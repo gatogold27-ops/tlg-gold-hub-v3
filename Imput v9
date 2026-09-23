@@ -1,0 +1,1746 @@
+--==================================================
+-- INPUT V9 - BURST CLEAN
+-- LocalScript
+--
+-- FEATURES
+--   • Z / X / C / V input buffering
+--   • Ping-adaptive input buffer
+--   • Ping-adaptive action window
+--   • Tool detection
+--   • Tool:Activate()
+--   • 3 activations per single tap
+--   • Hold protection
+--   • Local Stun = -1
+--   • Animation speed handling
+--   • Player position history
+--   • Historical position lookup
+--   • Recent target detection
+--   • Recent range check
+--   • Efficient history cleanup
+--
+-- NO NEW REMOTES
+--==================================================
+
+
+--==================================================
+-- SERVICES
+--==================================================
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+
+local player = Players.LocalPlayer
+
+
+--==================================================
+-- SETTINGS
+--==================================================
+
+-- INPUT
+local BASE_BUFFER_TIME = 0.07
+local MIN_BUFFER_TIME = 0.05
+local MAX_BUFFER_TIME = 0.12
+
+local BASE_ACTION_BUFFER_TIME = 0.25
+local MIN_ACTION_BUFFER_TIME = 0.18
+local MAX_ACTION_BUFFER_TIME = 0.35
+
+local TOOL_GRACE_TIME = 0.10
+
+
+-- BURST
+local BURST_COUNT = 3
+local BURST_INTERVAL = 0.025
+
+
+-- ANIMATION
+local BASE_ANIMATION_SPEED = 1.15
+local ATTACK_ANIMATION_SPEED = 1.40
+local WALK_ANIMATION_SPEED = 1.10
+local IDLE_ANIMATION_SPEED = 1.00
+
+
+-- PING
+local PING_UPDATE_INTERVAL = 1.0
+
+
+-- POSITION HISTORY
+local BASE_HISTORY_TIME = 0.20
+local MIN_HISTORY_TIME = 0.10
+local MAX_HISTORY_TIME = 0.35
+
+local TRACK_DISTANCE = 100
+local POSITION_SAMPLE_INTERVAL = 1 / 60
+local MAX_HISTORY_SAMPLES = 30
+
+
+-- TARGET
+local TARGET_UPDATE_INTERVAL = 0.05
+
+
+--==================================================
+-- CHARACTER STATE
+--==================================================
+
+local character = nil
+local humanoid = nil
+local stun = nil
+local currentTool = nil
+
+local active = false
+local settingUp = false
+
+
+--==================================================
+-- TIMING STATE
+--==================================================
+
+local cachedPing = 50
+
+local bufferTime = BASE_BUFFER_TIME
+local actionBufferTime = BASE_ACTION_BUFFER_TIME
+local historyTime = BASE_HISTORY_TIME
+
+local lastPingUpdateTime = 0
+local lastToolChangeTime = 0
+local lastPositionSampleTime = 0
+local lastTargetUpdateTime = 0
+
+
+--==================================================
+-- INPUT STATE
+--==================================================
+
+local inputBuffer = {}
+
+-- Prevents held keys from generating another burst.
+local actionHeld = {}
+
+-- Prevents multiple simultaneous bursts for the same key.
+local burstRunning = {}
+
+
+--==================================================
+-- POSITION HISTORY
+--==================================================
+
+local positionHistory = {}
+
+
+--==================================================
+-- TARGET STATE
+--==================================================
+
+local recentTarget = nil
+
+
+--==================================================
+-- CHARACTER CONNECTIONS
+--==================================================
+
+local characterConnections = {}
+
+
+--==================================================
+-- PERMANENT CONNECTIONS
+--==================================================
+
+local permanentConnections = {}
+
+
+--==================================================
+-- ACTION KEYS
+--==================================================
+
+local actionKeys = {
+	[Enum.KeyCode.Z] = true,
+	[Enum.KeyCode.X] = true,
+	[Enum.KeyCode.C] = true,
+	[Enum.KeyCode.V] = true,
+}
+
+
+--==================================================
+-- CHARACTER CONNECTION CLEANUP
+--==================================================
+
+local function disconnectCharacterConnections()
+
+	for _, connection in ipairs(characterConnections) do
+
+		if connection and connection.Disconnect then
+
+			pcall(function()
+				connection:Disconnect()
+			end)
+
+		end
+
+	end
+
+
+	table.clear(characterConnections)
+
+end
+
+
+--==================================================
+-- POSITION HISTORY CLEANUP
+--==================================================
+
+local function clearPlayerHistory(plr)
+
+	positionHistory[plr] = nil
+
+
+	if recentTarget == plr then
+		recentTarget = nil
+	end
+
+end
+
+
+local function clearAllHistory()
+
+	table.clear(positionHistory)
+
+	recentTarget = nil
+
+end
+
+
+--==================================================
+-- PING
+--==================================================
+
+local function getPing()
+
+	local success, result = pcall(function()
+
+		local network =
+			Stats:FindFirstChild("Network")
+
+
+		if not network then
+			return nil
+		end
+
+
+		-- Preferred path
+		local serverStats =
+			network:FindFirstChild("ServerStatsItem")
+
+
+		if serverStats then
+
+			local dataPing =
+				serverStats:FindFirstChild("Data Ping")
+
+
+			if dataPing then
+
+				local value =
+					dataPing:GetValueString()
+
+
+				local number =
+					tonumber(
+						string.match(
+							value,
+							"%d+"
+						)
+					)
+
+
+				if number then
+					return number
+				end
+
+			end
+
+		end
+
+
+		-- Fallback
+		local dataPing =
+			network:FindFirstChild("Data Ping")
+
+
+		if dataPing then
+
+			local value =
+				dataPing:GetValueString()
+
+
+			local number =
+				tonumber(
+					string.match(
+						value,
+						"%d+"
+					)
+				)
+
+
+			if number then
+				return number
+			end
+
+		end
+
+
+		return nil
+
+	end)
+
+
+	if success and result and result > 0 then
+		return result
+	end
+
+
+	return cachedPing
+
+end
+
+
+--==================================================
+-- TIMING UPDATE
+--==================================================
+
+local function updateTiming()
+
+	cachedPing = getPing()
+
+
+	local pingSeconds =
+		cachedPing / 1000
+
+
+	-- Short input buffer
+	bufferTime =
+		math.clamp(
+			pingSeconds * 0.8,
+			MIN_BUFFER_TIME,
+			MAX_BUFFER_TIME
+		)
+
+
+	-- Action window
+	actionBufferTime =
+		math.clamp(
+			pingSeconds * 2,
+			MIN_ACTION_BUFFER_TIME,
+			MAX_ACTION_BUFFER_TIME
+		)
+
+
+	-- Position history
+	historyTime =
+		math.clamp(
+			math.max(
+				BASE_HISTORY_TIME,
+				pingSeconds
+			),
+			MIN_HISTORY_TIME,
+			MAX_HISTORY_TIME
+		)
+
+end
+
+
+--==================================================
+-- TOOL DETECTION
+--==================================================
+
+local function updateTool()
+
+	if not character then
+
+		currentTool = nil
+
+		return
+
+	end
+
+
+	local newTool =
+		character:FindFirstChildOfClass("Tool")
+
+
+	if newTool ~= currentTool then
+
+		currentTool = newTool
+
+		lastToolChangeTime =
+			os.clock()
+
+	end
+
+end
+
+
+--==================================================
+-- INPUT BUFFER
+--==================================================
+
+local function addInput(key)
+
+	inputBuffer[key] =
+		os.clock()
+
+end
+
+
+local function cleanInputBuffer(now)
+
+	for key, pressedAt in pairs(inputBuffer) do
+
+		if now - pressedAt > actionBufferTime then
+
+			inputBuffer[key] = nil
+
+		end
+
+	end
+
+end
+
+
+local function getBufferedAction(now)
+
+	local bestKey = nil
+	local bestPriority = nil
+
+
+	for key, pressedAt in pairs(inputBuffer) do
+
+		local age =
+			now - pressedAt
+
+
+		if age <= actionBufferTime then
+
+			local priority =
+				pressedAt
+
+
+			-- Fresh inputs receive priority.
+			if age <= bufferTime then
+
+				priority =
+					priority + bufferTime
+
+			end
+
+
+			if
+				bestPriority == nil
+				or priority > bestPriority
+			then
+
+				bestKey =
+					key
+
+				bestPriority =
+					priority
+
+			end
+
+		end
+
+	end
+
+
+	if bestKey then
+
+		return bestKey, inputBuffer[bestKey]
+
+	end
+
+
+	return nil, nil
+
+end
+
+
+--==================================================
+-- SINGLE TOOL ACTIVATION
+--==================================================
+
+local function activateCurrentTool(tool)
+
+	if not active then
+		return false
+	end
+
+
+	if not tool then
+		return false
+	end
+
+
+	if not tool.Parent then
+		return false
+	end
+
+
+	local success =
+		pcall(function()
+
+			tool:Activate()
+
+		end)
+
+
+	return success
+
+end
+
+
+--==================================================
+-- BURST ACTIVATION
+--==================================================
+
+local function activateBurst(key)
+
+	if not active then
+		return
+	end
+
+
+	if burstRunning[key] then
+		return
+	end
+
+
+	local tool =
+		currentTool
+
+
+	if not tool or not tool.Parent then
+
+		updateTool()
+
+		tool =
+			currentTool
+
+	end
+
+
+	if not tool then
+		return
+	end
+
+
+	burstRunning[key] =
+		true
+
+
+	task.spawn(function()
+
+		for index = 1, BURST_COUNT do
+
+			if not active then
+				break
+			end
+
+
+			if not tool.Parent then
+				break
+			end
+
+
+			if index > 1 then
+
+				task.wait(
+					BURST_INTERVAL
+				)
+
+			end
+
+
+			if not active then
+				break
+			end
+
+
+			activateCurrentTool(tool)
+
+		end
+
+
+		burstRunning[key] =
+			nil
+
+	end)
+
+end
+
+
+--==================================================
+-- ANIMATION
+--==================================================
+
+local function getAnimationText(track)
+
+	local parts = {}
+
+
+	pcall(function()
+
+		if track.Name then
+
+			table.insert(
+				parts,
+				string.lower(
+					track.Name
+				)
+			)
+
+		end
+
+	end)
+
+
+	pcall(function()
+
+		if
+			track.Animation
+			and track.Animation.Name
+		then
+
+			table.insert(
+				parts,
+				string.lower(
+					track.Animation.Name
+				)
+			)
+
+		end
+
+	end)
+
+
+	return table.concat(
+		parts,
+		" "
+	)
+
+end
+
+
+local function getAnimationSpeed(track)
+
+	local text =
+		getAnimationText(track)
+
+
+	-- ATTACK
+	if
+		string.find(
+			text,
+			"attack",
+			1,
+			true
+		)
+		or string.find(
+			text,
+			"slash",
+			1,
+			true
+		)
+		or string.find(
+			text,
+			"skill",
+			1,
+			true
+		)
+		or string.find(
+			text,
+			"swing",
+			1,
+			true
+		)
+	then
+
+		return ATTACK_ANIMATION_SPEED
+
+	end
+
+
+	-- IDLE
+	if string.find(
+		text,
+		"idle",
+		1,
+		true
+	) then
+
+		return IDLE_ANIMATION_SPEED
+
+	end
+
+
+	-- WALK / RUN
+	if
+		string.find(
+			text,
+			"walk",
+			1,
+			true
+		)
+		or string.find(
+			text,
+			"run",
+			1,
+			true
+		)
+	then
+
+		return WALK_ANIMATION_SPEED
+
+	end
+
+
+	return BASE_ANIMATION_SPEED
+
+end
+
+
+local function setupAnimationListener(hum)
+
+	if not hum then
+		return
+	end
+
+
+	local connection =
+		hum.AnimationPlayed:Connect(
+			function(track)
+
+				if not active then
+					return
+				end
+
+
+				if not track then
+					return
+				end
+
+
+				local speed =
+					getAnimationSpeed(
+						track
+					)
+
+
+				pcall(function()
+
+					track:AdjustSpeed(
+						speed
+					)
+
+				end)
+
+			end
+		)
+
+
+	table.insert(
+		characterConnections,
+		connection
+	)
+
+end
+
+
+--==================================================
+-- POSITION HISTORY
+--==================================================
+
+local function recordPlayerPosition(
+	plr,
+	now
+)
+
+	if plr == player then
+		return
+	end
+
+
+	local targetCharacter =
+		plr.Character
+
+
+	if not targetCharacter then
+
+		clearPlayerHistory(plr)
+
+		return
+
+	end
+
+
+	local hrp =
+		targetCharacter:FindFirstChild(
+			"HumanoidRootPart"
+		)
+
+
+	if not hrp then
+		return
+	end
+
+
+	local myRoot = nil
+
+
+	if character then
+
+		myRoot =
+			character:FindFirstChild(
+				"HumanoidRootPart"
+			)
+
+	end
+
+
+	if myRoot then
+
+		local distance =
+			(
+				hrp.Position
+				-
+				myRoot.Position
+			).Magnitude
+
+
+		if distance > TRACK_DISTANCE then
+
+			clearPlayerHistory(plr)
+
+			return
+
+		end
+
+	end
+
+
+	local history =
+		positionHistory[plr]
+
+
+	if not history then
+
+		history = {}
+
+		positionHistory[plr] =
+			history
+
+	end
+
+
+	history[#history + 1] = {
+
+		time = now,
+
+		pos = hrp.Position,
+
+	}
+
+
+	local cutoff =
+		now - historyTime
+
+
+	local writeIndex = 1
+
+
+	for readIndex = 1, #history do
+
+		local sample =
+			history[readIndex]
+
+
+		if sample.time >= cutoff then
+
+			history[writeIndex] =
+				sample
+
+			writeIndex += 1
+
+		end
+
+	end
+
+
+	for index = #history,
+		writeIndex,
+		-1
+	do
+
+		history[index] =
+			nil
+
+	end
+
+
+	while #history >
+		MAX_HISTORY_SAMPLES
+	do
+
+		table.remove(
+			history,
+			1
+		)
+
+	end
+
+end
+
+
+local function updatePositionHistory(now)
+
+	if
+		now - lastPositionSampleTime
+		<
+		POSITION_SAMPLE_INTERVAL
+	then
+
+		return
+
+	end
+
+
+	lastPositionSampleTime =
+		now
+
+
+	for _, plr in ipairs(
+		Players:GetPlayers()
+	) do
+
+		if plr ~= player then
+
+			recordPlayerPosition(
+				plr,
+				now
+			)
+
+		end
+
+	end
+
+end
+
+
+--==================================================
+-- HISTORICAL POSITION
+--==================================================
+
+local function getHistoricalPosition(
+	plr,
+	targetTime
+)
+
+	local history =
+		positionHistory[plr]
+
+
+	if
+		not history
+		or #history == 0
+	then
+
+		return nil
+
+	end
+
+
+	local bestPosition = nil
+	local bestDifference =
+		math.huge
+
+
+	for index = #history,
+		1,
+		-1
+	do
+
+		local sample =
+			history[index]
+
+
+		local difference =
+			math.abs(
+				sample.time
+				-
+				targetTime
+			)
+
+
+		if difference <
+			bestDifference
+		then
+
+			bestDifference =
+				difference
+
+			bestPosition =
+				sample.pos
+
+		end
+
+	end
+
+
+	return bestPosition
+
+end
+
+
+--==================================================
+-- RANGE BOOST
+--==================================================
+
+local function getRangeBoost(baseRange)
+
+	return baseRange
+		+
+		(
+			cachedPing
+			*
+			0.002
+		)
+
+end
+
+
+--==================================================
+-- RECENT RANGE CHECK
+--==================================================
+
+local function wasInRangeRecently(
+	plr,
+	attackPosition,
+	baseRange,
+	attackTime
+)
+
+	local history =
+		positionHistory[plr]
+
+
+	if
+		not history
+		or #history == 0
+	then
+
+		return false
+
+	end
+
+
+	local now =
+		os.clock()
+
+
+	local checkTime =
+		attackTime
+		or now
+
+
+	local grace =
+		math.clamp(
+			cachedPing / 1000,
+			0,
+			historyTime
+		)
+
+
+	local minimumTime =
+		checkTime - grace
+
+
+	local range =
+		getRangeBoost(
+			baseRange
+		)
+
+
+	local historicalPosition =
+		getHistoricalPosition(
+			plr,
+			checkTime
+		)
+
+
+	if historicalPosition then
+
+		local distance =
+			(
+				historicalPosition
+				-
+				attackPosition
+			).Magnitude
+
+
+		if distance <= range then
+			return true
+		end
+
+	end
+
+
+	for index = #history,
+		1,
+		-1
+	do
+
+		local sample =
+			history[index]
+
+
+		if sample.time < minimumTime then
+			break
+		end
+
+
+		local distance =
+			(
+				sample.pos
+				-
+				attackPosition
+			).Magnitude
+
+
+		if distance <= range then
+			return true
+		end
+
+	end
+
+
+	return false
+
+end
+
+
+--==================================================
+-- RECENT TARGET
+--==================================================
+
+local function updateRecentTarget(now)
+
+	if
+		now - lastTargetUpdateTime
+		<
+		TARGET_UPDATE_INTERVAL
+	then
+
+		return
+
+	end
+
+
+	lastTargetUpdateTime =
+		now
+
+
+	if not character then
+
+		recentTarget =
+			nil
+
+		return
+
+	end
+
+
+	local myRoot =
+		character:FindFirstChild(
+			"HumanoidRootPart"
+		)
+
+
+	if not myRoot then
+
+		recentTarget =
+			nil
+
+		return
+
+	end
+
+
+	local origin =
+		myRoot.Position
+
+
+	local bestPlayer =
+		nil
+
+	local bestDistance =
+		math.huge
+
+
+	for _, plr in ipairs(
+		Players:GetPlayers()
+	) do
+
+		if plr ~= player then
+
+			local targetCharacter =
+				plr.Character
+
+
+			if targetCharacter then
+
+				local hrp =
+					targetCharacter:FindFirstChild(
+						"HumanoidRootPart"
+					)
+
+
+				if hrp then
+
+					local currentDistance =
+						(
+							hrp.Position
+							-
+							origin
+						).Magnitude
+
+
+					if
+						currentDistance
+						<= TRACK_DISTANCE
+					then
+
+						local wasRecent =
+							wasInRangeRecently(
+								plr,
+								origin,
+								TRACK_DISTANCE,
+								now
+							)
+
+
+						if wasRecent then
+
+							local historicalPosition =
+								getHistoricalPosition(
+									plr,
+									now
+								)
+
+
+							local targetPosition =
+								historicalPosition
+								or hrp.Position
+
+
+							local distance =
+								(
+									targetPosition
+									-
+									origin
+								).Magnitude
+
+
+							if distance <
+								bestDistance
+							then
+
+								bestPlayer =
+									plr
+
+								bestDistance =
+									distance
+
+							end
+
+						end
+
+					end
+
+				end
+
+			end
+
+		end
+
+	end
+
+
+	recentTarget =
+		bestPlayer
+
+end
+
+
+--==================================================
+-- INPUT BEGIN
+--==================================================
+
+local function onInputBegan(
+	input,
+	gameProcessed
+)
+
+	if
+		gameProcessed
+		or not active
+	then
+
+		return
+
+	end
+
+
+	local key =
+		input.KeyCode
+
+
+	if not actionKeys[key] then
+		return
+	end
+
+
+	if actionHeld[key] then
+		return
+	end
+
+
+	actionHeld[key] =
+		true
+
+
+	addInput(key)
+
+end
+
+
+--==================================================
+-- INPUT END
+--==================================================
+
+local function onInputEnded(input)
+
+	local key =
+		input.KeyCode
+
+
+	if actionKeys[key] then
+
+		actionHeld[key] =
+			nil
+
+	end
+
+end
+
+
+--==================================================
+-- CHARACTER READY
+--==================================================
+
+local function waitForCharacterReady(
+	char
+)
+
+	local hum =
+		char:WaitForChild(
+			"Humanoid"
+		)
+
+
+	local root =
+		char:WaitForChild(
+			"HumanoidRootPart"
+		)
+
+
+	local stunValue =
+		char:WaitForChild(
+			"Stun",
+			5
+		)
+
+
+	repeat
+
+		task.wait()
+
+	until
+		hum.Health > 0
+		and root.Parent
+
+
+	RunService.Heartbeat:Wait()
+	RunService.Heartbeat:Wait()
+
+
+	return hum, root, stunValue
+
+end
+
+
+--==================================================
+-- CHARACTER SETUP
+--==================================================
+
+local function setupCharacter(
+	char
+)
+
+	if settingUp then
+		return
+	end
+
+
+	settingUp =
+		true
+
+
+	active =
+		false
+
+
+	disconnectCharacterConnections()
+
+
+	character =
+		char
+
+
+	humanoid =
+		nil
+
+
+	stun =
+		nil
+
+
+	currentTool =
+		nil
+
+
+	table.clear(
+		inputBuffer
+	)
+
+
+	table.clear(
+		actionHeld
+	)
+
+
+	table.clear(
+		burstRunning
+	)
+
+
+	clearAllHistory()
+
+
+	local hum, _, stunValue =
+		waitForCharacterReady(
+			char
+		)
+
+
+	if player.Character ~= char then
+
+		settingUp =
+			false
+
+		return
+
+	end
+
+
+	humanoid =
+		hum
+
+
+	stun =
+		stunValue
+
+
+	updateTool()
+
+
+	setupAnimationListener(
+		humanoid
+	)
+
+
+	table.insert(
+		characterConnections,
+
+		char.ChildAdded:Connect(
+			function(instance)
+
+				if instance:IsA("Tool") then
+
+					updateTool()
+
+				end
+
+			end
+		)
+	)
+
+
+	table.insert(
+		characterConnections,
+
+		char.ChildRemoved:Connect(
+			function(instance)
+
+				if instance:IsA("Tool") then
+
+					updateTool()
+
+				end
+
+			end
+		)
+	)
+
+
+	table.insert(
+		characterConnections,
+
+		humanoid.Died:Connect(
+			function()
+
+				active =
+					false
+
+
+				table.clear(
+					inputBuffer
+				)
+
+
+				table.clear(
+					actionHeld
+				)
+
+
+				table.clear(
+					burstRunning
+				)
+
+
+				clearAllHistory()
+
+			end
+		)
+	)
+
+
+	active =
+		true
+
+
+	settingUp =
+		false
+
+end
+
+
+--==================================================
+-- PERMANENT INPUT CONNECTIONS
+--==================================================
+
+table.insert(
+	permanentConnections,
+
+	UserInputService.InputBegan:Connect(
+		onInputBegan
+	)
+)
+
+
+table.insert(
+	permanentConnections,
+
+	UserInputService.InputEnded:Connect(
+		onInputEnded
+	)
+)
+
+
+table.insert(
+	permanentConnections,
+
+	Players.PlayerRemoving:Connect(
+		function(plr)
+
+			clearPlayerHistory(
+				plr
+			)
+
+		end
+	)
+)
+
+
+--==================================================
+-- CHARACTER CONNECTION
+--==================================================
+
+player.CharacterAdded:Connect(
+	function(char)
+
+		task.spawn(
+			function()
+
+				setupCharacter(
+					char
+				)
+
+			end
+		)
+
+	end
+)
+
+
+--==================================================
+-- INITIAL CHARACTER
+--==================================================
+
+if player.Character then
+
+	task.spawn(
+		function()
+
+			setupCharacter(
+				player.Character
+			)
+
+		end
+	)
+
+end
+
+
+--==================================================
+-- MAIN LOOP
+--==================================================
+
+RunService.RenderStepped:Connect(
+	function()
+
+		if not active then
+			return
+		end
+
+
+		local now =
+			os.clock()
+
+
+		if
+			now - lastPingUpdateTime
+			>= PING_UPDATE_INTERVAL
+		then
+
+			updateTiming()
+
+			lastPingUpdateTime =
+				now
+
+		end
+
+
+		if
+			stun
+			and stun.Parent
+		then
+
+			pcall(function()
+
+				stun.Value =
+					-1
+
+			end)
+
+		end
+
+
+		updateTool()
+
+
+		updatePositionHistory(
+			now
+		)
+
+
+		updateRecentTarget(
+			now
+		)
+
+
+		cleanInputBuffer(
+			now
+		)
+
+
+		local key, pressedAt =
+			getBufferedAction(
+				now
+			)
+
+
+		if
+			key
+			and pressedAt
+			and not burstRunning[key]
+		then
+
+			local elapsed =
+				now - pressedAt
+
+
+			if elapsed <=
+				actionBufferTime
+			then
+
+				local toolReady =
+					currentTool ~= nil
+					or (
+						now - lastToolChangeTime
+						<= TOOL_GRACE_TIME
+					)
+
+
+				if toolReady then
+
+					inputBuffer[key] =
+						nil
+
+
+					activateBurst(
+						key
+					)
+
+				end
+
+			else
+
+				inputBuffer[key] =
+					nil
+
+			end
+
+		end
+
+	end
+)
