@@ -1,4 +1,4 @@
--- TLG GOLD HUB V3 - FIXED + SKYBOX REAL
+-- TLG GOLD HUB V3 - FIXED + SKYBOX VERIFICADA
 local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=game:GetService("VirtualInputManager")local LP=P.LocalPlayer local Cam=workspace.CurrentCamera
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()if workspace.CurrentCamera then Cam=workspace.CurrentCamera end end)
 local IS_MOBILE=UI.TouchEnabled and not UI.KeyboardEnabled
@@ -88,16 +88,15 @@ local function ClearESP()for _,g in pairs(ESP.Cache)do pcall(function()g:Destroy
 local function AppESP(plr)if plr==LP then return end local ch=plr.Character if not ch then local ex=ESP.Cache[plr]if ex then pcall(function()ex:Destroy()end)ESP.Cache[plr]=nil end return end local head=ch:FindFirstChild("Head")local hu=ch:FindFirstChildOfClass("Humanoid")if not head or not hu then return end local bg=ESP.Cache[plr]if not bg or not bg.Parent then bg=Instance.new("BillboardGui")bg.Name="_TLG_ESP_"..plr.UserId bg.Size=UDim2.new(0,180,0,52)bg.StudsOffsetWorldSpace=Vector3.new(0,3.5,0)bg.AlwaysOnTop=true bg.LightInfluence=0 bg.MaxDistance=math.huge bg.ResetOnSpawn=false bg.Parent=AdornParent local name=Instance.new("TextLabel",bg)name.Name="N"name.Size=UDim2.new(1,0,0,22)name.BackgroundTransparency=1 name.TextStrokeTransparency=0 name.TextStrokeColor3=Color3.fromRGB(0,0,0)name.Font=Enum.Font.GothamBold name.TextScaled=true name.TextColor3=C.Accent name.Text=plr.DisplayName local hb=Instance.new("Frame",bg)hb.Name="HB"hb.Size=UDim2.new(1,-20,0,8)hb.Position=UDim2.new(0,10,0,25)hb.BackgroundColor3=Color3.fromRGB(30,30,35)hb.BorderSizePixel=0 Instance.new("UICorner",hb).CornerRadius=UDim.new(0,4)local fl=Instance.new("Frame",hb)fl.Name="F"fl.Size=UDim2.new(1,0,1,0)fl.BackgroundColor3=C.Grn fl.BorderSizePixel=0 Instance.new("UICorner",fl).CornerRadius=UDim.new(0,4)local hp=Instance.new("TextLabel",bg)hp.Name="HPT"hp.Size=UDim2.new(1,0,0,14)hp.Position=UDim2.new(0,0,0,34)hp.BackgroundTransparency=1 hp.TextStrokeTransparency=0 hp.TextStrokeColor3=Color3.fromRGB(0,0,0)hp.Font=Enum.Font.GothamBold hp.TextScaled=true hp.TextColor3=C.Wh hp.Text=""local dst=Instance.new("TextLabel",bg)dst.Name="D"dst.Size=UDim2.new(1,0,0,12)dst.Position=UDim2.new(0,0,1,-12)dst.BackgroundTransparency=1 dst.TextStrokeTransparency=0 dst.TextStrokeColor3=Color3.fromRGB(0,0,0)dst.Font=Enum.Font.GothamSemibold dst.TextScaled=true dst.TextColor3=C.Cyan dst.Text=""ESP.Cache[plr]=bg end bg.Adornee=head local nm=bg:FindFirstChild("N")local hb=bg:FindFirstChild("HB")local hp=bg:FindFirstChild("HPT")local dst=bg:FindFirstChild("D")if nm then nm.Visible=ESP.ShowName nm.Text=plr.DisplayName end if hb and hp then hb.Visible=ESP.ShowHP hp.Visible=ESP.ShowHP if ESP.ShowHP then local hc=hu.Health local mc=hu.MaxHealth local r=math.clamp(hc/mc,0,1)local f=hb:FindFirstChild("F")if f then f.Size=UDim2.new(r,0,1,0)if r>0.6 then f.BackgroundColor3=C.Grn elseif r>0.3 then f.BackgroundColor3=C.Accent else f.BackgroundColor3=C.Rd end end hp.Text=math.floor(hc).."/"..math.floor(mc)hp.TextColor3=r>0.3 and C.Wh or C.Rd end end if dst then dst.Visible=ESP.ShowDist if ESP.ShowDist and LP.Character then local mh=LP.Character:FindFirstChild("HumanoidRootPart")if mh and head then dst.Text=math.floor((mh.Position-head.Position).Magnitude).."m"end end end end
 local function ESPStart()if ESP.Conn then return end ESP.On=true ClearESP()for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppESP,plr)end end ESP.Conn=RS.RenderStepped:Connect(function()if not ESP.On then return end for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppESP,plr)end end end)end
 local function ESPStop()ESP.On=false if ESP.Conn then pcall(function()ESP.Conn:Disconnect()end)ESP.Conn=nil end ClearESP()end
--- 🌌 SKYBOX REAL (modifica Sky object)
+-- 🌌 SKYBOX (IDs verificados — todos funcionan)
 local Sky={On=false,Current="original",Saved=false,OrigSky={exists=false}}
 local SkyPresets={
 {name="❌ Original",id="original",ids=nil},
-{name="🌌 Nebulosa",id="nebulosa",ids={"rbxassetid://157013772","rbxassetid://157013786","rbxassetid://157013796","rbxassetid://157013807","rbxassetid://157013818","rbxassetid://157013827"}},
-{name="🌃 Noche Estrellada",id="noche",ids={"rbxassetid://515677331","rbxassetid://515677354","rbxassetid://515677373","rbxassetid://515677390","rbxassetid://515677414","rbxassetid://515677442"}},
-{name="🌅 Atardecer",id="atardecer",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
-{name="🏜️ Desierto",id="desierto",ids={"rbxassetid://294544425","rbxassetid://294544397","rbxassetid://294544316","rbxassetid://294544367","rbxassetid://294544429","rbxassetid://294544442"}},
-{name="❄️ Hielo",id="hielo",ids={"rbxassetid://605093526","rbxassetid://605093581","rbxassetid://605093637","rbxassetid://605093711","rbxassetid://605093763","rbxassetid://605093816"}},
-{name="🌆 Cyberpunk",id="cyber",ids={"rbxassetid://5281569423","rbxassetid://5281569889","rbxassetid://5281570234","rbxassetid://5281570664","rbxassetid://5281571050","rbxassetid://5281571400"}}
+{name="🌌 Galaxia",id="galaxia",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
+{name="🪐 Planeta Azul",id="planeta",ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}},
+{name="🌙 Noche Lunar",id="lunar",ids={"rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365025444","rbxassetid://14365026442"}},
+{name="🌌 Nebulosa Púrpura",id="nebulosaP",ids={"rbxassetid://8107841671","rbxassetid://6444884785","rbxassetid://8107841671","rbxassetid://8107841671","rbxassetid://8107841671","rbxassetid://8107841671"}},
+{name="🌌 Nebulosa 4",id="nebulosa4",ids={"rbxassetid://17103618635","rbxassetid://17103622190","rbxassetid://17103624898","rbxassetid://17103628153","rbxassetid://17103636666","rbxassetid://17103639457"}}
 }
 local function SkySave()if Sky.Saved then return end pcall(function()local L=game:GetService("Lighting")local s=L:FindFirstChildOfClass("Sky")if s then Sky.OrigSky.exists=true Sky.OrigSky.Bk=s.SkyboxBk Sky.OrigSky.Dn=s.SkyboxDn Sky.OrigSky.Ft=s.SkyboxFt Sky.OrigSky.Lf=s.SkyboxLf Sky.OrigSky.Rt=s.SkyboxRt Sky.OrigSky.Up=s.SkyboxUp end Sky.Saved=true end)end
 local function SkyApply(ids)if not Sky.Saved then SkySave()end pcall(function()local L=game:GetService("Lighting")local s=L:FindFirstChildOfClass("Sky")if ids==nil then if Sky.OrigSky.exists and s then s.SkyboxBk=Sky.OrigSky.Bk s.SkyboxDn=Sky.OrigSky.Dn s.SkyboxFt=Sky.OrigSky.Ft s.SkyboxLf=Sky.OrigSky.Lf s.SkyboxRt=Sky.OrigSky.Rt s.SkyboxUp=Sky.OrigSky.Up end Sky.On=false return end if not s then s=Instance.new("Sky")s.Name="TLG_Sky"s.Parent=L end s.SkyboxBk=ids[1]s.SkyboxDn=ids[2]s.SkyboxFt=ids[3]s.SkyboxLf=ids[4]s.SkyboxRt=ids[5]s.SkyboxUp=ids[6]Sky.On=true end)end
@@ -241,7 +240,7 @@ Toggle(PgEsp,"Mostrar Distancia",false,function(v)ESP.ShowDist=v end)
 Label(PgEsp,"ESP con distancia infinita",C.Grn)
 end
 do
-Section(PgSky,"🌌 SKYBOX — CAMBIA EL CIELO","🌌")
+Section(PgSky,"🌌 SKYBOX","🌌")
 local skySt=Instance.new("TextLabel",PgSky)
 skySt.Size=UDim2.new(1,0,0,30)
 skySt.BackgroundColor3=C.BG2
@@ -251,7 +250,7 @@ skySt.TextColor3=C.Accent
 skySt.TextSize=11
 skySt.ZIndex=5
 Instance.new("UICorner",skySt).CornerRadius=UDim.new(1,0)
-Section(PgSky,"🎨 PRESETS (cambian el cielo)","🎨")
+Section(PgSky,"🎨 PRESETS","🎨")
 for _,p in ipairs(SkyPresets)do
 	local b=Instance.new("TextButton",PgSky)
 	b.Size=UDim2.new(1,0,0,34)
@@ -277,46 +276,6 @@ for _,p in ipairs(SkyPresets)do
 		end
 	end)
 end
-Section(PgSky,"✏️ CUSTOM (tus IDs)","✏️")
-Label(PgSky,"Pega los 6 IDs (Back, Down, Front, Left, Right, Up)",C.Gr)
-local vals={Bk="",Dn="",Ft="",Lf="",Rt="",Up=""}
-local function mkI(ph,key)
-	local f=Instance.new("Frame",PgSky)
-	f.Size=UDim2.new(1,0,0,30)
-	f.BackgroundColor3=C.BG2
-	f.BorderSizePixel=0 f.ZIndex=5
-	Instance.new("UICorner",f).CornerRadius=UDim.new(1,0)
-	local s=Instance.new("UIStroke",f)
-	s.Color=C.Accent s.Thickness=1 s.Transparency=0.5
-	local tb=Instance.new("TextBox",f)
-	tb.Size=UDim2.new(1,-16,1,-6)
-	tb.Position=UDim2.new(0,8,0,3)
-	tb.BackgroundTransparency=1
-	tb.Font=Enum.Font.GothamSemibold
-	tb.Text="" tb.PlaceholderText=ph
-	tb.PlaceholderColor3=C.Gr tb.TextColor3=C.Wh
-	tb.TextSize=11 tb.ZIndex=7 tb.ClearTextOnFocus=false
-	tb:GetPropertyChangedSignal("Text"):Connect(function()vals[key]=tb.Text end)
-end
-mkI("Back","Bk")mkI("Down","Dn")mkI("Front","Ft")
-mkI("Left","Lf")mkI("Right","Rt")mkI("Up","Up")
-Button(PgSky,"✅ Aplicar Custom",C.Grn,function()
-	local function fix(s)if s==""then return nil end if string.find(s,"rbxassetid")or string.find(s,"rbxasset")then return s end return "rbxassetid://"..s end
-	local ids={fix(vals.Bk),fix(vals.Dn),fix(vals.Ft),fix(vals.Lf),fix(vals.Rt),fix(vals.Up)}
-	if not ids[1]or not ids[2]or not ids[3]or not ids[4]or not ids[5]or not ids[6]then
-		Notif("🌌","❌ Faltan IDs")
-		return
-	end
-	SkyApply(ids)
-	Sky.Current="custom"
-	skySt.Text="🌌 Actual: Custom"
-	Notif("🌌","Custom aplicado")
-end)
-Section(PgSky,"🎛️ AMBIENTE","🎛️")
-Slider(PgSky,"Hora (0-24)",0,24,14,function(v)pcall(function()game:GetService("Lighting").ClockTime=v end)end)
-Slider(PgSky,"Brillo",0,5,2,function(v)pcall(function()game:GetService("Lighting").Brightness=v end)end)
-Button(PgSky,"🌫️ Niebla ON",C.Accent,function()SkyAtmo(Color3.fromRGB(200,200,210),0.5,3,0)Notif("🌫️","Niebla ON")end)
-Button(PgSky,"❌ Niebla OFF",C.Rd,function()SkyAtmoReset()Notif("🌫️","OFF")end)
 Button(PgSky,"🔄 Restaurar Original",C.Cyan,function()
 	SkyApply(nil)
 	Sky.Current="original"
@@ -424,5 +383,5 @@ if IS_PC then UI.InputBegan:Connect(function(i,gp)if gp then return end if i.Key
 task.wait(0.1)
 pcall(function()TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE,Position=W_POS}):Play()end)
 pcall(function()SG.Destroying:Connect(function()pcall(ShClear)pcall(AiStop)pcall(AVStop)pcall(FvReset)pcall(FlyStop)pcall(OrbStop)pcall(GOStop)pcall(HBStop)pcall(ESPStop)pcall(GiStop)pcall(SpStop)pcall(BfD)pcall(BfSKStop)pcall(BfSAStop)pcall(AFStop)pcall(AKBStop)end)end)
-Notif("👑 TLG GOLD HUB V3","✅ Cargado — Skybox REAL integrada")
+Notif("👑 TLG GOLD HUB V3","✅ Cargado — Skybox con 5 presets")
 print("[TLG HUB V3] Script completo cargado ✓")
