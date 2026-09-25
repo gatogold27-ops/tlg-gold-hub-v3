@@ -1,4 +1,4 @@
--- TLG GOLD HUB V3 - LOADSTRING VERSION (FIXED)
+-- TLG GOLD HUB V3 - FIXED
 local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=game:GetService("VirtualInputManager")local LP=P.LocalPlayer local Cam=workspace.CurrentCamera
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()if workspace.CurrentCamera then Cam=workspace.CurrentCamera end end)
 local IS_MOBILE=UI.TouchEnabled and not UI.KeyboardEnabled
