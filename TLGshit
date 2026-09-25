@@ -1,4 +1,4 @@
---[[👑 TLG GOLD HUB V3 - MEME SEA]]
+--[[👑 TLG GOLD HUB V3 - MEME SEA FINAL - VERSIÓN CORREGIDA]]
 local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=game:GetService("VirtualInputManager")local LP=P.LocalPlayer local Cam=workspace.CurrentCamera
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()if workspace.CurrentCamera then Cam=workspace.CurrentCamera end end)
 local IS_MOBILE=UI.TouchEnabled and not UI.KeyboardEnabled
@@ -7,7 +7,19 @@ local C={BG=Color3.fromRGB(15,15,18),BG2=Color3.fromRGB(22,22,26),BG3=Color3.fro
 local function GetParent()pcall(function()if gethui then local h=gethui()if h and h~=game then return h end end end)pcall(function()if syn and syn.protect_gui then local sg=Instance.new("ScreenGui")syn.protect_gui(sg)sg.Parent=CG return sg end end)local ok=pcall(function()local f=Instance.new("Folder")f.Parent=CG f:Destroy()return CG end)if ok then return CG end return LP:WaitForChild("PlayerGui")end
 local SP=GetParent()
 for _,n in ipairs({"TLG_GoldV3","TLG_HideBtn","TLG_Diag"})do pcall(function()local o=SP:FindFirstChild(n)if o then o:Destroy()end end)pcall(function()local o=CG and CG:FindFirstChild(n)if o then o:Destroy()end end)end
-local PC=nil pcall(function()local pm=LP:WaitForChild("PlayerScripts",10)if pm then local ps=pm:WaitForChild("PlayerModule",5)if ps then local m=require(ps)if m then PC=m:GetControls()end end end end)
+local PC=nil 
+pcall(function()
+	local pm=LP:WaitForChild("PlayerScripts",10)
+	if pm then 
+		local ps=pm:WaitForChild("PlayerModule",5)
+		if ps then 
+			local ok,m=pcall(require,ps)
+			if ok and m and type(m.GetControls)=="function" then 
+				PC=m:GetControls()
+			end
+		end 
+	end 
+end)
 local function Notif(t,x,d)pcall(function()game:GetService("StarterGui"):SetCore("SendNotification",{Title=t,Text=x,Duration=d or 3})end)end
 local function GetPing()local p=0 pcall(function()p=math.floor((LP:GetNetworkPing()or 0)*1000)end)return p end
 local function GetStats(plr)local s={Level=0,Health=0,MaxHealth=0,Melee=0,Weapon=0,Power=0,WName="--",PName="--",Damage=0}pcall(function()local ls=plr:FindFirstChild("leaderstats")if ls then for _,v in ipairs(ls:GetChildren())do local n=string.lower(v.Name)local val=tonumber(v.Value)or 0 if n=="level"or n=="lvl"then s.Level=val end if n=="power"or n=="poder"then s.Power=val end end end local pd=plr:FindFirstChild("PlayerData")if pd then local function g(name)local v=pd:FindFirstChild(name)if v and(v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue"))then return v.Value end return nil end local ml=g("MeleeLevel")if ml then s.Melee=tonumber(ml)or 0 end local sl=g("SwordLevel")if sl then s.Weapon=tonumber(sl)or 0 end local pwl=g("MemePowerLevel")if pwl then s.Power=tonumber(pwl)or 0 end local se=g("SwordEquip")if se then s.WName=tostring(se)end local pe=g("PowerEquip")if pe then s.PName=tostring(pe)end local hd=g("HitDamage")if hd then s.Damage=tonumber(hd)or 0 end local lv=g("Level")or g("Lvl")if lv then s.Level=tonumber(lv)or s.Level end end local ch=plr.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then s.Health=math.floor(hu.Health)s.MaxHealth=math.floor(hu.MaxHealth)end end end)return s end
@@ -15,23 +27,23 @@ local AV={On=false,Umbral=-80,C1=nil,C2=nil,Cd=false,Safe=nil}
 local function AVStop()AV.On=false if AV.C1 then pcall(function()AV.C1:Disconnect()end)AV.C1=nil end if AV.C2 then pcall(function()AV.C2:Disconnect()end)AV.C2=nil end AV.Safe=nil end
 local function AVStart()if AV.C1 then return end AV.On=true AV.Cd=false AV.C1=RS.Heartbeat:Connect(function()if not AV.On then return end pcall(function()local ch=LP.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then return end local st=hu:GetState()if st==Enum.HumanoidStateType.Running or st==Enum.HumanoidStateType.RunningNoPhysics or st==Enum.HumanoidStateType.Landed then AV.Safe=h.Position+Vector3.new(0,5,0)end end)end)AV.C2=RS.Heartbeat:Connect(function()if not AV.On or AV.Cd then return end pcall(function()local ch=LP.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then return end if h.Position.Y<AV.Umbral then AV.Cd=true local tgt=AV.Safe if not tgt then local sp=workspace:FindFirstChildOfClass("SpawnLocation")if sp then tgt=sp.Position+Vector3.new(0,5,0)else tgt=Vector3.new(0,50,0)end end h.CFrame=CFrame.new(tgt)h.Velocity=Vector3.zero h.AssemblyLinearVelocity=Vector3.zero pcall(function()hu:ChangeState(Enum.HumanoidStateType.GettingUp)end)Notif("🛡","Teletransportado")task.wait(2)AV.Cd=false end end)end)end
 local AKB={On=false,C=nil,Thr=80,LastH=Vector3.zero,Setup=nil}
-local function AKBSetupChar(ch)local hu=ch:WaitForChild("Humanoid",5)if not hu then return end pcall(function()hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)end)pcall(function()hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)end)pcall(function()hu:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)end)AKB.LastH=Vector3.zero end
-local function AKBStart()if AKB.C then return end AKB.On=true if LP.Character then pcall(AKBSetupChar,LP.Character)end AKB.Setup=LP.CharacterAdded:Connect(function(ch)task.wait(0.3)pcall(AKBSetupChar,ch)end)AKB.C=RS.Heartbeat:Connect(function()if not AKB.On then return end pcall(function()if Fly.On or Orb.On or GO.T then return end local ch=LP.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then return end local vel=h.AssemblyLinearVelocity local horiz=Vector3.new(vel.X,0,vel.Z)local mag=horiz.Magnitude local normal=(hu.WalkSpeed or 16)*3 if mag>math.max(normal,AKB.Thr)then h.AssemblyLinearVelocity=Vector3.new(AKB.LastH.X,vel.Y,AKB.LastH.Z)else AKB.LastH=horiz end local st=hu:GetState()if st==Enum.HumanoidStateType.FallingDown or st==Enum.HumanoidStateType.Ragdoll or st==Enum.HumanoidStateType.PlatformStanding then pcall(function()hu:ChangeState(Enum.HumanoidStateType.Running)end)end if hu.PlatformStand then hu.PlatformStand=false end end)end)end
+local function AKBSetupChar(ch)if not ch or not ch.Parent then return end local hu=ch:WaitForChild("Humanoid",5)if not hu then return end pcall(function()hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)end)pcall(function()hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)end)pcall(function()hu:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)end)AKB.LastH=Vector3.zero end
+local function AKBStart()if AKB.C then return end AKB.On=true if LP.Character then pcall(AKBSetupChar,LP.Character)end AKB.Setup=LP.CharacterAdded:Connect(function(ch)task.wait(0.3)pcall(AKBSetupChar,ch)end)AKB.C=RS.Heartbeat:Connect(function()if not AKB.On then return end pcall(function()if Fly.On or Orb.On or GO.T then return end local ch=LP.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then return end if not h.Parent then return end local vel=h.AssemblyLinearVelocity local horiz=Vector3.new(vel.X,0,vel.Z)local mag=horiz.Magnitude local normal=(hu.WalkSpeed or 16)*3 if mag>math.max(normal,AKB.Thr)then h.AssemblyLinearVelocity=Vector3.new(AKB.LastH.X,vel.Y,AKB.LastH.Z)else AKB.LastH=horiz end local st=hu:GetState()if st==Enum.HumanoidStateType.FallingDown or st==Enum.HumanoidStateType.Ragdoll or st==Enum.HumanoidStateType.PlatformStanding then pcall(function()hu:ChangeState(Enum.HumanoidStateType.Running)end)end if hu.PlatformStand then hu.PlatformStand=false end end)end)end
 local function AKBStop()AKB.On=false if AKB.C then pcall(function()AKB.C:Disconnect()end)AKB.C=nil end if AKB.Setup then pcall(function()AKB.Setup:Disconnect()end)AKB.Setup=nil end end
 local AF={On=false,C=nil}
 local function AFStart()if AF.C then return end AF.On=true AF.C=task.spawn(function()while AF.On do task.wait(60)pcall(function()if VIM then VIM:SendKeyEvent(true,Enum.KeyCode.Space,false,game)task.wait(0.05)VIM:SendKeyEvent(false,Enum.KeyCode.Space,false,game)else local ch=LP.Character if ch then local h=ch:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame*CFrame.new(0,0.1,0)end end end end)end end)end
 local function AFStop()AF.On=false if AF.C then AF.C=nil end end
 local Fly={On=false,Spd=100000,C=nil}
 local function FlyStop()Fly.On=false local ch=LP.Character if ch then local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if h then pcall(function()local bv=h:FindFirstChild("BodyVelocity")if bv then bv:Destroy()end local bg=h:FindFirstChild("BodyGyro")if bg then bg:Destroy()end end)end if hu then pcall(function()hu.PlatformStand=false end)end end if Fly.C then pcall(function()Fly.C:Disconnect()end)Fly.C=nil end end
-local function FlyStart()if Fly.On then return end Fly.On=true task.spawn(function()local ch=LP.Character or LP.CharacterAdded:Wait()local h=ch:WaitForChild("HumanoidRootPart",5)local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then Fly.On=false return end local bv=Instance.new("BodyVelocity",h)bv.MaxForce=Vector3.new(1e10,1e10,1e10)bv.Velocity=Vector3.zero local bg=Instance.new("BodyGyro",h)bg.MaxTorque=Vector3.new(1e10,1e10,1e10)bg.P=9e4 bg.CFrame=h.CFrame hu.PlatformStand=true Fly.C=RS.RenderStepped:Connect(function()if not Fly.On or not h.Parent then FlyStop()return end if not bv.Parent then bv=Instance.new("BodyVelocity",h)bv.MaxForce=Vector3.new(1e10,1e10,1e10)end if not bg.Parent then bg=Instance.new("BodyGyro",h)bg.MaxTorque=Vector3.new(1e10,1e10,1e10)bg.P=9e4 end if not hu.PlatformStand then hu.PlatformStand=true end bg.CFrame=Cam.CFrame local mv=Vector3.zero if PC then local ok,v=pcall(function()return PC:GetMoveVector()end)if ok and v then mv=v end end if mv.Magnitude<0.05 then bv.Velocity=Vector3.zero else local cf=Cam.CFrame local dir=(cf.LookVector*-mv.Z)+(cf.RightVector*mv.X)if dir.Magnitude>0.05 then bv.Velocity=dir.Unit*Fly.Spd else bv.Velocity=Vector3.zero end end end)end)end
+local function FlyStart()if Fly.On then return end Fly.On=true task.spawn(function()local ch=LP.Character or LP.CharacterAdded:Wait()local h=ch:WaitForChild("HumanoidRootPart",5)local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then Fly.On=false return end local bv=Instance.new("BodyVelocity",h)bv.MaxForce=Vector3.new(1e10,1e10,1e10)bv.Velocity=Vector3.zero local bg=Instance.new("BodyGyro",h)bg.MaxTorque=Vector3.new(1e10,1e10,1e10)bg.P=9e4 bg.CFrame=h.CFrame hu.PlatformStand=true Fly.C=RS.RenderStepped:Connect(function()if not Fly.On then FlyStop()return end if not h or not h.Parent then FlyStop()return end if not bv or not bv.Parent then bv=Instance.new("BodyVelocity",h)bv.MaxForce=Vector3.new(1e10,1e10,1e10)end if not bg or not bg.Parent then bg=Instance.new("BodyGyro",h)bg.MaxTorque=Vector3.new(1e10,1e10,1e10)bg.P=9e4 end if not hu.PlatformStand then hu.PlatformStand=true end bg.CFrame=Cam.CFrame local mv=Vector3.zero if PC then local ok,v=pcall(function()return PC:GetMoveVector()end)if ok and v then mv=v end end if mv.Magnitude<0.05 then bv.Velocity=Vector3.zero else local cf=Cam.CFrame local dir=(cf.LookVector*-mv.Z)+(cf.RightVector*mv.X)if dir.Magnitude>0.05 then bv.Velocity=dir.Unit*Fly.Spd else bv.Velocity=Vector3.zero end end end)end)end
 local Speed={On=false,Val=100}
 RS.RenderStepped:Connect(function()if Speed.On then local h=LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")if h then h.WalkSpeed=Speed.Val end end end)
 local Orb={On=false,Spd=3000,D=1000,A=100,C=nil,Ang=0}
-local function OrbStart()if Orb.C then return end Orb.On=true Orb.Ang=0 task.spawn(function()local ch=LP.Character or LP.CharacterAdded:Wait()local h=ch:WaitForChild("HumanoidRootPart",5)local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then Orb.On=false return end hu.PlatformStand=true Orb.C=RS.Heartbeat:Connect(function(dt)if not Orb.On or not h.Parent then if Orb.C then Orb.C:Disconnect()Orb.C=nil end pcall(function()hu.PlatformStand=false end)return end if not hu.PlatformStand then hu.PlatformStand=true end local av=math.min(Orb.Spd/math.max(Orb.D,1),20)Orb.Ang=Orb.Ang+av*dt if Orb.Ang>math.pi*2 then Orb.Ang=Orb.Ang-math.pi*2 end local x=math.cos(Orb.Ang)*Orb.D local z=math.sin(Orb.Ang)*Orb.D h.CFrame=CFrame.new(Vector3.new(x,Orb.A,z),Vector3.new(0,Orb.A,0))end)end)end
+local function OrbStart()if Orb.C then return end Orb.On=true Orb.Ang=0 task.spawn(function()local ch=LP.Character or LP.CharacterAdded:Wait()local h=ch:WaitForChild("HumanoidRootPart",5)local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu then Orb.On=false return end hu.PlatformStand=true Orb.C=RS.Heartbeat:Connect(function(dt)if not Orb.On or not h or not h.Parent then if Orb.C then Orb.C:Disconnect()Orb.C=nil end pcall(function()hu.PlatformStand=false end)return end if not hu.PlatformStand then hu.PlatformStand=true end local av=math.min(Orb.Spd/math.max(Orb.D,1),20)Orb.Ang=Orb.Ang+av*dt if Orb.Ang>math.pi*2 then Orb.Ang=Orb.Ang-math.pi*2 end local x=math.cos(Orb.Ang)*Orb.D local z=math.sin(Orb.Ang)*Orb.D h.CFrame=CFrame.new(Vector3.new(x,Orb.A,z),Vector3.new(0,Orb.A,0))end)end)end
 local function OrbStop()Orb.On=false if Orb.C then pcall(function()Orb.C:Disconnect()end)Orb.C=nil end local ch=LP.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then pcall(function()hu.PlatformStand=false end)end end end
 local GO={T=nil,C=nil,D=5,S=3,A=0,Ang=0}
 local function GOStop()GO.T=nil if GO.C then pcall(function()GO.C:Disconnect()end)GO.C=nil end end
-local function GOStart(plr)GOStop()GO.T=plr GO.Ang=0 GO.C=RS.Heartbeat:Connect(function(dt)if not GO.T then return end local tc=GO.T.Character local mc=LP.Character local th=tc and tc:FindFirstChild("HumanoidRootPart")local mh=mc and mc:FindFirstChild("HumanoidRootPart")local thu=tc and tc:FindFirstChildOfClass("Humanoid")if not th or not mh or not thu or thu.Health<=0 then GOStop()return end GO.Ang=GO.Ang+GO.S*dt if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.A,math.sin(GO.Ang)*GO.D)mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)end)end
+local function GOStart(plr)if not plr or not plr.Parent then return end GOStop()GO.T=plr GO.Ang=0 GO.C=RS.Heartbeat:Connect(function(dt)if not GO.T or not GO.T.Parent then GOStop()return end local tc=GO.T.Character local mc=LP.Character local th=tc and tc:FindFirstChild("HumanoidRootPart")local mh=mc and mc:FindFirstChild("HumanoidRootPart")local thu=tc and tc:FindFirstChildOfClass("Humanoid")if not th or not mh or not thu or thu.Health<=0 then GOStop()return end GO.Ang=GO.Ang+GO.S*dt if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.A,math.sin(GO.Ang)*GO.D)mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)end)end
 local AdornParent=(function()local p pcall(function()if gethui then p=gethui()end end)if not p then pcall(function()local f=Instance.new("Folder")f.Name="_TLG_HBF"f.Parent=CG p=f end)end if not p then p=CG end return p end)()
 local HB={On=false,Sz=15,Tr=0.3,Mode="cubo",Adorns={},Conn=nil}
 local function ClearHB()for _,a in pairs(HB.Adorns)do pcall(function()a:Destroy()end)end HB.Adorns={}end
@@ -44,11 +56,10 @@ local function AppESP(plr)if plr==LP then return end local ch=plr.Character if n
 local function ESPStart()if ESP.Conn then return end ESP.On=true ClearESP()for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppESP,plr)end end ESP.Conn=RS.RenderStepped:Connect(function()if not ESP.On then return end for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppESP,plr)end end end)end
 local function ESPStop()ESP.On=false if ESP.Conn then pcall(function()ESP.Conn:Disconnect()end)ESP.Conn=nil end ClearESP()end
 local Sky={On=false,Current="ninguno",Original={hasSky=false,Bk=nil,Dn=nil,Ft=nil,Lf=nil,Rt=nil,Up=nil}}
-local SkyPresets={{name="❌ Ninguno",id="ninguno",ids=nil},{name="🌅 Atardecer",id="atardecer",ids={"rbxassetid://515677119","rbxassetid://515677145","rbxassetid://515677173","rbxassetid://515677205","rbxassetid://515677231","rbxassetid://515677261"}},{name="🌙 Noche Estrellada",id="noche",ids={"rbxassetid://515677331","rbxassetid://515677354","rbxassetid://515677373","rbxassetid://515677390","rbxassetid://515677414","rbxassetid://515677442"}},{name="🌌 Nebulosa",id="nebulosa",ids={"rbxassetid://5219982616","rbxassetid://5219982716","rbxassetid://5219982816","rbxassetid://5219982916","rbxassetid://5219983016","rbxassetid://5219983116"}},{name="🌇 Amanecer",id="amanecer",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}}}
+local SkyPresets={{name="❌ Ninguno",id="ninguno",ids=nil},{name="🌅 Atardecer",id="atardecer",ids={"rbxassetid://515677119","rbxassetid://515677145","rbxassetid://515677173","rbxassetid://515677205","rbxassetid://515677231","rbxassetid://515677261"}},{name="🌙 Noche",id="noche",ids={"rbxassetid://515677331","rbxassetid://515677354","rbxassetid://515677373","rbxassetid://515677390","rbxassetid://515677414","rbxassetid://515677442"}}}
 local function SkyRestoreOriginal()pcall(function()local L=game:GetService("Lighting")local s=L:FindFirstChildOfClass("Sky")if Sky.Original.hasSky and Sky.Original.Bk and s then s.SkyboxBk=Sky.Original.Bk s.SkyboxDn=Sky.Original.Dn s.SkyboxFt=Sky.Original.Ft s.SkyboxLf=Sky.Original.Lf s.SkyboxRt=Sky.Original.Rt s.SkyboxUp=Sky.Original.Up elseif not Sky.Original.hasSky and s then s:Destroy()end end)end
 local function SkyApply(ids)pcall(function()local L=game:GetService("Lighting")if not Sky.Original.Bk then local s=L:FindFirstChildOfClass("Sky")if s then Sky.Original.hasSky=true Sky.Original.Bk=s.SkyboxBk Sky.Original.Dn=s.SkyboxDn Sky.Original.Ft=s.SkyboxFt Sky.Original.Lf=s.SkyboxLf Sky.Original.Rt=s.SkyboxRt Sky.Original.Up=s.SkyboxUp end end local s=L:FindFirstChildOfClass("Sky")if ids==nil then SkyRestoreOriginal()Sky.On=false Sky.Current="ninguno"return end if not s then s=Instance.new("Sky")s.Name="TLG_Sky"s.Parent=L end s.SkyboxBk=ids[1]s.SkyboxDn=ids[2]s.SkyboxFt=ids[3]s.SkyboxLf=ids[4]s.SkyboxRt=ids[5]s.SkyboxUp=ids[6]Sky.On=true end)end
-local function SkyApplyCustom(bk,dn,ft,lf,rt,up)local function fix(s)if s==""then return nil end if string.find(s,"rbxassetid")or string.find(s,"rbxasset")then return s end return "rbxassetid://"..s end local ids={fix(bk),fix(dn),fix(ft),fix(lf),fix(rt),fix(up)}if not ids[1]or not ids[2]or not ids[3]or not ids[4]or not ids[5]or not ids[6]then Notif("🌌 Skybox","Faltan IDs (necesitas los 6)")return end SkyApply(ids)Notif("🌌 Skybox","Custom aplicado")end
-local function SkyAtmo(color,density,haze,glare)pcall(function()local L=game:GetService("Lighting")local a=L:FindFirstChildOfClass("Atmosphere")if not a then a=Instance.new("Atmosphere")a.Name="TLG_Atmo"a.Parent=L end if color then a.Color=color end if density then a.Density=density end if haze then a.Haze=haze end if glare then a.Glare=glare end end)end
+local function SkyAtmo(color,density,haze)pcall(function()local L=game:GetService("Lighting")local a=L:FindFirstChildOfClass("Atmosphere")if not a then a=Instance.new("Atmosphere")a.Name="TLG_Atmo"a.Parent=L end if color then a.Color=color end if density then a.Density=density end if haze then a.Haze=haze end end)end
 local function SkyAtmoReset()pcall(function()local L=game:GetService("Lighting")local a=L:FindFirstChild("TLG_Atmo")if a then a:Destroy()end end)end
 local Gi={On=false,Sz=60000,Tr=1,C=nil,Cache={}}
 local function GiStart()if Gi.C then return end local function ap()for _,plr in ipairs(P:GetPlayers())do pcall(function()if plr==LP then return end local ch=plr.Character local h=ch and ch:FindFirstChild("HumanoidRootPart")if not h or not h:IsA("Part")then return end if not Gi.Cache[plr]then Gi.Cache[plr]={h.Size,h.Transparency,h.CanCollide,h.Shape,h.Material,h.Color}end h.Size=Vector3.new(Gi.Sz,Gi.Sz,Gi.Sz)h.Transparency=Gi.Tr h.CanCollide=false pcall(function()h.Shape=Enum.PartType.Block end)end)end end ap()Gi.C=task.spawn(function()while Gi.On do task.wait(0.5)ap()end end)end
@@ -57,15 +68,27 @@ local function Hop()Notif("🔄","Buscando...")task.spawn(function()local ok,res
 local function Rej()Notif("🔁","Reconectando...")task.wait(0.5)pcall(function()TPS:Teleport(game.PlaceId,LP)end)end
 local Sp={T=nil,C=nil}
 local function SpStop()if Sp.C then pcall(function()Sp.C:Disconnect()end)Sp.C=nil end Sp.T=nil if LP.Character then local hu=LP.Character:FindFirstChildOfClass("Humanoid")if hu and Cam then Cam.CameraSubject=hu end end end
-local function SpStart(plr)if not plr then return end SpStop()Sp.T=plr Sp.C=RS.RenderStepped:Connect(function()if not Sp.T then return end local ch=Sp.T.Character if not ch then SpStop()return end local hum=ch:FindFirstChildOfClass("Humanoid")if hum and hum.Health>0 and Cam then Cam.CameraSubject=hum elseif hum and hum.Health<=0 then SpStop()end end)end
+local function SpStart(plr)if not plr or not plr.Parent then return end SpStop()Sp.T=plr Sp.C=RS.RenderStepped:Connect(function()if not Sp.T or not Sp.T.Parent then SpStop()return end local ch=Sp.T.Character if not ch then SpStop()return end local hum=ch:FindFirstChildOfClass("Humanoid")if hum and hum.Health>0 and Cam then Cam.CameraSubject=hum elseif hum and hum.Health<=0 then SpStop()end end)end
 local Bf={Act=false,Auto=false,AS=false,Cnt=5,Iv=0.005,Tool=nil,Run=false,Ch=nil,Hum=nil,Stun=nil,Conn={},KC=nil,AC=nil,AnimS=2.5}
 local BfStunNames={"Stun","Stunned","StunTime","Freeze","Frozen","Ragdoll","Paralyzed","Webbed"}
 local BfStunAttrs={"Stun","Stunned","StunTime","Freeze","Frozen","Ragdoll","Paralyzed"}
 local function BfD()for _,c in ipairs(Bf.Conn)do pcall(function()c:Disconnect()end)end table.clear(Bf.Conn)end
-local function BfTool()if not Bf.Ch then Bf.Tool=nil return end Bf.Tool=Bf.Ch:FindFirstChildOfClass("Tool")end
-local function BfAnim(t)if not t then return 1.3 end local txt="" pcall(function()txt=txt.." "..string.lower(t.Name)end)pcall(function()if t.Animation then txt=txt.." "..string.lower(t.Animation.Name)end end)if string.find(txt,"attack")or string.find(txt,"slash")or string.find(txt,"skill")or string.find(txt,"swing")then return Bf.AnimS end return 1.3 end
-local function BfBurst()if not Bf.Act then return end local tool=Bf.Tool or(Bf.Ch and Bf.Ch:FindFirstChildOfClass("Tool"))if not tool or not tool.Parent then return end if Bf.Run then return end Bf.Run=true task.spawn(function()for i=1,Bf.Cnt do if not Bf.Act or not tool.Parent then break end pcall(function()tool:Activate()end)if i<Bf.Cnt then task.wait(Bf.Iv)end end Bf.Run=false end)end
-local function BfSetup(ch)BfD()Bf.Act=false Bf.Ch=ch Bf.Hum=ch:WaitForChild("Humanoid",5)BfTool()Bf.Stun=nil task.spawn(function()for _=1,20 do if not ch.Parent then return end for _,n in ipairs(BfStunNames)do local v=ch:FindFirstChild(n)if v and(v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("BoolValue"))then Bf.Stun=v return end end task.wait(0.25)end end)table.insert(Bf.Conn,Bf.Hum.AnimationPlayed:Connect(function(t)if not Bf.Act or not t then return end pcall(function()t:AdjustSpeed(BfAnim(t))end)end))table.insert(Bf.Conn,ch.ChildAdded:Connect(function(i)if i:IsA("Tool")then BfTool()end if(i:IsA("IntValue")or i:IsA("NumberValue")or i:IsA("BoolValue"))and table.find(BfStunNames,i.Name)then Bf.Stun=i end end))table.insert(Bf.Conn,ch.ChildRemoved:Connect(function(i)if i:IsA("Tool")then BfTool()end if Bf.Stun==i then Bf.Stun=nil end end))table.insert(Bf.Conn,Bf.Hum.Died:Connect(function()Bf.Act=false end))Bf.Act=true end
+local function BfTool()if not Bf.Ch or not Bf.Ch.Parent then Bf.Tool=nil return end Bf.Tool=Bf.Ch:FindFirstChildOfClass("Tool")end
+local function BfAnim(t)
+	if not t then return 1.3 end
+	local txt=""
+	pcall(function()
+		txt=txt.." "..string.lower(t.Name)
+		local anim=t:FindFirstChild("Animation")
+		if anim and anim:IsA("Animation") then
+			txt=txt.." "..string.lower(anim.Name)
+		end
+	end)
+	if string.find(txt,"attack")or string.find(txt,"slash")or string.find(txt,"skill")or string.find(txt,"swing")then return Bf.AnimS end
+	return 1.3
+end
+local function BfBurst()if not Bf.Act then return end local tool=Bf.Tool or(Bf.Ch and Bf.Ch:FindFirstChildOfClass("Tool"))if not tool or not tool.Parent then return end if Bf.Run then return end Bf.Run=true task.spawn(function()for i=1,Bf.Cnt do if not Bf.Act or not tool or not tool.Parent then break end pcall(function()tool:Activate()end)if i<Bf.Cnt then task.wait(Bf.Iv)end end Bf.Run=false end)end
+local function BfSetup(ch)if not ch or not ch.Parent then return end BfD()Bf.Act=false Bf.Ch=ch Bf.Hum=ch:WaitForChild("Humanoid",5)if not Bf.Hum then return end BfTool()Bf.Stun=nil task.spawn(function()for _=1,20 do if not ch or not ch.Parent then return end for _,n in ipairs(BfStunNames)do local v=ch:FindFirstChild(n)if v and(v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("BoolValue"))then Bf.Stun=v return end end task.wait(0.25)end end)table.insert(Bf.Conn,Bf.Hum.AnimationPlayed:Connect(function(t)if not Bf.Act or not t then return end pcall(function()t:AdjustSpeed(BfAnim(t))end)end))table.insert(Bf.Conn,ch.ChildAdded:Connect(function(i)if i:IsA("Tool")then BfTool()end if(i:IsA("IntValue")or i:IsA("NumberValue")or i:IsA("BoolValue"))and table.find(BfStunNames,i.Name)then Bf.Stun=i end end))table.insert(Bf.Conn,ch.ChildRemoved:Connect(function(i)if i:IsA("Tool")then BfTool()end if Bf.Stun==i then Bf.Stun=nil end end))table.insert(Bf.Conn,Bf.Hum.Died:Connect(function()Bf.Act=false end))Bf.Act=true end
 if LP.Character then pcall(BfSetup,LP.Character)end
 LP.CharacterAdded:Connect(function(c)pcall(BfSetup,c)end)
 local function BfSK()if Bf.KC then return end Bf.KC=UI.InputBegan:Connect(function(i,gp)if gp or not Bf.Auto then return end local k=i.KeyCode if k==Enum.KeyCode.Z or k==Enum.KeyCode.X or k==Enum.KeyCode.C or k==Enum.KeyCode.V then BfBurst()end end)end
@@ -89,8 +112,41 @@ local function ShClear()pcall(function()local L=game:GetService("Lighting")for _
 local function ShApply(n)ShClear()pcall(function()local L=game:GetService("Lighting")ShA=n if n=="realista"then local b=Instance.new("BloomEffect",L)b.Name="TLG_Shader_Bloom"b.Intensity=0.4 b.Size=24 b.Threshold=2 local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.05 c.Contrast=0.15 c.Saturation=0.15 local s=Instance.new("SunRaysEffect",L)s.Name="TLG_Shader_Sun"s.Intensity=0.05 s.Spread=0.5 L.Brightness=2 elseif n=="neon"then local b=Instance.new("BloomEffect",L)b.Name="TLG_Shader_Bloom"b.Intensity=1.5 b.Size=40 b.Threshold=0.8 local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.1 c.Contrast=0.4 c.Saturation=0.6 L.Brightness=3 L.Ambient=Color3.fromRGB(100,80,150)elseif n=="cartoon"then local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.15 c.Contrast=0.5 c.Saturation=0.8 L.Brightness=2.5 L.GlobalShadows=false elseif n=="oscuro"then local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=-0.1 c.Contrast=0.3 c.Saturation=-0.2 c.TintColor=Color3.fromRGB(150,150,200)L.Brightness=0.8 L.Ambient=Color3.fromRGB(30,30,50)elseif n=="infierno"then local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.1 c.Contrast=0.3 c.Saturation=0.7 c.TintColor=Color3.fromRGB(255,150,100)local b=Instance.new("BloomEffect",L)b.Name="TLG_Shader_Bloom"b.Intensity=0.8 b.Size=30 b.Threshold=1.2 L.Brightness=2.2 L.Ambient=Color3.fromRGB(120,40,20)elseif n=="hielo"then local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.15 c.Contrast=0.1 c.Saturation=-0.1 c.TintColor=Color3.fromRGB(200,220,255)local b=Instance.new("BloomEffect",L)b.Name="TLG_Shader_Bloom"b.Intensity=0.5 b.Size=28 b.Threshold=1.5 L.Brightness=2.5 L.Ambient=Color3.fromRGB(80,100,140)elseif n=="vaporwave"then local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.1 c.Contrast=0.35 c.Saturation=0.9 c.TintColor=Color3.fromRGB(255,150,255)local b=Instance.new("BloomEffect",L)b.Name="TLG_Shader_Bloom"b.Intensity=1.2 b.Size=45 b.Threshold=0.9 L.Brightness=2.5 L.Ambient=Color3.fromRGB(100,50,150)elseif n=="anime"then local b=Instance.new("BloomEffect",L)b.Name="TLG_Shader_Bloom"b.Intensity=0.9 b.Size=35 b.Threshold=1.1 local c=Instance.new("ColorCorrectionEffect",L)c.Name="TLG_Shader_CC"c.Brightness=0.12 c.Contrast=0.25 c.Saturation=0.5 L.Brightness=2.8 end end)end
 local Isl={["Floppa Island"]=Vector3.new(0,50,0),["Snow Island"]=Vector3.new(0,50,0),["Gorilla Island"]=Vector3.new(0,50,0),["Sand Island"]=Vector3.new(0,50,0),["Pumpkin Island"]=Vector3.new(0,50,0),["Moai Island"]=Vector3.new(0,50,0),["Forgotten Island"]=Vector3.new(0,50,0),["MrBeast Island"]=Vector3.new(0,50,0),["Noob Arena"]=Vector3.new(0,50,0),["Sus Mountain"]=Vector3.new(0,50,0)}
 local function TPTo(name,pos)local ch=LP.Character if not ch then Notif("❌","Sin player")return end local h=ch:FindFirstChild("HumanoidRootPart")if not h then Notif("❌","Sin HRP")return end local fd=nil pcall(function()for _,o in ipairs(workspace:GetDescendants())do if(o:IsA("BasePart")or o:IsA("Model"))and string.find(string.lower(o.Name),string.lower(name),1,true)then fd=o break end end end)if fd then local p=fd if p:IsA("Model")then p=p.PrimaryPart or p:FindFirstChildWhichIsA("BasePart")end if p then h.CFrame=CFrame.new(p.Position+Vector3.new(0,50,0))Notif("🏝️",name)return end end if pos then h.CFrame=CFrame.new(pos+Vector3.new(0,50,0))Notif("🏝️",name)end end
-local function DetIsl()local e={}for _,o in ipairs(workspace:GetDescendants())do if o:IsA("Model")or o:IsA("BasePart")then local n=string.lower(o.Name)if string.find(n,"island")or string.find(n,"arena")or string.find(n,"floppa")or string.find(n,"snow")or string.find(n,"gorilla")or string.find(n,"sand")or string.find(n,"pumpkin")or string.find(n,"moai")or string.find(n,"sus")or string.find(n,"forgotten")or string.find(n,"mrbeast")then local p=nil if o:IsA("Model")then local pp=o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")if pp then p=pp.Position end else p=o.Position end if p then e[o.Name]=p end end end end return e end
-local function UpdCoords()local d=DetIsl()local a=0 for n,p in pairs(d)do for ik,_ in pairs(Isl)do local nl=string.lower(n)local kl=string.lower(ik)if string.find(nl,kl,1,true)or string.find(kl,nl,1,true)then Isl[ik]=p a=a+1 end end end Notif("📌",a.." islas")return a end
+local function DetIsl()
+	local e={}
+	for _,o in ipairs(workspace:GetDescendants())do
+		if o:IsA("Model")or o:IsA("BasePart")then
+			local n=string.lower(o.Name)
+			if string.find(n,"island")or string.find(n,"arena")or string.find(n,"floppa")or string.find(n,"snow")or string.find(n,"gorilla")or string.find(n,"sand")or string.find(n,"pumpkin")or string.find(n,"moai")or string.find(n,"sus")or string.find(n,"forgotten")or string.find(n,"mrbeast")then
+				local p=nil
+				if o:IsA("Model")then
+					local pp=o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")
+					if pp then p=pp.Position end
+				else
+					p=o.Position
+				end
+				if p then e[o.Name]=p end
+			end
+		end
+	end
+	return e
+end
+local function UpdCoords()
+	local d=DetIsl()
+	local a=0
+	for n,p in pairs(d)do
+		for ik,_ in pairs(Isl)do
+			local nl=string.lower(n)
+			local kl=string.lower(ik)
+			if string.find(nl,kl,1,true)or string.find(kl,nl,1,true)then
+				Isl[ik]=p
+				a=a+1
+			end
+		end
+	end
+	Notif("📌",a.." islas")
+	return a
+end
 P.PlayerAdded:Connect(function(plr)if plr==LP then return end task.wait(1)if HB.On then pcall(AppHB,plr)end if ESP.On then pcall(AppESP,plr)end plr.CharacterAdded:Connect(function()task.wait(1.5)if HB.On then pcall(AppHB,plr)end if ESP.On then pcall(AppESP,plr)end end)end)
 P.PlayerRemoving:Connect(function(plr)pcall(function()local a=HB.Adorns[plr]if a then a:Destroy()HB.Adorns[plr]=nil end end)pcall(function()local e=ESP.Cache[plr]if e then e:Destroy()ESP.Cache[plr]=nil end end)pcall(function()Gi.Cache[plr]=nil end)end)
 local SG=Instance.new("ScreenGui")SG.Name="TLG_GoldV3"SG.ResetOnSpawn=false SG.IgnoreGuiInset=true pcall(function()SG.Parent=SP end)if not SG.Parent then pcall(function()SG.Parent=CG end)end
@@ -127,7 +183,6 @@ local function Label(par,txt,col)local l=Instance.new("TextLabel",par)l.Size=UDi
 local PgStats=Tab("STATS","📊")local PgJug=Tab("JUGADORES","👥")local PgAimB=Tab("AIMBOT","🎯")local PgFly=Tab("FLY","✈")local PgIsl=Tab("ISLAS","🏝️")local PgScr=Tab("SCRIPTS","📜")local PgTool=Tab("TOOLS","🔧")local PgSh=Tab("SHADERS","✨")local PgEsp=Tab("ESP","👁️")local PgSky=Tab("SKYBOX","🌌")local PgAim=Tab("AIM","🎯")local PgUtil=Tab("UTILS","⚙️")
 task.wait(0.1)
 if Tabs[1]then Tabs[1].l.TextColor3=C.BG Tabs[1].p.Visible=true Tabs[1].b.BackgroundColor3=C.Accent Tabs[1].b.BackgroundTransparency=0 Tabs[1].s.Color=C.Accent2 Tabs[1].s.Transparency=0 end
--- STATS
 do
 Section(PgStats,"MI PERFIL","👤")
 local MiC=Instance.new("Frame",PgStats)MiC.Size=UDim2.new(1,0,0,130)MiC.BackgroundColor3=C.BG2 MiC.BorderSizePixel=0 MiC.ZIndex=5 Instance.new("UICorner",MiC).CornerRadius=UDim.new(0,10)
@@ -149,7 +204,6 @@ P.PlayerAdded:Connect(function()task.wait(0.1)Ref()end)
 P.PlayerRemoving:Connect(function()task.wait(0.1)Ref()end)
 task.spawn(function()while true do task.wait(2)if PgStats.Visible then pcall(RefM)pcall(Ref)end end end)
 end
--- JUGADORES
 do
 Section(PgJug,"LISTA","👥")
 local st=Instance.new("TextLabel",PgJug)st.Size=UDim2.new(1,0,0,32)st.BackgroundColor3=C.BG2 st.Font=Enum.Font.GothamBold st.Text="🎯 Target: Ninguno"st.TextColor3=C.Accent st.TextSize=11 st.ZIndex=5 Instance.new("UICorner",st).CornerRadius=UDim.new(1,0)
@@ -166,7 +220,6 @@ Slider(PgJug,"Distancia",2,30,5,function(v)GO.D=v end)
 Slider(PgJug,"Velocidad",1,20,3,function(v)GO.S=v end)
 Slider(PgJug,"Altura",0,20,0,function(v)GO.A=v end)
 end
--- AIMBOT
 do
 Section(PgAimB,"🎯 AIMBOT","🎯")
 Toggle(PgAimB,"Activar Aimbot (Hitbox Masiva)",false,function(v)Gi.On=v if v then GiStart()else GiStop()end end)
@@ -180,7 +233,6 @@ local modos={{"⬛ Cuadrada","cubo"},{"👤 Cabeza","cabeza"},{"📏 Vertical","
 local mb={}
 for _,m in ipairs(modos)do local b=Instance.new("TextButton",PgAimB)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=(HB.Mode==m[2])and C.Accent or C.BG2 b.Font=Enum.Font.GothamBold b.Text=m[1]b.TextColor3=(HB.Mode==m[2])and C.BG or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)table.insert(mb,{b=b,m=m[2]})b.MouseButton1Click:Connect(function()HB.Mode=m[2]for _,x in ipairs(mb)do if x.m==m[2]then x.b.BackgroundColor3=C.Accent x.b.TextColor3=C.BG else x.b.BackgroundColor3=C.BG2 x.b.TextColor3=C.Wh end end end)end
 end
--- ESP
 do
 Section(PgEsp,"👁️ ESP — Jugadores","👁️")
 local espSt=Instance.new("TextLabel",PgEsp)espSt.Size=UDim2.new(1,0,0,30)espSt.BackgroundColor3=C.BG2 espSt.Font=Enum.Font.GothamBold espSt.Text="👁️ Estado: OFF"espSt.TextColor3=C.Rd espSt.TextSize=11 espSt.ZIndex=5 Instance.new("UICorner",espSt).CornerRadius=UDim.new(1,0)
@@ -189,30 +241,21 @@ Section(PgEsp,"📋 Información","📋")
 Toggle(PgEsp,"Mostrar Nombre",true,function(v)ESP.ShowName=v end)
 Toggle(PgEsp,"Mostrar Vida",true,function(v)ESP.ShowHP=v end)
 Toggle(PgEsp,"Mostrar Distancia",false,function(v)ESP.ShowDist=v end)
-Label(PgEsp,"ESP con distancia infinita — funciona a cualquier distancia",C.Grn)
-Label(PgEsp,"Atraviesa paredes (AlwaysOnTop)",C.Cyan)
+Label(PgEsp,"ESP con distancia infinita",C.Grn)
 end
--- SKYBOX
 do
 Section(PgSky,"🌌 SKYBOX","🌌")
 local skySt=Instance.new("TextLabel",PgSky)skySt.Size=UDim2.new(1,0,0,30)skySt.BackgroundColor3=C.BG2 skySt.Font=Enum.Font.GothamBold skySt.Text="🌌 Actual: Ninguno"skySt.TextColor3=C.Accent skySt.TextSize=11 skySt.ZIndex=5 Instance.new("UICorner",skySt).CornerRadius=UDim.new(1,0)
 Section(PgSky,"PRESETS","🎨")
-for _,p in ipairs(SkyPresets)do local b=Instance.new("TextButton",PgSky)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=(Sky.Current==p.id)and C.Accent or C.BG2 b.Font=Enum.Font.GothamBold b.Text=p.name b.TextColor3=(Sky.Current==p.id)and C.BG or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)b.MouseButton1Click:Connect(function()SkyApply(p.ids)Sky.Current=p.id skySt.Text="🌌 Actual: "..p.name Notif("🌌 Skybox",p.name)for _,c in ipairs(PgSky:GetChildren())do if c:IsA("TextButton")then if c.Text==p.name then c.BackgroundColor3=C.Accent c.TextColor3=C.BG else c.BackgroundColor3=C.BG2 c.TextColor3=C.Wh end end end end)end
+for _,p in ipairs(SkyPresets)do local b=Instance.new("TextButton",PgSky)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=(Sky.Current==p.id)and C.Accent or C.BG2 b.Font=Enum.Font.GothamBold b.Text=p.name b.TextColor3=(Sky.Current==p.id)and C.BG or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)b.MouseButton1Click:Connect(function()SkyApply(p.ids)Sky.Current=p.id skySt.Text="🌌 Actual: "..p.name Notif("🌌 Skybox",p.name)end)end
 Section(PgSky,"🌈 ATMÓSFERA","🌈")
-Button(PgSky,"☀️ Atmósfera Día",C.Accent,function()SkyAtmo(Color3.fromRGB(199,215,255),0.3,0,0.1)Notif("🌈","Día")end)
-Button(PgSky,"🌅 Atmósfera Atardecer",Color3.fromRGB(255,150,100),function()SkyAtmo(Color3.fromRGB(255,150,100),0.4,1.5,0.2)Notif("🌈","Atardecer")end)
-Button(PgSky,"🌙 Atmósfera Noche",Color3.fromRGB(50,50,100),function()SkyAtmo(Color3.fromRGB(50,50,100),0.4,2,0)Notif("🌈","Noche")end)
-Button(PgSky,"☁️ Atmósfera Nublada",Color3.fromRGB(180,180,190),function()SkyAtmo(Color3.fromRGB(180,180,190),0.5,3,0)Notif("🌈","Nublada")end)
-Button(PgSky,"❌ Quitar Atmósfera",C.Rd,function()SkyAtmoReset()Notif("🌈","Quitada")end)
-Section(PgSky,"✏️ CUSTOM (IDs)","✏️")
-Label(PgSky,"Pega los 6 IDs: Back, Down, Front, Left, Right, Up",C.Gr)
-local vals={Bk="",Dn="",Ft="",Lf="",Rt="",Up=""}
-local function mkI(ph,key)local f=Instance.new("Frame",PgSky)f.Size=UDim2.new(1,0,0,32)f.BackgroundColor3=C.BG2 f.BorderSizePixel=0 f.ZIndex=5 Instance.new("UICorner",f).CornerRadius=UDim.new(1,0)local s=Instance.new("UIStroke",f)s.Color=C.Accent s.Thickness=1 s.Transparency=0.5 local tb=Instance.new("TextBox",f)tb.Size=UDim2.new(1,-16,1,-6)tb.Position=UDim2.new(0,8,0,3)tb.BackgroundTransparency=1 tb.Font=Enum.Font.GothamSemibold tb.Text=""tb.PlaceholderText=ph tb.PlaceholderColor3=C.Gr tb.TextColor3=C.Wh tb.TextSize=11 tb.ZIndex=7 tb.ClearTextOnFocus=false tb:GetPropertyChangedSignal("Text"):Connect(function()vals[key]=tb.Text end)end
-mkI("Back ID","Bk")mkI("Down ID","Dn")mkI("Front ID","Ft")mkI("Left ID","Lf")mkI("Right ID","Rt")mkI("Up ID","Up")
-Button(PgSky,"✅ Aplicar Custom",C.Grn,function()SkyApplyCustom(vals.Bk,vals.Dn,vals.Ft,vals.Lf,vals.Rt,vals.Up)skySt.Text="🌌 Actual: Custom"Sky.Current="custom"end)
-Button(PgSky,"🔄 Restaurar Original",C.Cyan,function()SkyApply(nil)skySt.Text="🌌 Actual: Original"Notif("🌌","Restaurado")end)
+Button(PgSky,"☀️ Día",C.Accent,function()SkyAtmo(Color3.fromRGB(199,215,255),0.3,0)Notif("🌈","Día")end)
+Button(PgSky,"🌅 Atardecer",Color3.fromRGB(255,150,100),function()SkyAtmo(Color3.fromRGB(255,150,100),0.4,1.5)Notif("🌈","Atardecer")end)
+Button(PgSky,"🌙 Noche",Color3.fromRGB(50,50,100),function()SkyAtmo(Color3.fromRGB(50,50,100),0.4,2)Notif("🌈","Noche")end)
+Button(PgSky,"☁️ Nublada",Color3.fromRGB(180,180,190),function()SkyAtmo(Color3.fromRGB(180,180,190),0.5,3)Notif("🌈","Nublada")end)
+Button(PgSky,"❌ Quitar",C.Rd,function()SkyAtmoReset()Notif("🌈","Quitada")end)
+Button(PgSky,"🔄 Restaurar Skybox Original",C.Cyan,function()SkyApply(nil)skySt.Text="🌌 Actual: Original"Notif("🌌","Restaurado")end)
 end
--- FLY
 do
 Section(PgFly,"FLY","✈")
 Toggle(PgFly,"Activar Fly",false,function(v)if v then FlyStart()else FlyStop()end end)
@@ -223,7 +266,6 @@ Slider(PgFly,"Velocidad",16,500,100,function(v)Speed.Val=v end)
 Section(PgFly,"FUGA","🚀")
 Button(PgFly,"🚀 Ejecutar Fuga",C.Wh,function()local c=LP.Character local h=c and c:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)end end)
 end
--- ISLAS
 do
 Section(PgIsl,"TELETRANSPORTE","🏝️")
 local lista={}for n,p in pairs(Isl)do table.insert(lista,{n=n,p=p})end
@@ -233,7 +275,6 @@ Section(PgIsl,"HERRAMIENTAS","🔧")
 Button(PgIsl,"🔍 Detectar Islas",C.Cyan,function()DetIsl()end)
 Button(PgIsl,"📌 Actualizar Coordenadas",C.Grn,function()UpdCoords()end)
 end
--- SCRIPTS
 do
 Section(PgScr,"SERVER HOP","🔄")
 Button(PgScr,"🔄 Cambiar Server",C.Accent,function()Hop()end)
@@ -242,7 +283,6 @@ Section(PgScr,"SCRIPTS EXTERNOS","📜")
 Button(PgScr,"📜 IY Hub",C.Grn,function()pcall(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()end)end)
 Button(PgScr,"📜 Redz Hub",C.Accent,function()pcall(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/realredz/MemeSea/main/Source.lua"))()end)end)
 end
--- TOOLS
 do
 Section(PgTool,"BUFF FRUTAS","⚡")
 Toggle(PgTool,"Buff Frutas",false,function(v)Bf.Auto=v if v then BfSK()BfSA()else BfSKStop()BfSAStop()end end)
@@ -263,13 +303,11 @@ P.PlayerAdded:Connect(function()task.wait(0.1)PopS()end)
 P.PlayerRemoving:Connect(function()task.wait(0.1)PopS()end)
 Button(PgTool,"🛑 Detener Especteo",C.Rd,function()SpStop()specSt.Text="🎥 Ninguno"end)
 end
--- SHADERS
 do
 Section(PgSh,"PRESETS","✨")
 local presets={{"❌ Ninguno","ninguno"},{"🌅 Realista","realista"},{"💡 Neón","neon"},{"🎨 Cartoon","cartoon"},{"🌙 Oscuro","oscuro"},{"🔥 Infierno","infierno"},{"❄️ Hielo","hielo"},{"🌈 Vaporwave","vaporwave"},{"⚡ Anime","anime"}}
 for _,p in ipairs(presets)do local b=Instance.new("TextButton",PgSh)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=(ShA==p[2])and C.Accent or C.BG2 b.Font=Enum.Font.GothamBold b.Text=p[1]b.TextColor3=(ShA==p[2])and C.BG or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)b.MouseButton1Click:Connect(function()ShApply(p[2])for _,c in ipairs(PgSh:GetChildren())do if c:IsA("TextButton")then if string.find(c.Text,p[1],1,true)then c.BackgroundColor3=C.Accent c.TextColor3=C.BG else c.BackgroundColor3=C.BG2 c.TextColor3=C.Wh end end end end)end
 end
--- AIM
 do
 Section(PgAim,"AIM ASSIST","🎯")
 local aSt=Instance.new("TextLabel",PgAim)aSt.Size=UDim2.new(1,0,0,32)aSt.BackgroundColor3=C.BG2 aSt.Font=Enum.Font.GothamBold aSt.Text="🎯 Estado: OFF"aSt.TextColor3=C.Rd aSt.TextSize=11 aSt.ZIndex=5 Instance.new("UICorner",aSt).CornerRadius=UDim.new(1,0)
@@ -285,7 +323,6 @@ local fovLbl=Instance.new("TextLabel",PgAim)fovLbl.Size=UDim2.new(1,0,0,24)fovLb
 Toggle(PgAim,"Activar FOV",false,function(v)if v then FvApply(Fv.V)fovLbl.Text="📷 FOV: "..Fv.V else FvReset()fovLbl.Text="📷 FOV: "..Fv.Orig end end)
 Slider(PgAim,"FOV Valor",30,200,90,function(v)Fv.V=v if Fv.On then FvApply(v)end fovLbl.Text="📷 FOV: "..v end)
 end
--- UTILS
 do
 Section(PgUtil,"🛡 ANTI-VOID","🛡")
 local avSt=Instance.new("TextLabel",PgUtil)avSt.Size=UDim2.new(1,0,0,30)avSt.BackgroundColor3=C.BG2 avSt.Font=Enum.Font.GothamBold avSt.Text="🛡 Estado: OFF"avSt.TextColor3=C.Rd avSt.TextSize=11 avSt.ZIndex=5 Instance.new("UICorner",avSt).CornerRadius=UDim.new(1,0)
@@ -306,21 +343,18 @@ Slider(PgUtil,"Velocidad",500,20000,3000,function(v)Orb.Spd=v end)
 Slider(PgUtil,"Distancia",100,5000,1000,function(v)Orb.D=v end)
 Slider(PgUtil,"Altura",0,2000,100,function(v)Orb.A=v end)
 end
--- BOTÓN FLOTANTE
 local HFSG=Instance.new("ScreenGui")HFSG.Name="TLG_HideBtn"HFSG.ResetOnSpawn=false HFSG.DisplayOrder=999 HFSG.IgnoreGuiInset=true pcall(function()HFSG.Parent=SP end)if not HFSG.Parent then pcall(function()HFSG.Parent=CG end)end
 local ShowBtn=Instance.new("TextButton",HFSG)ShowBtn.Size=UDim2.new(0,54,0,54)ShowBtn.Position=UDim2.new(0.02,0,0.45,0)ShowBtn.BackgroundColor3=C.BG2 ShowBtn.Text="👑"ShowBtn.Font=Enum.Font.GothamBold ShowBtn.TextColor3=C.Accent ShowBtn.TextSize=26 ShowBtn.BorderSizePixel=0 ShowBtn.AutoButtonColor=false ShowBtn.ZIndex=10 ShowBtn.Visible=false Instance.new("UICorner",ShowBtn).CornerRadius=UDim.new(1,0)
 local SS=Instance.new("UIStroke",ShowBtn)SS.Color=C.Accent SS.Thickness=2
-do
 local dragBtn=false local dragStart=nil local startPos=nil local moved=false
 ShowBtn.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragBtn=true dragStart=i.Position startPos=ShowBtn.Position moved=false end end)
 UI.InputChanged:Connect(function(i)if dragBtn and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local dl=i.Position-dragStart if math.abs(dl.X)>6 or math.abs(dl.Y)>6 then moved=true end if moved then ShowBtn.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+dl.X,startPos.Y.Scale,startPos.Y.Offset+dl.Y)end end end)
 UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dragBtn=false end end)
 ShowBtn.MouseButton1Click:Connect(function()if moved then return end W.Visible=true TS:Create(W,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE}):Play()task.wait(0.35)ShowBtn.Visible=false end)
-end
 HBtn.MouseButton1Click:Connect(function()TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(0,0,0,0)}):Play()task.wait(0.3)W.Visible=false ShowBtn.Visible=true end)
 if IS_PC then UI.InputBegan:Connect(function(i,gp)if gp then return end if i.KeyCode==Enum.KeyCode.RightShift then W.Visible=not W.Visible end if i.KeyCode==Enum.KeyCode.Insert then W.Visible=not W.Visible ShowBtn.Visible=not ShowBtn.Visible end end)end
 task.wait(0.1)
 pcall(function()TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE,Position=W_POS}):Play()end)
 pcall(function()SG.Destroying:Connect(function()pcall(ShClear)pcall(AiStop)pcall(AVStop)pcall(FvReset)pcall(FlyStop)pcall(OrbStop)pcall(GOStop)pcall(HBStop)pcall(ESPStop)pcall(GiStop)pcall(SpStop)pcall(BfD)pcall(BfSKStop)pcall(BfSAStop)pcall(AFStop)pcall(AKBStop)pcall(SkyRestoreOriginal)pcall(SkyAtmoReset)end)end)
-Notif("👑 TLG GOLD HUB V3","✅ Cargado — sin FPS Booster")
-print("[TLG HUB V3] cargado ✓")
+Notif("👑 TLG GOLD HUB V3","✅ Cargado [FIXED]")
+print("[TLG HUB V3] VERSIÓN CORREGIDA cargado ✓")
