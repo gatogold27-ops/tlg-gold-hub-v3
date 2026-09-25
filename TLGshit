@@ -2,12 +2,33 @@
 -- Copiar todo esto y hacer: loadstring(game:HttpGet("URL_del_script"))()
 -- O ejecutar directamente en el executor
 
-local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=game:GetService("VirtualInputManager")local LP=P.LocalPlayer local Cam=workspace.CurrentCamera
+local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=nil pcall(function()VIM=game:GetService("VirtualInputManager")end)local LP=P.LocalPlayer local Cam=workspace.CurrentCamera
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()if workspace.CurrentCamera then Cam=workspace.CurrentCamera end end)
-local IS_MOBILE=UI.TouchEnabled and not UI.KeyboardEnabled
-local IS_PC=UI.KeyboardEnabled
+local IS_MOBILE=UI.TouchEnabled
+local IS_PC=UI.KeyboardEnabled and not UI.TouchEnabled
 local C={BG=Color3.fromRGB(15,15,18),BG2=Color3.fromRGB(22,22,26),BG3=Color3.fromRGB(30,30,35),Accent=Color3.fromRGB(255,200,80),Accent2=Color3.fromRGB(255,225,140),Wh=Color3.fromRGB(245,245,250),Gr=Color3.fromRGB(140,140,155),GrD=Color3.fromRGB(70,70,80),Grn=Color3.fromRGB(90,240,120),Rd=Color3.fromRGB(220,60,70),Cyan=Color3.fromRGB(0,230,255)}
-local function GetParent()pcall(function()if gethui then local h=gethui()if h and h~=game then return h end end end)pcall(function()if syn and syn.protect_gui then local sg=Instance.new("ScreenGui")syn.protect_gui(sg)sg.Parent=CG return sg end end)local ok=pcall(function()local f=Instance.new("Folder")f.Parent=CG f:Destroy()return CG end)if ok then return CG end return LP:WaitForChild("PlayerGui")end
+local function GetParent()
+    -- Compatible GUI parent resolution for mobile/PC executors.
+    local ok, h = pcall(function()
+        if type(gethui) == "function" then return gethui() end
+    end)
+    if ok and h and h ~= game then return h end
+    local ok2, sg = pcall(function()
+        if syn and type(syn.protect_gui) == "function" then
+            local g = Instance.new("ScreenGui")
+            syn.protect_gui(g)
+            return g
+        end
+    end)
+    if ok2 and sg then return sg end
+    local ok3 = pcall(function()
+        local f = Instance.new("Folder")
+        f.Parent = CG
+        f:Destroy()
+    end)
+    if ok3 then return CG end
+    return LP:WaitForChild("PlayerGui")
+end
 local SP=GetParent()
 for _,n in ipairs({"TLG_GoldV3","TLG_HideBtn","TLG_Diag"})do pcall(function()local o=SP:FindFirstChild(n)if o then o:Destroy()end end)pcall(function()local o=CG and CG:FindFirstChild(n)if o then o:Destroy()end end)end
 local PC=nil 
@@ -434,4 +455,4 @@ task.wait(0.1)
 pcall(function()TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE,Position=W_POS}):Play()end)
 pcall(function()SG.Destroying:Connect(function()pcall(ShClear)pcall(AiStop)pcall(AVStop)pcall(FvReset)pcall(FlyStop)pcall(OrbStop)pcall(GOStop)pcall(HBStop)pcall(ESPStop)pcall(GiStop)pcall(SpStop)pcall(BfD)pcall(BfSKStop)pcall(BfSAStop)pcall(AFStop)pcall(AKBStop)pcall(function()if Sky.Conn then Sky.Conn:Disconnect()Sky.Conn=nil end Sky.On=false end)pcall(SkyRestoreOriginal)pcall(SkyAtmoReset)end)end)
 Notif("👑 TLG GOLD HUB V3","✅ Cargado [FIXED]")
-print("[TLG HUB V3] VERSIÓN CORREGIDA cargado ✓")
+print("[TLG HUB V3] VERSIÓN CORREGIDA cargado ✓ | Mobile/PC compatible")
