@@ -2,9 +2,7 @@
 -- 👑 TLG GOLD HUB V4 — FULL ORGANIZED
 -- ═══════════════════════════════════════════════════════════
 
--- ═══════════════════════════════════════════════════════════
 -- [1] SERVICIOS
--- ═══════════════════════════════════════════════════════════
 local TS=game:GetService("TweenService")
 local UI=game:GetService("UserInputService")
 local P=game:GetService("Players")
@@ -24,9 +22,7 @@ workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
     if workspace.CurrentCamera then Cam=workspace.CurrentCamera end
 end)
 
--- ═══════════════════════════════════════════════════════════
 -- [2] PARENT
--- ═══════════════════════════════════════════════════════════
 local function GetParent()
     pcall(function()
         if gethui then
@@ -58,9 +54,7 @@ for _,n in ipairs({"TLG_GoldV4","TLG_GoldV3","TLG_HideBtn","TLG_Express","TLG_Ex
     pcall(function()local o=CG:FindFirstChild(n)if o then o:Destroy()end end)
 end
 
--- ═══════════════════════════════════════════════════════════
 -- [3] UTILIDADES
--- ═══════════════════════════════════════════════════════════
 local function Notif(t,x,d)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification",{Title=t,Text=x,Duration=d or 3})
@@ -73,9 +67,7 @@ local function GetPing()
     return p
 end
 
--- ═══════════════════════════════════════════════════════════
 -- [4] TEMAS
--- ═══════════════════════════════════════════════════════════
 local Themes={
     ["👑 Gold Neon"]={Accent=Color3.fromRGB(255,215,0),Accent2=Color3.fromRGB(255,235,100)},
     ["💜 Purple"]={Accent=Color3.fromRGB(180,80,255),Accent2=Color3.fromRGB(220,150,255)},
@@ -115,9 +107,7 @@ local function ApplyTheme()
     for _,b in ipairs(ThemedBars)do pcall(function()b.BackgroundColor3=A()end)end
 end
 
--- ═══════════════════════════════════════════════════════════
 -- [5] PC + STATS
--- ═══════════════════════════════════════════════════════════
 local PC=nil
 pcall(function()
     local pm=LP:WaitForChild("PlayerScripts",10)
@@ -155,9 +145,7 @@ local function GetStats(plr)
     return s
 end
 
--- ═══════════════════════════════════════════════════════════
--- [6] MÓDULO: HITBOX (3 formas)
--- ═══════════════════════════════════════════════════════════
+-- [6] MÓDULO: HITBOX
 local HB={On=false,Sz=20,Tr=0.3,Shape="cuadrado",Conn=nil}
 
 local function HBShape(sz,mode)
@@ -212,9 +200,7 @@ local function HBStop()
     end
 end
 
--- ═══════════════════════════════════════════════════════════
--- [7] MÓDULO: MAGNET
--- ═══════════════════════════════════════════════════════════
+-- [7] MÓDULO: MAGNET (ahora AIMBOT)
 local MGT={On=false,Active=false,HB={},BV={}}
 local MGT_CFG={Size=3500,PullRate=0.02,BoostSpd=900,Range=9000}
 
@@ -309,9 +295,7 @@ RS.Heartbeat:Connect(function(dt)
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
--- [8] MÓDULO: GOD ORB (orbit around target)
--- ═══════════════════════════════════════════════════════════
+-- [8] GOD ORB
 local GO={T=nil,C=nil,D=15,S=3,A=5,Ang=0}
 
 local function GOStop()
@@ -346,9 +330,7 @@ local function GOStart(plr)
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [9] MÓDULO: SPECTATE
--- ═══════════════════════════════════════════════════════════
+-- [9] SPECTATE
 local Sp={T=nil,C=nil}
 
 local function SpStop()
@@ -377,9 +359,7 @@ local function SpStart(plr)
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [10] MÓDULO: FLY
--- ═══════════════════════════════════════════════════════════
+-- [10] FLY
 local Fly={On=false,Spd=100000,C=nil}
 
 local function FlyStop()
@@ -436,9 +416,7 @@ local function FlyStart()
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [11] MÓDULO: SPEED
--- ═══════════════════════════════════════════════════════════
+-- [11] SPEED
 local Speed={On=false,Val=100}
 RS.RenderStepped:Connect(function()
     if Speed.On then
@@ -447,9 +425,7 @@ RS.RenderStepped:Connect(function()
     end
 end)
 
--- ═══════════════════════════════════════════════════════════
--- [12] MÓDULO: ORBIT MAPA
--- ═══════════════════════════════════════════════════════════
+-- [12] ORBIT MAPA
 local Orb={On=false,Spd=3000,D=1000,A=100,C=nil,Ang=0}
 
 local function OrbStart()
@@ -487,9 +463,7 @@ local function OrbStop()
     end
 end
 
--- ═══════════════════════════════════════════════════════════
--- [13] MÓDULO: ANTI-VOID
--- ═══════════════════════════════════════════════════════════
+-- [13] ANTI-VOID
 local AV={On=false,Umbral=-80,C1=nil,C2=nil,Cd=false,Safe=nil}
 
 local function AVStop()
@@ -538,9 +512,7 @@ local function AVStart()
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [14] MÓDULO: ANTI-KB
--- ═══════════════════════════════════════════════════════════
+-- [14] ANTI-KB
 local AKB={On=false,C=nil,Thr=80,LastH=Vector3.zero,Setup=nil}
 
 local function AKBStart()
@@ -592,9 +564,7 @@ local function AKBStop()
     if AKB.Setup then pcall(function()AKB.Setup:Disconnect()end)AKB.Setup=nil end
 end
 
--- ═══════════════════════════════════════════════════════════
--- [15] MÓDULO: ANTI-AFK
--- ═══════════════════════════════════════════════════════════
+-- [15] ANTI-AFK
 local AF={On=false,C=nil}
 
 local function AFStart()
@@ -616,18 +586,17 @@ end
 
 local function AFStop()AF.On=false if AF.C then AF.C=nil end end
 
--- ═══════════════════════════════════════════════════════════
--- [16] MÓDULO: SKYBOX
--- ═══════════════════════════════════════════════════════════
+-- [16] SKYBOX (RTX AND SKYBOX) — con presets + Black Hole
 local Sky={On=false,Current="original",Saved=false,OrigSky={exists=false}}
 local SkyPresets={
     {name="❌ Original",id="original",ids=nil},
     {name="🌌 Galaxia",id="galaxia",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
     {name="🪐 Planeta Azul",id="planeta",ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}},
     {name="🌙 Noche Lunar",id="lunar",ids={"rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365025444","rbxassetid://14365026442"}},
-    {name="🌑 Planeta Oscuro",id="oscuro",ids={"rbxassetid://14365025444","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365026442"}},
+    {name="🕳️ Black Hole",id="blackhole",ids={"rbxassetid://14365025444","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365026442"}},
     {name="🌌 Nebulosa Púrpura",id="nebulosaP",ids={"rbxassetid://8107841671","rbxassetid://6444884785","rbxassetid://8107841671","rbxassetid://8107841671","rbxassetid://8107841671","rbxassetid://8107841671"}},
     {name="🌌 Nebulosa 4",id="nebulosa4",ids={"rbxassetid://17103618635","rbxassetid://17103622190","rbxassetid://17103624898","rbxassetid://17103628153","rbxassetid://17103636666","rbxassetid://17103639457"}},
+    {name="🕳️ Vacío Absoluto",id="vacio",ids={"rbxassetid://12064107","rbxassetid://12064152","rbxassetid://12064121","rbxassetid://12063984","rbxassetid://12064107","rbxassetid://12064121"}},
 }
 
 local function SkySave()
@@ -668,9 +637,7 @@ local function SkyApply(ids)
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [17] MÓDULO: ESP (más delgado)
--- ═══════════════════════════════════════════════════════════
+-- [17] ESP
 local ESP={On=false,ShowName=true,ShowHP=true,ShowDist=false,Cache={},Conn=nil}
 local AdornParent=(function()
     local p
@@ -707,7 +674,7 @@ local function AppESP(plr)
     if not bg or not bg.Parent then
         bg=Instance.new("BillboardGui")
         bg.Name="_TLG_ESP_"..plr.UserId
-        bg.Size=UDim2.new(0,160,0,38)  -- ⬅️ ESP más delgado
+        bg.Size=UDim2.new(0,160,0,38)
         bg.StudsOffsetWorldSpace=Vector3.new(0,3,0)
         bg.AlwaysOnTop=true
         bg.LightInfluence=0
@@ -717,7 +684,7 @@ local function AppESP(plr)
 
         local name=Instance.new("TextLabel",bg)
         name.Name="N"
-        name.Size=UDim2.new(1,0,0,16)  -- ⬅️ antes 22
+        name.Size=UDim2.new(1,0,0,16)
         name.BackgroundTransparency=1
         name.TextStrokeTransparency=0.5
         name.TextStrokeColor3=Color3.new(0,0,0)
@@ -728,11 +695,11 @@ local function AppESP(plr)
 
         local hb=Instance.new("Frame",bg)
         hb.Name="HB"
-        hb.Size=UDim2.new(1,-30,0,4)  -- ⬅️ antes 8, ahora 4 (más delgado)
+        hb.Size=UDim2.new(1,-30,0,4)
         hb.Position=UDim2.new(0,15,0,18)
         hb.BackgroundColor3=Color3.fromRGB(20,20,20)
         hb.BorderSizePixel=0
-        Instance.new("UICorner",hb).CornerRadius=UDim.new(1,0)  -- redondeado
+        Instance.new("UICorner",hb).CornerRadius=UDim.new(1,0)
 
         local fl=Instance.new("Frame",hb)
         fl.Name="F"
@@ -743,7 +710,7 @@ local function AppESP(plr)
 
         local hp=Instance.new("TextLabel",bg)
         hp.Name="HPT"
-        hp.Size=UDim2.new(1,0,0,12)  -- ⬅️ antes 14
+        hp.Size=UDim2.new(1,0,0,12)
         hp.Position=UDim2.new(0,0,0,24)
         hp.BackgroundTransparency=1
         hp.TextStrokeTransparency=0.5
@@ -753,7 +720,7 @@ local function AppESP(plr)
 
         local dst=Instance.new("TextLabel",bg)
         dst.Name="D"
-        dst.Size=UDim2.new(1,0,0,10)  -- ⬅️ antes 12
+        dst.Size=UDim2.new(1,0,0,10)
         dst.Position=UDim2.new(0,0,1,-10)
         dst.BackgroundTransparency=1
         dst.TextStrokeTransparency=0.5
@@ -811,9 +778,7 @@ local function ESPStop()
     ClearESP()
 end
 
--- ═══════════════════════════════════════════════════════════
--- [18] MÓDULO: AIM ASSIST
--- ═══════════════════════════════════════════════════════════
+-- [18] AIM ASSIST
 local Ai={On=false,Sm=0.15,Pt="Head",D=500,C=nil}
 
 local function AiStop()
@@ -872,9 +837,7 @@ local function AiStart()
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [19] MÓDULO: FOV
--- ═══════════════════════════════════════════════════════════
+-- [19] FOV
 local Fv={On=false,Orig=70,V=90}
 pcall(function()if Cam then Fv.Orig=Cam.FieldOfView end end)
 task.spawn(function()
@@ -888,9 +851,7 @@ end)
 local function FvApply(v)Fv.V=v Fv.On=true pcall(function()if Cam then Cam.FieldOfView=v end end)end
 local function FvReset()Fv.On=false pcall(function()if Cam then Cam.FieldOfView=Fv.Orig end end)end
 
--- ═══════════════════════════════════════════════════════════
--- [20] MÓDULO: MACRO
--- ═══════════════════════════════════════════════════════════
+-- [20] MACRO
 local Ma={On=false,Delay=0.5,Busy=false}
 local function MaRun()
     if Ma.Busy or not Ma.On then return end
@@ -910,9 +871,7 @@ local function MaRun()
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [21] MÓDULO: SERVER HOP
--- ═══════════════════════════════════════════════════════════
+-- [21] SERVER HOP
 local function Hop()
     Notif("🔄","Buscando...")
     task.spawn(function()
@@ -938,9 +897,7 @@ local function Rej()
     pcall(function()TPS:Teleport(game.PlaceId,LP)end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [22] MÓDULO: ISLAS
--- ═══════════════════════════════════════════════════════════
+-- [22] ISLAS
 local Isl={
     ["Floppa Island"]=Vector3.new(0,50,0),
     ["Snow Island"]=Vector3.new(0,50,0),
@@ -983,9 +940,7 @@ local function TPTo(name,pos)
     end
 end
 
--- ═══════════════════════════════════════════════════════════
 -- [23] UI PRINCIPAL
--- ═══════════════════════════════════════════════════════════
 local SG=Instance.new("ScreenGui")
 SG.Name="TLG_GoldV4"
 SG.ResetOnSpawn=false
@@ -1172,9 +1127,7 @@ Content.Position=UDim2.new(0,8,0,102)
 Content.BackgroundTransparency=1
 Content.ZIndex=3
 
--- ═══════════════════════════════════════════════════════════
 -- [24] UI BUILDERS
--- ═══════════════════════════════════════════════════════════
 local Tabs={}
 
 local function Tab(name,icon)
@@ -1409,6 +1362,7 @@ local function Button(par,txt,col,cb)
             b.TextColor3=col or C.Wh
         end)
     end)
+    return b
 end
 
 local function Label(par,txt,col)
@@ -1423,21 +1377,18 @@ local function Label(par,txt,col)
     l.ZIndex=5
 end
 
--- ═══════════════════════════════════════════════════════════
--- [25] TABS (nueva pestaña MAGNET)
--- ═══════════════════════════════════════════════════════════
+-- [25] TABS (nueva estructura)
 local PgStats=Tab("STATS","📊")
 local PgJug=Tab("JUGADORES","👥")
-local PgAimB=Tab("AIMBOT","🎯")
-local PgMag=Tab("MAGNET","🧲")
+local PgCombat=Tab("COMBATE","⚔️")   -- NUEVA: AIM + HITBOX
+local PgMag=Tab("AIMBOT","🎯")        -- antes MAGNET
 local PgFly=Tab("FLY","✈")
 local PgIsl=Tab("ISLAS","🏝️")
 local PgScr=Tab("SCRIPTS","📜")
 local PgTool=Tab("TOOLS","🔧")
 local PgSh=Tab("SHADERS","✨")
 local PgEsp=Tab("ESP","👁️")
-local PgSky=Tab("SKYBOX","🌌")
-local PgAim=Tab("AIM","🎯")
+local PgSky=Tab("RTX AND SKYBOX","✨") -- antes SKYBOX
 local PgUtil=Tab("UTILS","⚙️")
 local PgSet=Tab("SETTINGS","⚙️")
 
@@ -1449,9 +1400,7 @@ if Tabs[1]then
     Tabs[1].b.BackgroundTransparency=0
 end
 
--- ═══════════════════════════════════════════════════════════
--- [26] PÁGINA: STATS
--- ═══════════════════════════════════════════════════════════
+-- [26] STATS
 do
     Section(PgStats,"MI PERFIL","👤")
     local MiC=Instance.new("Frame",PgStats)
@@ -1510,9 +1459,7 @@ do
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [27] PÁGINA: JUGADORES (con panel de acciones)
--- ═══════════════════════════════════════════════════════════
+-- [27] JUGADORES
 local SelectedPlayer=nil
 do
     Section(PgJug,"LISTA — Tocá un jugador","👥")
@@ -1535,7 +1482,6 @@ do
     pcall(function()lS.AutomaticCanvasSize=Enum.AutomaticSize.Y end)
     Instance.new("UIListLayout",lS).Padding=UDim.new(0,4)
 
-    -- Panel de acciones (aparece al seleccionar)
     local ActionPanel=Instance.new("Frame",PgJug)
     ActionPanel.Size=UDim2.new(1,0,0,180)
     ActionPanel.BackgroundColor3=C.BG2
@@ -1613,7 +1559,6 @@ do
         Notif("🎥","Especteo detenido")
     end)
 
-    -- Función para poblar lista
     local function Pop()
         for _,c in ipairs(lS:GetChildren())do
             if c:IsA("TextButton")then c:Destroy()end
@@ -1693,22 +1638,20 @@ do
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [28] PÁGINA: AIMBOT (solo hitbox, sin magnet)
--- ═══════════════════════════════════════════════════════════
+-- [28] PÁGINA: COMBATE (AIM + HITBOX)
 do
-    Section(PgAimB,"🔵 HITBOX","🔵")
-    Toggle(PgAimB,"Activar Hitbox",false,function(v)
+    Section(PgCombat,"🔵 HITBOX","🔵")
+    Toggle(PgCombat,"Activar Hitbox",false,function(v)
         if v then HBStart() else HBStop() end
     end)
-    Slider(PgAimB,"Tamaño",3,50,20,function(v)HB.Sz=v end)
-    Slider(PgAimB,"Transparencia",0,100,30,function(v)HB.Tr=v/100 end)
+    Slider(PgCombat,"Tamaño Hitbox",3,50,20,function(v)HB.Sz=v end)
+    Slider(PgCombat,"Transparencia",0,100,30,function(v)HB.Tr=v/100 end)
 
-    Section(PgAimB,"🎨 FORMA","🎨")
+    Section(PgCombat,"🎨 FORMA HITBOX","🎨")
     local formas={{"🔵 Esfera","esfera"},{"🟦 Cilindro","cilindro"},{"⬛ Cuadrado","cuadrado"}}
     local fbtns={}
     for _,m in ipairs(formas)do
-        local b=Instance.new("TextButton",PgAimB)
+        local b=Instance.new("TextButton",PgCombat)
         b.Size=UDim2.new(1,0,0,32)
         b.BackgroundColor3=(HB.Shape==m[2])and A()or C.BG2
         b.Font=Enum.Font.GothamBold
@@ -1733,36 +1676,73 @@ do
             end
         end)
     end
+
+    Section(PgCombat,"🎯 AIM ASSIST","🎯")
+    Toggle(PgCombat,"Activar Aim Assist",false,function(v)if v then AiStart() else AiStop() end end)
+    Slider(PgCombat,"Suavizado",1,100,15,function(v)Ai.Sm=v/100 end)
+    Slider(PgCombat,"Distancia",50,2000,500,function(v)Ai.D=v end)
+
+    Section(PgCombat,"📷 FOV","📷")
+    Toggle(PgCombat,"Activar FOV",false,function(v)if v then FvApply(Fv.V) else FvReset() end end)
+    Slider(PgCombat,"FOV Valor",30,200,90,function(v)Fv.V=v if Fv.On then FvApply(v)end end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [29] PÁGINA: MAGNET (separada)
--- ═══════════════════════════════════════════════════════════
+-- [29] PÁGINA: AIMBOT (antes MAGNET) — UN SOLO BOTÓN
 do
-    Section(PgMag,"🧲 MAGNET PRO","🧲")
-    Toggle(PgMag,"Activar Magnet",false,function(v)
-        MGT.On=v
-        if v then
+    Section(PgMag,"🎯 AIMBOT PRO","🎯")
+
+    -- Estado maestro
+    local aimbotOn=false
+
+    -- Botón único maestro
+    local masterBtn=Instance.new("TextButton",PgMag)
+    masterBtn.Size=UDim2.new(1,0,0,46)
+    masterBtn.BackgroundColor3=C.BG2
+    masterBtn.Font=Enum.Font.GothamBold
+    masterBtn.Text="🎯 ACTIVAR AIMBOT"
+    masterBtn.TextColor3=A()
+    masterBtn.TextSize=13
+    masterBtn.BorderSizePixel=0
+    masterBtn.AutoButtonColor=false
+    masterBtn.ZIndex=5
+    Instance.new("UICorner",masterBtn).CornerRadius=UDim.new(0,10)
+    local mbS=Instance.new("UIStroke",masterBtn)
+    mbS.Thickness=2
+    RegS(mbS)
+
+    masterBtn.MouseButton1Click:Connect(function()
+        aimbotOn=not aimbotOn
+        MGT.On=aimbotOn
+        MGT.Active=aimbotOn
+        if aimbotOn then
             for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(MGT_Apply,plr)end end
-            Notif("🧲",(IS_MOBILE and "Mantené 🧲"or "Mantené [E]"))
+            masterBtn.Text="🛑 DESACTIVAR AIMBOT"
+            masterBtn.BackgroundColor3=C.Rd
+            masterBtn.TextColor3=C.Wh
+            Notif("🎯","AIMBOT ACTIVADO ✅")
         else
-            MGT.Active=false
             MGT_Clean()
+            masterBtn.Text="🎯 ACTIVAR AIMBOT"
+            masterBtn.BackgroundColor3=C.BG2
+            masterBtn.TextColor3=A()
+            Notif("🎯","AIMBOT DESACTIVADO ❌")
         end
     end)
 
+    Label(PgMag,"Un solo botón activa TODO el sistema:",C.Grn)
+    Label(PgMag,"• Hitbox gigante en enemigos",C.Cyan)
+    Label(PgMag,"• Pull automático (atrae enemigos)",C.Cyan)
+    Label(PgMag,"• Boost de velocidad hacia vos",C.Cyan)
+    Label(PgMag,"• Activa el tool automáticamente",C.Cyan)
+
+    Section(PgMag,"⚙️ AJUSTES AVANZADOS","⚙️")
     Slider(PgMag,"Tamaño Hitbox",500,10000,3500,function(v)MGT_CFG.Size=v end)
     Slider(PgMag,"Velocidad Boost",100,2000,900,function(v)MGT_CFG.BoostSpd=v end)
     Slider(PgMag,"Alcance",1000,20000,9000,function(v)MGT_CFG.Range=v end)
     Slider(PgMag,"Pulls/seg",0.01,0.5,0.02,function(v)MGT_CFG.PullRate=v end)
-
-    Label(PgMag,IS_MOBILE and "Mantené el botón 🧲 para atraer"or "Mantené [E] para atraer",C.Grn)
-    Label(PgMag,"Atrae enemigos desde muy lejos",C.Cyan)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [30] PÁGINA: FLY
--- ═══════════════════════════════════════════════════════════
+-- [30] FLY
 do
     Section(PgFly,"✈ FLY","✈")
     Toggle(PgFly,"Activar Fly",false,function(v)if v then FlyStart() else FlyStop() end end)
@@ -1778,9 +1758,7 @@ do
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [31] PÁGINA: ISLAS
--- ═══════════════════════════════════════════════════════════
+-- [31] ISLAS
 do
     Section(PgIsl,"🏝️ TELETRANSPORTE","🏝️")
     local lista={}
@@ -1791,18 +1769,14 @@ do
     end
 end
 
--- ═══════════════════════════════════════════════════════════
--- [32] PÁGINA: SCRIPTS
--- ═══════════════════════════════════════════════════════════
+-- [32] SCRIPTS
 do
     Section(PgScr,"🔄 SERVER","🔄")
     Button(PgScr,"🔄 Cambiar Server",A(),function()Hop()end)
     Button(PgScr,"🔁 Rejoin",C.Cyan,function()Rej()end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [33] PÁGINA: TOOLS
--- ═══════════════════════════════════════════════════════════
+-- [33] TOOLS
 do
     Section(PgTool,"⚡ MACRO","⚡")
     Toggle(PgTool,"Activar Macro",false,function(v)Ma.On=v end)
@@ -1810,9 +1784,7 @@ do
     Button(PgTool,"⚡ Ejecutar Macro",C.Grn,function()MaRun()end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [34] PÁGINA: SHADERS
--- ═══════════════════════════════════════════════════════════
+-- [34] SHADERS
 do
     Section(PgSh,"✨ PRESETS","✨")
     local presets={
@@ -1827,9 +1799,7 @@ do
     end
 end
 
--- ═══════════════════════════════════════════════════════════
--- [35] PÁGINA: ESP
--- ═══════════════════════════════════════════════════════════
+-- [35] ESP
 do
     Section(PgEsp,"👁️ ESP","👁️")
     Toggle(PgEsp,"Activar ESP",false,function(v)if v then ESPStart() else ESPStop() end end)
@@ -1838,11 +1808,10 @@ do
     Toggle(PgEsp,"Distancia",false,function(v)ESP.ShowDist=v end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [36] PÁGINA: SKYBOX
--- ═══════════════════════════════════════════════════════════
+-- [36] RTX AND SKYBOX
 do
-    Section(PgSky,"🌌 SKYBOX","🌌")
+    Section(PgSky,"✨ RTX AND SKYBOX","✨")
+    Label(PgSky,"Incluye presets de cielo + Black Hole",C.Gr)
     for _,p in ipairs(SkyPresets)do
         local b=Instance.new("TextButton",PgSky)
         b.Size=UDim2.new(1,0,0,32)
@@ -1858,27 +1827,12 @@ do
         b.MouseButton1Click:Connect(function()
             Sky.Current=p.id
             SkyApply(p.ids)
-            Notif("🌌",p.name)
+            Notif("✨",p.name)
         end)
     end
 end
 
--- ═══════════════════════════════════════════════════════════
--- [37] PÁGINA: AIM
--- ═══════════════════════════════════════════════════════════
-do
-    Section(PgAim,"🎯 AIM ASSIST","🎯")
-    Toggle(PgAim,"Activar Aim Assist",false,function(v)if v then AiStart() else AiStop() end end)
-    Slider(PgAim,"Suavizado",1,100,15,function(v)Ai.Sm=v/100 end)
-    Slider(PgAim,"Distancia",50,2000,500,function(v)Ai.D=v end)
-    Section(PgAim,"📷 FOV","📷")
-    Toggle(PgAim,"Activar FOV",false,function(v)if v then FvApply(Fv.V) else FvReset() end end)
-    Slider(PgAim,"FOV Valor",30,200,90,function(v)Fv.V=v if Fv.On then FvApply(v)end end)
-end
-
--- ═══════════════════════════════════════════════════════════
--- [38] PÁGINA: UTILS
--- ═══════════════════════════════════════════════════════════
+-- [37] UTILS
 do
     Section(PgUtil,"🛡 ANTI-VOID","🛡")
     Toggle(PgUtil,"Activar Anti-Void",false,function(v)if v then AVStart() else AVStop() end end)
@@ -1895,9 +1849,7 @@ do
     Slider(PgUtil,"Altura",0,2000,100,function(v)Orb.A=v end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [39] PÁGINA: SETTINGS
--- ═══════════════════════════════════════════════════════════
+-- [38] SETTINGS
 do
     Section(PgSet,"🎨 TEMA","🎨")
     local themeList={}
@@ -1958,9 +1910,7 @@ do
     Label(PgSet,"Hecho por TLG 🚀",A())
 end
 
--- ═══════════════════════════════════════════════════════════
--- [40] BOTÓN MINIMIZAR FLOTANTE
--- ═══════════════════════════════════════════════════════════
+-- [39] BOTÓN MINIMIZAR FLOTANTE
 local HFSG=Instance.new("ScreenGui")
 HFSG.Name="TLG_HideBtn"
 HFSG.ResetOnSpawn=false
@@ -2038,9 +1988,7 @@ if IS_PC then
     end)
 end
 
--- ═══════════════════════════════════════════════════════════
--- [41] ANIMACIÓN INICIAL
--- ═══════════════════════════════════════════════════════════
+-- [40] ANIMACIÓN INICIAL
 task.wait(0.1)
 pcall(function()
     TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{
