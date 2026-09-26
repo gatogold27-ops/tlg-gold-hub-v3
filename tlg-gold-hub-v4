@@ -200,7 +200,7 @@ local function HBStop()
     end
 end
 
--- [7] MÓDULO: MAGNET (ahora AIMBOT)
+-- [7] MÓDULO: MAGNET (AIMBOT)
 local MGT={On=false,Active=false,HB={},BV={}}
 local MGT_CFG={Size=3500,PullRate=0.02,BoostSpd=900,Range=9000}
 
@@ -586,7 +586,7 @@ end
 
 local function AFStop()AF.On=false if AF.C then AF.C=nil end end
 
--- [16] SKYBOX (RTX AND SKYBOX) — con presets + Black Hole
+-- [16] SKYBOX
 local Sky={On=false,Current="original",Saved=false,OrigSky={exists=false}}
 local SkyPresets={
     {name="❌ Original",id="original",ids=nil},
@@ -1377,19 +1377,17 @@ local function Label(par,txt,col)
     l.ZIndex=5
 end
 
--- [25] TABS (nueva estructura)
+-- [25] TABS (11 pestañas)
 local PgStats=Tab("STATS","📊")
 local PgJug=Tab("JUGADORES","👥")
-local PgCombat=Tab("COMBATE","⚔️")   -- NUEVA: AIM + HITBOX
-local PgMag=Tab("AIMBOT","🎯")        -- antes MAGNET
+local PgCombat=Tab("COMBATE","⚔️")
+local PgMag=Tab("AIMBOT","🎯")
 local PgFly=Tab("FLY","✈")
 local PgIsl=Tab("ISLAS","🏝️")
 local PgScr=Tab("SCRIPTS","📜")
-local PgTool=Tab("TOOLS","🔧")
-local PgSh=Tab("SHADERS","✨")
+local PgTool=Tab("TOOLS & UTILS","🔧")   -- FUSIÓN
 local PgEsp=Tab("ESP","👁️")
-local PgSky=Tab("RTX AND SKYBOX","✨") -- antes SKYBOX
-local PgUtil=Tab("UTILS","⚙️")
+local PgSh=Tab("RTX & SHADERS","🎨")     -- FUSIÓN
 local PgSet=Tab("SETTINGS","⚙️")
 
 task.wait(0.1)
@@ -1638,7 +1636,7 @@ do
     end)
 end
 
--- [28] PÁGINA: COMBATE (AIM + HITBOX)
+-- [28] COMBATE
 do
     Section(PgCombat,"🔵 HITBOX","🔵")
     Toggle(PgCombat,"Activar Hitbox",false,function(v)
@@ -1687,14 +1685,12 @@ do
     Slider(PgCombat,"FOV Valor",30,200,90,function(v)Fv.V=v if Fv.On then FvApply(v)end end)
 end
 
--- [29] PÁGINA: AIMBOT (antes MAGNET) — UN SOLO BOTÓN
+-- [29] AIMBOT
 do
     Section(PgMag,"🎯 AIMBOT PRO","🎯")
 
-    -- Estado maestro
     local aimbotOn=false
 
-    -- Botón único maestro
     local masterBtn=Instance.new("TextButton",PgMag)
     masterBtn.Size=UDim2.new(1,0,0,46)
     masterBtn.BackgroundColor3=C.BG2
@@ -1776,17 +1772,43 @@ do
     Button(PgScr,"🔁 Rejoin",C.Cyan,function()Rej()end)
 end
 
--- [33] TOOLS
+-- [33] TOOLS & UTILS (FUSIÓN)
 do
     Section(PgTool,"⚡ MACRO","⚡")
     Toggle(PgTool,"Activar Macro",false,function(v)Ma.On=v end)
     Slider(PgTool,"Delay",1,50,5,function(v)Ma.Delay=v/10 end)
     Button(PgTool,"⚡ Ejecutar Macro",C.Grn,function()MaRun()end)
+
+    Section(PgTool,"🛡 ANTI-VOID","🛡")
+    Toggle(PgTool,"Activar Anti-Void",false,function(v)if v then AVStart() else AVStop() end end)
+    Slider(PgTool,"Umbral Y",-500,-50,-80,function(v)AV.Umbral=v end)
+
+    Section(PgTool,"🛑 ANTI-KB","🛑")
+    Toggle(PgTool,"Activar Anti-KB",false,function(v)if v then AKBStart() else AKBStop() end end)
+    Slider(PgTool,"Umbral",40,300,80,function(v)AKB.Thr=v end)
+
+    Section(PgTool,"💤 ANTI-AFK","💤")
+    Toggle(PgTool,"Activar Anti-AFK",false,function(v)if v then AFStart() else AFStop() end end)
+
+    Section(PgTool,"🪐 ORBIT MAPA","🪐")
+    Toggle(PgTool,"Activar Orbit",false,function(v)if v then OrbStart() else OrbStop() end end)
+    Slider(PgTool,"Velocidad",500,20000,3000,function(v)Orb.Spd=v end)
+    Slider(PgTool,"Distancia",100,5000,1000,function(v)Orb.D=v end)
+    Slider(PgTool,"Altura",0,2000,100,function(v)Orb.A=v end)
 end
 
--- [34] SHADERS
+-- [34] ESP
 do
-    Section(PgSh,"✨ PRESETS","✨")
+    Section(PgEsp,"👁️ ESP","👁️")
+    Toggle(PgEsp,"Activar ESP",false,function(v)if v then ESPStart() else ESPStop() end end)
+    Toggle(PgEsp,"Nombre",true,function(v)ESP.ShowName=v end)
+    Toggle(PgEsp,"Vida",true,function(v)ESP.ShowHP=v end)
+    Toggle(PgEsp,"Distancia",false,function(v)ESP.ShowDist=v end)
+end
+
+-- [35] RTX & SHADERS (FUSIÓN)
+do
+    Section(PgSh,"🎨 SHADERS / LIGHTING","🎨")
     local presets={
         {"❌ Ninguno",function()L.Brightness=1 L.Ambient=Color3.fromRGB(70,70,70)L.OutdoorAmbient=Color3.fromRGB(128,128,128)L.ClockTime=14 end},
         {"🌅 Atardecer",function()L.Brightness=2 L.Ambient=Color3.fromRGB(200,150,100)L.OutdoorAmbient=Color3.fromRGB(255,150,100)L.ClockTime=18 end},
@@ -1797,23 +1819,11 @@ do
     for _,p in ipairs(presets)do
         Button(PgSh,p[1],A(),p[2])
     end
-end
 
--- [35] ESP
-do
-    Section(PgEsp,"👁️ ESP","👁️")
-    Toggle(PgEsp,"Activar ESP",false,function(v)if v then ESPStart() else ESPStop() end end)
-    Toggle(PgEsp,"Nombre",true,function(v)ESP.ShowName=v end)
-    Toggle(PgEsp,"Vida",true,function(v)ESP.ShowHP=v end)
-    Toggle(PgEsp,"Distancia",false,function(v)ESP.ShowDist=v end)
-end
-
--- [36] RTX AND SKYBOX
-do
-    Section(PgSky,"✨ RTX AND SKYBOX","✨")
-    Label(PgSky,"Incluye presets de cielo + Black Hole",C.Gr)
+    Section(PgSh,"🌌 SKYBOX / RTX","🌌")
+    Label(PgSh,"Presets de cielo + Black Hole",C.Gr)
     for _,p in ipairs(SkyPresets)do
-        local b=Instance.new("TextButton",PgSky)
+        local b=Instance.new("TextButton",PgSh)
         b.Size=UDim2.new(1,0,0,32)
         b.BackgroundColor3=(Sky.Current==p.id)and A()or C.BG2
         b.Font=Enum.Font.GothamBold
@@ -1827,29 +1837,12 @@ do
         b.MouseButton1Click:Connect(function()
             Sky.Current=p.id
             SkyApply(p.ids)
-            Notif("✨",p.name)
+            Notif("🌌",p.name)
         end)
     end
 end
 
--- [37] UTILS
-do
-    Section(PgUtil,"🛡 ANTI-VOID","🛡")
-    Toggle(PgUtil,"Activar Anti-Void",false,function(v)if v then AVStart() else AVStop() end end)
-    Slider(PgUtil,"Umbral Y",-500,-50,-80,function(v)AV.Umbral=v end)
-    Section(PgUtil,"🛑 ANTI-KB","🛑")
-    Toggle(PgUtil,"Activar Anti-KB",false,function(v)if v then AKBStart() else AKBStop() end end)
-    Slider(PgUtil,"Umbral",40,300,80,function(v)AKB.Thr=v end)
-    Section(PgUtil,"💤 ANTI-AFK","💤")
-    Toggle(PgUtil,"Activar Anti-AFK",false,function(v)if v then AFStart() else AFStop() end end)
-    Section(PgUtil,"🪐 ORBIT MAPA","🪐")
-    Toggle(PgUtil,"Activar Orbit",false,function(v)if v then OrbStart() else OrbStop() end end)
-    Slider(PgUtil,"Velocidad",500,20000,3000,function(v)Orb.Spd=v end)
-    Slider(PgUtil,"Distancia",100,5000,1000,function(v)Orb.D=v end)
-    Slider(PgUtil,"Altura",0,2000,100,function(v)Orb.A=v end)
-end
-
--- [38] SETTINGS
+-- [36] SETTINGS
 do
     Section(PgSet,"🎨 TEMA","🎨")
     local themeList={}
@@ -1910,7 +1903,7 @@ do
     Label(PgSet,"Hecho por TLG 🚀",A())
 end
 
--- [39] BOTÓN MINIMIZAR FLOTANTE
+-- [37] BOTÓN MINIMIZAR FLOTANTE
 local HFSG=Instance.new("ScreenGui")
 HFSG.Name="TLG_HideBtn"
 HFSG.ResetOnSpawn=false
@@ -1988,7 +1981,7 @@ if IS_PC then
     end)
 end
 
--- [40] ANIMACIÓN INICIAL
+-- [38] ANIMACIÓN INICIAL
 task.wait(0.1)
 pcall(function()
     TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{
