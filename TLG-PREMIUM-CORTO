@@ -14,7 +14,7 @@ local function SlideIn(obj,delay)delay=delay or 0 local ot=obj.BackgroundTranspa
 local NotifHolder=nil local function GetNotifHolder()if NotifHolder and NotifHolder.Parent then return NotifHolder end NotifHolder=Instance.new("Frame",SG)NotifHolder.Name="NotifHolder"NotifHolder.Size=UDim2.new(0,280,1,-80)NotifHolder.Position=UDim2.new(1,-290,0,60)NotifHolder.BackgroundTransparency=1 NotifHolder.ZIndex=9999 local ll=Instance.new("UIListLayout",NotifHolder)ll.Padding=UDim.new(0,8)ll.HorizontalAlignment=Enum.HorizontalAlignment.Right ll.VerticalAlignment=Enum.VerticalAlignment.Top return NotifHolder end
 local function PremiumNotif(title,text,col)col=col or A()local holder=GetNotifHolder()local nf=Instance.new("Frame",holder)nf.Size=UDim2.new(1,0,0,52)nf.BackgroundColor3=C.BG2 nf.BorderSizePixel=0 nf.ZIndex=10000 Instance.new("UICorner",nf).CornerRadius=UDim.new(0,10)local nfS=Instance.new("UIStroke",nf)nfS.Color=col nfS.Thickness=1.5 local bar=Instance.new("Frame",nf)bar.Size=UDim2.new(0,3,1,-12)bar.Position=UDim2.new(0,0,0,6)bar.BackgroundColor3=col bar.BorderSizePixel=0 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)local tL=Instance.new("TextLabel",nf)tL.Size=UDim2.new(1,-20,0,18)tL.Position=UDim2.new(0,14,0,6)tL.BackgroundTransparency=1 tL.Font=Enum.Font.GothamBold tL.Text=title tL.TextColor3=col tL.TextSize=11 tL.TextXAlignment=Enum.TextXAlignment.Left tL.ZIndex=10001 local xL=Instance.new("TextLabel",nf)xL.Size=UDim2.new(1,-20,0,18)xL.Position=UDim2.new(0,14,0,24)xL.BackgroundTransparency=1 xL.Font=Enum.Font.Gotham xL.Text=text xL.TextColor3=C.Wh xL.TextSize=10 xL.TextXAlignment=Enum.TextXAlignment.Left xL.TextTruncate=Enum.TextTruncate.AtEnd xL.ZIndex=10001 nf.Position=UDim2.new(1,50,0,0)TS:Create(nf,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.new(0,0,0,0)}):Play()task.delay(2.5,function()if not nf.Parent then return end TS:Create(nf,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Position=UDim2.new(1,50,0,0),BackgroundTransparency=1}):Play()task.wait(0.35)pcall(function()nf:Destroy()end)end)end
 local PC=nil pcall(function()local pm=LP:WaitForChild("PlayerScripts",10)if pm then local ps=pm:WaitForChild("PlayerModule",5)if ps then local ok,m=pcall(require,ps)if ok and m and type(m.GetControls)=="function" then PC=m:GetControls()end end end end)
--- ✨ GetStats MEJORADO — lee leaderstats y otras fuentes
+-- ═══ GetStats MEJORADO para Meme Sea ═══
 local function GetStats(plr)
     local s={Level=0,Health=0,MaxHealth=0,Melee=0,Weapon=0,Power=0,Kills=0,Deaths=0}
     pcall(function()
@@ -24,6 +24,7 @@ local function GetStats(plr)
             if hu then s.Health=math.floor(hu.Health)s.MaxHealth=math.floor(hu.MaxHealth)end
         end
     end)
+    -- Buscar en leaderstats
     pcall(function()
         local ls=plr:FindFirstChild("leaderstats")
         if ls then
@@ -33,23 +34,50 @@ local function GetStats(plr)
                     local val=tonumber(v.Value)or 0
                     if n=="level"or n=="nivel"or n=="lvl"then s.Level=val
                     elseif n=="kills"or n=="kill"or n=="ko"then s.Kills=val
-                    elseif n=="deaths"or n=="death"or n=="wins"then s.Deaths=val
+                    elseif n=="deaths"or n=="death"or n=="muertes"then s.Deaths=val
                     elseif n=="melee"then s.Melee=val
-                    elseif n=="sword"or n=="weapon"then s.Weapon=val
+                    elseif n=="sword"or n=="weapon"or n=="arma"then s.Weapon=val
                     elseif n=="power"or n=="poder"then s.Power=val
                     end
                 end
             end
         end
     end)
+    -- Buscar en PlayerData (Meme Sea)
     pcall(function()
-        local pd=plr:FindFirstChild("PlayerData")
+        local pd=plr:FindFirstChild("PlayerData")or plr:FindFirstChild("Stats")or plr:FindFirstChild("Data")
         if pd then
-            local function g(n)local v=pd:FindFirstChild(n)if v and(v:IsA("IntValue")or v:IsA("NumberValue"))then return v.Value end return nil end
-            local lv=g("Level")or g("Lvl")if lv then s.Level=tonumber(lv)or s.Level end
-            local ml=g("MeleeLevel")if ml then s.Melee=tonumber(ml)or 0 end
-            local sl=g("SwordLevel")if sl then s.Weapon=tonumber(sl)or 0 end
-            local pw=g("MemePowerLevel")if pw then s.Power=tonumber(pw)or 0 end
+            for _,v in ipairs(pd:GetChildren())do
+                if v:IsA("IntValue")or v:IsA("NumberValue")then
+                    local n=v.Name:lower()
+                    local val=tonumber(v.Value)or 0
+                    if n=="level"or n=="nivel"or n=="lvl"then s.Level=val
+                    elseif n=="kills"or n=="kill"then s.Kills=val
+                    elseif n=="deaths"or n=="death"or n=="muertes"then s.Deaths=val
+                    elseif n=="melee"or n=="meleelevel"then s.Melee=val
+                    elseif n=="sword"or n=="swordlevel"or n=="weapon"then s.Weapon=val
+                    elseif n=="power"or n=="memepowerlevel"or n=="meme_power"then s.Power=val
+                    end
+                end
+            end
+            -- Subcarpetas (Meme Sea usa carpetas dentro de PlayerData)
+            for _,folder in ipairs(pd:GetChildren())do
+                if folder:IsA("Folder")or folder:IsA("Configuration")then
+                    for _,v in ipairs(folder:GetChildren())do
+                        if v:IsA("IntValue")or v:IsA("NumberValue")then
+                            local n=v.Name:lower()
+                            local val=tonumber(v.Value)or 0
+                            if n=="level"or n=="nivel"then s.Level=val
+                            elseif n=="kills"or n=="kill"then s.Kills=val
+                            elseif n=="deaths"or n=="death"or n=="muertes"then s.Deaths=val
+                            elseif n=="melee"or n=="meleelevel"then s.Melee=val
+                            elseif n=="sword"or n=="swordlevel"or n=="weapon"then s.Weapon=val
+                            elseif n=="power"or n=="memepowerlevel"then s.Power=val
+                            end
+                        end
+                    end
+                end
+            end
         end
     end)
     return s
@@ -128,19 +156,15 @@ local W_SIZE=IS_MOBILE and UDim2.new(0,440,0,300)or UDim2.new(0,720,0,460)local 
 local W=Instance.new("Frame",SG)W.Size=UDim2.new(0,0,0,0)W.Position=UDim2.new(0.5,0,0.5,0)W.BackgroundColor3=C.BG W.BorderSizePixel=0 W.ClipsDescendants=true W.Active=true W.ZIndex=1 Instance.new("UICorner",W).CornerRadius=UDim.new(0,10)
 local Wgrad=Instance.new("UIGradient",W)Wgrad.Color=ColorSequence.new(C.BG,C.BG2)Wgrad.Rotation=135
 local WS=Instance.new("UIStroke",W)WS.Thickness=1.5 RegS(WS)
--- ═══ TITLE BAR ═══
 local TB=Instance.new("Frame",W)TB.Size=UDim2.new(1,0,0,34)TB.BackgroundColor3=C.BG3 TB.BorderSizePixel=0 TB.ZIndex=5 Instance.new("UICorner",TB).CornerRadius=UDim.new(0,10)
 local TBF=Instance.new("Frame",TB)TBF.Size=UDim2.new(1,0,0,10)TBF.Position=UDim2.new(0,0,1,-10)TBF.BackgroundColor3=C.BG3 TBF.BorderSizePixel=0 TBF.ZIndex=5
 local Ico=Instance.new("TextLabel",TB)Ico.Size=UDim2.new(0,26,0,26)Ico.Position=UDim2.new(0,6,0.5,-13)Ico.BackgroundColor3=C.BG2 Ico.Text="👑"Ico.TextSize=14 Ico.Font=Enum.Font.GothamBold Ico.TextColor3=A()Ico.ZIndex=7 Instance.new("UICorner",Ico).CornerRadius=UDim.new(1,0)RegL(Ico)
--- ✨ Título CORTO que siempre cabe
-local Ttl=Instance.new("TextLabel",TB)Ttl.Size=UDim2.new(0,180,1,0)Ttl.Position=UDim2.new(0,38,0,0)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBold Ttl.Text="TLG Gold Hub || V5.4"Ttl.TextSize=11 Ttl.TextColor3=C.Wh Ttl.TextXAlignment=Enum.TextXAlignment.Left Ttl.ZIndex=7
--- Stats bar
+local Ttl=Instance.new("TextLabel",TB)Ttl.Size=UDim2.new(0,180,1,0)Ttl.Position=UDim2.new(0,38,0,0)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBold Ttl.Text="TLG Gold Hub || V5.5"Ttl.TextSize=11 Ttl.TextColor3=C.Wh Ttl.TextXAlignment=Enum.TextXAlignment.Left Ttl.ZIndex=7
 local StatsBar=Instance.new("Frame",TB)StatsBar.Size=UDim2.new(0,140,0,22)StatsBar.Position=UDim2.new(0.5,-70,0.5,-11)StatsBar.BackgroundColor3=C.BG StatsBar.BackgroundTransparency=0.3 StatsBar.BorderSizePixel=0 StatsBar.ZIndex=6 Instance.new("UICorner",StatsBar).CornerRadius=UDim.new(1,0)
 local FL=Instance.new("TextLabel",StatsBar)FL.Size=UDim2.new(0.5,-6,1,0)FL.Position=UDim2.new(0,6,0,0)FL.BackgroundTransparency=1 FL.Font=Enum.Font.GothamBold FL.Text="FPS: --"FL.TextColor3=C.Grn FL.TextSize=10 FL.TextXAlignment=Enum.TextXAlignment.Left FL.ZIndex=7
 local PLb=Instance.new("TextLabel",StatsBar)PLb.Size=UDim2.new(0.5,-6,1,0)PLb.Position=UDim2.new(0.5,0,0,0)PLb.BackgroundTransparency=1 PLb.Font=Enum.Font.GothamBold PLb.Text="Ping: --"PLb.TextColor3=C.Cyan PLb.TextSize=10 PLb.TextXAlignment=Enum.TextXAlignment.Right PLb.ZIndex=7
 task.spawn(function()local frames=0 local lastTime=os.clock()RS.RenderStepped:Connect(function()frames=frames+1 local now=os.clock()if now-lastTime>=1 then local fps=math.floor(frames/(now-lastTime))FL.Text="FPS: "..fps PLb.Text="Ping: "..GetPing().."ms"frames=0 lastTime=now end end)end)
 local STtl=Instance.new("TextLabel",TB)STtl.Size=UDim2.new(0,100,1,0)STtl.Position=UDim2.new(1,-110,0,0)STtl.BackgroundTransparency=1 STtl.Font=Enum.Font.GothamBold STtl.Text="👑 MENU"STtl.TextSize=10 STtl.TextColor3=A()STtl.TextXAlignment=Enum.TextXAlignment.Right STtl.ZIndex=7 RegL(STtl)
--- ✨ DRAG del menú
 local dragging,dragStart,startPos=false,nil,nil
 TB.InputBegan:Connect(function(input)if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then dragging=true dragStart=input.Position startPos=W.Position end end)
 UI.InputChanged:Connect(function(input)if dragging and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then local delta=input.Position-dragStart W.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)end end)
@@ -164,10 +188,10 @@ local ViewingPlayerStats=nil
 local StatsRefM=nil
 do 
     Section(PgStats,"MI PERFIL","👤")
-    local MiC=Instance.new("Frame",PgStats)MiC.Size=UDim2.new(1,0,0,110)MiC.BackgroundColor3=C.BG2 MiC.BackgroundTransparency=0.2 MiC.BorderSizePixel=0 MiC.ZIndex=5 Instance.new("UICorner",MiC).CornerRadius=UDim.new(0,8)
+    local MiC=Instance.new("Frame",PgStats)MiC.Size=UDim2.new(1,0,0,120)MiC.BackgroundColor3=C.BG2 MiC.BackgroundTransparency=0.2 MiC.BorderSizePixel=0 MiC.ZIndex=5 Instance.new("UICorner",MiC).CornerRadius=UDim.new(0,8)
     local MiN=Instance.new("TextLabel",MiC)MiN.Size=UDim2.new(1,-20,0,20)MiN.Position=UDim2.new(0,10,0,6)MiN.BackgroundTransparency=1 MiN.Font=Enum.Font.GothamBold MiN.Text="👤  "..LP.DisplayName MiN.TextSize=12 MiN.TextXAlignment=Enum.TextXAlignment.Left MiN.ZIndex=7 RegL(MiN)
     local sLbls={}
-    local sN={"📊 Nivel","❤️ Vida","🥊 Kills","⚔️ Muertes","⚡ Power","🎯 Melee"}
+    local sN={"📊 Nivel","❤️ Vida","🥊 Kills","💀 Muertes","⚡ Power","🎯 Melee"}
     local sC={A(),C.Rd,C.Grn,C.Yellow,C.Cyan,A2()}
     for i,name in ipairs(sN)do 
         local row=math.floor((i-1)/2)local col=(i-1)%2 
@@ -181,15 +205,108 @@ do
         sLbls[1].Text="📊 Nivel: "..s.Level
         sLbls[2].Text="❤️ Vida: "..s.Health.."/"..s.MaxHealth
         sLbls[3].Text="🥊 Kills: "..s.Kills
-        sLbls[4].Text="⚔️ Muertes: "..s.Deaths
+        sLbls[4].Text="💀 Muertes: "..s.Deaths
         sLbls[5].Text="⚡ Power: "..s.Power
         sLbls[6].Text="🎯 Melee: "..s.Melee
     end
     StatsRefM()
-    task.spawn(function()while true do task.wait(1)if PgStats.Visible then pcall(StatsRefM)end end end)
     Section(PgStats,"OPCIONES","⚙️")
     local resetBtn=Instance.new("TextButton",PgStats)resetBtn.Size=UDim2.new(1,0,0,30)resetBtn.BackgroundColor3=C.BG2 resetBtn.BackgroundTransparency=0.2 resetBtn.Font=Enum.Font.GothamBold resetBtn.Text="👤 Ver mis Stats"resetBtn.TextColor3=A()resetBtn.TextSize=10 resetBtn.BorderSizePixel=0 resetBtn.AutoButtonColor=false resetBtn.ZIndex=5 Instance.new("UICorner",resetBtn).CornerRadius=UDim.new(0,6)Ripple(resetBtn)
     resetBtn.MouseButton1Click:Connect(function()ViewingPlayerStats=nil if StatsRefM then StatsRefM()end end)
+    -- ═══ SECCIÓN: OTROS JUGADORES (stats verticales) ═══
+    Section(PgStats,"OTROS JUGADORES","👥")
+    local OC=Instance.new("Frame",PgStats)OC.Size=UDim2.new(1,0,0,250)OC.BackgroundColor3=C.BG2 OC.BackgroundTransparency=0.2 OC.BorderSizePixel=0 OC.ZIndex=5 Instance.new("UICorner",OC).CornerRadius=UDim.new(0,8)
+    local OS=Instance.new("ScrollingFrame",OC)OS.Size=UDim2.new(1,-10,1,-10)OS.Position=UDim2.new(0,5,0,5)OS.BackgroundTransparency=1 OS.BorderSizePixel=0 OS.ScrollBarThickness=5 OS.ScrollBarImageColor3=A()OS.CanvasSize=UDim2.new(0,0,0,0)OS.ZIndex=6 pcall(function()OS.AutomaticCanvasSize=Enum.AutomaticSize.Y end)
+    local OSL=Instance.new("UIListLayout",OS)OSL.Padding=UDim.new(0,6)
+    local function BuildPlayerStatCard(plr)
+        local s=GetStats(plr)
+        local card=Instance.new("Frame",OS)
+        card.Size=UDim2.new(1,-4,0,110)
+        card.BackgroundColor3=C.BG
+        card.BorderSizePixel=0
+        card.ZIndex=7
+        Instance.new("UICorner",card).CornerRadius=UDim.new(0,6)
+        local cardS=Instance.new("UIStroke",card)cardS.Thickness=1 cardS.Transparency=0.5 RegS(cardS)
+        -- Header con nombre
+        local nameL=Instance.new("TextLabel",card)
+        nameL.Size=UDim2.new(1,-16,0,20)
+        nameL.Position=UDim2.new(0,8,0,4)
+        nameL.BackgroundTransparency=1
+        nameL.Font=Enum.Font.GothamBold
+        nameL.Text="👤 "..plr.DisplayName
+        nameL.TextColor3=A()
+        nameL.TextSize=11
+        nameL.TextXAlignment=Enum.TextXAlignment.Left
+        nameL.ZIndex=8
+        RegL(nameL)
+        -- Línea separadora
+        local sep=Instance.new("Frame",card)
+        sep.Size=UDim2.new(1,-16,0,1)
+        sep.Position=UDim2.new(0,8,0,26)
+        sep.BackgroundColor3=C.BG3
+        sep.BorderSizePixel=0
+        sep.ZIndex=8
+        -- Stats verticales (2 columnas x 2 filas para compactar)
+        local statsList={
+            {"🎯 Melee",s.Melee,C.Cyan},
+            {"❤️ Health",s.Health.."/"..s.MaxHealth,C.Rd},
+            {"⚔️ Weapon",s.Weapon,C.Yellow},
+            {"⚡ Power",s.Power,A2()},
+        }
+        for i,data in ipairs(statsList)do
+            local row=math.floor((i-1)/2)
+            local col=(i-1)%2
+            local lbl=Instance.new("TextLabel",card)
+            lbl.Size=UDim2.new(0.5,-12,0,20)
+            lbl.Position=UDim2.new(col*0.5+0.01,8,0,32+row*22)
+            lbl.BackgroundTransparency=1
+            lbl.Font=Enum.Font.GothamSemibold
+            lbl.Text=data[1]..": "..data[2]
+            lbl.TextColor3=data[3]
+            lbl.TextSize=10
+            lbl.TextXAlignment=Enum.TextXAlignment.Left
+            lbl.ZIndex=8
+        end
+    end
+    local function RefreshOtherPlayers()
+        for _,c in ipairs(OS:GetChildren())do
+            if c:IsA("Frame")then c:Destroy()end
+        end
+        for _,plr in ipairs(P:GetPlayers())do
+            if plr~=LP then
+                pcall(BuildPlayerStatCard,plr)
+            end
+        end
+        -- Si no hay otros jugadores
+        local count=0
+        for _,plr in ipairs(P:GetPlayers())do if plr~=LP then count=count+1 end end
+        if count==0 then
+            local empty=Instance.new("TextLabel",OS)
+            empty.Size=UDim2.new(1,-4,0,40)
+            empty.BackgroundColor3=C.BG
+            empty.BorderSizePixel=0
+            empty.Font=Enum.Font.Gotham
+            empty.Text="No hay otros jugadores"
+            empty.TextColor3=C.Gr
+            empty.TextSize=10
+            empty.ZIndex=7
+            Instance.new("UICorner",empty).CornerRadius=UDim.new(0,6)
+        end
+    end
+    RefreshOtherPlayers()
+    -- Auto-refresh
+    task.spawn(function()
+        while true do
+            task.wait(2)
+            if PgStats.Visible then
+                pcall(StatsRefM)
+                pcall(RefreshOtherPlayers)
+            end
+        end
+    end)
+    -- Refrescar cuando entra/sale alguien
+    P.PlayerAdded:Connect(function()task.wait(0.5)if PgStats.Visible then pcall(RefreshOtherPlayers)end end)
+    P.PlayerRemoving:Connect(function()task.wait(0.5)if PgStats.Visible then pcall(RefreshOtherPlayers)end end)
 end
 -- ═══ JUGADORES ═══
 local SelectedPlayer=nil 
@@ -234,16 +351,16 @@ local function SetMinimized(state)
     if minimized then 
         TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(W_SIZE.X.Scale,W_SIZE.X.Offset,0,34)}):Play()
         TabBar.Visible=false Content.Visible=false 
-        Ttl.Text="TLG Gold Hub || V5.4 (min)"STtl.Text="👑 ABRIR"
+        Ttl.Text="TLG Gold Hub || V5.5"STtl.Text="👑 ABRIR"
     else 
         TS:Create(W,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{Size=W_SIZE}):Play()
         TabBar.Visible=true Content.Visible=true 
-        Ttl.Text="TLG Gold Hub || V5.4"STtl.Text="👑 MENU"
+        Ttl.Text="TLG Gold Hub || V5.5"STtl.Text="👑 MENU"
     end 
 end
 local CrownBtn=Instance.new("TextButton",Ico)CrownBtn.Size=UDim2.new(1,0,1,0)CrownBtn.BackgroundTransparency=1 CrownBtn.Text=""CrownBtn.ZIndex=10 CrownBtn.MouseButton1Click:Connect(function()SetMinimized(not minimized)end)
 if IS_PC then UI.InputBegan:Connect(function(i,gp)if gp then return end if i.KeyCode==Enum.KeyCode.RightShift then SetMinimized(not minimized)end end)end
--- ═══ FABs FLOTANTES (rediseñados) ═══
+-- ═══ FABs FLOTANTES ═══
 local FAB_SG=Instance.new("ScreenGui")
 FAB_SG.Name="TLG_FAB"
 FAB_SG.ResetOnSpawn=false
@@ -284,7 +401,7 @@ FAB_Layout.Padding=UDim.new(0,6)
 FAB_Layout.HorizontalAlignment=Enum.HorizontalAlignment.Center
 FAB_Layout.VerticalAlignment=Enum.VerticalAlignment.Center
 local FAB_State={Orbit=false,Fly=false}
-local function CreateFAB(icon,label,key,cb)
+local function CreateFAB(icon,label,cb)
     local btn=Instance.new("TextButton",FAB_Holder)
     btn.Size=UDim2.new(0,60,0,52)
     btn.BackgroundColor3=C.BG2
@@ -300,7 +417,7 @@ local function CreateFAB(icon,label,key,cb)
     bS.Transparency=0.4
     local iL=Instance.new("TextLabel",btn)
     iL.Size=UDim2.new(1,0,0,24)
-    iL.Position=UDim2.new(0,0,0,4)
+    iL.Position=UDim2.new(0,0,0,6)
     iL.BackgroundTransparency=1
     iL.Text=icon
     iL.TextSize=20
@@ -316,28 +433,17 @@ local function CreateFAB(icon,label,key,cb)
     nL.TextSize=8
     nL.Font=Enum.Font.GothamBold
     nL.ZIndex=13
-    local kL=Instance.new("TextLabel",btn)
-    kL.Size=UDim2.new(1,0,0,10)
-    kL.Position=UDim2.new(0,0,1,-26)
-    kL.BackgroundTransparency=1
-    kL.Text=key
-    kL.TextColor3=C.Gr
-    kL.TextSize=8
-    kL.Font=Enum.Font.GothamBold
-    kL.ZIndex=13
     local function SetActive(state)
         if state then
             btn.BackgroundColor3=A()
             iL.TextColor3=C.BG
             nL.TextColor3=C.BG
-            kL.TextColor3=C.BG
             bS.Color=C.Wh
             bS.Transparency=0
         else
             btn.BackgroundColor3=C.BG2
             iL.TextColor3=C.Wh
             nL.TextColor3=C.Wh
-            kL.TextColor3=C.Gr
             bS.Color=A()
             bS.Transparency=0.4
         end
@@ -349,36 +455,26 @@ local function CreateFAB(icon,label,key,cb)
     SetActive(false)
     return btn
 end
--- FAB FUGA (acción rápida)
-CreateFAB("🚀","FUGA","",function()
+CreateFAB("🚀","FUGA",function()
     local c=LP.Character
     local h=c and c:FindFirstChild("HumanoidRootPart")
     if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)end
 end)
--- FAB ORBIT (toggle)
-local orbitFAB=CreateFAB("🪐","ORBIT","",function()
-    if FAB_State.Orbit then
-        OrbStop()FAB_State.Orbit=false
-    else
-        OrbStart()FAB_State.Orbit=true
-    end
+CreateFAB("🪐","ORBIT",function()
+    if FAB_State.Orbit then OrbStop()FAB_State.Orbit=false
+    else OrbStart()FAB_State.Orbit=true end
     return FAB_State.Orbit
 end)
--- FAB FLY (toggle)
-local flyFAB=CreateFAB("✈","FLY","",function()
-    if FAB_State.Fly then
-        FlyStop()FAB_State.Fly=false
-    else
-        FlyStart()FAB_State.Fly=true
-    end
+CreateFAB("✈","FLY",function()
+    if FAB_State.Fly then FlyStop()FAB_State.Fly=false
+    else FlyStart()FAB_State.Fly=true end
     return FAB_State.Fly
 end)
--- Drag del contenedor FAB
 local fDrag,fStart,fPos=false,nil,nil
 FAB_Header.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then fDrag=true fStart=i.Position fPos=FAB_Main.Position end end)
 UI.InputChanged:Connect(function(i)if fDrag and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-fStart FAB_Main.Position=UDim2.new(fPos.X.Scale,fPos.X.Offset+d.X,fPos.Y.Scale,fPos.Y.Offset+d.Y)end end)
 UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then fDrag=false end end)
 task.wait(0.5)
 pcall(function()TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE,Position=W_POS}):Play()end)
-PremiumNotif("👑 TLG GOLD HUB V5.4","✨ Premium Edition cargada",A())
-print("[TLG GOLD HUB V5.4] ✨ Cargado ✓")
+PremiumNotif("👑 TLG GOLD HUB V5.5","✨ Stats + Otros Jugadores",A())
+print("[TLG GOLD HUB V5.5] ✨ Cargado ✓")
