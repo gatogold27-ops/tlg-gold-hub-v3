@@ -10,7 +10,6 @@ local C={BG=Color3.fromRGB(15,15,18),BG2=Color3.fromRGB(22,22,26),BG3=Color3.fro
 local ThemedStrokes,ThemedLabels,ThemedBars,ThemedGradients={},{},{},{}local function RegS(s)table.insert(ThemedStrokes,s)pcall(function()s.Color=A()end)end local function RegL(l)table.insert(ThemedLabels,l)pcall(function()l.TextColor3=A()end)end local function RegB(b)table.insert(ThemedBars,b)pcall(function()b.BackgroundColor3=A()end)end
 local function ApplyTheme()for _,s in ipairs(ThemedStrokes)do pcall(function()s.Color=A()end)end for _,l in ipairs(ThemedLabels)do pcall(function()l.TextColor3=A()end)end for _,b in ipairs(ThemedBars)do pcall(function()b.BackgroundColor3=A()end)end for _,g in ipairs(ThemedGradients)do pcall(function()if g.grad then g.grad.Color=ColorSequence.new(A(),A2())end end)end end
 local function PulsingGlow(stroke,minT,maxT,dur)minT=minT or 0.2 maxT=maxT or 0.8 dur=dur or 1.5 task.spawn(function()while stroke and stroke.Parent do local t1=TS:Create(stroke,TweenInfo.new(dur,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=maxT})t1:Play()t1.Completed:Wait()if not stroke.Parent then break end local t2=TS:Create(stroke,TweenInfo.new(dur,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=minT})t2:Play()t2.Completed:Wait()end end)end
-local function AnimatedGradient(parent,col1,col2,speed)local g=Instance.new("UIGradient",parent)g.Color=ColorSequence.new(col1,col2)g.Rotation=0 speed=speed or 0.02 task.spawn(function()local o=0 while g and g.Parent do o=o+0.01 if o>2 then o=0 end g.Offset=Vector2.new(o-1,0)task.wait(speed)end end)table.insert(ThemedGradients,{grad=g})return g end
 local function Ripple(obj)obj.MouseButton1Click:Connect(function()local rip=Instance.new("Frame",obj)rip.BackgroundColor3=A()rip.BackgroundTransparency=0.6 rip.BorderSizePixel=0 rip.Size=UDim2.new(0,0,0,0)rip.Position=UDim2.new(0.5,0,0.5,0)rip.AnchorPoint=Vector2.new(0.5,0.5)rip.ZIndex=obj.ZIndex+5 Instance.new("UICorner",rip).CornerRadius=UDim.new(1,0)local ms=math.max(obj.AbsoluteSize.X,obj.AbsoluteSize.Y)*1.8 TS:Create(rip,TweenInfo.new(0.5,Enum.EasingStyle.Quad),{Size=UDim2.new(0,ms,0,ms),BackgroundTransparency=1}):Play()task.delay(0.5,function()pcall(function()rip:Destroy()end)end)end)end
 local function SlideIn(obj,delay)delay=delay or 0 local ot=obj.BackgroundTransparency obj.BackgroundTransparency=1 if obj:IsA("TextLabel")or obj:IsA("TextButton")then local ott=obj.TextTransparency obj.TextTransparency=1 task.delay(delay,function()TS:Create(obj,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{BackgroundTransparency=ot}):Play()TS:Create(obj,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{TextTransparency=ott}):Play()end)else task.delay(delay,function()TS:Create(obj,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{BackgroundTransparency=ot}):Play()end)end end
 local NotifHolder=nil local function GetNotifHolder()if NotifHolder and NotifHolder.Parent then return NotifHolder end NotifHolder=Instance.new("Frame",SG)NotifHolder.Name="NotifHolder"NotifHolder.Size=UDim2.new(0,280,1,-80)NotifHolder.Position=UDim2.new(1,-290,0,60)NotifHolder.BackgroundTransparency=1 NotifHolder.ZIndex=9999 local ll=Instance.new("UIListLayout",NotifHolder)ll.Padding=UDim.new(0,8)ll.HorizontalAlignment=Enum.HorizontalAlignment.Right ll.VerticalAlignment=Enum.VerticalAlignment.Top return NotifHolder end
@@ -42,13 +41,97 @@ end
 local HB={On=false,Sz=20,Tr=0.3,Conn=nil}
 local function AppHB(plr)if plr==LP then return end local ch=plr.Character if not ch then return end local hrp=ch:FindFirstChild("HumanoidRootPart")if not hrp then return end pcall(function()hrp.Size=Vector3.new(HB.Sz,HB.Sz,HB.Sz)hrp.Transparency=HB.Tr hrp.LocalTransparencyModifier=0 hrp.Material=Enum.Material.Neon hrp.Color=A()hrp.CanCollide=false end)end
 local function HBStart()if HB.Conn then return end HB.On=true for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppHB,plr)end end HB.Conn=RS.Heartbeat:Connect(function()if not HB.On then return end for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppHB,plr)end end end)end
-local function HBStop()HB.On=false if HB.Conn then pcall(function()HB.Conn:Disconnect()end)HB.Conn=nil end end
-local MGT={On=false,Active=false,HB={},BV={}}local MGT_CFG={Size=25,PullRate=0.1,BoostSpd=200,Range=400}
-local function MGT_Apply(plr)if plr==LP then return end local ch=plr.Character if not ch then return end local hrp=ch:FindFirstChild("HumanoidRootPart")if not hrp then return end local my=LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")if not my then return end if (hrp.Position-my.Position).Magnitude>MGT_CFG.Range then return end if not MGT.HB[plr]then MGT.HB[plr]={hrp=hrp,sz=hrp.Size,tr=hrp.Transparency,mt=hrp.Material,cl=hrp.Color}end hrp.Size=Vector3.new(MGT_CFG.Size,MGT_CFG.Size,MGT_CFG.Size)hrp.Transparency=1 hrp.CanCollide=false end
-local function MGT_Restore(plr)local d=MGT.HB[plr]if d and d.hrp and d.hrp.Parent then pcall(function()d.hrp.Size=d.sz d.hrp.Transparency=d.tr d.hrp.Material=d.mt d.hrp.Color=d.cl end)end MGT.HB[plr]=nil local bv=MGT.BV[plr]if bv then pcall(function()bv:Destroy()end)MGT.BV[plr]=nil end end
-local function MGT_Clean()for plr,_ in pairs(MGT.HB)do MGT_Restore(plr)end MGT.HB={}MGT.BV={}end
-local function MGT_Boost(plr)if plr==LP then return end local ch=plr.Character if not ch then return end local hrp=ch:FindFirstChild("HumanoidRootPart")if not hrp then return end local my=LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")if not my then return end local dist=(hrp.Position-my.Position).Magnitude if dist>MGT_CFG.Range then local bv=MGT.BV[plr]if bv then pcall(function()bv:Destroy()end)MGT.BV[plr]=nil end return end local bv=MGT.BV[plr]if not bv or not bv.Parent then bv=Instance.new("BodyVelocity")bv.MaxForce=Vector3.new(1e6,1e6,1e6)bv.Parent=hrp MGT.BV[plr]=bv end local dir=(my.Position-hrp.Position).Unit bv.Velocity=dir*MGT_CFG.BoostSpd end
-local mHB,mBoost,mPull=0,0,0 RS.Heartbeat:Connect(function(dt)if not MGT.On then return end mHB=mHB+dt mBoost=mBoost+dt mPull=mPull+dt if mHB>=0.3 then mHB=0 for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(MGT_Apply,plr)end end end if MGT.Active then if mBoost>=0.1 then mBoost=0 for _,plr in ipairs(P:GetPlayers())do if plr~=LP and plr.Character then pcall(MGT_Boost,plr)end end end if mPull>=MGT_CFG.PullRate then mPull=0 local ch=LP.Character if ch then local tool=ch:FindFirstChildOfClass("Tool")if tool then pcall(function()tool:Activate()end)end end end end end)
+local function HBStop()HB.On=false if HB.Conn then pcall(function()HB.Conn:Disconnect()end)HB.Conn=nil end for _,plr in ipairs(P:GetPlayers())do if plr~=LP and plr.Character then local hrp=plr.Character:FindFirstChild("HumanoidRootPart")if hrp then pcall(function()hrp.Size=Vector3.new(2,2,1)hrp.Transparency=1 hrp.LocalTransparencyModifier=1 end)end end end end
+-- ═══ AIMBOT MEJORADO (FUNCIONAL) ═══
+local AIM={On=false,Conn=nil,Target=nil,HitboxSize=15,AttackRate=0.08,TeleportRange=30,LastAttack=0,OriginalSizes={}}
+local function AIM_FindTarget()
+    local closest=nil local closestDist=math.huge
+    local myChar=LP.Character if not myChar then return nil end
+    local myRoot=myChar:FindFirstChild("HumanoidRootPart") if not myRoot then return nil end
+    for _,plr in ipairs(P:GetPlayers())do
+        if plr~=LP then
+            local ch=plr.Character
+            if ch then
+                local hrp=ch:FindFirstChild("HumanoidRootPart")
+                local hu=ch:FindFirstChildOfClass("Humanoid")
+                if hrp and hu and hu.Health>0 then
+                    local dist=(hrp.Position-myRoot.Position).Magnitude
+                    if dist<closestDist then closestDist=dist closest=plr end
+                end
+            end
+        end
+    end
+    return closest,closestDist
+end
+local function AIM_SetHitbox(plr,size)
+    if not plr or not plr.Character then return end
+    local hrp=plr.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if not AIM.OriginalSizes[plr] then
+        AIM.OriginalSizes[plr]={Size=hrp.Size,Transparency=hrp.Transparency,CanCollide=hrp.CanCollide}
+    end
+    pcall(function()
+        hrp.Size=Vector3.new(size,size,size)
+        hrp.Transparency=1
+        hrp.CanCollide=false
+    end)
+end
+local function AIM_RestoreAll()
+    for plr,data in pairs(AIM.OriginalSizes)do
+        if plr.Character then
+            local hrp=plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then pcall(function()hrp.Size=data.Size hrp.Transparency=data.Transparency hrp.CanCollide=data.CanCollide end)end
+        end
+    end
+    AIM.OriginalSizes={}
+end
+local function AIM_Attack()
+    local myChar=LP.Character if not myChar then return end
+    local tool=myChar:FindFirstChildOfClass("Tool")
+    if tool then pcall(function() tool:Activate() end) end
+end
+local function AIM_Start()
+    if AIM.On then return end
+    AIM.On=true
+    AIM.Conn=RS.Heartbeat:Connect(function()
+        if not AIM.On then return end
+        local target,dist=AIM_FindTarget()
+        AIM.Target=target
+        if not target or dist>AIM.TeleportRange*3 then return end
+        -- Hitbox en el enemigo
+        AIM_SetHitbox(target,AIM.HitboxSize)
+        -- Acercarse al enemigo con CFrame (si no está muy cerca)
+        local myChar=LP.Character
+        if myChar then
+            local myRoot=myChar:FindFirstChild("HumanoidRootPart")
+            local targetRoot=target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot and targetRoot then
+                local dir=(targetRoot.Position-myRoot.Position)
+                if dir.Magnitude>AIM.TeleportRange then
+                    pcall(function()
+                        myRoot.CFrame=CFrame.new(targetRoot.Position-Vector3.new(0,0,AIM.TeleportRange))
+                    end)
+                end
+            end
+        end
+        -- Auto-attack
+        local now=os.clock()
+        if now-AIM.LastAttack>=AIM.AttackRate then
+            AIM.LastAttack=now
+            AIM_Attack()
+        end
+    end)
+    PremiumNotif("🎯 Aimbot","✅ Activado",C.Grn)
+end
+local function AIM_Stop()
+    if not AIM.On then return end
+    AIM.On=false
+    if AIM.Conn then pcall(function()AIM.Conn:Disconnect()end)AIM.Conn=nil end
+    AIM_RestoreAll()
+    AIM.Target=nil
+    PremiumNotif("🎯 Aimbot","❌ Desactivado",C.Rd)
+end
+-- GOD ORB
 local GO={T=nil,C=nil,D=15,S=3,Al=5,Ang=0}
 local function GOStop()GO.T=nil if GO.C then pcall(function()GO.C:Disconnect()end)GO.C=nil end local ch=LP.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then pcall(function()hu.PlatformStand=false end)end end end
 local function GOStart(plr)if not plr or not plr.Parent then return end GOStop()GO.T=plr GO.Ang=0 GO.C=RS.Heartbeat:Connect(function(dt)if not GO.T or not GO.T.Parent then GOStop()return end local tc=GO.T.Character local mc=LP.Character local th=tc and tc:FindFirstChild("HumanoidRootPart")local mh=mc and mc:FindFirstChild("HumanoidRootPart")local thu=tc and tc:FindFirstChildOfClass("Humanoid")local mhu=mc and mc:FindFirstChildOfClass("Humanoid")if not th or not mh or not thu or thu.Health<=0 then GOStop()return end if mhu then mhu.PlatformStand=true end GO.Ang=GO.Ang+GO.S*dt if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.Al,math.sin(GO.Ang)*GO.D)mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)end)end
@@ -131,7 +214,7 @@ local WS=Instance.new("UIStroke",W)WS.Thickness=1.5 RegS(WS)
 local TB=Instance.new("Frame",W)TB.Size=UDim2.new(1,0,0,34)TB.BackgroundColor3=C.BG3 TB.BorderSizePixel=0 TB.ZIndex=5 Instance.new("UICorner",TB).CornerRadius=UDim.new(0,10)
 local TBF=Instance.new("Frame",TB)TBF.Size=UDim2.new(1,0,0,10)TBF.Position=UDim2.new(0,0,1,-10)TBF.BackgroundColor3=C.BG3 TBF.BorderSizePixel=0 TBF.ZIndex=5
 local Ico=Instance.new("TextLabel",TB)Ico.Size=UDim2.new(0,26,0,26)Ico.Position=UDim2.new(0,6,0.5,-13)Ico.BackgroundColor3=C.BG2 Ico.Text="👑"Ico.TextSize=14 Ico.Font=Enum.Font.GothamBold Ico.TextColor3=A()Ico.ZIndex=7 Instance.new("UICorner",Ico).CornerRadius=UDim.new(1,0)RegL(Ico)
-local Ttl=Instance.new("TextLabel",TB)Ttl.Size=UDim2.new(0,180,1,0)Ttl.Position=UDim2.new(0,38,0,0)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBold Ttl.Text="TLG Gold Hub || V6.0"Ttl.TextSize=11 Ttl.TextColor3=C.Wh Ttl.TextXAlignment=Enum.TextXAlignment.Left Ttl.ZIndex=7
+local Ttl=Instance.new("TextLabel",TB)Ttl.Size=UDim2.new(0,180,1,0)Ttl.Position=UDim2.new(0,38,0,0)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBold Ttl.Text="TLG Gold Hub || V6.2"Ttl.TextSize=11 Ttl.TextColor3=C.Wh Ttl.TextXAlignment=Enum.TextXAlignment.Left Ttl.ZIndex=7
 local StatsBar=Instance.new("Frame",TB)StatsBar.Size=UDim2.new(0,140,0,22)StatsBar.Position=UDim2.new(0.5,-70,0.5,-11)StatsBar.BackgroundColor3=C.BG StatsBar.BackgroundTransparency=0.3 StatsBar.BorderSizePixel=0 StatsBar.ZIndex=6 Instance.new("UICorner",StatsBar).CornerRadius=UDim.new(1,0)
 local FL=Instance.new("TextLabel",StatsBar)FL.Size=UDim2.new(0.5,-6,1,0)FL.Position=UDim2.new(0,6,0,0)FL.BackgroundTransparency=1 FL.Font=Enum.Font.GothamBold FL.Text="FPS: --"FL.TextColor3=C.Grn FL.TextSize=10 FL.TextXAlignment=Enum.TextXAlignment.Left FL.ZIndex=7
 local PLb=Instance.new("TextLabel",StatsBar)PLb.Size=UDim2.new(0.5,-6,1,0)PLb.Position=UDim2.new(0.5,0,0,0)PLb.BackgroundTransparency=1 PLb.Font=Enum.Font.GothamBold PLb.Text="Ping: --"PLb.TextColor3=C.Cyan PLb.TextSize=10 PLb.TextXAlignment=Enum.TextXAlignment.Right PLb.ZIndex=7
@@ -240,32 +323,41 @@ do
     task.spawn(function()while true do task.wait(3)if PgJug.Visible then pcall(Pop)end end end)
 end
 do Section(PgCombat,"🔵 HITBOX","🔵")Toggle(PgCombat,"Activar Hitbox",false,function(v)if v then HBStart()else HBStop()end end)Slider(PgCombat,"Tamaño",3,50,20,function(v)HB.Sz=v end)Slider(PgCombat,"Transparencia",0,100,30,function(v)HB.Tr=v/100 end)Section(PgCombat,"🎯 AIM ASSIST","🎯")Toggle(PgCombat,"Activar Aim Assist",false,function(v)if v then AiStart()else AiStop()end end)Slider(PgCombat,"Suavizado",1,100,15,function(v)Ai.Sm=v/100 end)Section(PgCombat,"📷 FOV","📷")Toggle(PgCombat,"Activar FOV",false,function(v)if v then FvApply(Fv.V)else FvReset()end end)Slider(PgCombat,"FOV Valor",30,200,90,function(v)Fv.V=v if Fv.On then FvApply(v)end end)end
-do Section(PgMag,"🎯 AIMBOT PRO","🎯")local ab=false local mb=Instance.new("TextButton",PgMag)mb.Size=UDim2.new(1,0,0,40)mb.BackgroundColor3=C.BG2 mb.Font=Enum.Font.GothamBold mb.Text="🎯 ACTIVAR AIMBOT"mb.TextColor3=A()mb.TextSize=12 mb.BorderSizePixel=0 mb.AutoButtonColor=false mb.ZIndex=5 Instance.new("UICorner",mb).CornerRadius=UDim.new(0,8)Ripple(mb)mb.MouseButton1Click:Connect(function()ab=not ab MGT.On=ab MGT.Active=ab if ab then mb.Text="🛑 DESACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()else MGT_Clean()mb.Text="🎯 ACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()end end)Label(PgMag,"Optimizado sin lag",C.Cyan)Slider(PgMag,"Hitbox Size",10,100,25,function(v)MGT_CFG.Size=v end)Slider(PgMag,"Alcance",100,1000,400,function(v)MGT_CFG.Range=v end)end
+-- ═══ AIMBOT NUEVO Y FUNCIONAL ═══
+do
+    Section(PgMag,"🎯 AIMBOT PRO","🎯")
+    local mb=Instance.new("TextButton",PgMag)mb.Size=UDim2.new(1,0,0,46)mb.BackgroundColor3=C.BG2 mb.BackgroundTransparency=0.1 mb.Font=Enum.Font.GothamBold mb.Text="🎯 ACTIVAR AIMBOT"mb.TextColor3=A()mb.TextSize=13 mb.BorderSizePixel=0 mb.AutoButtonColor=false mb.ZIndex=5 mb.ClipsDescendants=true Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)
+    local mbS=Instance.new("UIStroke",mb)mbS.Thickness=2 RegS(mbS)PulsingGlow(mbS,0.2,0.7,1.5)
+    Ripple(mb)
+    mb.MouseButton1Click:Connect(function()
+        if AIM.On then
+            AIM_Stop()
+            mb.Text="🎯 ACTIVAR AIMBOT"
+            TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()
+        else
+            AIM_Start()
+            mb.Text="🛑 DESACTIVAR AIMBOT"
+            TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()
+        end
+    end)
+    Label(PgMag,"✅ Aimbot FUNCIONAL - Auto-attack al enemigo más cercano",C.Grn)
+    Label(PgMag,"• Hitbox en el enemigo",C.Cyan)
+    Label(PgMag,"• Te teletransporta cerca si está lejos",C.Cyan)
+    Label(PgMag,"• Auto-activa el tool",C.Cyan)
+    Section(PgMag,"⚙️ AJUSTES AVANZADOS","⚙️")
+    Slider(PgMag,"Hitbox Size",5,50,15,function(v)AIM.HitboxSize=v end)
+    Slider(PgMag,"Distancia TP",10,100,30,function(v)AIM.TeleportRange=v end)
+    Slider(PgMag,"Ataque/seg",1,20,12,function(v)AIM.AttackRate=1/v end)
+end
 do Section(PgFly,"✈ FLY","✈")Toggle(PgFly,"Activar Fly",false,function(v)if v then FlyStart()else FlyStop()end end)Slider(PgFly,"Velocidad",100,1000000,100000,function(v)Fly.Spd=v end)Section(PgFly,"🏃 SPEED","🏃")Toggle(PgFly,"Activar Speed",false,function(v)Speed.On=v end)Slider(PgFly,"Velocidad",16,500,100,function(v)Speed.Val=v end)Section(PgFly,"🚀 FUGA","🚀")Button(PgFly,"🚀 Ejecutar Fuga",C.Wh,function()local c=LP.Character local h=c and c:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)end end)end
 do Section(PgIsl,"🏝️ TELETRANSPORTE","🏝️")local lista={}for n,p in pairs(Isl)do table.insert(lista,{n=n,p=p})end table.sort(lista,function(a,b)return a.n<b.n end)for _,i in ipairs(lista)do Button(PgIsl,"🏝️ "..i.n,C.Wh,function()TPTo(i.n,i.p)end)end end
 do Section(PgScr,"🔄 SERVER","🔄")Button(PgScr,"🔄 Cambiar Server",A(),function()Hop()end)Button(PgScr,"🔁 Rejoin",C.Cyan,function()Rej()end)end
--- ═══ FABs AUTOMÁTICOS + INPUT.V9 + ANTI-STUN ═══
+-- ═══ TOOLS CON FABs + INPUT.V9 AUTO + ANTI-STUN ═══
 do
+    -- FABs FLOTANTES con botón toggle
     Section(PgTool,"🚀 FABs FLOTANTES","🚀")
-    Label(PgTool,"Los botones FUGA/ORBIT/FLY ya aparecen en pantalla",C.Grn)
-    Label(PgTool,"Arrastrá el panel desde el título",C.Gr)
-    -- FABs automáticos (aparecen al iniciar)
-    local FAB_SG=Instance.new("ScreenGui")
-    FAB_SG.Name="TLG_FAB_Float"
-    FAB_SG.ResetOnSpawn=false
-    FAB_SG.DisplayOrder=999
-    FAB_SG.IgnoreGuiInset=true
-    pcall(function()FAB_SG.Parent=SP end)
-    if not FAB_SG.Parent then pcall(function()FAB_SG.Parent=CG end)end
-    local FAB_Main=Instance.new("Frame",FAB_SG)
-    FAB_Main.Size=UDim2.new(0,220,0,80)
-    FAB_Main.Position=UDim2.new(1,-240,0.5,-40)
-    FAB_Main.BackgroundColor3=C.BG
-    FAB_Main.BackgroundTransparency=0.25
-    FAB_Main.BorderSizePixel=0
-    FAB_Main.ZIndex=10
-    FAB_Main.Visible=true
-    Instance.new("UICorner",FAB_Main).CornerRadius=UDim.new(0,12)
+    local FAB_SG=Instance.new("ScreenGui")FAB_SG.Name="TLG_FAB_Float"FAB_SG.ResetOnSpawn=false FAB_SG.DisplayOrder=999 FAB_SG.IgnoreGuiInset=true pcall(function()FAB_SG.Parent=SP end)if not FAB_SG.Parent then pcall(function()FAB_SG.Parent=CG end)end
+    local FAB_Main=Instance.new("Frame",FAB_SG)FAB_Main.Size=UDim2.new(0,220,0,80)FAB_Main.Position=UDim2.new(1,-240,0.5,-40)FAB_Main.BackgroundColor3=C.BG FAB_Main.BackgroundTransparency=0.25 FAB_Main.BorderSizePixel=0 FAB_Main.ZIndex=10 FAB_Main.Visible=false Instance.new("UICorner",FAB_Main).CornerRadius=UDim.new(0,12)
     local FAB_Stroke=Instance.new("UIStroke",FAB_Main)FAB_Stroke.Thickness=1.5 FAB_Stroke.Color=A()FAB_Stroke.Transparency=0.3
     local FAB_Header=Instance.new("TextLabel",FAB_Main)FAB_Header.Size=UDim2.new(1,0,0,16)FAB_Header.Position=UDim2.new(0,0,0,2)FAB_Header.BackgroundTransparency=1 FAB_Header.Font=Enum.Font.GothamBold FAB_Header.Text="⚡ ACCIONES RÁPIDAS"FAB_Header.TextColor3=A()FAB_Header.TextSize=9 FAB_Header.ZIndex=12
     local FAB_Holder=Instance.new("Frame",FAB_Main)FAB_Holder.Size=UDim2.new(1,-10,1,-22)FAB_Holder.Position=UDim2.new(0,5,0,20)FAB_Holder.BackgroundTransparency=1 FAB_Holder.ZIndex=11
@@ -276,10 +368,7 @@ do
         local bS=Instance.new("UIStroke",btn)bS.Thickness=2 bS.Color=A()bS.Transparency=0.4
         local iL=Instance.new("TextLabel",btn)iL.Size=UDim2.new(1,0,0,24)iL.Position=UDim2.new(0,0,0,6)iL.BackgroundTransparency=1 iL.Text=icon iL.TextSize=20 iL.TextColor3=C.Wh iL.Font=Enum.Font.GothamBold iL.ZIndex=13
         local nL=Instance.new("TextLabel",btn)nL.Size=UDim2.new(1,0,0,12)nL.Position=UDim2.new(0,0,1,-16)nL.BackgroundTransparency=1 nL.Text=label nL.TextColor3=C.Wh nL.TextSize=8 nL.Font=Enum.Font.GothamBold nL.ZIndex=13
-        local function SetActive(state)
-            if state then btn.BackgroundColor3=A()iL.TextColor3=C.BG nL.TextColor3=C.BG bS.Color=C.Wh bS.Transparency=0
-            else btn.BackgroundColor3=C.BG2 iL.TextColor3=C.Wh nL.TextColor3=C.Wh bS.Color=A()bS.Transparency=0.4 end
-        end
+        local function SetActive(state)if state then btn.BackgroundColor3=A()iL.TextColor3=C.BG nL.TextColor3=C.BG bS.Color=C.Wh bS.Transparency=0 else btn.BackgroundColor3=C.BG2 iL.TextColor3=C.Wh nL.TextColor3=C.Wh bS.Color=A()bS.Transparency=0.4 end end
         btn.MouseButton1Click:Connect(function()local newState=cb()if newState~=nil then SetActive(newState)end end)
         SetActive(false)
         return btn
@@ -291,178 +380,74 @@ do
     FAB_Header.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then fDrag=true fStart=i.Position fPos=FAB_Main.Position end end)
     UI.InputChanged:Connect(function(i)if fDrag and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-fStart FAB_Main.Position=UDim2.new(fPos.X.Scale,fPos.X.Offset+d.X,fPos.Y.Scale,fPos.Y.Offset+d.Y)end end)
     UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then fDrag=false end end)
+    local fabVisible=false
+    local showFabBtn=Instance.new("TextButton",PgTool)showFabBtn.Size=UDim2.new(1,0,0,40)showFabBtn.BackgroundColor3=C.BG2 showFabBtn.BackgroundTransparency=0.2 showFabBtn.Font=Enum.Font.GothamBold showFabBtn.Text="👁️ MOSTRAR FABs EN PANTALLA"showFabBtn.TextColor3=A()showFabBtn.TextSize=11 showFabBtn.BorderSizePixel=0 showFabBtn.AutoButtonColor=false showFabBtn.ZIndex=5 Instance.new("UICorner",showFabBtn).CornerRadius=UDim.new(0,8)
+    local showFabStroke=Instance.new("UIStroke",showFabBtn)showFabStroke.Thickness=1.5 showFabStroke.Color=A()showFabStroke.Transparency=0.3
+    Ripple(showFabBtn)
+    showFabBtn.MouseButton1Click:Connect(function()
+        fabVisible=not fabVisible
+        FAB_Main.Visible=fabVisible
+        if fabVisible then showFabBtn.Text="🙈 OCULTAR FABs"showFabBtn.BackgroundColor3=A()showFabBtn.TextColor3=C.BG showFabStroke.Color=C.Wh showFabStroke.Transparency=0
+        else showFabBtn.Text="👁️ MOSTRAR FABs EN PANTALLA"showFabBtn.BackgroundColor3=C.BG2 showFabBtn.TextColor3=A()showFabStroke.Color=A()showFabStroke.Transparency=0.3 end
+    end)
+    Label(PgTool,"Los botones aparecen en el costado derecho",C.Gr)
 
-    -- ═══ INPUT.V9 BUFF ═══
+    -- INPUT.V9 SIEMPRE ACTIVO (sin botones en pantalla)
     Section(PgTool,"🎮 INPUT.V9 BUFF","🎮")
-    local IV9={On=false,Connections={},Gui=nil,Active=false,Char=nil,Hum=nil,CurTool=nil,Buffer={},Held={},Burst={},LastToolChange=0,LastPingUpdate=0,CachedPing=50,BufferTime=0.07,ActionBufferTime=0.25}
+    Label(PgTool,"PC: Auto-attack x3 con Z/X/C/V",C.Cyan)
+    Label(PgTool,"Móvil: Auto-attack continuo automático",C.Cyan)
+    Label(PgTool,"⚡ Activado al cargar el script",C.Grn)
+    local IV9={Active=false,Char=nil,Hum=nil,CurTool=nil,Buffer={},Held={},Burst={},LastToolChange=0,LastPingUpdate=0,CachedPing=50,BufferTime=0.07,ActionBufferTime=0.25,Connections={}}
     local IV9_CFG={MinBuffer=0.05,MaxBuffer=0.12,MinActionBuffer=0.18,MaxActionBuffer=0.35,ToolGrace=0.10,BurstCount=3,BurstInterval=0.020}
     local IV9_Keys={[Enum.KeyCode.Z]=true,[Enum.KeyCode.X]=true,[Enum.KeyCode.C]=true,[Enum.KeyCode.V]=true}
+    local IV9_AutoInterval=0.35
+    local IV9_LastAutoAtk=0
     local function IV9_GetPing()
-        local s,r=pcall(function()
-            local n=StatsSvc:FindFirstChild("Network")
-            if not n then return nil end
-            local ss=n:FindFirstChild("ServerStatsItem")
-            if ss then local dp=ss:FindFirstChild("Data Ping") if dp then return tonumber(string.match(dp:GetValueString(),"%d+")) end end
-            return nil
-        end)
+        local s,r=pcall(function()local n=StatsSvc:FindFirstChild("Network")if not n then return nil end local ss=n:FindFirstChild("ServerStatsItem")if ss then local dp=ss:FindFirstChild("Data Ping")if dp then return tonumber(string.match(dp:GetValueString(),"%d+"))end end return nil end)
         return (s and r and r>0) and r or IV9.CachedPing
     end
-    local function IV9_UpdateTiming()
-        IV9.CachedPing=IV9_GetPing()
-        local ps=IV9.CachedPing/1000
-        IV9.BufferTime=math.clamp(ps*0.8,IV9_CFG.MinBuffer,IV9_CFG.MaxBuffer)
-        IV9.ActionBufferTime=math.clamp(ps*2,IV9_CFG.MinActionBuffer,IV9_CFG.MaxActionBuffer)
-    end
-    local function IV9_UpdateTool()
-        if not IV9.Char then IV9.CurTool=nil return end
-        local nt=IV9.Char:FindFirstChildOfClass("Tool")
-        if nt~=IV9.CurTool then IV9.CurTool=nt IV9.LastToolChange=os.clock() end
-    end
-    local function IV9_ActivateBurst(key)
-        if not IV9.Active or IV9.Burst[key] then return end
-        local tool=IV9.CurTool or (IV9.Char and IV9.Char:FindFirstChildOfClass("Tool"))
-        if not tool then return end
-        IV9.Burst[key]=true
-        task.spawn(function()
-            for i=1,IV9_CFG.BurstCount do
-                if not IV9.Active or not tool.Parent then break end
-                if i>1 then task.wait(IV9_CFG.BurstInterval) end
-                pcall(function() tool:Activate() end)
-            end
-            IV9.Burst[key]=nil
-        end)
-    end
-    local function IV9_SetupMobileUI()
-        if not UI.TouchEnabled then return end
-        local pg=LP:WaitForChild("PlayerGui")
-        local old=pg:FindFirstChild("TLG_Input_MobileUI")
-        if old then old:Destroy() end
-        local sg=Instance.new("ScreenGui")
-        sg.Name="TLG_Input_MobileUI"
-        sg.ResetOnSpawn=false
-        sg.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-        sg.Parent=pg
-        local cont=Instance.new("Frame",sg)
-        cont.Name="ButtonContainer"
-        cont.Size=UDim2.new(0,220,0,110)
-        cont.Position=UDim2.new(0,10,0.5,-55)
-        cont.BackgroundTransparency=1
-        local lay=Instance.new("UIGridLayout",cont)
-        lay.CellSize=UDim2.new(0,48,0,48)
-        lay.CellPadding=UDim2.new(0,6,0,6)
-        lay.SortOrder=Enum.SortOrder.LayoutOrder
-        for i,kn in ipairs({"Z","X","C","V"}) do
-            local btn=Instance.new("TextButton",cont)
-            btn.Name="Btn_"..kn
-            btn.Text=kn
-            btn.TextScaled=true
-            btn.Font=Enum.Font.GothamBold
-            btn.TextColor3=Color3.fromRGB(255,215,0)
-            btn.BackgroundColor3=Color3.fromRGB(20,20,20)
-            btn.BackgroundTransparency=0.3
-            btn.BorderSizePixel=0
-            btn.LayoutOrder=i
-            Instance.new("UICorner",btn).CornerRadius=UDim.new(0,8)
-            local st=Instance.new("UIStroke",btn)
-            st.Color=Color3.fromRGB(255,215,0)
-            st.Thickness=1.5
-            btn.InputBegan:Connect(function(inp)
-                if inp.UserInputType==Enum.UserInputType.Touch then
-                    local ke=Enum.KeyCode[kn]
-                    IV9.Buffer[ke]=os.clock()
-                end
-            end)
-        end
-        IV9.Gui=sg
-    end
-    local function IV9_SetupChar(char)
-        if not IV9.On then return end
-        IV9.Active=false
-        IV9.Char=char
-        local hum=char:WaitForChild("Humanoid")
-        IV9.Hum=hum
-        IV9_UpdateTool()
-        IV9_SetupMobileUI()
-        IV9.Active=true
-    end
-    local function IV9_Start()
-        if IV9.On then return end
-        IV9.On=true
+    local function IV9_UpdateTiming()IV9.CachedPing=IV9_GetPing()local ps=IV9.CachedPing/1000 IV9.BufferTime=math.clamp(ps*0.8,IV9_CFG.MinBuffer,IV9_CFG.MaxBuffer)IV9.ActionBufferTime=math.clamp(ps*2,IV9_CFG.MinActionBuffer,IV9_CFG.MaxActionBuffer)end
+    local function IV9_UpdateTool()if not IV9.Char then IV9.CurTool=nil return end local nt=IV9.Char:FindFirstChildOfClass("Tool")if nt~=IV9.CurTool then IV9.CurTool=nt IV9.LastToolChange=os.clock()end end
+    local function IV9_ActivateBurst(key)if not IV9.Active or IV9.Burst[key]then return end local tool=IV9.CurTool or (IV9.Char and IV9.Char:FindFirstChildOfClass("Tool"))if not tool then return end IV9.Burst[key]=true task.spawn(function()for i=1,IV9_CFG.BurstCount do if not IV9.Active or not tool.Parent then break end if i>1 then task.wait(IV9_CFG.BurstInterval)end pcall(function()tool:Activate()end)end IV9.Burst[key]=nil end)end
+    local function IV9_SetupChar(char)IV9.Active=false IV9.Char=char local hum=char:WaitForChild("Humanoid")IV9.Hum=hum IV9_UpdateTool()IV9.Active=true end
+    task.spawn(function()
         table.insert(IV9.Connections,LP.CharacterAdded:Connect(function(c)task.wait(0.1)IV9_SetupChar(c)end))
-        if LP.Character then task.spawn(function()IV9_SetupChar(LP.Character)end) end
+        if LP.Character then IV9_SetupChar(LP.Character)end
         table.insert(IV9.Connections,RS.RenderStepped:Connect(function()
             if not IV9.Active then return end
             local now=os.clock()
-            if now-IV9.LastPingUpdate>=1.0 then IV9_UpdateTiming() IV9.LastPingUpdate=now end
+            if now-IV9.LastPingUpdate>=1.0 then IV9_UpdateTiming()IV9.LastPingUpdate=now end
             IV9_UpdateTool()
+            -- PC: buffer de teclas
             for key,pt in pairs(IV9.Buffer) do
                 if now-pt<=IV9.ActionBufferTime then
-                    if not IV9.Burst[key] and (IV9.CurTool or (now-IV9.LastToolChange<=IV9_CFG.ToolGrace)) then
-                        IV9.Buffer[key]=nil
-                        IV9_ActivateBurst(key)
-                    end
-                else
-                    IV9.Buffer[key]=nil
-                end
+                    if not IV9.Burst[key] and (IV9.CurTool or (now-IV9.LastToolChange<=IV9_CFG.ToolGrace))then IV9.Buffer[key]=nil IV9_ActivateBurst(key)end
+                else IV9.Buffer[key]=nil end
+            end
+            -- MÓVIL: auto-attack continuo
+            if UI.TouchEnabled and IV9.CurTool and now-IV9_LastAutoAtk>=IV9_AutoInterval then
+                IV9_LastAutoAtk=now
+                local tool=IV9.CurTool
+                task.spawn(function()for i=1,IV9_CFG.BurstCount do if not IV9.Active or not tool.Parent then break end if i>1 then task.wait(IV9_CFG.BurstInterval)end pcall(function()tool:Activate()end)end end)
             end
         end))
-        table.insert(IV9.Connections,UI.InputBegan:Connect(function(inp,gp)
-            if gp or not IV9.Active then return end
-            if IV9_Keys[inp.KeyCode] and not IV9.Held[inp.KeyCode] then
-                IV9.Held[inp.KeyCode]=true
-                IV9.Buffer[inp.KeyCode]=os.clock()
-            end
-        end))
-        table.insert(IV9.Connections,UI.InputEnded:Connect(function(inp)
-            if IV9_Keys[inp.KeyCode] then IV9.Held[inp.KeyCode]=nil end
-        end))
-        PremiumNotif("🎮 Input.v9","✅ Activado",C.Grn)
-    end
-    local function IV9_Stop()
-        if not IV9.On then return end
-        IV9.On=false
-        IV9.Active=false
-        for _,c in ipairs(IV9.Connections) do pcall(function()c:Disconnect()end) end
-        IV9.Connections={}
-        if IV9.Gui then pcall(function()IV9.Gui:Destroy()end)IV9.Gui=nil end
-        local pg=LP:FindFirstChild("PlayerGui")
-        if pg then local o=pg:FindFirstChild("TLG_Input_MobileUI") if o then o:Destroy() end end
-        IV9.Buffer={}IV9.Held={}IV9.Burst={}
-        PremiumNotif("🎮 Input.v9","❌ Desactivado",C.Rd)
-    end
-    Toggle(PgTool,"Activar Input.v9 Buff",false,function(v)if v then IV9_Start()else IV9_Stop()end end)
+        if not UI.TouchEnabled then
+            table.insert(IV9.Connections,UI.InputBegan:Connect(function(inp,gp)if gp or not IV9.Active then return end if IV9_Keys[inp.KeyCode]and not IV9.Held[inp.KeyCode]then IV9.Held[inp.KeyCode]=true IV9.Buffer[inp.KeyCode]=os.clock()end end))
+            table.insert(IV9.Connections,UI.InputEnded:Connect(function(inp)if IV9_Keys[inp.KeyCode]then IV9.Held[inp.KeyCode]=nil end end))
+        end
+    end)
     Slider(PgTool,"Burst Count",1,10,3,function(v)IV9_CFG.BurstCount=v end)
     Slider(PgTool,"Burst Interval (ms)",5,100,20,function(v)IV9_CFG.BurstInterval=v/1000 end)
-    Label(PgTool,"Auto-attack x3 con Z/X/C/V",C.Cyan)
-    Label(PgTool,"Móvil: botones táctiles en pantalla",C.Cyan)
+    Slider(PgTool,"Auto-Attack Delay (ms)",100,1000,350,function(v)IV9_AutoInterval=v/1000 end)
 
-    -- ═══ ANTI-STUN SEPARADO ═══
+    -- ANTI-STUN
     Section(PgTool,"💫 ANTI-STUN","💫")
     local AS={On=false,Conn=nil}
-    local function AS_Start()
-        if AS.On then return end
-        AS.On=true
-        AS.Conn=RS.Heartbeat:Connect(function()
-            if not AS.On then return end
-            pcall(function()
-                local char=LP.Character
-                if not char then return end
-                local st=char:FindFirstChild("Stun")
-                if st and st:IsA("NumberValue") then st.Value=-1 end
-            end)
-        end)
-        PremiumNotif("💫 Anti-Stun","✅ Activado",C.Grn)
-    end
-    local function AS_Stop()
-        if not AS.On then return end
-        AS.On=false
-        if AS.Conn then pcall(function()AS.Conn:Disconnect()end)AS.Conn=nil end
-        PremiumNotif("💫 Anti-Stun","❌ Desactivado",C.Rd)
-    end
+    local function AS_Start()if AS.On then return end AS.On=true AS.Conn=RS.Heartbeat:Connect(function()if not AS.On then return end pcall(function()local char=LP.Character if not char then return end local st=char:FindFirstChild("Stun")if st and st:IsA("NumberValue")then st.Value=-1 end end)end)PremiumNotif("💫 Anti-Stun","✅ Activado",C.Grn)end
+    local function AS_Stop()if not AS.On then return end AS.On=false if AS.Conn then pcall(function()AS.Conn:Disconnect()end)AS.Conn=nil end PremiumNotif("💫 Anti-Stun","❌ Desactivado",C.Rd)end
     Toggle(PgTool,"Activar Anti-Stun",false,function(v)if v then AS_Start()else AS_Stop()end end)
     Label(PgTool,"Mantiene Stun.Value en -1 (evita aturdimiento)",C.Yellow)
 
-    -- ═══ MACRO, ANTI-VOID, ANTI-KB, ANTI-AFK, ORBIT ═══
     Section(PgTool,"⚡ MACRO","⚡")Toggle(PgTool,"Activar Macro",false,function(v)Ma.On=v end)Slider(PgTool,"Delay",1,50,5,function(v)Ma.Delay=v/10 end)Button(PgTool,"⚡ Ejecutar Macro",C.Grn,function()MaRun()end)
     Section(PgTool,"🛡 ANTI-VOID","🛡")Toggle(PgTool,"Activar Anti-Void",false,function(v)if v then AVStart()else AVStop()end end)Slider(PgTool,"Umbral Y",-500,-50,-80,function(v)AV.Umbral=v end)
     Section(PgTool,"🛑 ANTI-KB","🛑")Toggle(PgTool,"Activar Anti-KB",false,function(v)if v then AKBStart()else AKBStop()end end)Slider(PgTool,"Umbral",40,300,80,function(v)AKB.Thr=v end)
@@ -479,15 +464,15 @@ local function SetMinimized(state)
     if minimized then
         TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(W_SIZE.X.Scale,W_SIZE.X.Offset,0,34)}):Play()
         TabBar.Visible=false Content.Visible=false
-        Ttl.Text="TLG Gold Hub || V6.0"STtl.Text="👑 ABRIR"
+        Ttl.Text="TLG Gold Hub || V6.2 (min)"STtl.Text="👑 ABRIR"
     else
         TS:Create(W,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{Size=W_SIZE}):Play()
         TabBar.Visible=true Content.Visible=true
-        Ttl.Text="TLG Gold Hub || V6.0"STtl.Text="👑 MENU"
+        Ttl.Text="TLG Gold Hub || V6.2"STtl.Text="👑 MENU"
     end
 end
 local CrownBtn=Instance.new("TextButton",Ico)CrownBtn.Size=UDim2.new(1,0,1,0)CrownBtn.BackgroundTransparency=1 CrownBtn.Text=""CrownBtn.ZIndex=10 CrownBtn.MouseButton1Click:Connect(function()SetMinimized(not minimized)end)
 if IS_PC then UI.InputBegan:Connect(function(i,gp)if gp then return end if i.KeyCode==Enum.KeyCode.RightShift then SetMinimized(not minimized)end end)end
 task.wait(0.5)pcall(function()TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE,Position=W_POS}):Play()end)
-PremiumNotif("👑 TLG GOLD HUB V6.0","✨ Premium Edition",A())
-print("[TLG GOLD HUB V6.0] ✨ Cargado ✓")
+PremiumNotif("👑 TLG GOLD HUB V6.2","✨ Premium + Aimbot Pro",A())
+print("[TLG GOLD HUB V6.2] ✨ Cargado ✓")
