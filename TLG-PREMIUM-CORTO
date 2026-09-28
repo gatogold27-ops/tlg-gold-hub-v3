@@ -26,13 +26,6 @@ local HB={On=false,Sz=20,Tr=0.3,Conn=nil}
 local function AppHB(plr)if plr==LP then return end local ch=plr.Character if not ch then return end local hrp=ch:FindFirstChild("HumanoidRootPart")if not hrp then return end pcall(function()hrp.Size=Vector3.new(HB.Sz,HB.Sz,HB.Sz)hrp.Transparency=HB.Tr hrp.LocalTransparencyModifier=0 hrp.Material=Enum.Material.Neon hrp.Color=A()hrp.CanCollide=false end)end
 local function HBStart()if HB.Conn then return end HB.On=true for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppHB,plr)end end HB.Conn=RS.Heartbeat:Connect(function()if not HB.On then return end for _,plr in ipairs(P:GetPlayers())do if plr~=LP then pcall(AppHB,plr)end end end)end
 local function HBStop()HB.On=false if HB.Conn then pcall(function()HB.Conn:Disconnect()end)HB.Conn=nil end end
-local AIM={On=false,Conn=nil,Target=nil,HitboxSize=15,AttackRate=0.08,TeleportRange=30,LastAttack=0,OriginalSizes={}}
-local function AIM_FindTarget()local closest=nil local closestDist=math.huge local myChar=LP.Character if not myChar then return nil end local myRoot=myChar:FindFirstChild("HumanoidRootPart")if not myRoot then return nil end for _,plr in ipairs(P:GetPlayers())do if plr~=LP then local ch=plr.Character if ch then local hrp=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if hrp and hu and hu.Health>0 then local dist=(hrp.Position-myRoot.Position).Magnitude if dist<closestDist then closestDist=dist closest=plr end end end end end return closest,closestDist end
-local function AIM_SetHitbox(plr,size)if not plr or not plr.Character then return end local hrp=plr.Character:FindFirstChild("HumanoidRootPart")if not hrp then return end if not AIM.OriginalSizes[plr]then AIM.OriginalSizes[plr]={Size=hrp.Size,Transparency=hrp.Transparency,CanCollide=hrp.CanCollide}end pcall(function()hrp.Size=Vector3.new(size,size,size)hrp.Transparency=1 hrp.CanCollide=false end)end
-local function AIM_RestoreAll()for plr,data in pairs(AIM.OriginalSizes)do if plr.Character then local hrp=plr.Character:FindFirstChild("HumanoidRootPart")if hrp then pcall(function()hrp.Size=data.Size hrp.Transparency=data.Transparency hrp.CanCollide=data.CanCollide end)end end end AIM.OriginalSizes={}end
-local function AIM_Attack()local myChar=LP.Character if not myChar then return end local tool=myChar:FindFirstChildOfClass("Tool")if tool then pcall(function()tool:Activate()end)end end
-local function AIM_Start()if AIM.On then return end AIM.On=true AIM.Conn=RS.Heartbeat:Connect(function()if not AIM.On then return end local target,dist=AIM_FindTarget()AIM.Target=target if not target or dist>AIM.TeleportRange*3 then return end AIM_SetHitbox(target,AIM.HitboxSize)local myChar=LP.Character if myChar then local myRoot=myChar:FindFirstChild("HumanoidRootPart")local targetRoot=target.Character and target.Character:FindFirstChild("HumanoidRootPart")if myRoot and targetRoot then local dir=(targetRoot.Position-myRoot.Position)if dir.Magnitude>AIM.TeleportRange then pcall(function()myRoot.CFrame=CFrame.new(targetRoot.Position-Vector3.new(0,0,AIM.TeleportRange))end)end end end local now=os.clock()if now-AIM.LastAttack>=AIM.AttackRate then AIM.LastAttack=now AIM_Attack()end end)PremiumNotif("🎯 Aimbot","✅ Activado",C.Grn)end
-local function AIM_Stop()if not AIM.On then return end AIM.On=false if AIM.Conn then pcall(function()AIM.Conn:Disconnect()end)AIM.Conn=nil end AIM_RestoreAll()AIM.Target=nil PremiumNotif("🎯 Aimbot","❌ Desactivado",C.Rd)end
 local GO={T=nil,C=nil,D=15,S=3,Al=5,Ang=0}
 local function GOStop()GO.T=nil if GO.C then pcall(function()GO.C:Disconnect()end)GO.C=nil end local ch=LP.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then pcall(function()hu.PlatformStand=false end)end end end
 local function GOStart(plr)if not plr or not plr.Parent then return end GOStop()GO.T=plr GO.Ang=0 GO.C=RS.Heartbeat:Connect(function(dt)if not GO.T or not GO.T.Parent then GOStop()return end local tc=GO.T.Character local mc=LP.Character local th=tc and tc:FindFirstChild("HumanoidRootPart")local mh=mc and mc:FindFirstChild("HumanoidRootPart")local thu=tc and tc:FindFirstChildOfClass("Humanoid")local mhu=mc and mc:FindFirstChildOfClass("Humanoid")if not th or not mh or not thu or thu.Health<=0 then GOStop()return end if mhu then mhu.PlatformStand=true end GO.Ang=GO.Ang+GO.S*dt if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.Al,math.sin(GO.Ang)*GO.D)mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)end)end
@@ -111,7 +104,6 @@ local function CONFIG_Save()
     CONFIG.Data.Theme=CurrentTheme
     CONFIG.Data.CustomAccent=CustomAccent and {R=CustomAccent.R,G=CustomAccent.G,B=CustomAccent.B}or nil
     CONFIG.Data.HB_Sz=HB.Sz CONFIG.Data.HB_Tr=HB.Tr
-    CONFIG.Data.AIM_Hitbox=AIM.HitboxSize CONFIG.Data.AIM_Range=AIM.TeleportRange CONFIG.Data.AIM_Attack=AIM.AttackRate
     CONFIG.Data.Fly_Spd=Fly.Spd CONFIG.Data.Speed_Val=Speed.Val
     CONFIG.Data.Orb_Spd=Orb.Spd CONFIG.Data.Orb_D=Orb.D CONFIG.Data.Orb_Al=Orb.Al
     CONFIG.Data.Ma_Delay=Ma.Delay CONFIG.Data.AV_Umbral=AV.Umbral CONFIG.Data.AKB_Thr=AKB.Thr
@@ -135,7 +127,6 @@ local function CONFIG_Load()
     if data.Theme and Themes[data.Theme]then CurrentTheme=data.Theme end
     if data.CustomAccent then CustomAccent=Color3.new(data.CustomAccent.R,data.CustomAccent.G,data.CustomAccent.B)end
     if data.HB_Sz then HB.Sz=data.HB_Sz end if data.HB_Tr then HB.Tr=data.HB_Tr end
-    if data.AIM_Hitbox then AIM.HitboxSize=data.AIM_Hitbox end if data.AIM_Range then AIM.TeleportRange=data.AIM_Range end if data.AIM_Attack then AIM.AttackRate=data.AIM_Attack end
     if data.Fly_Spd then Fly.Spd=data.Fly_Spd end if data.Speed_Val then Speed.Val=data.Speed_Val end
     if data.Orb_Spd then Orb.Spd=data.Orb_Spd end if data.Orb_D then Orb.D=data.Orb_D end if data.Orb_Al then Orb.Al=data.Orb_Al end
     if data.Ma_Delay then Ma.Delay=data.Ma_Delay end if data.AV_Umbral then AV.Umbral=data.AV_Umbral end if data.AKB_Thr then AKB.Thr=data.AKB_Thr end
@@ -150,7 +141,7 @@ local WS=Instance.new("UIStroke",W)WS.Thickness=1.5 RegS(WS)
 local TB=Instance.new("Frame",W)TB.Size=UDim2.new(1,0,0,34)TB.BackgroundColor3=C.BG3 TB.BorderSizePixel=0 TB.ZIndex=5 Instance.new("UICorner",TB).CornerRadius=UDim.new(0,10)
 local TBF=Instance.new("Frame",TB)TBF.Size=UDim2.new(1,0,0,10)TBF.Position=UDim2.new(0,0,1,-10)TBF.BackgroundColor3=C.BG3 TBF.BorderSizePixel=0 TBF.ZIndex=5
 local Ico=Instance.new("TextLabel",TB)Ico.Size=UDim2.new(0,26,0,26)Ico.Position=UDim2.new(0,6,0.5,-13)Ico.BackgroundColor3=C.BG2 Ico.Text="👑"Ico.TextSize=14 Ico.Font=Enum.Font.GothamBold Ico.TextColor3=A()Ico.ZIndex=7 Instance.new("UICorner",Ico).CornerRadius=UDim.new(1,0)RegL(Ico)
-local Ttl=Instance.new("TextLabel",TB)Ttl.Size=UDim2.new(0,180,1,0)Ttl.Position=UDim2.new(0,38,0,0)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBold Ttl.Text="TLG Gold Hub || V6.4"Ttl.TextSize=11 Ttl.TextColor3=C.Wh Ttl.TextXAlignment=Enum.TextXAlignment.Left Ttl.ZIndex=7
+local Ttl=Instance.new("TextLabel",TB)Ttl.Size=UDim2.new(0,180,1,0)Ttl.Position=UDim2.new(0,38,0,0)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBold Ttl.Text="TLG Gold Hub || V6.5"Ttl.TextSize=11 Ttl.TextColor3=C.Wh Ttl.TextXAlignment=Enum.TextXAlignment.Left Ttl.ZIndex=7
 local StatsBar=Instance.new("Frame",TB)StatsBar.Size=UDim2.new(0,140,0,22)StatsBar.Position=UDim2.new(0.5,-70,0.5,-11)StatsBar.BackgroundColor3=C.BG StatsBar.BackgroundTransparency=0.3 StatsBar.BorderSizePixel=0 StatsBar.ZIndex=6 Instance.new("UICorner",StatsBar).CornerRadius=UDim.new(1,0)
 local FL=Instance.new("TextLabel",StatsBar)FL.Size=UDim2.new(0.5,-6,1,0)FL.Position=UDim2.new(0,6,0,0)FL.BackgroundTransparency=1 FL.Font=Enum.Font.GothamBold FL.Text="FPS: --"FL.TextColor3=C.Grn FL.TextSize=10 FL.TextXAlignment=Enum.TextXAlignment.Left FL.ZIndex=7
 local PLb=Instance.new("TextLabel",StatsBar)PLb.Size=UDim2.new(0.5,-6,1,0)PLb.Position=UDim2.new(0.5,0,0,0)PLb.BackgroundTransparency=1 PLb.Font=Enum.Font.GothamBold PLb.Text="Ping: --"PLb.TextColor3=C.Cyan PLb.TextSize=10 PLb.TextXAlignment=Enum.TextXAlignment.Right PLb.ZIndex=7
@@ -220,17 +211,91 @@ do
     task.spawn(function()while true do task.wait(3)if PgJug.Visible then pcall(Pop)end end end)
 end
 do Section(PgCombat,"🔵 HITBOX","🔵")Toggle(PgCombat,"Activar Hitbox",false,function(v)if v then HBStart()else HBStop()end end)Slider(PgCombat,"Tamaño",3,50,20,function(v)HB.Sz=v end)Slider(PgCombat,"Transparencia",0,100,30,function(v)HB.Tr=v/100 end)Section(PgCombat,"🎯 AIM ASSIST","🎯")Toggle(PgCombat,"Activar Aim Assist",false,function(v)if v then AiStart()else AiStop()end end)Slider(PgCombat,"Suavizado",1,100,15,function(v)Ai.Sm=v/100 end)Section(PgCombat,"📷 FOV","📷")Toggle(PgCombat,"Activar FOV",false,function(v)if v then FvApply(Fv.V)else FvReset()end end)Slider(PgCombat,"FOV Valor",30,200,90,function(v)Fv.V=v if Fv.On then FvApply(v)end end)end
+-- ═══ HITBOX MASIVO (Meme Sea) ═══
 do
-    Section(PgMag,"🎯 AIMBOT PRO","🎯")
-    local mb=Instance.new("TextButton",PgMag)mb.Size=UDim2.new(1,0,0,46)mb.BackgroundColor3=C.BG2 mb.BackgroundTransparency=0.1 mb.Font=Enum.Font.GothamBold mb.Text="🎯 ACTIVAR AIMBOT"mb.TextColor3=A()mb.TextSize=13 mb.BorderSizePixel=0 mb.AutoButtonColor=false mb.ZIndex=5 mb.ClipsDescendants=true Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)
+    Section(PgMag,"🎯 HITBOX MASIVO","🎯")
+    local AIM={On=false,Conn=nil,HitboxSize=80,Transparency=1,Range=1000,UseNeon=true,OriginalSizes={}}
+    local function AIM_ApplyHitbox(plr)
+        if plr==LP then return end
+        local ch=plr.Character
+        if not ch then return end
+        local hrp=ch:FindFirstChild("HumanoidRootPart")
+        local hu=ch:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hu or hu.Health<=0 then return end
+        if not AIM.OriginalSizes[plr]then
+            AIM.OriginalSizes[plr]={Size=hrp.Size,Transparency=hrp.Transparency,CanCollide=hrp.CanCollide,Material=hrp.Material,Color=hrp.Color}
+        end
+        pcall(function()
+            hrp.Size=Vector3.new(AIM.HitboxSize,AIM.HitboxSize,AIM.HitboxSize)
+            hrp.Transparency=AIM.Transparency
+            hrp.CanCollide=false
+            if AIM.UseNeon then hrp.Material=Enum.Material.Neon hrp.Color=A()end
+            hrp.LocalTransparencyModifier=0
+        end)
+    end
+    local function AIM_Restore(plr)
+        local data=AIM.OriginalSizes[plr]
+        if not data then return end
+        if plr.Character then
+            local hrp=plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then pcall(function()
+                hrp.Size=data.Size hrp.Transparency=data.Transparency hrp.CanCollide=data.CanCollide hrp.Material=data.Material hrp.Color=data.Color
+            end)end
+        end
+        AIM.OriginalSizes[plr]=nil
+    end
+    local function AIM_RestoreAll()
+        for plr,_ in pairs(AIM.OriginalSizes)do AIM_Restore(plr)end
+        AIM.OriginalSizes={}
+    end
+    local function AIM_InRange(plr)
+        local myChar=LP.Character
+        if not myChar then return false end
+        local myRoot=myChar:FindFirstChild("HumanoidRootPart")
+        local tgtRoot=plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+        if not myRoot or not tgtRoot then return false end
+        return (tgtRoot.Position-myRoot.Position).Magnitude<=AIM.Range
+    end
+    local function AIM_Loop()
+        if not AIM.On then return end
+        for _,plr in ipairs(P:GetPlayers())do
+            if plr~=LP then
+                if AIM_InRange(plr)then AIM_ApplyHitbox(plr)
+                else if AIM.OriginalSizes[plr]then AIM_Restore(plr)end end
+            end
+        end
+    end
+    local function AIM_Start()
+        if AIM.On then return end
+        AIM.On=true
+        for _,plr in ipairs(P:GetPlayers())do
+            if plr~=LP and AIM_InRange(plr)then AIM_ApplyHitbox(plr)end
+        end
+        AIM.Conn=RS.Heartbeat:Connect(AIM_Loop)
+        PremiumNotif("🎯 Hitbox","✅ Activado",C.Grn)
+    end
+    local function AIM_Stop()
+        if not AIM.On then return end
+        AIM.On=false
+        if AIM.Conn then pcall(function()AIM.Conn:Disconnect()end)AIM.Conn=nil end
+        AIM_RestoreAll()
+        PremiumNotif("🎯 Hitbox","❌ Desactivado",C.Rd)
+    end
+    LP.CharacterAdded:Connect(function()if AIM.On then task.wait(1)AIM_RestoreAll()AIM_Stop()AIM_Start()end end)
+    local mb=Instance.new("TextButton",PgMag)
+    mb.Size=UDim2.new(1,0,0,46)mb.BackgroundColor3=C.BG2 mb.BackgroundTransparency=0.1 mb.Font=Enum.Font.GothamBold mb.Text="🎯 ACTIVAR HITBOX MASIVO"mb.TextColor3=A()mb.TextSize=13 mb.BorderSizePixel=0 mb.AutoButtonColor=false mb.ZIndex=5 mb.ClipsDescendants=true Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)
     local mbS=Instance.new("UIStroke",mb)mbS.Thickness=2 RegS(mbS)PulsingGlow(mbS,0.2,0.7,1.5)
     Ripple(mb)
-    mb.MouseButton1Click:Connect(function()if AIM.On then AIM_Stop()mb.Text="🎯 ACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()else AIM_Start()mb.Text="🛑 DESACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()end end)
-    Label(PgMag,"✅ Aimbot FUNCIONAL",C.Grn)
+    mb.MouseButton1Click:Connect(function()
+        if AIM.On then AIM_Stop()mb.Text="🎯 ACTIVAR HITBOX MASIVO"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()
+        else AIM_Start()mb.Text="🛑 DESACTIVAR HITBOX"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()end
+    end)
+    Label(PgMag,"Hitbox gigante en enemigos = pegás desde lejos",C.Cyan)
+    Label(PgMag,"No te mueve, solo agranda el hitbox",C.Grn)
     Section(PgMag,"⚙️ AJUSTES","⚙️")
-    Slider(PgMag,"Hitbox Size",5,50,15,function(v)AIM.HitboxSize=v end)
-    Slider(PgMag,"Distancia TP",10,100,30,function(v)AIM.TeleportRange=v end)
-    Slider(PgMag,"Ataque/seg",1,20,12,function(v)AIM.AttackRate=1/v end)
+    Slider(PgMag,"Hitbox Size",20,200,80,function(v)AIM.HitboxSize=v end)
+    Slider(PgMag,"Alcance",100,3000,1000,function(v)AIM.Range=v end)
+    Toggle(PgMag,"Material Neon",true,function(v)AIM.UseNeon=v end)
 end
 do Section(PgFly,"✈ FLY","✈")Toggle(PgFly,"Activar Fly",false,function(v)if v then FlyStart()else FlyStop()end end)Slider(PgFly,"Velocidad",100,1000000,100000,function(v)Fly.Spd=v end)Section(PgFly,"🏃 SPEED","🏃")Toggle(PgFly,"Activar Speed",false,function(v)Speed.On=v end)Slider(PgFly,"Velocidad",16,500,100,function(v)Speed.Val=v end)Section(PgFly,"🚀 FUGA","🚀")Button(PgFly,"🚀 Ejecutar Fuga",C.Wh,function()local c=LP.Character local h=c and c:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)end end)end
 do Section(PgIsl,"🏝️ TELETRANSPORTE","🏝️")local lista={}for n,p in pairs(Isl)do table.insert(lista,{n=n,p=p})end table.sort(lista,function(a,b)return a.n<b.n end)for _,i in ipairs(lista)do Button(PgIsl,"🏝️ "..i.n,C.Wh,function()TPTo(i.n,i.p)end)end end
@@ -312,7 +377,6 @@ do
     Slider(PgTool,"Burst Interval (ms)",5,100,20,function(v)IV9_CFG.BurstInterval=v/1000 end)
     Slider(PgTool,"Auto-Attack Delay (ms)",100,1000,350,function(v)IV9_AutoInterval=v/1000 end)
 
-    -- ═══ ANTI-STUN PRO ═══
     Section(PgTool,"💫 ANTI-STUN PRO","💫")
     local AS={On=false,Conn=nil,SpamThread=nil}
     local AS_CFG={SpamRate=0.05,RestoreSpeed=true,RestoreJump=true,ForceTool=true,ForceStunVars=true}
@@ -327,9 +391,7 @@ do
                 local st=char:FindFirstChild("Stun")
                 if st and st:IsA("NumberValue")then st.Value=-1 end
                 if AS_CFG.ForceStunVars then
-                    for _,v in ipairs(char:GetChildren())do
-                        if v:IsA("NumberValue")and v.Name:lower():find("stun")then v.Value=-1 end
-                    end
+                    for _,v in ipairs(char:GetChildren())do if v:IsA("NumberValue")and v.Name:lower():find("stun")then v.Value=-1 end end
                 end
                 local hum=char:FindFirstChildOfClass("Humanoid")
                 if hum then
@@ -398,9 +460,9 @@ do
 end
 do Section(PgSet,"🎨 TEMA","🎨")local themeList={}for name,_ in pairs(Themes)do table.insert(themeList,name)end table.sort(themeList)local themeBtns={}for _,tn in ipairs(themeList)do local b=Instance.new("TextButton",PgSet)b.Size=UDim2.new(1,0,0,28)b.BackgroundColor3=(CurrentTheme==tn and not CustomAccent)and Themes[tn].Accent or C.BG2 b.Font=Enum.Font.GothamBold b.Text=tn b.TextColor3=(CurrentTheme==tn and not CustomAccent)and C.BG or C.Wh b.TextSize=10 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)table.insert(themeBtns,{b=b,n=tn})Ripple(b)b.MouseButton1Click:Connect(function()CustomAccent=nil CurrentTheme=tn ApplyTheme()for _,x in ipairs(themeBtns)do if x.n==tn then x.b.BackgroundColor3=Themes[tn].Accent x.b.TextColor3=C.BG else x.b.BackgroundColor3=C.BG2 x.b.TextColor3=C.Wh end end end)SlideIn(b)end end
 local minimized=false
-local function SetMinimized(state)minimized=state if minimized then TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(W_SIZE.X.Scale,W_SIZE.X.Offset,0,34)}):Play()TabBar.Visible=false Content.Visible=false Ttl.Text="TLG Gold Hub || V6.4"STtl.Text="👑 ABRIR"else TS:Create(W,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{Size=W_SIZE}):Play()TabBar.Visible=true Content.Visible=true Ttl.Text="TLG Gold Hub || V6.4"STtl.Text="👑 MENU"end end
+local function SetMinimized(state)minimized=state if minimized then TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(W_SIZE.X.Scale,W_SIZE.X.Offset,0,34)}):Play()TabBar.Visible=false Content.Visible=false Ttl.Text="TLG Gold Hub || V6.5"STtl.Text="👑 ABRIR"else TS:Create(W,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{Size=W_SIZE}):Play()TabBar.Visible=true Content.Visible=true Ttl.Text="TLG Gold Hub || V6.5"STtl.Text="👑 MENU"end end
 local CrownBtn=Instance.new("TextButton",Ico)CrownBtn.Size=UDim2.new(1,0,1,0)CrownBtn.BackgroundTransparency=1 CrownBtn.Text=""CrownBtn.ZIndex=10 CrownBtn.MouseButton1Click:Connect(function()SetMinimized(not minimized)end)
 if IS_PC then UI.InputBegan:Connect(function(i,gp)if gp then return end if i.KeyCode==Enum.KeyCode.RightShift then SetMinimized(not minimized)end end)end
 task.wait(0.5)pcall(function()TS:Create(W,TweenInfo.new(0.6,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_SIZE,Position=W_POS}):Play()end)
-PremiumNotif("👑 TLG GOLD HUB V6.4","✨ Anti-Stun PRO",A())
-print("[TLG GOLD HUB V6.4] ✨ Cargado ✓")
+PremiumNotif("👑 TLG GOLD HUB V6.5","✨ Hitbox Masivo Meme Sea",A())
+print("[TLG GOLD HUB V6.5] ✨ Cargado ✓")
