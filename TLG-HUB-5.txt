@@ -15,11 +15,36 @@ local function SlIn(o,dl)dl=dl or 0 local ot=o.BackgroundTransparency o.Backgrou
 local NH=nil local function GNH()if NH and NH.Parent then return NH end NH=Instance.new("Frame",SG)NH.Size=UDim2.new(0,280,1,-80)NH.Position=UDim2.new(1,-290,0,60)NH.BackgroundTransparency=1 NH.ZIndex=9999 local ll=Instance.new("UIListLayout",NH)ll.Padding=UDim.new(0,8)ll.HorizontalAlignment=Enum.HorizontalAlignment.Right ll.VerticalAlignment=Enum.VerticalAlignment.Top return NH end
 local function PNotif(t,x,c)c=c or A()local h=GNH()local n=Instance.new("Frame",h)n.Size=UDim2.new(1,0,0,52)n.BackgroundColor3=C.BG2 n.BorderSizePixel=0 n.ZIndex=10000 Instance.new("UICorner",n).CornerRadius=UDim.new(0,10)local nS=Instance.new("UIStroke",n)nS.Color=c nS.Thickness=2 local bar=Instance.new("Frame",n)bar.Size=UDim2.new(0,3,1,-12)bar.Position=UDim2.new(0,0,0,6)bar.BackgroundColor3=c bar.BorderSizePixel=0 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)local tL=Instance.new("TextLabel",n)tL.Size=UDim2.new(1,-20,0,18)tL.Position=UDim2.new(0,14,0,6)tL.BackgroundTransparency=1 tL.Font=Enum.Font.GothamBold tL.Text=t tL.TextColor3=c tL.TextSize=11 tL.TextXAlignment=Enum.TextXAlignment.Left tL.ZIndex=10001 local xL=Instance.new("TextLabel",n)xL.Size=UDim2.new(1,-20,0,18)xL.Position=UDim2.new(0,14,0,24)xL.BackgroundTransparency=1 xL.Font=Enum.Font.Gotham xL.Text=x xL.TextColor3=C.Wh xL.TextSize=10 xL.TextXAlignment=Enum.TextXAlignment.Left xL.TextTruncate=Enum.TextTruncate.AtEnd xL.ZIndex=10001 n.Position=UDim2.new(1,50,0,0)TS:Create(n,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.new(0,0,0,0)}):Play()task.delay(2.5,function()if not n.Parent then return end TS:Create(n,TweenInfo.new(0.3),{Position=UDim2.new(1,50,0,0),BackgroundTransparency=1}):Play()task.wait(0.35)pcall(function()n:Destroy()end)end)end
 local PC=nil pcall(function()local pm=LP:WaitForChild("PlayerScripts",10)if pm then local ps=pm:WaitForChild("PlayerModule",5)if ps then local ok,m=pcall(require,ps)if ok and m and type(m.GetControls)=="function" then PC=m:GetControls()end end end end)
+-- GS MEJORADO (Kills/Muertes/Weapon)
 local function GS(plr)
-local s={Level=0,Health=0,MaxHealth=0,Gems=0,Cash=0,Exp=0,MaxExp=0,Kills=0,Deaths=0,Melee=0,Weapon=0,Power=0}
+local s={Level=0,Health=0,MaxHealth=0,Gems=0,Cash=0,Exp=0,MaxExp=0,Kills=0,Deaths=0,Melee=0,Weapon=0,Power=0,WName="--",PName="--"}
 pcall(function()local ch=plr.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then s.Health=math.floor(hu.Health)s.MaxHealth=math.floor(hu.MaxHealth)end end end)
-local function sc(f,d)if not f or(d or 0)>4 then return end for _,v in ipairs(f:GetChildren())do if v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue")then local n=v.Name:lower()local val=tonumber(v.Value)or 0 if n=="level"or n=="lvl"or n=="nivel"then s.Level=val elseif n=="gem"or n=="gems"or n=="gemas"then s.Gems=val elseif n=="cash"or n=="money"or n=="coins"then s.Cash=val elseif n=="exp"or n=="xp"or n=="experience"then s.Exp=val elseif n=="maxexp"or n=="max_exp"then s.MaxExp=val elseif n=="kills"or n=="kill"then s.Kills=val elseif n=="deaths"or n=="death"then s.Deaths=val elseif n=="melee"or n=="meleelevel"then s.Melee=val elseif n=="sword"or n=="swordlevel"or n=="weapon"or n=="arma"then s.Weapon=val elseif n=="power"or n=="poder"or n=="memepowerlevel"then s.Power=val end elseif v:IsA("Folder")or v:IsA("Configuration")then sc(v,(d or 0)+1)end end end
-for _,n in ipairs({"leaderstats","PlayerData","Stats","Data","Values","SaveData"})do pcall(function()sc(plr:FindFirstChild(n),0)end)end
+local function sc(f,d)
+    if not f or (d or 0)>4 then return end
+    for _,v in ipairs(f:GetChildren())do
+        if v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue")then
+            local n=v.Name:lower()
+            local val=tonumber(v.Value)or 0
+            if n=="level"or n=="lvl"or n=="nivel"then s.Level=val
+            elseif n=="gem"or n=="gems"or n=="gemas"then s.Gems=val
+            elseif n=="cash"or n=="money"or n=="coins"then s.Cash=val
+            elseif n=="exp"or n=="xp"or n=="experience"then s.Exp=val
+            elseif n=="maxexp"or n=="max_exp"then s.MaxExp=val
+            elseif n=="kills"or n=="kill"or n=="kills_total"or n=="totalkills"or n=="killcount"or n=="kill_count"then s.Kills=val
+            elseif n=="deaths"or n=="death"or n=="muertes"or n=="totaldeaths"or n=="deathcount"or n=="death_count"then s.Deaths=val
+            elseif n=="melee"or n=="meleelevel"then s.Melee=val
+            elseif n=="sword"or n=="swordlevel"or n=="weapon"or n=="weaponlevel"or n=="arma"or n=="espada"then s.Weapon=val
+            elseif n=="power"or n=="poder"or n=="memepowerlevel"then s.Power=val
+            elseif n=="swordequip"or n=="weaponequip"or n=="equippedsword"then s.WName=tostring(v.Value)
+            elseif n=="powerequip"or n=="equippedpower"then s.PName=tostring(v.Value)end
+        elseif v:IsA("Folder")or v:IsA("Configuration")then
+            sc(v,(d or 0)+1)
+        end
+    end
+end
+for _,n in ipairs({"leaderstats","PlayerData","Stats","Data","Values","SaveData","Statistics","PlayerStats"})do
+    pcall(function()sc(plr:FindFirstChild(n),0)end)
+end
 if s.Level==0 then pcall(function()sc(plr,0)end)end
 return s
 end
@@ -373,13 +398,13 @@ local Ico=Instance.new("TextLabel",TB)Ico.Size=UDim2.new(0,32,0,32)Ico.Position=
 local IcoS=Instance.new("UIStroke",Ico)IcoS.Color=A()IcoS.Thickness=2 RegS(IcoS)PGlow(IcoS,0.1,0.5,1.2)
 Ico.MouseEnter:Connect(function()TS:Create(Ico,TweenInfo.new(0.2),{BackgroundColor3=A(),TextColor3=C.BG}):Play()end)
 Ico.MouseLeave:Connect(function()TS:Create(Ico,TweenInfo.new(0.2),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()end)
-local Ttl2=Instance.new("TextLabel",TB)Ttl2.Size=UDim2.new(0,180,1,0)Ttl2.Position=UDim2.new(0,46,0,0)Ttl2.BackgroundTransparency=1 Ttl2.Font=Enum.Font.GothamBold Ttl2.Text="TLG Gold Hub || Meme Sea"Ttl2.TextSize=12 Ttl2.TextColor3=C.Wh Ttl2.TextXAlignment=Enum.TextXAlignment.Left Ttl2.ZIndex=7
-local SB=Instance.new("Frame",TB)SB.Size=UDim2.new(0,140,0,24)SB.Position=UDim2.new(0.5,-70,0.5,-12)SB.BackgroundColor3=C.BG SB.BackgroundTransparency=0.2 SB.BorderSizePixel=0 SB.ZIndex=6 Instance.new("UICorner",SB).CornerRadius=UDim.new(1,0)
+local Ttl2=Instance.new("TextLabel",TB)Ttl2.Size=UDim2.new(0,220,1,0)Ttl2.Position=UDim2.new(0,46,0,0)Ttl2.BackgroundTransparency=1 Ttl2.Font=Enum.Font.GothamBold Ttl2.Text="TLG Gold Hub — Meme Sea"Ttl2.TextSize=11 Ttl2.TextColor3=C.Wh Ttl2.TextTruncate=Enum.TextTruncate.AtEnd Ttl2.TextXAlignment=Enum.TextXAlignment.Left Ttl2.ZIndex=7
+local SB=Instance.new("Frame",TB)SB.Size=UDim2.new(0,160,0,22)SB.Position=UDim2.new(1,-300,0.5,-11)SB.BackgroundColor3=C.BG SB.BackgroundTransparency=0.2 SB.BorderSizePixel=0 SB.ZIndex=6 Instance.new("UICorner",SB).CornerRadius=UDim.new(1,0)
 local SBS=Instance.new("UIStroke",SB)SBS.Color=A()SBS.Thickness=1 SBS.Transparency=0.4
 local FL=Instance.new("TextLabel",SB)FL.Size=UDim2.new(0.5,-6,1,0)FL.Position=UDim2.new(0,6,0,0)FL.BackgroundTransparency=1 FL.Font=Enum.Font.GothamBold FL.Text="FPS: --"FL.TextColor3=C.Grn FL.TextSize=10 FL.TextXAlignment=Enum.TextXAlignment.Left FL.ZIndex=7
 local PLb=Instance.new("TextLabel",SB)PLb.Size=UDim2.new(0.5,-6,1,0)PLb.Position=UDim2.new(0.5,0,0,0)PLb.BackgroundTransparency=1 PLb.Font=Enum.Font.GothamBold PLb.Text="Ping: --"PLb.TextColor3=C.Cyan PLb.TextSize=10 PLb.TextXAlignment=Enum.TextXAlignment.Right PLb.ZIndex=7
 task.spawn(function()local fc=0 local lt=os.clock()RS.RenderStepped:Connect(function()fc=fc+1 local n=os.clock()if n-lt>=1 then FL.Text="FPS: "..math.floor(fc/(n-lt))PLb.Text="Ping: "..GPg().."ms"fc=0 lt=n end end)end)
-local STtl=Instance.new("TextLabel",TB)STtl.Size=UDim2.new(0,100,1,0)STtl.Position=UDim2.new(1,-110,0,0)STtl.BackgroundTransparency=1 STtl.Font=Enum.Font.GothamBold STtl.Text="👑 MENU"STtl.TextSize=11 STtl.TextColor3=A()STtl.TextXAlignment=Enum.TextXAlignment.Right STtl.ZIndex=7 RegL(STtl)
+local STtl=Instance.new("TextLabel",TB)STtl.Size=UDim2.new(0,80,1,0)STtl.Position=UDim2.new(1,-90,0,0)STtl.BackgroundTransparency=1 STtl.Font=Enum.Font.GothamBold STtl.Text="👑 MENU"STtl.TextSize=10 STtl.TextColor3=A()STtl.TextXAlignment=Enum.TextXAlignment.Right STtl.ZIndex=7 RegL(STtl)
 local dg,dS,dP=false,nil,nil
 TB.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg=true dS=i.Position dP=W.Position end end)
 UI.InputChanged:Connect(function(i)if dg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-dS W.Position=UDim2.new(dP.X.Scale,dP.X.Offset+d.X,dP.Y.Scale,dP.Y.Offset+d.Y)end end)
@@ -397,16 +422,30 @@ local function Sli(p,t,mn,mx,d,cb)local sv=d local f=Instance.new("Frame",p)f.Si
 local function Btn(p,t,c,cb)local b=Instance.new("TextButton",p)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=C.BG2 b.BackgroundTransparency=0.1 b.Font=Enum.Font.GothamBold b.Text=t b.TextColor3=c or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 b.ClipsDescendants=true Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)local bS=Instance.new("UIStroke",b)bS.Thickness=1.5 bS.Transparency=0.4 bS.Color=A()RegS(bS)local sh=Instance.new("Frame",b)sh.Size=UDim2.new(0,40,1.5,0)sh.Position=UDim2.new(-0.2,0,-0.25,0)sh.BackgroundColor3=Color3.fromRGB(255,255,255)sh.BackgroundTransparency=0.8 sh.BorderSizePixel=0 sh.Rotation=20 sh.ZIndex=b.ZIndex-1 Instance.new("UICorner",sh).CornerRadius=UDim.new(1,0)b.MouseEnter:Connect(function()TS:Create(sh,TweenInfo.new(0.4),{Position=UDim2.new(1.2,0,-0.25,0)}):Play()TS:Create(b,TweenInfo.new(0.15),{BackgroundColor3=C.BG3}):Play()TS:Create(bS,TweenInfo.new(0.15),{Transparency=0}):Play()end)b.MouseLeave:Connect(function()sh.Position=UDim2.new(-0.2,0,-0.25,0)TS:Create(b,TweenInfo.new(0.15),{BackgroundColor3=C.BG2}):Play()TS:Create(bS,TweenInfo.new(0.15),{Transparency=0.4}):Play()end)Rip(b)b.MouseButton1Click:Connect(function()pcall(cb)end)SlIn(b)return b end
 local PInfo=Tab("Info","📊")local PPl=Tab("Players","👥")local PCb=Tab("Combat","⚔️")local PAb=Tab("Aimbot","🎯")local PFl=Tab("Fly","✈")local PIs=Tab("Islands","🏝️")local PSc=Tab("Scripts","📜")local PTo=Tab("Tools","🔧")local PEs=Tab("ESP","👁️")local PVi=Tab("Visuals","🎨")local POp=Tab("Optimize","⚡")local PSe=Tab("Settings","⚙️")
 task.wait(0.1)if Tabs[1]then Tabs[1].l.TextColor3=C.BG Tabs[1].p.Visible=true Tabs[1].b.BackgroundColor3=A()Tabs[1].b.BackgroundTransparency=0 Tabs[1].g.Transparency=0 TS:Create(Tabs[1].u,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,2)}):Play()end
--- INFO
+-- INFO (con Otros Jugadores)
 local ViewPS=nil local SRefM=nil
 do
 Sec(PInfo,"MI PERFIL","👤")
-local MiC=Instance.new("Frame",PInfo)MiC.Size=UDim2.new(1,0,0,260)MiC.BackgroundColor3=C.BG2 MiC.BackgroundTransparency=0.05 MiC.BorderSizePixel=0 MiC.ZIndex=5 Instance.new("UICorner",MiC).CornerRadius=UDim.new(0,10)
+local MiC=Instance.new("Frame",PInfo)MiC.Size=UDim2.new(1,0,0,270)MiC.BackgroundColor3=C.BG2 MiC.BackgroundTransparency=0.05 MiC.BorderSizePixel=0 MiC.ZIndex=5 Instance.new("UICorner",MiC).CornerRadius=UDim.new(0,10)
 local MiG=Instance.new("UIGradient",MiC)MiG.Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(32,28,40)),ColorSequenceKeypoint.new(1,Color3.fromRGB(20,18,26))})MiG.Rotation=135
 local MiS=Instance.new("UIStroke",MiC)MiS.Thickness=2 MiS.Transparency=0.3 MiS.Color=A()RegS(MiS)
 local MiN=Instance.new("TextLabel",MiC)MiN.Size=UDim2.new(1,-20,0,22)MiN.Position=UDim2.new(0,10,0,8)MiN.BackgroundTransparency=1 MiN.Font=Enum.Font.GothamBold MiN.Text="👤  "..LP.DisplayName MiN.TextSize=12 MiN.TextXAlignment=Enum.TextXAlignment.Left MiN.ZIndex=7 RegL(MiN)
-local sL={}local sN={"📊 Nivel","💎 Gemas","💰 Cash","✨ Exp","❤️ Vida","🎯 Melee","⚔️ Weapon","⚡ Power","💀 Muertes","🥊 Kills"}local sC={A(),C.Cyan,C.Yel,C.Grn,C.Rd,A2(),C.Wh,A(),C.Rd,C.Grn}
-for i,n in ipairs(sN)do local lbl=Instance.new("TextLabel",MiC)lbl.Size=UDim2.new(1,-20,0,20)lbl.Position=UDim2.new(0,10,0,38+(i-1)*20)lbl.BackgroundTransparency=1 lbl.Font=Enum.Font.GothamBold lbl.Text=n..": --"lbl.TextColor3=sC[i]lbl.TextSize=11 lbl.TextXAlignment=Enum.TextXAlignment.Left lbl.ZIndex=7 table.insert(sL,lbl)end
+local sL={}
+local sN={"📊 Nivel","💎 Gemas","💰 Cash","✨ Exp","❤️ Vida","🎯 Melee","⚔️ Weapon","⚡ Power","💀 Muertes","🥊 Kills"}
+local sC={A(),C.Cyan,C.Yel,C.Grn,C.Rd,A2(),C.Wh,A(),C.Rd,C.Grn}
+for i,n in ipairs(sN)do
+    local lbl=Instance.new("TextLabel",MiC)
+    lbl.Size=UDim2.new(1,-20,0,20)
+    lbl.Position=UDim2.new(0,10,0,38+(i-1)*20)
+    lbl.BackgroundTransparency=1
+    lbl.Font=Enum.Font.GothamBold
+    lbl.Text=n..": --"
+    lbl.TextColor3=sC[i]
+    lbl.TextSize=11
+    lbl.TextXAlignment=Enum.TextXAlignment.Left
+    lbl.ZIndex=7
+    table.insert(sL,lbl)
+end
 SRefM=function()
     local tg=ViewPS or LP
     local s=GS(tg)
@@ -417,13 +456,131 @@ SRefM=function()
     sL[4].Text="✨ Exp: "..s.Exp.."/"..s.MaxExp
     sL[5].Text="❤️ Vida: "..s.Health.."/"..s.MaxHealth
     sL[6].Text="🎯 Melee: "..s.Melee
-    sL[7].Text="⚔️ Weapon: "..s.Weapon
-    sL[8].Text="⚡ Power: "..s.Power
+    sL[7].Text="⚔️ Weapon: "..s.Weapon..(s.WName~="--"and " ("..s.WName..")" or "")
+    sL[8].Text="⚡ Power: "..s.Power..(s.PName~="--"and " ("..s.PName..")" or "")
     sL[9].Text="💀 Muertes: "..s.Deaths
     sL[10].Text="🥊 Kills: "..s.Kills
 end
 SRefM()
-task.spawn(function()while true do task.wait(2)if PInfo.Visible then pcall(SRefM)end end end)end
+Sec(PInfo,"OTROS JUGADORES","👥")
+local OC=Instance.new("Frame",PInfo)
+OC.Size=UDim2.new(1,0,0,300)
+OC.BackgroundColor3=C.BG2
+OC.BackgroundTransparency=0.1
+OC.BorderSizePixel=0
+OC.ZIndex=5
+Instance.new("UICorner",OC).CornerRadius=UDim.new(0,10)
+local OCS=Instance.new("UIStroke",OC)
+OCS.Thickness=1.5
+OCS.Transparency=0.4
+OCS.Color=A()
+RegS(OCS)
+local OS=Instance.new("ScrollingFrame",OC)
+OS.Size=UDim2.new(1,-10,1,-10)
+OS.Position=UDim2.new(0,5,0,5)
+OS.BackgroundTransparency=1
+OS.BorderSizePixel=0
+OS.ScrollBarThickness=6
+OS.ScrollBarImageColor3=A()
+OS.CanvasSize=UDim2.new(0,0,0,0)
+OS.ZIndex=6
+pcall(function()OS.AutomaticCanvasSize=Enum.AutomaticSize.Y end)
+Instance.new("UIListLayout",OS).Padding=UDim.new(0,6)
+local function BuildCard(plr)
+    local s=GS(plr)
+    local card=Instance.new("Frame",OS)
+    card.Size=UDim2.new(1,-4,0,140)
+    card.BackgroundColor3=C.BG
+    card.BorderSizePixel=0
+    card.ZIndex=7
+    Instance.new("UICorner",card).CornerRadius=UDim.new(0,8)
+    local cS=Instance.new("UIStroke",card)
+    cS.Thickness=1.5
+    cS.Transparency=0.5
+    cS.Color=A()
+    RegS(cS)
+    local nameL=Instance.new("TextLabel",card)
+    nameL.Size=UDim2.new(1,-16,0,20)
+    nameL.Position=UDim2.new(0,8,0,6)
+    nameL.BackgroundTransparency=1
+    nameL.Font=Enum.Font.GothamBold
+    nameL.Text="👤 "..plr.DisplayName
+    nameL.TextColor3=A()
+    nameL.TextSize=11
+    nameL.TextXAlignment=Enum.TextXAlignment.Left
+    nameL.ZIndex=8
+    RegL(nameL)
+    local sep=Instance.new("Frame",card)
+    sep.Size=UDim2.new(1,-16,0,1)
+    sep.Position=UDim2.new(0,8,0,28)
+    sep.BackgroundColor3=C.BG3
+    sep.BorderSizePixel=0
+    sep.ZIndex=8
+    local statsList={
+        {"📊 Lv",s.Level,A()},
+        {"💎",s.Gems,C.Cyan},
+        {"💰",s.Cash,C.Yel},
+        {"❤️",s.Health.."/"..s.MaxHealth,C.Rd},
+        {"🥊 Melee",s.Melee,C.Cyan},
+        {"⚔️ Weapon",s.Weapon,C.Grn},
+        {"⚡ Power",s.Power,A2()},
+        {"💀 Muertes",s.Deaths,C.Rd},
+        {"🥊 Kills",s.Kills,C.Grn}
+    }
+    for i,d in ipairs(statsList)do
+        local row=math.floor((i-1)/2)
+        local col=(i-1)%2
+        local lbl=Instance.new("TextLabel",card)
+        lbl.Size=UDim2.new(0.5,-12,0,20)
+        lbl.Position=UDim2.new(col*0.5+0.01,8,0,34+row*20)
+        lbl.BackgroundTransparency=1
+        lbl.Font=Enum.Font.GothamSemibold
+        lbl.Text=d[1]..": "..d[2]
+        lbl.TextColor3=d[3]
+        lbl.TextSize=10
+        lbl.TextXAlignment=Enum.TextXAlignment.Left
+        lbl.ZIndex=8
+    end
+end
+local function RefOP()
+    pcall(function()
+        for _,c in ipairs(OS:GetChildren())do
+            if c:IsA("Frame")then c:Destroy()end
+        end
+        local cnt=0
+        for _,p in ipairs(P:GetPlayers())do
+            if p~=LP then
+                cnt=cnt+1
+                pcall(BuildCard,p)
+            end
+        end
+        if cnt==0 then
+            local em=Instance.new("TextLabel",OS)
+            em.Size=UDim2.new(1,-4,0,40)
+            em.BackgroundColor3=C.BG
+            em.BorderSizePixel=0
+            em.Font=Enum.Font.Gotham
+            em.Text="No hay otros jugadores conectados"
+            em.TextColor3=C.Gr
+            em.TextSize=10
+            em.ZIndex=7
+            Instance.new("UICorner",em).CornerRadius=UDim.new(0,6)
+        end
+    end)
+end
+RefOP()
+task.spawn(function()
+    while true do
+        task.wait(2)
+        if PInfo.Visible then
+            pcall(SRefM)
+            pcall(RefOP)
+        end
+    end
+end)
+P.PlayerAdded:Connect(function()task.wait(0.5)pcall(RefOP)end)
+P.PlayerRemoving:Connect(function()task.wait(0.5)pcall(RefOP)end)
+end
 -- PLAYERS
 local SelP=nil
 do
@@ -470,7 +627,7 @@ mb.MouseButton1Click:Connect(function()if AIM.On then AIM.On=false if AIM.C then
 LP.CharacterAdded:Connect(function()if AIM.On then task.wait(1)RsAll()end end)
 Lbl(PAb,"Hitbox de 500 studs (anti-detect)",C.Cyan)
 Lbl(PAb,"Optimizado para Meme Sea",C.Grn)end
--- FLY CON BOTÓN
+-- FLY
 do
 Sec(PFl,"✈ FLY","✈")
 Tog(PFl,"Activar Fly",false,function(v)if v then FlyStart()else FlyStop()end end)
