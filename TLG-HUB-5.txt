@@ -14,7 +14,7 @@ local function Rip(o)o.MouseButton1Click:Connect(function()local r=Instance.new(
 local NH=nil local function GNH()if NH and NH.Parent then return NH end NH=Instance.new("Frame",SG)NH.Size=UDim2.new(0,280,1,-80)NH.Position=UDim2.new(1,-290,0,60)NH.BackgroundTransparency=1 NH.ZIndex=9999 local ll=Instance.new("UIListLayout",NH)ll.Padding=UDim.new(0,8)ll.HorizontalAlignment=Enum.HorizontalAlignment.Right ll.VerticalAlignment=Enum.VerticalAlignment.Top return NH end
 local function PNotif(t,x,c)c=c or A()local h=GNH()local n=Instance.new("Frame",h)n.Size=UDim2.new(1,0,0,52)n.BackgroundColor3=C.BG2 n.BorderSizePixel=0 n.ZIndex=10000 Instance.new("UICorner",n).CornerRadius=UDim.new(0,10)local nS=Instance.new("UIStroke",n)nS.Color=c nS.Thickness=2 local b=Instance.new("Frame",n)b.Size=UDim2.new(0,3,1,-12)b.Position=UDim2.new(0,0,0,6)b.BackgroundColor3=c b.BorderSizePixel=0 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)local tL=Instance.new("TextLabel",n)tL.Size=UDim2.new(1,-20,0,18)tL.Position=UDim2.new(0,14,0,6)tL.BackgroundTransparency=1 tL.Font=Enum.Font.GothamBold tL.Text=t tL.TextColor3=c tL.TextSize=11 tL.TextXAlignment=Enum.TextXAlignment.Left tL.ZIndex=10001 local xL=Instance.new("TextLabel",n)xL.Size=UDim2.new(1,-20,0,18)xL.Position=UDim2.new(0,14,0,24)xL.BackgroundTransparency=1 xL.Font=Enum.Font.Gotham xL.Text=x xL.TextColor3=C.Wh xL.TextSize=10 xL.TextXAlignment=Enum.TextXAlignment.Left xL.TextTruncate=Enum.TextTruncate.AtEnd xL.ZIndex=10001 n.Position=UDim2.new(1,50,0,0)TS:Create(n,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.new(0,0,0,0)}):Play()task.delay(2.5,function()if not n.Parent then return end TS:Create(n,TweenInfo.new(0.3),{Position=UDim2.new(1,50,0,0),BackgroundTransparency=1}):Play()task.wait(0.35)pcall(function()n:Destroy()end)end)end
 local PC=nil pcall(function()local pm=LP:WaitForChild("PlayerScripts",10)if pm then local ps=pm:WaitForChild("PlayerModule",5)if ps then local ok,m=pcall(require,ps)if ok and m and type(m.GetControls)=="function" then PC=m:GetControls()end end end end)
--- FOV CIRCLE
+-- FOV
 local FOVCircle=nil
 local FOVSettings={Enabled=false,Radius=150,Color=A(),Transparency=0.5}
 local function UpdFOV()
@@ -28,11 +28,11 @@ local function UpdFOV()
     end)
 end
 RS.RenderStepped:Connect(function()if FOVCircle then UpdFOV()end end)
--- GS
+-- GS (sin Kills/Deaths)
 local function GS(plr)
-local s={Level=0,Health=0,MaxHealth=0,Gems=0,Cash=0,Exp=0,MaxExp=0,Kills=0,Deaths=0,Melee=0,Weapon=0,Power=0,WName="--",PName="--"}
+local s={Level=0,Health=0,MaxHealth=0,Gems=0,Cash=0,Exp=0,MaxExp=0,Melee=0,Weapon=0,Power=0,WName="--",PName="--"}
 pcall(function()local ch=plr.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then s.Health=math.floor(hu.Health)s.MaxHealth=math.floor(hu.MaxHealth)end end end)
-local function sc(f,d)if not f or(d or 0)>4 then return end for _,v in ipairs(f:GetChildren())do if v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue")then local n=v.Name:lower()local val=tonumber(v.Value)or 0 if n=="level"or n=="lvl"then s.Level=val elseif n=="gem"or n=="gems"then s.Gems=val elseif n=="cash"or n=="money"then s.Cash=val elseif n=="exp"or n=="xp"then s.Exp=val elseif n=="maxexp"or n=="max_exp"then s.MaxExp=val elseif n=="kills"or n=="kill"or n=="killcount"then s.Kills=val elseif n=="deaths"or n=="death"or n=="deathcount"then s.Deaths=val elseif n=="melee"or n=="meleelevel"then s.Melee=val elseif n=="sword"or n=="swordlevel"or n=="weapon"or n=="arma"then s.Weapon=val elseif n=="power"or n=="poder"or n=="memepowerlevel"then s.Power=val elseif n=="swordequip"or n=="weaponequip"then s.WName=tostring(v.Value)elseif n=="powerequip"then s.PName=tostring(v.Value)end elseif v:IsA("Folder")or v:IsA("Configuration")then sc(v,(d or 0)+1)end end end
+local function sc(f,d)if not f or(d or 0)>4 then return end for _,v in ipairs(f:GetChildren())do if v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue")then local n=v.Name:lower()local val=tonumber(v.Value)or 0 if n=="level"or n=="lvl"then s.Level=val elseif n=="gem"or n=="gems"then s.Gems=val elseif n=="cash"or n=="money"then s.Cash=val elseif n=="exp"or n=="xp"then s.Exp=val elseif n=="maxexp"or n=="max_exp"then s.MaxExp=val elseif n=="melee"or n=="meleelevel"then s.Melee=val elseif n=="sword"or n=="swordlevel"or n=="weapon"or n=="arma"then s.Weapon=val elseif n=="power"or n=="poder"or n=="memepowerlevel"then s.Power=val elseif n=="swordequip"or n=="weaponequip"then s.WName=tostring(v.Value)elseif n=="powerequip"then s.PName=tostring(v.Value)end elseif v:IsA("Folder")or v:IsA("Configuration")then sc(v,(d or 0)+1)end end end
 for _,n in ipairs({"leaderstats","PlayerData","Stats","Data","Values","SaveData","Statistics"})do pcall(function()sc(plr:FindFirstChild(n),0)end)end
 if s.Level==0 then pcall(function()sc(plr,0)end)end
 return s
@@ -41,9 +41,38 @@ local HB={On=false,Sz=20,Tr=0.3,C=nil}
 local function AHB(p)if p==LP then return end local ch=p.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")if not h then return end pcall(function()h.Size=Vector3.new(HB.Sz,HB.Sz,HB.Sz)h.Transparency=HB.Tr h.LocalTransparencyModifier=0 h.Material=Enum.Material.Neon h.Color=A()h.CanCollide=false end)end
 local function HBS()if HB.C then return end HB.On=true for _,p in ipairs(P:GetPlayers())do if p~=LP then pcall(AHB,p)end end HB.C=RS.Heartbeat:Connect(function()if not HB.On then return end for _,p in ipairs(P:GetPlayers())do if p~=LP then pcall(AHB,p)end end end)end
 local function HBE()HB.On=false if HB.C then pcall(function()HB.C:Disconnect()end)HB.C=nil end end
-local GO={T=nil,C=nil,D=15,S=3,Al=5,Ang=0}
+-- GOD ORB MEJORADO
+local GO={T=nil,C=nil,D=15,S=2,Al=8,Ang=0,SafeY=50,MaxDist=100}
 local function GOS()GO.T=nil if GO.C then pcall(function()GO.C:Disconnect()end)GO.C=nil end local ch=LP.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then pcall(function()hu.PlatformStand=false end)end end end
-local function GOSt(p)if not p or not p.Parent then return end GOS()GO.T=p GO.Ang=0 GO.C=RS.Heartbeat:Connect(function(dt)if not GO.T or not GO.T.Parent then GOS()return end local tc=GO.T.Character local mc=LP.Character local th=tc and tc:FindFirstChild("HumanoidRootPart")local mh=mc and mc:FindFirstChild("HumanoidRootPart")local thu=tc and tc:FindFirstChildOfClass("Humanoid")local mhu=mc and mc:FindFirstChildOfClass("Humanoid")if not th or not mh or not thu or thu.Health<=0 then GOS()return end if mhu then mhu.PlatformStand=true end GO.Ang=GO.Ang+GO.S*dt if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.Al,math.sin(GO.Ang)*GO.D)mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)end)end
+local function GOSt(p)
+    if not p or not p.Parent then return end
+    GOS()
+    GO.T=p
+    GO.Ang=0
+    local mh0=LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+    if mh0 then GO.SafeY=math.max(mh0.Position.Y+5,50) end
+    GO.C=RS.Heartbeat:Connect(function(dt)
+        if not GO.T or not GO.T.Parent then GOS()return end
+        local tc=GO.T.Character
+        local mc=LP.Character
+        if not tc or not mc then GOS()return end
+        local th=tc:FindFirstChild("HumanoidRootPart")
+        local mh=mc:FindFirstChild("HumanoidRootPart")
+        local thu=tc:FindFirstChildOfClass("Humanoid")
+        local mhu=mc:FindFirstChildOfClass("Humanoid")
+        if not th or not mh or not thu or thu.Health<=0 then GOS()return end
+        local dist=(th.Position-mh.Position).Magnitude
+        if dist>GO.MaxDist then GOS()return end
+        if mhu then mhu.PlatformStand=true end
+        GO.Ang=GO.Ang+GO.S*dt
+        if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end
+        local targetY=th.Position.Y+GO.Al
+        if targetY<GO.SafeY then targetY=GO.SafeY end
+        local off=Vector3.new(math.cos(GO.Ang)*GO.D,0,math.sin(GO.Ang)*GO.D)
+        local newPos=Vector3.new(th.Position.X+off.X,targetY,th.Position.Z+off.Z)
+        mh.CFrame=CFrame.new(newPos,Vector3.new(th.Position.X,targetY,th.Position.Z))
+    end)
+end
 local Sp={T=nil,C=nil}
 local function SpS()if Sp.C then pcall(function()Sp.C:Disconnect()end)Sp.C=nil end Sp.T=nil if LP.Character then local hu=LP.Character:FindFirstChildOfClass("Humanoid")if hu and Cam then Cam.CameraSubject=hu end end end
 local function SpSt(p)if not p or not p.Parent then return end SpS()Sp.T=p Sp.C=RS.RenderStepped:Connect(function()if not Sp.T or not Sp.T.Parent then SpS()return end local ch=Sp.T.Character if not ch then SpS()return end local hu=ch:FindFirstChildOfClass("Humanoid")if hu and hu.Health>0 and Cam then Cam.CameraSubject=hu elseif hu and hu.Health<=0 then SpS()end end)end
@@ -171,41 +200,160 @@ local function Lbl(p,t,c)if typeof(c)~="Color3"then c=C.Gr end local l=Instance.
 local function Tog(p,t,d,cb)local sv=d==true local f=Instance.new("Frame",p)f.Size=UDim2.new(1,0,0,36)f.BackgroundColor3=C.BG2 f.BackgroundTransparency=0.1 f.BorderSizePixel=0 f.ZIndex=5 Instance.new("UICorner",f).CornerRadius=UDim.new(0,6)local l=Instance.new("TextLabel",f)l.Size=UDim2.new(1,-70,1,0)l.Position=UDim2.new(0,12,0,0)l.BackgroundTransparency=1 l.Font=Enum.Font.GothamSemibold l.Text=t l.TextColor3=C.Wh l.TextSize=11 l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=7 local sl=Instance.new("TextLabel",f)sl.Size=UDim2.new(0,40,1,0)sl.Position=UDim2.new(1,-95,0,0)sl.BackgroundTransparency=1 sl.Font=Enum.Font.GothamBold sl.Text=sv and "ON"or"OFF"sl.TextColor3=sv and C.Grn or C.Rd sl.TextSize=10 sl.TextXAlignment=Enum.TextXAlignment.Right sl.ZIndex=7 local sw=Instance.new("Frame",f)sw.Size=UDim2.new(0,40,0,20)sw.Position=UDim2.new(1,-52,0.5,-10)sw.BackgroundColor3=sv and A()or C.GrD sw.BorderSizePixel=0 sw.ZIndex=6 Instance.new("UICorner",sw).CornerRadius=UDim.new(1,0)local kn=Instance.new("Frame",sw)kn.Size=UDim2.new(0,16,0,16)kn.Position=sv and UDim2.new(1,-18,0.5,-8)or UDim2.new(0,2,0.5,-8)kn.BackgroundColor3=C.Wh kn.BorderSizePixel=0 kn.ZIndex=7 Instance.new("UICorner",kn).CornerRadius=UDim.new(1,0)local st=sv local btn=Instance.new("TextButton",f)btn.Size=UDim2.new(1,0,1,0)btn.BackgroundTransparency=1 btn.Text=""btn.ZIndex=10 btn.MouseButton1Click:Connect(function()st=not st TS:Create(sw,TweenInfo.new(0.3,Enum.EasingStyle.Back),{BackgroundColor3=st and A()or C.GrD}):Play()TS:Create(kn,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Position=st and UDim2.new(1,-18,0.5,-8)or UDim2.new(0,2,0.5,-8)}):Play()sl.Text=st and "ON"or"OFF"sl.TextColor3=st and C.Grn or C.Rd pcall(cb,st)end)end
 local function Sli(p,t,mn,mx,d,cb)local sv=d local f=Instance.new("Frame",p)f.Size=UDim2.new(1,0,0,46)f.BackgroundColor3=C.BG2 f.BackgroundTransparency=0.1 f.BorderSizePixel=0 f.ZIndex=5 Instance.new("UICorner",f).CornerRadius=UDim.new(0,6)local l=Instance.new("TextLabel",f)l.Size=UDim2.new(0.6,-14,0,14)l.Position=UDim2.new(0,12,0,6)l.BackgroundTransparency=1 l.Font=Enum.Font.GothamSemibold l.Text=t l.TextColor3=C.Wh l.TextSize=10 l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=7 local vl=Instance.new("TextLabel",f)vl.Size=UDim2.new(0.4,-10,0,14)vl.Position=UDim2.new(0.6,2,0,6)vl.BackgroundTransparency=1 vl.Font=Enum.Font.GothamBold vl.Text=tostring(sv)vl.TextSize=10 vl.TextXAlignment=Enum.TextXAlignment.Right vl.ZIndex=7 RegL(vl)local b=Instance.new("Frame",f)b.Size=UDim2.new(1,-24,0,8)b.Position=UDim2.new(0,12,0,30)b.BackgroundColor3=C.BG b.BorderSizePixel=0 b.ZIndex=6 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)local fi=Instance.new("Frame",b)fi.Size=UDim2.new((sv-mn)/(mx-mn),0,1,0)fi.BorderSizePixel=0 fi.ZIndex=7 Instance.new("UICorner",fi).CornerRadius=UDim.new(1,0)RegB(fi)local kn=Instance.new("Frame",b)kn.Size=UDim2.new(0,16,0,16)kn.Position=UDim2.new((sv-mn)/(mx-mn),-8,0.5,-8)kn.BackgroundColor3=C.Wh kn.BorderSizePixel=0 kn.ZIndex=8 Instance.new("UICorner",kn).CornerRadius=UDim.new(1,0)local tn=Instance.new("TextButton",f)tn.Size=UDim2.new(1,-8,0,46)tn.Position=UDim2.new(0,4,0,0)tn.BackgroundTransparency=1 tn.Text=""tn.ZIndex=10 local dg2=false local function up(i)local pp=math.clamp((i.Position.X-b.AbsolutePosition.X)/b.AbsoluteSize.X,0,1)local v=math.floor(mn+(mx-mn)*pp)fi.Size=UDim2.new(pp,0,1,0)kn.Position=UDim2.new(pp,-8,0.5,-8)vl.Text=tostring(v)pcall(cb,v)end tn.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg2=true up(i)end end)UI.InputChanged:Connect(function(i)if dg2 and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then up(i)end end)UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg2=false end end)end
 local function Btn(p,t,c,cb)local b=Instance.new("TextButton",p)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=C.BG2 b.BackgroundTransparency=0.1 b.Font=Enum.Font.GothamBold b.Text=t b.TextColor3=c or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)local bS=Instance.new("UIStroke",b)bS.Thickness=1.5 bS.Transparency=0.4 bS.Color=A()RegS(bS)Rip(b)b.MouseButton1Click:Connect(function()pcall(cb)end)return b end
-local PInfo=Tab("Info","📊")local PPl=Tab("Players","👥")local PCb=Tab("Combat","⚔️")local PAb=Tab("Aimbot","🎯")local PFl=Tab("Fly","✈")local PIs=Tab("Islands","🏝️")local PSc=Tab("Scripts","📜")local PTo=Tab("Tools","🔧")local PEs=Tab("ESP","👁️")local PVi=Tab("Visuals","🎨")local POp=Tab("Optimize","⚡")local PSe=Tab("Settings","⚙️")
+local PInfo=Tab("Info","📊")local PCb=Tab("Combat","⚔️")local PAb=Tab("Aimbot","🎯")local PFl=Tab("Fly","✈")local PIs=Tab("Islands","🏝️")local PSc=Tab("Scripts","📜")local PTo=Tab("Tools","🔧")local PEs=Tab("ESP","👁️")local PVi=Tab("Visuals","🎨")local POp=Tab("Optimize","⚡")local PSe=Tab("Settings","⚙️")
 task.wait(0.1)if Tabs[1]then Tabs[1].l.TextColor3=C.BG Tabs[1].p.Visible=true Tabs[1].b.BackgroundColor3=A()Tabs[1].b.BackgroundTransparency=0 TS:Create(Tabs[1].u,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,2)}):Play()end
--- INFO
-local ViewPS=nil local SRefM=nil
+-- INFO: LISTA DE JUGADORES CON STATS Y BOTONES
 do
-Sec(PInfo,"MI PERFIL","👤")
-local MiC=Instance.new("Frame",PInfo)MiC.Size=UDim2.new(1,0,0,270)MiC.BackgroundColor3=C.BG2 MiC.BackgroundTransparency=0.05 MiC.BorderSizePixel=0 MiC.ZIndex=5 Instance.new("UICorner",MiC).CornerRadius=UDim.new(0,10)
-local MiS=Instance.new("UIStroke",MiC)MiS.Thickness=2 MiS.Transparency=0.3 MiS.Color=A()RegS(MiS)
-local MiN=Instance.new("TextLabel",MiC)MiN.Size=UDim2.new(1,-20,0,22)MiN.Position=UDim2.new(0,10,0,8)MiN.BackgroundTransparency=1 MiN.Font=Enum.Font.GothamBold MiN.Text="👤  "..LP.DisplayName MiN.TextSize=12 MiN.TextXAlignment=Enum.TextXAlignment.Left MiN.ZIndex=7 RegL(MiN)
-local sL={}
-local sN={"📊 Nivel","💎 Gemas","💰 Cash","✨ Exp","❤️ Vida","🎯 Melee","⚔️ Weapon","⚡ Power","💀 Muertes","🥊 Kills"}
-local sC={A(),C.Cyan,C.Yel,C.Grn,C.Rd,A2(),C.Wh,A(),C.Rd,C.Grn}
-for i,n in ipairs(sN)do local lbl=Instance.new("TextLabel",MiC)lbl.Size=UDim2.new(1,-20,0,20)lbl.Position=UDim2.new(0,10,0,38+(i-1)*20)lbl.BackgroundTransparency=1 lbl.Font=Enum.Font.GothamBold lbl.Text=n..": --"lbl.TextColor3=sC[i]lbl.TextSize=11 lbl.TextXAlignment=Enum.TextXAlignment.Left lbl.ZIndex=7 table.insert(sL,lbl)end
-SRefM=function()local tg=ViewPS or LP local s=GS(tg)MiN.Text="👤  "..tg.DisplayName..(ViewPS and "  (viendo)" or "  (vos)")sL[1].Text="📊 Nivel: "..s.Level sL[2].Text="💎 Gemas: "..s.Gems sL[3].Text="💰 Cash: "..s.Cash sL[4].Text="✨ Exp: "..s.Exp.."/"..s.MaxExp sL[5].Text="❤️ Vida: "..s.Health.."/"..s.MaxHealth sL[6].Text="🎯 Melee: "..s.Melee sL[7].Text="⚔️ Weapon: "..s.Weapon..(s.WName~="--"and " ("..s.WName..")" or "")sL[8].Text="⚡ Power: "..s.Power..(s.PName~="--"and " ("..s.PName..")" or "")sL[9].Text="💀 Muertes: "..s.Deaths sL[10].Text="🥊 Kills: "..s.Kills end
-SRefM()
-task.spawn(function()while true do task.wait(2)if PInfo.Visible then pcall(SRefM)end end end)end
--- PLAYERS
-local SelP=nil
-do
-Sec(PPl,"LISTA","👥")
-local lF=Instance.new("Frame",PPl)lF.Size=UDim2.new(1,0,0,200)lF.BackgroundColor3=C.BG2 lF.BackgroundTransparency=0.1 lF.BorderSizePixel=0 lF.ZIndex=5 Instance.new("UICorner",lF).CornerRadius=UDim.new(0,8)
-local lS=Instance.new("ScrollingFrame",lF)lS.Size=UDim2.new(1,-10,1,-10)lS.Position=UDim2.new(0,5,0,5)lS.BackgroundTransparency=1 lS.BorderSizePixel=0 lS.ScrollBarThickness=5 lS.ScrollBarImageColor3=A()lS.CanvasSize=UDim2.new(0,0,0,0)lS.ZIndex=6 pcall(function()lS.AutomaticCanvasSize=Enum.AutomaticSize.Y end)Instance.new("UIListLayout",lS).Padding=UDim.new(0,4)
-local AP=Instance.new("Frame",PPl)AP.Size=UDim2.new(1,0,0,200)AP.BackgroundColor3=C.BG2 AP.BackgroundTransparency=0.1 AP.BorderSizePixel=0 AP.Visible=false AP.ZIndex=5 Instance.new("UICorner",AP).CornerRadius=UDim.new(0,8)
-local apL=Instance.new("TextLabel",AP)apL.Size=UDim2.new(1,-20,0,22)apL.Position=UDim2.new(0,10,0,6)apL.BackgroundTransparency=1 apL.Font=Enum.Font.GothamBold apL.Text="🎯 Ninguno"apL.TextSize=12 apL.TextXAlignment=Enum.TextXAlignment.Left apL.ZIndex=7 RegL(apL)
-local function MAB(t,c,y,cb)local b=Instance.new("TextButton",AP)b.Size=UDim2.new(1,-20,0,28)b.Position=UDim2.new(0,10,0,y)b.BackgroundColor3=C.BG3 b.Font=Enum.Font.GothamBold b.Text=t b.TextColor3=c b.TextSize=10 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=6 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)Rip(b)b.MouseButton1Click:Connect(function()if not SelP then return end pcall(cb)end)return b end
-MAB("📊 Ver Stats",A(),34,function()if SelP then ViewPS=SelP for _,t in ipairs(Tabs)do t.l.TextColor3=C.Gr t.p.Visible=false t.b.BackgroundColor3=C.BG3 t.b.BackgroundTransparency=1 end Tabs[1].l.TextColor3=C.BG Tabs[1].p.Visible=true Tabs[1].b.BackgroundColor3=A()Tabs[1].b.BackgroundTransparency=0 if SRefM then SRefM()end end end)
-MAB("🌀 God Orb",A(),66,function()if SelP then GOSt(SelP)end end)
-MAB("🛑 Stop Orb",C.Rd,98,function()GOS()end)
-MAB("🎥 Spectate",C.Cyan,130,function()if SelP then SpSt(SelP)end end)
-MAB("🛑 Stop Spec",C.Rd,162,function()SpS()end)
-local function Pop()for _,c in ipairs(lS:GetChildren())do if c:IsA("TextButton")then c:Destroy()end end for _,p in ipairs(P:GetPlayers())do if p~=LP then local s=GS(p)local b=Instance.new("TextButton",lS)b.Size=UDim2.new(1,-4,0,38)b.BackgroundColor3=(SelP==p)and A()or C.BG b.Text=""b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=7 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)local n=Instance.new("TextLabel",b)n.Size=UDim2.new(0.6,-8,0,18)n.Position=UDim2.new(0,8,0,4)n.BackgroundTransparency=1 n.Font=Enum.Font.GothamBold n.Text=p.DisplayName n.TextColor3=(SelP==p)and C.BG or C.Wh n.TextSize=10 n.TextXAlignment=Enum.TextXAlignment.Left n.ZIndex=8 local h=Instance.new("TextLabel",b)h.Size=UDim2.new(0.4,-8,0,18)h.Position=UDim2.new(0.6,0,0,4)h.BackgroundTransparency=1 h.Font=Enum.Font.GothamBold h.Text="❤️ "..s.Health h.TextColor3=(SelP==p)and C.BG or C.Rd h.TextSize=9 h.TextXAlignment=Enum.TextXAlignment.Right h.ZIndex=8 b.MouseButton1Click:Connect(function()SelP=p apL.Text="🎯 "..p.DisplayName AP.Visible=true b.BackgroundColor3=A()end)end end end
-Pop()
-P.PlayerAdded:Connect(function()task.wait(0.5)Pop()end)
-P.PlayerRemoving:Connect(function(p)task.wait(0.5)if SelP==p then SelP=nil AP.Visible=false GOS()SpS()end Pop()end)
-task.spawn(function()while true do task.wait(3)if PPl.Visible then pcall(Pop)end end end)end
+Sec(PInfo,"📊 LISTA DE JUGADORES","📊")
+local SPJ=Instance.new("ScrollingFrame",PInfo)
+SPJ.Size=UDim2.new(1,0,0,400)
+SPJ.BackgroundColor3=C.BG2
+SPJ.BackgroundTransparency=0.1
+SPJ.BorderSizePixel=0
+SPJ.ScrollBarThickness=6
+SPJ.ScrollBarImageColor3=A()
+SPJ.CanvasSize=UDim2.new(0,0,0,0)
+SPJ.ZIndex=5
+pcall(function()SPJ.AutomaticCanvasSize=Enum.AutomaticSize.Y end)
+Instance.new("UICorner",SPJ).CornerRadius=UDim.new(0,8)
+local SPJS=Instance.new("UIStroke",SPJ)
+SPJS.Thickness=1.5
+SPJS.Transparency=0.4
+SPJS.Color=A()
+RegS(SPJS)
+local SPJL=Instance.new("UIListLayout",SPJ)
+SPJL.Padding=UDim.new(0,8)
+local SPJP=Instance.new("UIPadding",SPJ)
+SPJP.PaddingTop=UDim.new(0,8)
+SPJP.PaddingLeft=UDim.new(0,8)
+SPJP.PaddingRight=UDim.new(0,8)
+SPJP.PaddingBottom=UDim.new(0,8)
+
+local function BuildCard(plr,isMe)
+    local s=GS(plr)
+    local card=Instance.new("Frame",SPJ)
+    card.Size=UDim2.new(1,-4,0,290)
+    card.BackgroundColor3=C.BG
+    card.BorderSizePixel=0
+    card.ZIndex=7
+    Instance.new("UICorner",card).CornerRadius=UDim.new(0,8)
+    local cS=Instance.new("UIStroke",card)
+    cS.Thickness=1.5
+    cS.Transparency=0.4
+    cS.Color=isMe and A2() or A()
+    RegS(cS)
+    local n=Instance.new("TextLabel",card)
+    n.Size=UDim2.new(1,-16,0,22)
+    n.Position=UDim2.new(0,8,0,6)
+    n.BackgroundTransparency=1
+    n.Font=Enum.Font.GothamBold
+    n.Text=(isMe and "👑 " or "👤 ")..plr.DisplayName..(isMe and " (vos)" or "")
+    n.TextColor3=isMe and A2() or A()
+    n.TextSize=12
+    n.TextXAlignment=Enum.TextXAlignment.Left
+    n.ZIndex=8
+    RegL(n)
+    local sep=Instance.new("Frame",card)
+    sep.Size=UDim2.new(1,-16,0,1)
+    sep.Position=UDim2.new(0,8,0,30)
+    sep.BackgroundColor3=C.BG3
+    sep.BorderSizePixel=0
+    sep.ZIndex=8
+    local stats={
+        {"📊 Nivel",s.Level,A()},
+        {"💎 Gemas",s.Gems,C.Cyan},
+        {"💰 Cash",s.Cash,C.Yel},
+        {"✨ Exp",s.Exp.."/"..s.MaxExp,C.Grn},
+        {"❤️ Vida",s.Health.."/"..s.MaxHealth,C.Rd},
+        {"🎯 Melee",s.Melee,C.Cyan},
+        {"⚔️ Weapon",s.Weapon..(s.WName~="--"and " ("..s.WName..")" or ""),C.Grn},
+        {"⚡ Power",s.Power..(s.PName~="--"and " ("..s.PName..")" or ""),A2()},
+    }
+    for i,d in ipairs(stats)do
+        local row=Instance.new("TextLabel",card)
+        row.Size=UDim2.new(1,-16,0,18)
+        row.Position=UDim2.new(0,8,0,36+(i-1)*20)
+        row.BackgroundTransparency=1
+        row.Font=Enum.Font.GothamSemibold
+        row.Text=d[1]..": "..tostring(d[2])
+        row.TextColor3=d[3]
+        row.TextSize=10
+        row.TextXAlignment=Enum.TextXAlignment.Left
+        row.ZIndex=8
+    end
+    if not isMe then
+        local gb=Instance.new("TextButton",card)
+        gb.Size=UDim2.new(0.5,-12,0,28)
+        gb.Position=UDim2.new(0,8,0,206)
+        gb.BackgroundColor3=C.BG3
+        gb.Font=Enum.Font.GothamBold
+        gb.Text="🌀 God Orb"
+        gb.TextColor3=A()
+        gb.TextSize=10
+        gb.BorderSizePixel=0
+        gb.AutoButtonColor=false
+        gb.ZIndex=8
+        Instance.new("UICorner",gb).CornerRadius=UDim.new(0,6)
+        Rip(gb)
+        gb.MouseButton1Click:Connect(function()
+            if GO.T==plr then
+                GOS()
+                gb.Text="🌀 God Orb"
+                PNotif("🌀 God Orb","Detenido",C.Rd)
+            else
+                GOSt(plr)
+                gb.Text="🛑 Detener"
+                PNotif("🌀 God Orb","Orbitando "..plr.DisplayName,C.Grn)
+            end
+        end)
+        local sb=Instance.new("TextButton",card)
+        sb.Size=UDim2.new(0.5,-12,0,28)
+        sb.Position=UDim2.new(0.5,4,0,206)
+        sb.BackgroundColor3=C.BG3
+        sb.Font=Enum.Font.GothamBold
+        sb.Text="🎥 Spectate"
+        sb.TextColor3=C.Cyan
+        sb.TextSize=10
+        sb.BorderSizePixel=0
+        sb.AutoButtonColor=false
+        sb.ZIndex=8
+        Instance.new("UICorner",sb).CornerRadius=UDim.new(0,6)
+        Rip(sb)
+        sb.MouseButton1Click:Connect(function()
+            if Sp.T==plr then
+                SpS()
+                sb.Text="🎥 Spectate"
+                PNotif("🎥","Detenido",C.Rd)
+            else
+                SpSt(plr)
+                sb.Text="🛑 Stop"
+                PNotif("🎥","Viendo "..plr.DisplayName,C.Cyan)
+            end
+        end)
+    end
+end
+
+local function RefStats()
+    pcall(function()
+        for _,c in ipairs(SPJ:GetChildren())do
+            if c:IsA("Frame")then c:Destroy()end
+        end
+        BuildCard(LP,true)
+        for _,p in ipairs(P:GetPlayers())do
+            if p~=LP then BuildCard(p,false)end
+        end
+    end)
+end
+RefStats()
+task.spawn(function()
+    while true do
+        task.wait(2)
+        if PInfo.Visible then pcall(RefStats)end
+    end
+end)
+P.PlayerAdded:Connect(function()task.wait(0.5)pcall(RefStats)end)
+P.PlayerRemoving:Connect(function()task.wait(0.5)pcall(RefStats)end)
+end
 -- COMBAT
 do
 Sec(PCb,"🔵 HITBOX","🔵")
@@ -236,7 +384,7 @@ local mb=Instance.new("TextButton",PAb)mb.Size=UDim2.new(1,0,0,48)mb.BackgroundC
 mb.MouseButton1Click:Connect(function()if AIM.On then AIM.On=false if AIM.C then pcall(function()AIM.C:Disconnect()end)AIM.C=nil end RsAll()mb.Text="🎯 ACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()PNotif("🎯 Aimbot","Desactivado",C.Rd)else AIM.On=true for _,p in ipairs(P:GetPlayers())do if p~=LP and InR(p)then ApA(p)end end AIM.C=RS.Heartbeat:Connect(Lp)mb.Text="🛑 DESACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()PNotif("🎯 Aimbot","Activado",C.Grn)end end)
 LP.CharacterAdded:Connect(function()if AIM.On then task.wait(1)RsAll()end end)
 Lbl(PAb,"Hitbox de 500 studs (anti-detect)",C.Cyan)end
--- FLY con SLIDER
+-- FLY
 do
 Sec(PFl,"✈ FLY","✈")
 Tog(PFl,"Activar Fly",false,function(v)if v then FlyS()else FlyE()end end)
