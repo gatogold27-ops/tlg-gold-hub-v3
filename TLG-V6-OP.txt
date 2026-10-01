@@ -1,4 +1,4 @@
--- TLG GOLD HUB V6 - FULL DELTA-SAFE (Sin Auto-Exec)
+-- TLG GOLD HUB V6 - FIX DELTA KEEP-ALIVE
 local TS=game:GetService("TweenService")
 local UI=game:GetService("UserInputService")
 local P=game:GetService("Players")
@@ -15,31 +15,39 @@ local LP=P.LocalPlayer
 local Cam=workspace.CurrentCamera
 local IS_M=UI.TouchEnabled and not UI.KeyboardEnabled
 
--- ===== ANTI-DETECT =====
+print("[TLG] Inicio OK")
+
+-- ANTI-DETECT
 local AD={Jit=true,RL=true,Smooth=true,Max=20,MinP=0.1,MaxP=0.5}
 local function Jit(v) return AD.Jit and math.max(v*0.7,v*(0.7+math.random()*0.6)) or v end
 local function SmTP(a,b) return AD.Smooth and a+((b-a).Unit*math.min((b-a).Magnitude,150)) or b end
 local function RandP() return AD.MinP+math.random()*(AD.MaxP-AD.MinP) end
 
--- ===== GUI PARENT =====
+-- GUI PARENT
 local function GP()
     local r=nil
     pcall(function() if gethui then local h=gethui() if h and h~=game then r=h end end end)
     if r then return r end
-    pcall(function() local f=Instance.new("Folder") f.Parent=CG f:Destroy() r=CG end)
-    return r or LP:WaitForChild("PlayerGui")
+    return CG
 end
 local SP=GP()
-for _,n in ipairs({"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7","TLG_GoldV8","TLG_FAB_Float","TLG_Watermark"}) do
+for _,n in ipairs({"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7","TLG_GoldV8","TLG_FAB_Float","TLG_Watermark","TLG_Diag"}) do
     pcall(function() local o=SP:FindFirstChild(n) if o then o:Destroy() end end)
     pcall(function() local o=CG:FindFirstChild(n) if o then o:Destroy() end end)
 end
-local SG=Instance.new("ScreenGui")
-SG.Name="TLG_GoldV6" SG.ResetOnSpawn=false SG.IgnoreGuiInset=true SG.DisplayOrder=200
-pcall(function() SG.Parent=SP end)
-if not SG.Parent then pcall(function() SG.Parent=CG end) end
 
--- ===== TEMA =====
+local SG=Instance.new("ScreenGui")
+SG.Name="TLG_GoldV6"
+SG.ResetOnSpawn=false
+SG.IgnoreGuiInset=true
+SG.DisplayOrder=999
+pcall(function() if syn and syn.protect_gui then syn.protect_gui(SG) end end)
+pcall(function() if protect_gui then protect_gui(SG) end end)
+SG.Parent=SP
+if not SG.Parent then SG.Parent=CG end
+print("[TLG] GUI creada")
+
+-- TEMA
 local TH={Gold=Color3.fromRGB(255,215,0),Purple=Color3.fromRGB(190,90,255),Cyan=Color3.fromRGB(0,240,255),Red=Color3.fromRGB(255,70,90),Green=Color3.fromRGB(80,255,130),Pink=Color3.fromRGB(255,110,210),Orange=Color3.fromRGB(255,160,60),White=Color3.fromRGB(250,250,255)}
 local CurT="Gold"
 local CA=nil
@@ -78,7 +86,7 @@ local function Ripple(o)
     end)
 end
 
--- ===== NOTIF =====
+-- NOTIF
 local NH=nil
 local function GNH()
     if NH and NH.Parent then return NH end
@@ -102,7 +110,7 @@ local function Ntf(t,x,c)
     task.delay(2.5,function() if n.Parent then TS:Create(n,TweenInfo.new(0.3),{Position=UDim2.new(1,50,0,0),BackgroundTransparency=1}):Play() task.wait(0.35) pcall(function() n:Destroy() end) end end)
 end
 
--- ===== PLAYER MODULE =====
+-- PLAYER MODULE
 local PC=nil
 pcall(function()
     local pm=LP:WaitForChild("PlayerScripts",10)
@@ -112,7 +120,7 @@ pcall(function()
     end
 end)
 
--- ===== FOV =====
+-- FOV
 local FOVC=nil
 local DOK=false
 pcall(function() if Drawing and Drawing.new then DOK=true end end)
@@ -127,7 +135,7 @@ local function UpFOV()
 end
 RS.RenderStepped:Connect(function() if FOVC then UpFOV() end end)
 
--- ===== STATS =====
+-- STATS
 local function GS(p)
     local s={Lv=0,HP=0,MHP=0,Gem=0,Cash=0,Pow=0,Melee=0,Weapon=0}
     pcall(function()
@@ -152,7 +160,7 @@ local function GS(p)
     return s
 end
 
--- ===== HITBOX =====
+-- HITBOX
 local HB={On=false,Sz=50,Tr=0.5,C=nil}
 local function AH(p)
     if p==LP then return end
@@ -170,7 +178,7 @@ local function HBS()
 end
 local function HBE() HB.On=false if HB.C then HB.C:Disconnect() HB.C=nil end end
 
--- ===== GOD ORB =====
+-- GOD ORB
 local GO={T=nil,C=nil,D=8,S=5,Al=3,Ang=0,On=false}
 local function GOS()
     GO.T=nil GO.On=false
@@ -205,7 +213,7 @@ local function GOSt(p)
     end)
 end
 
--- ===== SPECTATE =====
+-- SPECTATE
 local Sp={T=nil,C=nil}
 local function SpS()
     if Sp.C then Sp.C:Disconnect() Sp.C=nil end
@@ -227,7 +235,7 @@ local function SpSt(p)
     end)
 end
 
--- ===== FLY =====
+-- FLY
 local Fly={On=false,Spd=200,C=nil}
 local function FlyE()
     Fly.On=false
@@ -268,11 +276,11 @@ local function FlyS()
     end)
 end
 
--- ===== SPEED =====
+-- SPEED
 local Spd={On=false,V=100}
 RS.RenderStepped:Connect(function() if Spd.On then local h=LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") if h then h.WalkSpeed=Spd.V end end end)
 
--- ===== ORBIT =====
+-- ORBIT
 local Orb={On=false,Spd=8000,D=3000,Al=150,C=nil,Ang=0}
 local function OrbE()
     Orb.On=false
@@ -299,7 +307,7 @@ local function OrbS()
     end)
 end
 
--- ===== ANTI-VOID =====
+-- ANTI-VOID
 local AV={On=false,U=-80,C1=nil,C2=nil,Cd=false,Safe=nil}
 local function AVE() AV.On=false if AV.C1 then AV.C1:Disconnect() AV.C1=nil end if AV.C2 then AV.C2:Disconnect() AV.C2=nil end end
 local function AVS()
@@ -329,21 +337,15 @@ local function AVS()
     end)
 end
 
--- ===== ANTI-STUN =====
+-- ANTI-STUN
 local AS={On=false,C=nil,Spam=nil}
-local function ASE()
-    AS.On=false
-    if AS.C then AS.C:Disconnect() AS.C=nil end
-    AS.Spam=nil
-end
+local function ASE() AS.On=false if AS.C then AS.C:Disconnect() AS.C=nil end AS.Spam=nil end
 local function ASS()
     if AS.On then return end
     AS.On=true
     AS.C=RS.Heartbeat:Connect(function()
         pcall(function()
             local ch=LP.Character if not ch then return end
-            local st=ch:FindFirstChild("Stun")
-            if st and st:IsA("NumberValue") then st.Value=-1 end
             for _,v in ipairs(ch:GetChildren()) do
                 if v:IsA("NumberValue") and (v.Name:lower():find("stun") or v.Name:lower():find("freeze")) then v.Value=-1 end
             end
@@ -352,27 +354,12 @@ local function ASS()
                 if u.WalkSpeed<16 then u.WalkSpeed=16 end
                 if u.JumpPower<50 then u.JumpPower=50 end
                 if u.PlatformStand then u.PlatformStand=false end
-                for _,s in ipairs({Enum.HumanoidStateType.FallingDown,Enum.HumanoidStateType.Ragdoll,Enum.HumanoidStateType.Physics}) do
-                    pcall(function() u:SetStateEnabled(s,false) end)
-                end
             end
         end)
     end)
-    AS.Spam=task.spawn(function()
-        while AS.On do
-            task.wait(0.03)
-            pcall(function()
-                local ch=LP.Character if not ch then return end
-                local t=ch:FindFirstChildOfClass("Tool")
-                if not t then return end
-                local pr=UI:IsKeyDown(Enum.KeyCode.Z) or UI:IsKeyDown(Enum.KeyCode.X) or UI:IsKeyDown(Enum.KeyCode.C) or UI:IsKeyDown(Enum.KeyCode.V)
-                if pr then pcall(function() t:Activate() end) end
-            end)
-        end
-    end)
 end
 
--- ===== ANTI-AFK =====
+-- ANTI-AFK
 local AF={On=false,C=nil}
 local function AFE() AF.On=false AF.C=nil end
 local function AFS()
@@ -391,8 +378,8 @@ local function AFS()
     end)
 end
 
--- ===== TIMING TOOLS =====
-local TT={On=false,Act=false,Char=nil,CT=nil,Buf={},Held={},Burst={},Cnx={},BC=5,BI=0.008,MAB=0.4,LA=0}
+-- TIMING TOOLS
+local TT={On=false,Act=false,Char=nil,CT=nil,Buf={},Held={},Burst={},Cnx={},BC=5,BI=0.008,MAB=0.4}
 local TTK={[Enum.KeyCode.Z]=true,[Enum.KeyCode.X]=true,[Enum.KeyCode.C]=true,[Enum.KeyCode.V]=true}
 local function TTA(k)
     if not TT.Act or TT.Burst[k] then return end
@@ -413,7 +400,6 @@ local function TTE()
     TT.On=false TT.Act=false
     for _,c in ipairs(TT.Cnx) do pcall(function() c:Disconnect() end) end
     TT.Cnx={} TT.Buf={} TT.Held={}
-    Ntf("⚡ Timing","Off",C.Rd)
 end
 local function TTS()
     if TT.On then return end
@@ -443,10 +429,9 @@ local function TTS()
         end))
         table.insert(TT.Cnx,UI.InputEnded:Connect(function(inp) if TTK[inp.KeyCode] then TT.Held[inp.KeyCode]=nil end end))
     end
-    Ntf("⚡ Timing","✅ On",C.Grn)
 end
 
--- ===== ISLANDS =====
+-- ISLANDS
 local Isl={["Floppa Island"]=1,["Snow Island"]=1,["Gorilla Island"]=1,["Sand Island"]=1,["Pumpkin Island"]=1,["Moai Island"]=1,["Forgotten Island"]=1,["Noob Arena"]=1,["PVP Arena"]=1}
 local function TPT(n)
     local ch=LP.Character if not ch then return end
@@ -465,12 +450,9 @@ local function TPT(n)
     h.CFrame=CFrame.new(0,50,0)
 end
 
--- ===== ESP =====
+-- ESP
 local ESP={On=false,C={},Conn=nil,ShN=true,ShHP=true}
-local function ESPC()
-    for _,g in pairs(ESP.C) do pcall(function() g:Destroy() end) end
-    ESP.C={}
-end
+local function ESPC() for _,g in pairs(ESP.C) do pcall(function() g:Destroy() end) end ESP.C={} end
 local function ESPA(p)
     if p==LP then return end
     local ch=p.Character
@@ -506,12 +488,12 @@ local function ES()
 end
 local function EE() ESP.On=false if ESP.Conn then ESP.Conn:Disconnect() ESP.Conn=nil end ESPC() end
 
--- ===== CAM FOV =====
+-- CAM FOV
 local Fv={On=false,Orig=70,V=120}
 pcall(function() if Cam then Fv.Orig=Cam.FieldOfView end end)
 task.spawn(function() while true do RS.RenderStepped:Wait() if Fv.On and Cam then Cam.FieldOfView=Fv.V end end end)
 
--- ===== AIM ASSIST =====
+-- AIM ASSIST
 local Ai={On=false,Sm=0.35,D=1000,C=nil}
 local function AiE()
     if Ai.C then Ai.C:Disconnect() Ai.C=nil end
@@ -547,7 +529,7 @@ local function AiS()
     end)
 end
 
--- ===== AIMBOT =====
+-- AIMBOT
 local AIM={On=false,C=nil,Hs=50,Bs=50,R=5000,Atk=true,Rate=0.05,TP=true,TD=5,Face=true,Data={},LA=0,RC=0,RT=os.clock()}
 local function SvO(p,pt,t) if not AIM.Data[p] then AIM.Data[p]={} end if not AIM.Data[p][t] then AIM.Data[p][t]={S=pt.Size,T=pt.Transparency,M=pt.Material,C=pt.Color} end end
 local function EH(p)
@@ -646,7 +628,7 @@ local function AimE()
     RA() Ntf("🎯 Aimbot","❌ Off",C.Rd)
 end
 
--- ===== SKYBOX =====
+-- SKYBOX
 local Sky={Cur="orig",Sv=false,OS={e=false}}
 local SkyP={
     {n="Original",id="orig",ids=nil},
@@ -684,20 +666,27 @@ local function SkyAp(ids)
     end)
 end
 
--- ===== UI =====
+-- UI
 local WS=IS_M and UDim2.new(0,380,0,270) or UDim2.new(0,600,0,400)
 local WP=UDim2.new(0.5,-WS.X.Offset/2,0.5,-WS.Y.Offset/2)
 local W=Instance.new("Frame",SG)
-W.Size=UDim2.new(0,0,0,0) W.Position=UDim2.new(0.5,0,0.5,0) W.BackgroundColor3=C.BG W.BorderSizePixel=0 W.ClipsDescendants=true W.Active=true
+W.Size=WS
+W.Position=WP
+W.BackgroundColor3=C.BG
+W.BorderSizePixel=0
+W.ClipsDescendants=true
+W.Active=true
+W.Visible=true
 Instance.new("UICorner",W).CornerRadius=UDim.new(0,12)
 local WStr=Instance.new("UIStroke",W) WStr.Thickness=2 RS1(WStr) Glow(WStr,0.05,0.3,1.5)
+print("[TLG] Ventana creada")
 
 local Hd=Instance.new("Frame",W) Hd.Size=UDim2.new(1,0,0,42) Hd.BackgroundColor3=C.BG2 Hd.BackgroundTransparency=0.05 Hd.BorderSizePixel=0 Hd.ZIndex=5
 Instance.new("UICorner",Hd).CornerRadius=UDim.new(0,12)
 local Ic=Instance.new("TextLabel",Hd) Ic.Size=UDim2.new(0,26,0,26) Ic.Position=UDim2.new(0,10,0.5,-13) Ic.BackgroundColor3=C.BG3 Ic.Text="💀" Ic.TextSize=15 Ic.Font=Enum.Font.GothamBold Ic.TextColor3=C.Yl Ic.ZIndex=10
 Instance.new("UICorner",Ic).CornerRadius=UDim.new(1,0)
 local Ti=Instance.new("TextLabel",Hd) Ti.Size=UDim2.new(0,200,0,18) Ti.Position=UDim2.new(0,42,0,6) Ti.BackgroundTransparency=1 Ti.Font=Enum.Font.GothamBold Ti.Text="TLG GOLD HUB" Ti.TextSize=13 Ti.TextColor3=C.Yl Ti.TextXAlignment=Enum.TextXAlignment.Left Ti.ZIndex=10
-local Sub=Instance.new("TextLabel",Hd) Sub.Size=UDim2.new(0,200,0,12) Sub.Position=UDim2.new(0,42,0,24) Sub.BackgroundTransparency=1 Sub.Font=Enum.Font.Gotham Sub.Text="Meme Sea • V6 Full" Sub.TextSize=9 Sub.TextColor3=C.Gr Sub.TextXAlignment=Enum.TextXAlignment.Left Sub.ZIndex=10
+local Sub=Instance.new("TextLabel",Hd) Sub.Size=UDim2.new(0,200,0,12) Sub.Position=UDim2.new(0,42,0,24) Sub.BackgroundTransparency=1 Sub.Font=Enum.Font.Gotham Sub.Text="Meme Sea • V6" Sub.TextSize=9 Sub.TextColor3=C.Gr Sub.TextXAlignment=Enum.TextXAlignment.Left Sub.ZIndex=10
 local StatP=Instance.new("Frame",Hd) StatP.Size=UDim2.new(0,130,0,24) StatP.Position=UDim2.new(1,-190,0.5,-12) StatP.BackgroundColor3=C.BG3 StatP.BackgroundTransparency=0.3 StatP.BorderSizePixel=0 StatP.ZIndex=8
 Instance.new("UICorner",StatP).CornerRadius=UDim.new(0,6)
 local FS=Instance.new("TextLabel",StatP) FS.Size=UDim2.new(0.5,-6,1,0) FS.Position=UDim2.new(0,4,0,0) FS.BackgroundTransparency=1 FS.Font=Enum.Font.GothamBold FS.Text="FPS: --" FS.TextColor3=C.Grn FS.TextSize=10 FS.TextXAlignment=Enum.TextXAlignment.Left FS.ZIndex=9
@@ -828,6 +817,7 @@ local PSe=Tab("Config","⚙️")
 
 task.wait(0.1)
 if Tabs[1] then Tabs[1].l.TextColor3=C.Yl Tabs[1].i.TextTransparency=0 Tabs[1].p.Visible=true Tabs[1].b.BackgroundTransparency=0.5 TS:Create(Tabs[1].u,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,3)}):Play() end
+print("[TLG] UI armada")
 
 -- INFO
 do
@@ -1040,9 +1030,10 @@ do
 end
 
 -- FABs
-local FSG=Instance.new("ScreenGui") FSG.Name="TLG_FAB_Float" FSG.ResetOnSpawn=false FSG.DisplayOrder=999 FSG.IgnoreGuiInset=true
+local FSG=Instance.new("ScreenGui") FSG.Name="TLG_FAB_Float" FSG.ResetOnSpawn=false FSG.DisplayOrder=998 FSG.IgnoreGuiInset=true
+pcall(function() if syn and syn.protect_gui then syn.protect_gui(FSG) end end)
 pcall(function() FSG.Parent=SP end)
-if not FSG.Parent then pcall(function() FSG.Parent=CG end) end
+if not FSG.Parent then FSG.Parent=CG end
 local FM=Instance.new("Frame",FSG) FM.Size=UDim2.new(0,240,0,72) FM.Position=UDim2.new(0,10,1,-82) FM.BackgroundColor3=C.BG FM.BackgroundTransparency=0.2 FM.BorderSizePixel=0 FM.ZIndex=10
 Instance.new("UICorner",FM).CornerRadius=UDim.new(0,12)
 local FStr=Instance.new("UIStroke",FM) FStr.Thickness=2 FStr.Color=C.Yl FStr.Transparency=0.2 Glow(FStr,0.1,0.5,1.5)
@@ -1102,71 +1093,32 @@ if UI.KeyboardEnabled then
     UI.InputBegan:Connect(function(i,gp) if gp then return end if i.KeyCode==Enum.KeyCode.RightShift then SetMin(not Min) end end)
 end
 
-pcall(function() TS:Create(W,TweenInfo.new(0.7,Enum.EasingStyle.Back),{Size=WS,Position=WP}):Play() end)
-task.wait(0.8)
 FM.Visible=true
 Ntf("👑 TLG GOLD HUB V6","✅ Cargado",C.Yl)
-print("[TLG GOLD HUB V6] 💀 OK")
+print("[TLG] Script completado — UI visible")
 
--- ===== PROTECCIÓN CONTRA LIMPIEZA DE DELTA =====
--- 1) Proteger la GUI antes de parentarla (si el executor lo soporta)
-pcall(function()
-    if syn and syn.protect_gui then syn.protect_gui(SG) end
-end)
-pcall(function()
-    if protect_gui then protect_gui(SG) end
-end)
-
--- 2) Re-parentar por si Delta la tiró a nil
-local function ReParent()
-    pcall(function()
-        if SG and not SG.Parent then
-            if gethui then SG.Parent=gethui()
-            else SG.Parent=CG end
-        end
-        if FSG and not FSG.Parent then
-            if gethui then FSG.Parent=gethui()
-            else FSG.Parent=CG end
-        end
-    end)
-end
-
--- 3) Vigilante: si algo borra la GUI, la vuelve a poner
-SG.AncestryChanged:Connect(function(_,parent)
-    if not parent then
+-- ========== KEEP-ALIVE (evita que Delta borre la GUI) ==========
+SG.AncestryChanged:Connect(function()
+    if not SG.Parent then
         task.wait(0.1)
-        ReParent()
+        pcall(function() SG.Parent=CG end)
     end
 end)
-FSG.AncestryChanged:Connect(function(_,parent)
-    if not parent then
-        task.wait(0.1)
+
+task.spawn(function()
+    while true do
+        task.wait(3)
         pcall(function()
-            if gethui then FSG.Parent=gethui()
-            else FSG.Parent=CG end
+            if SG and not SG.Parent then SG.Parent=CG end
+            if FSG and not FSG.Parent then FSG.Parent=CG end
         end)
     end
 end)
 
--- 4) KEEP-ALIVE: mantiene el script corriendo para que Delta no limpie
-task.spawn(function()
-    while true do
-        task.wait(3)
-        ReParent()
-        -- Si ambos murieron definitivamente, recrear el ScreenGui principal
-        if not SG then break end
-    end
-end)
-
--- 5) Anti-destroy de la GUI principal (por si alguien la destruye)
-SG.Destroying:Connect(function()
-    task.wait(0.1)
-    if not SG.Parent then ReParent() end
-end)
-
--- 6) Loop final que evita que el hilo principal termine
---    ESTO ES LO MÁS IMPORTANTE PARA DELTA
+-- Loop final — esto es lo que evita que Delta mate el script
 while true do
     task.wait(10)
-    ReParent()
+    pcall(function()
+        if SG and not SG.Parent then SG.Parent=CG end
+    end)
 end
