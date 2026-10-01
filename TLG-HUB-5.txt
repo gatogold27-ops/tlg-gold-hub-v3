@@ -1,5 +1,6 @@
+
 -- ═══════════════════════════════════════════════════════════════
--- 👑 TLG GOLD HUB V6.1 — 🚀 BUFFED + FAB TOGGLE 🚀
+-- 👑 TLG GOLD HUB V6.3 — 🎯 10K AIMBOT EDITION 🎯
 -- ═══════════════════════════════════════════════════════════════
 
 local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=game:GetService("VirtualInputManager")local L=game:GetService("Lighting")local Stat=game:GetService("Stats")local LP=P.LocalPlayer local Cam=workspace.CurrentCamera local IS_M=UI.TouchEnabled and not UI.KeyboardEnabled
@@ -176,8 +177,8 @@ local IB=Instance.new("Frame",SG)IB.Size=UDim2.new(1,0,1,0)IB.BackgroundColor3=C
 local R1=Instance.new("Frame",IB)R1.Size=UDim2.new(0,200,0,200)R1.Position=UDim2.new(0.5,-100,0.5,-100)R1.BackgroundTransparency=1 R1.ZIndex=100000 local R1S=Instance.new("UIStroke",R1)R1S.Thickness=4 R1S.Color=A()Instance.new("UICorner",R1).CornerRadius=UDim.new(1,0)
 local R2=Instance.new("Frame",IB)R2.Size=UDim2.new(0,300,0,300)R2.Position=UDim2.new(0.5,-150,0.5,-150)R2.BackgroundTransparency=1 R2.ZIndex=100000 local R2S=Instance.new("UIStroke",R2)R2S.Thickness=3 R2S.Color=A2()R2S.Transparency=0.5 Instance.new("UICorner",R2).CornerRadius=UDim.new(1,0)
 local Cr=Instance.new("TextLabel",IB)Cr.Size=UDim2.new(0,80,0,80)Cr.Position=UDim2.new(0.5,-40,0.5,-40)Cr.BackgroundTransparency=1 Cr.Text="👑"Cr.Font=Enum.Font.GothamBlack Cr.TextSize=60 Cr.TextColor3=A()Cr.TextTransparency=1 Cr.ZIndex=100002
-local Ttl=Instance.new("TextLabel",IB)Ttl.Size=UDim2.new(1,0,0,50)Ttl.Position=UDim2.new(0,0,0.5,60)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBlack Ttl.Text="TLG GOLD HUB V6.1"Ttl.TextScaled=true Ttl.TextColor3=Color3.fromRGB(255,255,255)Ttl.TextStrokeColor3=A()Ttl.TextStrokeTransparency=1 Ttl.TextTransparency=1 Ttl.ZIndex=100001
-local Sub=Instance.new("TextLabel",IB)Sub.Size=UDim2.new(1,0,0,20)Sub.Position=UDim2.new(0,0,0.5,115)Sub.BackgroundTransparency=1 Sub.Font=Enum.Font.GothamSemibold Sub.Text="🚀 BUFFED + FAB TOGGLE"Sub.TextColor3=A()Sub.TextSize=12 Sub.TextTransparency=1 Sub.ZIndex=100001
+local Ttl=Instance.new("TextLabel",IB)Ttl.Size=UDim2.new(1,0,0,50)Ttl.Position=UDim2.new(0,0,0.5,60)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBlack Ttl.Text="TLG GOLD HUB V6.3"Ttl.TextScaled=true Ttl.TextColor3=Color3.fromRGB(255,255,255)Ttl.TextStrokeColor3=A()Ttl.TextStrokeTransparency=1 Ttl.TextTransparency=1 Ttl.ZIndex=100001
+local Sub=Instance.new("TextLabel",IB)Sub.Size=UDim2.new(1,0,0,20)Sub.Position=UDim2.new(0,0,0.5,115)Sub.BackgroundTransparency=1 Sub.Font=Enum.Font.GothamSemibold Sub.Text="🎯 10K AIMBOT EDITION"Sub.TextColor3=A()Sub.TextSize=12 Sub.TextTransparency=1 Sub.ZIndex=100001
 local Bar=Instance.new("Frame",IB)Bar.Size=UDim2.new(0,240,0,3)Bar.Position=UDim2.new(0.5,-120,0.5,150)Bar.BackgroundColor3=Color3.fromRGB(30,30,40)Bar.BorderSizePixel=0 Bar.ZIndex=100000 Instance.new("UICorner",Bar).CornerRadius=UDim.new(1,0)
 local BF=Instance.new("Frame",Bar)BF.Size=UDim2.new(0,0,1,0)BF.BackgroundColor3=A()BF.BorderSizePixel=0 BF.ZIndex=100001 Instance.new("UICorner",BF).CornerRadius=UDim.new(1,0)
 task.spawn(function()
@@ -214,7 +215,7 @@ local WS=Instance.new("UIStroke",W)WS.Thickness=2.5 RegS(WS)PGlow(WS,0.05,0.35,1
 local TB=Instance.new("Frame",W)TB.Size=UDim2.new(1,0,0,42)TB.BackgroundColor3=C.BG3 TB.BorderSizePixel=0 TB.ZIndex=5 Instance.new("UICorner",TB).CornerRadius=UDim.new(0,14)
 local Ico=Instance.new("TextLabel",TB)Ico.Size=UDim2.new(0,32,0,32)Ico.Position=UDim2.new(0,8,0.5,-16)Ico.BackgroundColor3=C.BG2 Ico.Text="👑"Ico.TextSize=16 Ico.Font=Enum.Font.GothamBold Ico.TextColor3=A()Ico.ZIndex=7 Instance.new("UICorner",Ico).CornerRadius=UDim.new(1,0)RegL(Ico)
 local IcoS=Instance.new("UIStroke",Ico)IcoS.Color=A()IcoS.Thickness=2 RegS(IcoS)PGlow(IcoS,0.1,0.5,1.2)
-local Ttl2=Instance.new("TextLabel",TB)Ttl2.Size=UDim2.new(0,180,1,0)Ttl2.Position=UDim2.new(0,46,0,0)Ttl2.BackgroundTransparency=1 Ttl2.Font=Enum.Font.GothamBold Ttl2.Text="TLG GOLD HUB V6.1"Ttl2.TextSize=11 Ttl2.TextColor3=C.Wh Ttl2.TextXAlignment=Enum.TextXAlignment.Left Ttl2.ZIndex=7
+local Ttl2=Instance.new("TextLabel",TB)Ttl2.Size=UDim2.new(0,180,1,0)Ttl2.Position=UDim2.new(0,46,0,0)Ttl2.BackgroundTransparency=1 Ttl2.Font=Enum.Font.GothamBold Ttl2.Text="TLG GOLD HUB V6.3"Ttl2.TextSize=11 Ttl2.TextColor3=C.Wh Ttl2.TextXAlignment=Enum.TextXAlignment.Left Ttl2.ZIndex=7
 local SB=Instance.new("Frame",TB)SB.Size=UDim2.new(0,150,0,22)SB.Position=UDim2.new(1,-240,0.5,-11)SB.BackgroundColor3=C.BG SB.BackgroundTransparency=0.2 SB.BorderSizePixel=0 SB.ZIndex=6 Instance.new("UICorner",SB).CornerRadius=UDim.new(1,0)
 local FL=Instance.new("TextLabel",SB)FL.Size=UDim2.new(0.5,-6,1,0)FL.Position=UDim2.new(0,6,0,0)FL.BackgroundTransparency=1 FL.Font=Enum.Font.GothamBold FL.Text="FPS: --"FL.TextColor3=C.Grn FL.TextSize=10 FL.TextXAlignment=Enum.TextXAlignment.Left FL.ZIndex=7
 local PLb=Instance.new("TextLabel",SB)PLb.Size=UDim2.new(0.5,-6,1,0)PLb.Position=UDim2.new(0.5,0,0,0)PLb.BackgroundTransparency=1 PLb.Font=Enum.Font.GothamBold PLb.Text="Ping: --"PLb.TextColor3=C.Cyan PLb.TextSize=10 PLb.TextXAlignment=Enum.TextXAlignment.Right PLb.ZIndex=7
@@ -309,27 +310,196 @@ do
     Tog(PCb,"Activar FOV Cámara",false,function(v)if v then FvAp(Fv.V)else FvR()end end)
     Sli(PCb,"Valor FOV",30,300,120,function(v)Fv.V=v if Fv.On then FvAp(v)end end)
 end
--- AIMBOT
+-- 🎯 AIMBOT 10K
 do
-    Sec(PAb,"🎯 AIMBOT ULTRA","🎯")
-    local AIM={On=false,C=nil,HSz=1000,Tr=1,R=10000,OS={}}
-    local function ApA(p)if p==LP then return end local ch=p.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if not h or not hu or hu.Health<=0 then return end if not AIM.OS[p]then AIM.OS[p]={S=h.Size,T=h.Transparency,C=h.CanCollide,M=h.Material,Co=h.Color}end pcall(function()h.Size=Vector3.new(AIM.HSz,AIM.HSz,AIM.HSz)h.Transparency=AIM.Tr h.CanCollide=false h.Material=Enum.Material.Neon h.Color=A()h.LocalTransparencyModifier=0 end)end
-    local function RsA(p)local d=AIM.OS[p]if not d then return end if p.Character then local h=p.Character:FindFirstChild("HumanoidRootPart")if h then pcall(function()h.Size=d.S h.Transparency=d.T h.CanCollide=d.C h.Material=d.M h.Color=d.Co end)end end AIM.OS[p]=nil end
-    local function RsAll()for p,_ in pairs(AIM.OS)do RsA(p)end AIM.OS={}end
-    local function InR(p)local mc=LP.Character if not mc then return false end local mr=mc:FindFirstChild("HumanoidRootPart")local tr=p.Character and p.Character:FindFirstChild("HumanoidRootPart")if not mr or not tr then return false end return(tr.Position-mr.Position).Magnitude<=AIM.R end
-    local function Lp()if not AIM.On then return end for _,p in ipairs(P:GetPlayers())do if p~=LP then if InR(p)then ApA(p)else if AIM.OS[p]then RsA(p)end end end end end
-    local mb=Instance.new("TextButton",PAb)mb.Size=UDim2.new(1,0,0,48)mb.BackgroundColor3=C.BG2 mb.BackgroundTransparency=0.05 mb.Font=Enum.Font.GothamBold mb.Text="🎯 ACTIVAR AIMBOT ULTRA"mb.TextColor3=A()mb.TextSize=13 mb.BorderSizePixel=0 mb.AutoButtonColor=false mb.ZIndex=5 Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)local mbS=Instance.new("UIStroke",mb)mbS.Thickness=2 mbS.Color=A()RegS(mbS)PGlow(mbS,0.1,0.5,1.5)Rip(mb)
-    mb.MouseButton1Click:Connect(function()if AIM.On then AIM.On=false if AIM.C then pcall(function()AIM.C:Disconnect()end)AIM.C=nil end RsAll()mb.Text="🎯 ACTIVAR AIMBOT ULTRA"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()PNotif("🎯 Aimbot","Desactivado",C.Rd)else AIM.On=true for _,p in ipairs(P:GetPlayers())do if p~=LP and InR(p)then ApA(p)end end AIM.C=RS.Heartbeat:Connect(Lp)mb.Text="🛑 DESACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()PNotif("🎯 Aimbot","Activado ULTRA",C.Grn)end end)
-    LP.CharacterAdded:Connect(function()if AIM.On then task.wait(1)RsAll()end end)
-    Lbl(PAb,"🔥 Hitbox de 1,000 studs + Rango 10k",C.Cyan)
-    Lbl(PAb,"⚡ Pegás a cualquier distancia",C.Grn)
+    Sec(PAb,"🎯 AIMBOT PRO (Meme Sea)","🎯")
+    local AIM={On=false,Conn=nil,Target=nil,HeadSize=10000,BodySize=10000,Range=999999,AutoAttack=true,AttackRate=0.025,TeleportNear=true,TeleDist=5,FaceTarget=true,ExpandHead=true,ExpandBody=true,OriginalData={},LastAttack=0}
+    local function SaveOriginal(plr,part,tipo)
+        if not AIM.OriginalData[plr]then AIM.OriginalData[plr]={}end
+        if not AIM.OriginalData[plr][tipo]then
+            AIM.OriginalData[plr][tipo]={Size=part.Size,Transparency=part.Transparency,CanCollide=part.CanCollide,Material=part.Material,Color=part.Color}
+        end
+    end
+    local function ExpandHead(plr)
+        if not AIM.ExpandHead then return end
+        local ch=plr.Character
+        if not ch then return end
+        local head=ch:FindFirstChild("Head")
+        if not head then return end
+        SaveOriginal(plr,head,"Head")
+        pcall(function()
+            head.Size=Vector3.new(AIM.HeadSize,AIM.HeadSize,AIM.HeadSize)
+            head.Transparency=1
+            head.CanCollide=false
+            head.Material=Enum.Material.Neon
+            head.Color=A()
+        end)
+    end
+    local function ExpandBody(plr)
+        if not AIM.ExpandBody then return end
+        local ch=plr.Character
+        if not ch then return end
+        local hrp=ch:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        SaveOriginal(plr,hrp,"Body")
+        pcall(function()
+            hrp.Size=Vector3.new(AIM.BodySize,AIM.BodySize,AIM.BodySize)
+            hrp.Transparency=1
+            hrp.CanCollide=false
+        end)
+    end
+    local function RestoreAll()
+        for plr,data in pairs(AIM.OriginalData)do
+            if plr.Character then
+                for tipo,d in pairs(data)do
+                    local part=plr.Character:FindFirstChild(tipo=="Head"and "Head"or "HumanoidRootPart")
+                    if part then pcall(function()
+                        part.Size=d.Size
+                        part.Transparency=d.Transparency
+                        part.CanCollide=d.CanCollide
+                        part.Material=d.Material
+                        part.Color=d.Color
+                    end)end
+                end
+            end
+        end
+        AIM.OriginalData={}
+    end
+    local function FindTarget()
+        local best=nil local bd=AIM.Range
+        local mc=LP.Character if not mc then return nil end
+        local mh=mc:FindFirstChild("HumanoidRootPart") if not mh then return nil end
+        for _,p in ipairs(P:GetPlayers())do
+            if p~=LP and p.Character then
+                local h=p.Character:FindFirstChild("HumanoidRootPart")
+                local hu=p.Character:FindFirstChildOfClass("Humanoid")
+                if h and hu and hu.Health>0 then
+                    local d=(h.Position-mh.Position).Magnitude
+                    if d<bd then bd=d best=p end
+                end
+            end
+        end
+        return best,bd
+    end
+    local function Attack()
+        local mc=LP.Character
+        if not mc then return end
+        local tool=mc:FindFirstChildOfClass("Tool")
+        if tool then pcall(function()tool:Activate()end)end
+    end
+    local function TeleportNear(target)
+        if not AIM.TeleportNear then return end
+        local mc=LP.Character
+        if not mc then return end
+        local mh=mc:FindFirstChild("HumanoidRootPart")
+        local tc=target.Character
+        if not tc then return end
+        local th=tc:FindFirstChild("HumanoidRootPart")
+        if not mh or not th then return end
+        local dist=(th.Position-mh.Position).Magnitude
+        if dist<=AIM.TeleDist then return end
+        local dir=(th.Position-mh.Position).Unit
+        local newPos=th.Position-dir*AIM.TeleDist
+        pcall(function()mh.CFrame=CFrame.new(newPos,th.Position)end)
+    end
+    local function FaceTarget(target)
+        if not AIM.FaceTarget then return end
+        local mc=LP.Character
+        if not mc then return end
+        local mh=mc:FindFirstChild("HumanoidRootPart")
+        local tc=target.Character
+        if not tc then return end
+        local th=tc:FindFirstChild("HumanoidRootPart")
+        if not mh or not th then return end
+        pcall(function()
+            mh.CFrame=CFrame.new(mh.Position,Vector3.new(th.Position.X,mh.Position.Y,th.Position.Z))
+        end)
+    end
+    local function MainLoop()
+        if not AIM.On then return end
+        local target,dist=FindTarget()
+        AIM.Target=target
+        if not target then return end
+        ExpandHead(target)
+        ExpandBody(target)
+        FaceTarget(target)
+        TeleportNear(target)
+        if AIM.AutoAttack then
+            local now=os.clock()
+            if now-AIM.LastAttack>=AIM.AttackRate then
+                AIM.LastAttack=now
+                Attack()
+            end
+        end
+    end
+    local function AIM_Start()
+        if AIM.On then return end
+        AIM.On=true
+        for _,p in ipairs(P:GetPlayers())do
+            if p~=LP then ExpandHead(p)ExpandBody(p)end
+        end
+        AIM.Conn=RS.Heartbeat:Connect(MainLoop)
+        PNotif("🎯 Aimbot","✅ Activado 10K Hitbox",C.Grn)
+    end
+    local function AIM_Stop()
+        if not AIM.On then return end
+        AIM.On=false
+        if AIM.Conn then pcall(function()AIM.Conn:Disconnect()end)AIM.Conn=nil end
+        RestoreAll()
+        AIM.Target=nil
+        PNotif("🎯 Aimbot","❌ Desactivado",C.Rd)
+    end
+    LP.CharacterAdded:Connect(function()
+        if AIM.On then task.wait(1)RestoreAll()end
+    end)
+    local mb=Instance.new("TextButton",PAb)
+    mb.Size=UDim2.new(1,0,0,48)
+    mb.BackgroundColor3=C.BG2
+    mb.BackgroundTransparency=0.05
+    mb.Font=Enum.Font.GothamBold
+    mb.Text="🎯 ACTIVAR AIMBOT (10K Hitbox)"
+    mb.TextColor3=A()
+    mb.TextSize=13
+    mb.BorderSizePixel=0
+    mb.AutoButtonColor=false
+    mb.ZIndex=5
+    Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)
+    local mbS=Instance.new("UIStroke",mb)
+    mbS.Thickness=2 mbS.Color=A()RegS(mbS)PGlow(mbS,0.1,0.5,1.5)
+    Rip(mb)
+    mb.MouseButton1Click:Connect(function()
+        if AIM.On then
+            AIM_Stop()
+            mb.Text="🎯 ACTIVAR AIMBOT (10K Hitbox)"
+            TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()
+        else
+            AIM_Start()
+            mb.Text="🛑 DESACTIVAR AIMBOT"
+            TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()
+        end
+    end)
+    Lbl(PAb,"🔥 Head + Body Hitbox de 10,000 studs",C.Cyan)
+    Lbl(PAb,"⚡ Auto-attack 40 veces/segundo",C.Grn)
+    Lbl(PAb,"🌀 Teletransporte + Face Target",C.Yel)
+    Lbl(PAb,"⚠️ MUY potente - usalo con cuidado",C.Rd)
+    Sec(PAb,"⚙️ AJUSTES AVANZADOS","⚙️")
+    Sli(PAb,"Head Hitbox Size",1000,100000,10000,function(v)AIM.HeadSize=v end)
+    Sli(PAb,"Body Hitbox Size",1000,100000,10000,function(v)AIM.BodySize=v end)
+    Sli(PAb,"Rango",1000,999999,999999,function(v)AIM.Range=v end)
+    Sli(PAb,"Distancia TP",2,30,5,function(v)AIM.TeleDist=v end)
+    Sli(PAb,"Ataques/seg",10,100,40,function(v)AIM.AttackRate=1/v end)
+    Tog(PAb,"Auto-Attack",true,function(v)AIM.AutoAttack=v end)
+    Tog(PAb,"Teletransporte cerca",true,function(v)AIM.TeleportNear=v end)
+    Tog(PAb,"Mirar al enemigo",true,function(v)AIM.FaceTarget=v end)
+    Tog(PAb,"Expandir Cabeza (headshot)",true,function(v)AIM.ExpandHead=v end)
+    Tog(PAb,"Expandir Cuerpo",true,function(v)AIM.ExpandBody=v end)
 end
 -- FLY
 do
     Sec(PFl,"✈ FLY ULTRA","✈")
     Tog(PFl,"Activar Fly",false,function(v)if v then FlyS()else FlyE()end end)
     Sli(PFl,"Velocidad",100,50000,15000,function(v)Fly.Spd=v end)
-    Lbl(PFl,"Máx 50,000 studs/s (recomendado 15k)",C.Gr)
+    Lbl(PFl,"Máx 50,000 studs/s",C.Gr)
     Sec(PFl,"🏃 SPEED ULTRA","🏃")
     Tog(PFl,"Activar Speed",false,function(v)Speed.On=v end)
     Sli(PFl,"Velocidad",16,1000,300,function(v)Speed.Val=v end)
@@ -349,7 +519,6 @@ do
 end
 -- TOOLS
 do
-    -- 🆕 TOGGLE DE FABs
     Sec(PTo,"🚀 FABs FLOTANTES","🚀")
     Lbl(PTo,"Mostrar/Ocultar los botones flotantes",C.Cyan)
     Tog(PTo,"Mostrar FABs en pantalla",true,function(v)
@@ -422,7 +591,7 @@ do
     local tbs={}
     for _,tn in ipairs(tl)do local b=Instance.new("TextButton",PSe)b.Size=UDim2.new(1,0,0,30)b.BackgroundColor3=(CurT==tn and not CA)and TH[tn].A or C.BG2 b.Font=Enum.Font.GothamBold b.Text=tn b.TextColor3=(CurT==tn and not CA)and C.BG or C.Wh b.TextSize=10 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)table.insert(tbs,{b=b,n=tn})Rip(b)b.MouseButton1Click:Connect(function()CA=nil CurT=tn ApTh()FOVSettings.Color=A()for _,x in ipairs(tbs)do if x.n==tn then x.b.BackgroundColor3=TH[tn].A x.b.TextColor3=C.BG else x.b.BackgroundColor3=C.BG2 x.b.TextColor3=C.Wh end end end)end
 end
--- ═══ FABs (con referencia global) ═══
+-- FABs
 local FSG=Instance.new("ScreenGui")
 FSG.Name="TLG_FAB_Float"
 FSG.ResetOnSpawn=false
@@ -586,7 +755,7 @@ WTx.Size=UDim2.new(1,-60,1,0)
 WTx.Position=UDim2.new(0,30,0,0)
 WTx.BackgroundTransparency=1
 WTx.Font=Enum.Font.GothamBold
-WTx.Text="TLG GOLD HUB V6.1"
+WTx.Text="TLG GOLD HUB V6.3"
 WTx.TextSize=10
 WTx.TextColor3=C.Wh
 WTx.TextXAlignment=Enum.TextXAlignment.Left
@@ -634,5 +803,5 @@ end)
 task.wait(0.9)
 if FAB_Toggle_State then FM.Visible=true end
 WM.Visible=true
-PNotif("👑 TLG GOLD HUB V6.1","🚀 BUFFED + FAB Toggle",A())
-print("[TLG GOLD HUB V6.1] 🚀 Cargado ✓")
+PNotif("👑 TLG GOLD HUB V6.3","🎯 10K AIMBOT Edition",A())
+print("[TLG GOLD HUB V6.3] 🎯 Cargado ✓")
