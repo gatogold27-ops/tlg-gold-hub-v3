@@ -1592,15 +1592,32 @@ end
 -- VISUALS
 do
     Sec(PVi, "🎨 LIGHTING", "🎨")
-    local presets = {
+    local lightingPresets = {
         {"❌ Ninguno", function() Lighting.Brightness = 1; Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128); Lighting.ClockTime = 14 end},
         {"🌅 Atardecer", function() Lighting.Brightness = 2; Lighting.Ambient = Color3.fromRGB(200,150,100); Lighting.OutdoorAmbient = Color3.fromRGB(255,150,100); Lighting.ClockTime = 18 end},
         {"🌙 Noche", function() Lighting.Brightness = 0.5; Lighting.Ambient = Color3.fromRGB(30,30,50); Lighting.OutdoorAmbient = Color3.fromRGB(50,50,100); Lighting.ClockTime = 0 end},
         {"🔥 Infierno", function() Lighting.Brightness = 2; Lighting.Ambient = Color3.fromRGB(150,50,20); Lighting.OutdoorAmbient = Color3.fromRGB(255,100,50); Lighting.ClockTime = 16 end},
         {"❄️ Hielo", function() Lighting.Brightness = 2.5; Lighting.Ambient = Color3.fromRGB(150,180,220); Lighting.OutdoorAmbient = Color3.fromRGB(200,220,255); Lighting.ClockTime = 12 end}
     }
-    for _, p in ipairs(presets) do
+    for _, p in ipairs(lightingPresets) do
         Btn(PVi, p[1], C.Yel, p[2])
+    end
+
+    Sec(PVi, "🌌 SKYBOX", "🌌")
+    Lbl(PVi, "7 Skyboxes confirmadas • 6 caras cada una", C.Cyan)
+
+    for _, preset in ipairs(SkyPresets) do
+        local skyPreset = preset
+        Btn(PVi, skyPreset.name, C.Yel, function()
+            local ok, err = pcall(function()
+                SkyApply(skyPreset.ids)
+            end)
+            if ok then
+                TLG.PNotif("🌌 SKYBOX", skyPreset.name .. " aplicada", C.Grn)
+            else
+                TLG.PNotif("🌌 SKYBOX", "Error: " .. tostring(err), C.Rd)
+            end
+        end)
     end
 end
 
