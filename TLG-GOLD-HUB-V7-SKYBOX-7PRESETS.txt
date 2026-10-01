@@ -1,8 +1,8 @@
 -- ═══════════════════════════════════════════════════════════════
--- 👑 TLG GOLD HUB V6.8 — 💀 GOLD SKULL EDITION
+-- 👑 TLG GOLD HUB V7.1 — 💀 GOLD SKULL EDITION (Meme Sea Stats)
 -- ═══════════════════════════════════════════════════════════════
 
--- ═══ PARTE 1/3 — BASE Y UTILIDADES ═══
+-- ═══ PARTE 1/3 — BASE, UTILIDADES Y SISTEMAS ═══
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
@@ -10,9 +10,7 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local Lighting = game:GetService("Lighting")
-local Stats = game:GetService("Stats")
 
 _G.TLG = _G.TLG or {}
 local TLG = _G.TLG
@@ -21,14 +19,11 @@ TLG.LP = Players.LocalPlayer
 TLG.Cam = workspace.CurrentCamera
 TLG.IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 TLG.SelectedTarget = nil
-TLG.FAB_Toggle_State = true
-TLG.FAB_Frame_Ref = nil
 
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
     if workspace.CurrentCamera then TLG.Cam = workspace.CurrentCamera end
 end)
 
--- PARENT DEL GUI
 local function GetParent()
     local p
     pcall(function() if gethui then p = gethui() end end)
@@ -36,18 +31,13 @@ local function GetParent()
         pcall(function()
             if syn and syn.protect_gui then
                 local g = Instance.new("ScreenGui")
-                syn.protect_gui(g)
-                g.Parent = CoreGui
-                p = g
+                syn.protect_gui(g); g.Parent = CoreGui; p = g
             end
         end)
     end
     if not p then
         local ok = pcall(function()
-            local f = Instance.new("Folder")
-            f.Parent = CoreGui
-            f:Destroy()
-            return CoreGui
+            local f = Instance.new("Folder"); f.Parent = CoreGui; f:Destroy(); return CoreGui
         end)
         if ok then p = CoreGui end
     end
@@ -55,9 +45,10 @@ local function GetParent()
     return p
 end
 
+TLG.GetParent = GetParent
 TLG.SP = GetParent()
 
-for _, n in ipairs({"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7","TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float","TLG_Intro","TLG_Watermark"}) do
+for _, n in ipairs({"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7","TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float","TLG_Intro","TLG_Watermark","TLG_FugaFAB"}) do
     pcall(function() local o = TLG.SP:FindFirstChild(n); if o then o:Destroy() end end)
     pcall(function() local o = CoreGui:FindFirstChild(n); if o then o:Destroy() end end)
 end
@@ -71,92 +62,6 @@ pcall(function() SG.Parent = TLG.SP end)
 if not SG.Parent then pcall(function() SG.Parent = CoreGui end) end
 TLG.SG = SG
 
--- ═══════════════════════════════════════════════════════════════
--- ⚡ INTRO ÉPICA — TLG GOLD HUB
--- ═══════════════════════════════════════════════════════════════
-local function TLG_EpicIntro()
-    task.spawn(function()
-        local Intro = Instance.new("Frame")
-        Intro.Name = "TLG_EpicIntro"
-        Intro.Size = UDim2.fromScale(1,1)
-        Intro.BackgroundColor3 = Color3.fromRGB(5,5,8)
-        Intro.BorderSizePixel = 0
-        Intro.ZIndex = 9999
-        Intro.Parent = SG
-
-        local Title = Instance.new("TextLabel", Intro)
-        Title.AnchorPoint = Vector2.new(0.5,0.5)
-        Title.Position = UDim2.fromScale(0.5,0.42)
-        Title.Size = UDim2.fromScale(0.9,0.12)
-        Title.BackgroundTransparency = 1
-        Title.Text = "💀  TLG GOLD HUB  💀"
-        Title.TextColor3 = Color3.fromRGB(255,215,0)
-        Title.TextTransparency = 1
-        Title.TextScaled = true
-        Title.Font = Enum.Font.GothamBlack
-        Title.ZIndex = 10000
-
-        local Sub = Instance.new("TextLabel", Intro)
-        Sub.AnchorPoint = Vector2.new(0.5,0.5)
-        Sub.Position = UDim2.fromScale(0.5,0.52)
-        Sub.Size = UDim2.fromScale(0.9,0.07)
-        Sub.BackgroundTransparency = 1
-        Sub.Text = "GOLD SKULL EDITION  •  V6.8"
-        Sub.TextColor3 = C.Wh
-        Sub.TextTransparency = 1
-        Sub.TextScaled = true
-        Sub.Font = Enum.Font.GothamBold
-        Sub.ZIndex = 10000
-
-        local Status = Instance.new("TextLabel", Intro)
-        Status.AnchorPoint = Vector2.new(0.5,0.5)
-        Status.Position = UDim2.fromScale(0.5,0.61)
-        Status.Size = UDim2.fromScale(0.9,0.05)
-        Status.BackgroundTransparency = 1
-        Status.Text = "⚡ INICIANDO SISTEMA..."
-        Status.TextColor3 = C.Cyan
-        Status.TextTransparency = 1
-        Status.TextScaled = true
-        Status.Font = Enum.Font.GothamBold
-        Status.ZIndex = 10000
-
-        local BarBG = Instance.new("Frame", Intro)
-        BarBG.AnchorPoint = Vector2.new(0.5,0.5)
-        BarBG.Position = UDim2.fromScale(0.5,0.70)
-        BarBG.Size = UDim2.fromScale(0.62,0.012)
-        BarBG.BackgroundColor3 = C.BG3
-        BarBG.BorderSizePixel = 0
-        BarBG.ZIndex = 10000
-        Instance.new("UICorner",BarBG).CornerRadius = UDim.new(1,0)
-
-        local Bar = Instance.new("Frame", BarBG)
-        Bar.Size = UDim2.fromScale(0,1)
-        Bar.BackgroundColor3 = C.Yel
-        Bar.BorderSizePixel = 0
-        Bar.ZIndex = 10001
-        Instance.new("UICorner",Bar).CornerRadius = UDim.new(1,0)
-
-        local function tw(o,t,p)
-            local x=TweenService:Create(o,t,p); x:Play(); return x
-        end
-        tw(Title,TweenInfo.new(0.55,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{TextTransparency=0})
-        task.wait(0.12)
-        tw(Sub,TweenInfo.new(0.45,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{TextTransparency=0})
-        task.wait(0.12)
-        tw(Status,TweenInfo.new(0.4,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{TextTransparency=0})
-        tw(Bar,TweenInfo.new(1.8,Enum.EasingStyle.Quart,Enum.EasingDirection.Out),{Size=UDim2.fromScale(1,1)})
-        task.wait(0.6); Status.Text="👑 CARGANDO GOLD SYSTEM..."
-        task.wait(0.55); Status.Text="🌌 PREPARANDO VISUALES..."
-        task.wait(0.55); Status.Text="✓ TLG GOLD HUB LISTO"
-        task.wait(0.45)
-        tw(Title,TweenInfo.new(0.3),{TextTransparency=1})
-        tw(Sub,TweenInfo.new(0.3),{TextTransparency=1})
-        tw(Status,TweenInfo.new(0.25),{TextTransparency=1})
-        local f=tw(Intro,TweenInfo.new(0.45),{BackgroundTransparency=1})
-        f.Completed:Wait()
-        pcall(function() Intro:Destroy() end)
-    end)
-end
 function TLG.GetPing()
     local p = 0
     pcall(function() p = math.floor((TLG.LP:GetNetworkPing() or 0) * 1000) end)
@@ -164,22 +69,21 @@ function TLG.GetPing()
 end
 
 local Themes = {
-    ["👑 Gold"] = {A = Color3.fromRGB(255,215,0), A2 = Color3.fromRGB(255,235,100)},
+    ["👑 Gold"]   = {A = Color3.fromRGB(255,215,0),  A2 = Color3.fromRGB(255,235,100)},
     ["💜 Purple"] = {A = Color3.fromRGB(190,90,255), A2 = Color3.fromRGB(230,150,255)},
-    ["💙 Cyan"] = {A = Color3.fromRGB(0,240,255), A2 = Color3.fromRGB(120,255,255)},
-    ["❤️ Red"] = {A = Color3.fromRGB(255,70,90), A2 = Color3.fromRGB(255,160,160)},
-    ["💚 Green"] = {A = Color3.fromRGB(80,255,130), A2 = Color3.fromRGB(160,255,180)},
-    ["💗 Pink"] = {A = Color3.fromRGB(255,110,210), A2 = Color3.fromRGB(255,180,235)},
+    ["💙 Cyan"]   = {A = Color3.fromRGB(0,240,255),  A2 = Color3.fromRGB(120,255,255)},
+    ["❤️ Red"]    = {A = Color3.fromRGB(255,70,90),  A2 = Color3.fromRGB(255,160,160)},
+    ["💚 Green"]  = {A = Color3.fromRGB(80,255,130), A2 = Color3.fromRGB(160,255,180)},
+    ["💗 Pink"]   = {A = Color3.fromRGB(255,110,210),A2 = Color3.fromRGB(255,180,235)},
     ["🧡 Orange"] = {A = Color3.fromRGB(255,160,60), A2 = Color3.fromRGB(255,210,130)},
-    ["🤍 White"] = {A = Color3.fromRGB(250,250,255), A2 = Color3.fromRGB(255,255,255)}
+    ["🤍 White"]  = {A = Color3.fromRGB(250,250,255),A2 = Color3.fromRGB(255,255,255)}
 }
-
 TLG.Themes = Themes
 TLG.CurrentTheme = "👑 Gold"
 TLG.CustomAccent = nil
 TLG.CustomAccent2 = nil
 
-function TLG.A() return TLG.CustomAccent or Themes[TLG.CurrentTheme].A end
+function TLG.A()  return TLG.CustomAccent  or Themes[TLG.CurrentTheme].A  end
 function TLG.A2() return TLG.CustomAccent2 or Themes[TLG.CurrentTheme].A2 end
 
 local C = {
@@ -191,9 +95,6 @@ local C = {
     Yel = Color3.fromRGB(255,215,0)
 }
 TLG.C = C
-
--- Start the intro only after C/theme colors have been initialized.
-TLG_EpicIntro()
 
 local NotifHolder = nil
 local function GetNotifHolder()
@@ -219,51 +120,35 @@ function TLG.PNotif(title, text, color)
     nf.BorderSizePixel = 0
     nf.ZIndex = 10000
     Instance.new("UICorner", nf).CornerRadius = UDim.new(0, 10)
-    local nfS = Instance.new("UIStroke", nf)
-    nfS.Color = color
-    nfS.Thickness = 2
+    local nfS = Instance.new("UIStroke", nf); nfS.Color = color; nfS.Thickness = 2
     local bar = Instance.new("Frame", nf)
-    bar.Size = UDim2.new(0, 3, 1, -12)
-    bar.Position = UDim2.new(0, 0, 0, 6)
-    bar.BackgroundColor3 = color
-    bar.BorderSizePixel = 0
+    bar.Size = UDim2.new(0, 3, 1, -12); bar.Position = UDim2.new(0, 0, 0, 6)
+    bar.BackgroundColor3 = color; bar.BorderSizePixel = 0
     Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
     local tL = Instance.new("TextLabel", nf)
-    tL.Size = UDim2.new(1, -20, 0, 18)
-    tL.Position = UDim2.new(0, 14, 0, 6)
-    tL.BackgroundTransparency = 1
-    tL.Font = Enum.Font.GothamBold
-    tL.Text = title
-    tL.TextColor3 = color
-    tL.TextSize = 11
-    tL.TextXAlignment = Enum.TextXAlignment.Left
-    tL.ZIndex = 10001
+    tL.Size = UDim2.new(1, -20, 0, 18); tL.Position = UDim2.new(0, 14, 0, 6)
+    tL.BackgroundTransparency = 1; tL.Font = Enum.Font.GothamBold
+    tL.Text = title; tL.TextColor3 = color; tL.TextSize = 11
+    tL.TextXAlignment = Enum.TextXAlignment.Left; tL.ZIndex = 10001
     local xL = Instance.new("TextLabel", nf)
-    xL.Size = UDim2.new(1, -20, 0, 18)
-    xL.Position = UDim2.new(0, 14, 0, 24)
-    xL.BackgroundTransparency = 1
-    xL.Font = Enum.Font.Gotham
-    xL.Text = text
-    xL.TextColor3 = C.Wh
-    xL.TextSize = 10
-    xL.TextXAlignment = Enum.TextXAlignment.Left
-    xL.TextTruncate = Enum.TextTruncate.AtEnd
+    xL.Size = UDim2.new(1, -20, 0, 18); xL.Position = UDim2.new(0, 14, 0, 24)
+    xL.BackgroundTransparency = 1; xL.Font = Enum.Font.Gotham
+    xL.Text = text; xL.TextColor3 = C.Wh; xL.TextSize = 10
+    xL.TextXAlignment = Enum.TextXAlignment.Left; xL.TextTruncate = Enum.TextTruncate.AtEnd
     xL.ZIndex = 10001
     nf.Position = UDim2.new(1, 50, 0, 0)
     TweenService:Create(nf, TweenInfo.new(0.35, Enum.EasingStyle.Back), {Position = UDim2.new(0, 0, 0, 0)}):Play()
     task.delay(2.5, function()
         if not nf.Parent then return end
         TweenService:Create(nf, TweenInfo.new(0.3), {Position = UDim2.new(1, 50, 0, 0), BackgroundTransparency = 1}):Play()
-        task.wait(0.35)
-        pcall(function() nf:Destroy() end)
+        task.wait(0.35); pcall(function() nf:Destroy() end)
     end)
 end
 
 function TLG.Ripple(obj)
     obj.MouseButton1Click:Connect(function()
         local r = Instance.new("Frame", obj)
-        r.BackgroundColor3 = TLG.A()
-        r.BackgroundTransparency = 0.6
+        r.BackgroundColor3 = TLG.A(); r.BackgroundTransparency = 0.6
         r.BorderSizePixel = 0
         r.Size = UDim2.new(0, 0, 0, 0)
         r.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -277,24 +162,56 @@ function TLG.Ripple(obj)
 end
 
 function TLG.PGlow(stroke, minT, maxT, dur)
-    minT = minT or 0.2
-    maxT = maxT or 0.8
-    dur = dur or 1.5
+    minT = minT or 0.2; maxT = maxT or 0.8; dur = dur or 1.5
     task.spawn(function()
         while stroke and stroke.Parent do
             local t1 = TweenService:Create(stroke, TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = maxT})
-            t1:Play()
-            t1.Completed:Wait()
+            t1:Play(); t1.Completed:Wait()
             if not stroke.Parent then break end
             local t2 = TweenService:Create(stroke, TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = minT})
-            t2:Play()
-            t2.Completed:Wait()
+            t2:Play(); t2.Completed:Wait()
         end
     end)
 end
 
+-- ═══════════════════════════════════════════════════════════════
+-- 📊 STATS MEME SEA — Escáner recursivo de PlayerData
+-- ═══════════════════════════════════════════════════════════════
+local function DeepScan(inst, s, depth)
+    if not inst or depth > 6 then return end
+    for _, v in ipairs(inst:GetChildren()) do
+        local cn = v.ClassName
+        if cn == "IntValue" or cn == "NumberValue" or cn == "StringValue" then
+            local n = v.Name:lower():gsub("[%s_%-%.]", "")
+            local num = tonumber(v.Value)
+            if num then
+                if     n == "level" or n == "lvl"                                       then s.Level   = num
+                elseif n == "gem" or n == "gems"                                        then s.Gems    = num
+                elseif n == "cash" or n == "money" or n == "coins" or n == "belly"      then s.Cash    = num
+                elseif n == "power" or n == "memepower" or n == "memepowerlevel" or n == "poder" then s.Power = num
+                elseif n == "melee" or n == "meleelevel" or n == "fist" or n == "fistslevel" then s.Melee = num
+                elseif n == "sword" or n == "swordlevel" or n == "weapon" or n == "weaponlevel" or n == "gun" then s.Weapon = num
+                elseif n == "rebirth" or n == "rebirths" or n == "prestige"             then s.Rebirths = num
+                elseif n == "rank" or n == "ranklevel"                                  then s.Rank    = num
+                elseif n == "kills" or n == "killcount"                                 then s.Kills   = num
+                elseif n == "deaths" or n == "deathcount"                               then s.Deaths  = num
+                elseif n == "essence" or n == "shards"                                  then s.Essence = num
+                elseif n == "tokens" or n == "tickets"                                  then s.Tokens  = num
+                end
+            end
+        elseif cn == "Folder" or cn == "Configuration" or cn == "Model" then
+            DeepScan(v, s, depth + 1)
+        end
+    end
+end
+
 function TLG.GetStats(plr)
-    local s = {Level=0, Health=0, MaxHealth=0, Gems=0, Cash=0, Power=0, Melee=0, Weapon=0}
+    local s = {
+        Level=0, Health=0, MaxHealth=0, Gems=0, Cash=0, Power=0,
+        Melee=0, Weapon=0, Rebirths=0, Rank=0, Kills=0, Deaths=0,
+        Essence=0, Tokens=0
+    }
+    -- Vida (Humanoid, lo más fiable)
     pcall(function()
         local ch = plr.Character
         if ch then
@@ -305,37 +222,237 @@ function TLG.GetStats(plr)
             end
         end
     end)
-    local function scan(folder, depth)
-        if not folder or depth > 4 then return end
-        for _, v in ipairs(folder:GetChildren()) do
-            if v:IsA("IntValue") or v:IsA("NumberValue") or v:IsA("StringValue") then
-                local n = v.Name:lower()
-                local val = tonumber(v.Value) or 0
-                if n == "level" or n == "lvl" then s.Level = val
-                elseif n == "gem" or n == "gems" then s.Gems = val
-                elseif n == "cash" or n == "money" then s.Cash = val
-                elseif n == "power" or n == "poder" or n == "memepowerlevel" then s.Power = val
-                elseif n == "melee" or n == "meleelevel" then s.Melee = val
-                elseif n == "sword" or n == "swordlevel" or n == "weapon" or n == "arma" then s.Weapon = val
+    -- ★ CLAVE MEME SEA: PlayerData recursivo
+    pcall(function()
+        local pd = plr:FindFirstChild("PlayerData")
+        if pd then DeepScan(pd, s, 0) end
+    end)
+    -- Fallbacks
+    for _, n in ipairs({"leaderstats","Stats","Data","Values","SaveData","PlayerStats"}) do
+        pcall(function() DeepScan(plr:FindFirstChild(n), s, 0) end)
+    end
+    -- Attributes del personaje (por si Meme Sea los usa)
+    pcall(function()
+        local ch = plr.Character
+        if ch then
+            for _, attr in ipairs({"Level","Power","Melee","Weapon","Gems","Cash","SwordLevel"}) do
+                local a = ch:GetAttribute(attr)
+                if type(a) == "number" then
+                    if attr == "SwordLevel" then s.Weapon = a
+                    else s[attr] = a end
                 end
-            elseif v:IsA("Folder") or v:IsA("Configuration") then
-                scan(v, depth + 1)
             end
         end
-    end
-    for _, n in ipairs({"leaderstats","PlayerData","Stats","Data","Values","SaveData"}) do
-        pcall(function() scan(plr:FindFirstChild(n), 0) end)
-    end
+    end)
     return s
 end
 
-local HB = {On = false, Sz = 50, Tr = 0.5, C = nil}
+-- ═══════════════════════════════════════════════════════════════
+-- 🎯 SISTEMA AIMBOT
+-- ═══════════════════════════════════════════════════════════════
+local AIM = {
+    On = false, Conn = nil, Target = nil,
+    HeadSize = 50, BodySize = 50, Range = 5000,
+    AutoAttack = true, AttackRate = 0.05,
+    TeleportNear = true, TeleDist = 5,
+    FaceTarget = true, ExpandHead = true, ExpandBody = true,
+    TeamCheck = false, WallCheck = false, Prediction = true,
+    OriginalData = {}, LastAttack = 0, RateCounter = 0, RateTimer = os.clock(),
+    FOVCircle = true
+}
+TLG.AIM = AIM
+
+local ANTI = {Enabled=true, Jitter=true, RateLimit=true, SmoothTP=true, MaxAttacksPerSec=20}
+TLG.ANTI_DETECT = ANTI
+
+local FOVCircle = nil
+pcall(function()
+    FOVCircle = Drawing.new("Circle")
+    FOVCircle.Thickness = 1.5
+    FOVCircle.NumSides = 64
+    FOVCircle.Radius = 150
+    FOVCircle.Filled = false
+    FOVCircle.Color = Color3.fromRGB(255, 215, 0)
+    FOVCircle.Transparency = 0.8
+    FOVCircle.Visible = false
+end)
+TLG.FOVCircle = FOVCircle
+
+local function AIM_SaveOrig(plr, part, tipo)
+    if not AIM.OriginalData[plr] then AIM.OriginalData[plr] = {} end
+    if not AIM.OriginalData[plr][tipo] then
+        AIM.OriginalData[plr][tipo] = {
+            Size = part.Size, Transparency = part.Transparency,
+            CanCollide = part.CanCollide, Material = part.Material, Color = part.Color
+        }
+    end
+end
+local function AIM_ExpandHead(plr)
+    if not AIM.ExpandHead then return end
+    local ch = plr.Character; if not ch then return end
+    local h = ch:FindFirstChild("Head"); if not h then return end
+    AIM_SaveOrig(plr, h, "Head")
+    pcall(function()
+        h.Size = Vector3.new(AIM.HeadSize, AIM.HeadSize, AIM.HeadSize)
+        h.Transparency = 1; h.CanCollide = false
+        h.Material = Enum.Material.Neon; h.Color = TLG.A()
+    end)
+end
+local function AIM_ExpandBody(plr)
+    if not AIM.ExpandBody then return end
+    local ch = plr.Character; if not ch then return end
+    local h = ch:FindFirstChild("HumanoidRootPart"); if not h then return end
+    AIM_SaveOrig(plr, h, "Body")
+    pcall(function()
+        h.Size = Vector3.new(AIM.BodySize, AIM.BodySize, AIM.BodySize)
+        h.Transparency = 1; h.CanCollide = false
+    end)
+end
+local function AIM_RestoreAll()
+    for plr, d in pairs(AIM.OriginalData) do
+        if plr.Character then
+            for tipo, v in pairs(d) do
+                local p = plr.Character:FindFirstChild(tipo == "Head" and "Head" or "HumanoidRootPart")
+                if p then
+                    pcall(function()
+                        p.Size = v.Size; p.Transparency = v.Transparency
+                        p.CanCollide = v.CanCollide; p.Material = v.Material; p.Color = v.Color
+                    end)
+                end
+            end
+        end
+    end
+    AIM.OriginalData = {}
+end
+local function AIM_HasLOS(fromPos, targetPart)
+    local params = RaycastParams.new()
+    params.FilterDescendantsInstances = {TLG.LP.Character, targetPart.Parent}
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    local result = workspace:Raycast(fromPos, targetPart.Position - fromPos, params)
+    return result == nil
+end
+local function AIM_FindTarget()
+    local b = nil
+    local bd = AIM.Range
+    local mc = TLG.LP.Character; if not mc then return nil end
+    local mh = mc:FindFirstChild("HumanoidRootPart"); if not mh then return nil end
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= TLG.LP and p.Character then
+            if not (AIM.TeamCheck and TLG.LP.Team and p.Team == TLG.LP.Team) then
+                local h = p.Character:FindFirstChild("HumanoidRootPart")
+                local hu = p.Character:FindFirstChildOfClass("Humanoid")
+                if h and hu and hu.Health > 0 then
+                    local d = (h.Position - mh.Position).Magnitude
+                    if d < bd then
+                        if not AIM.WallCheck or AIM_HasLOS(mh.Position, h) then
+                            bd = d; b = p
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return b
+end
+local function AIM_Atk()
+    local mc = TLG.LP.Character; if not mc then return end
+    local t = mc:FindFirstChildOfClass("Tool")
+    if t then pcall(function() t:Activate() end) end
+end
+local function AIM_TPn(target)
+    if not AIM.TeleportNear then return end
+    local mc = TLG.LP.Character; if not mc then return end
+    local mh = mc:FindFirstChild("HumanoidRootPart")
+    local tc = target.Character; if not tc then return end
+    local th = tc:FindFirstChild("HumanoidRootPart")
+    if not mh or not th then return end
+    local dist = (th.Position - mh.Position).Magnitude
+    if dist <= AIM.TeleDist then return end
+    local dir = (th.Position - mh.Position).Unit
+    local np = th.Position - dir * AIM.TeleDist
+    pcall(function() mh.CFrame = CFrame.new(np, th.Position) end)
+end
+local function AIM_FaceTarget(target)
+    if not AIM.FaceTarget then return end
+    local mc = TLG.LP.Character; if not mc then return end
+    local mh = mc:FindFirstChild("HumanoidRootPart")
+    local tc = target.Character; if not tc then return end
+    local th = tc:FindFirstChild("HumanoidRootPart")
+    if not mh or not th then return end
+    local aimPos = th.Position
+    if AIM.Prediction then
+        local vel = th.AssemblyLinearVelocity or Vector3.zero
+        local ping = TLG.GetPing() / 1000
+        aimPos = aimPos + vel * (ping * 0.5)
+    end
+    pcall(function()
+        mh.CFrame = CFrame.new(mh.Position, Vector3.new(aimPos.X, mh.Position.Y, aimPos.Z))
+    end)
+end
+local function AIM_Loop()
+    if not AIM.On then return end
+    local t = AIM_FindTarget()
+    AIM.Target = t
+    if not t then return end
+    AIM_ExpandHead(t); AIM_ExpandBody(t)
+    AIM_FaceTarget(t); AIM_TPn(t)
+    if AIM.AutoAttack then
+        local n = os.clock()
+        if ANTI.RateLimit then
+            if n - AIM.RateTimer >= 1 then AIM.RateCounter = 0; AIM.RateTimer = n end
+            if AIM.RateCounter >= ANTI.MaxAttacksPerSec then return end
+        end
+        local interval = AIM.AttackRate * (ANTI.Jitter and (0.7 + math.random() * 0.6) or 1)
+        if n - AIM.LastAttack >= interval then
+            AIM.LastAttack = n
+            AIM.RateCounter = AIM.RateCounter + 1
+            AIM_Atk()
+        end
+    end
+end
+function TLG.AIM_Start()
+    if AIM.On then return end
+    AIM.On = true
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= TLG.LP then AIM_ExpandHead(p); AIM_ExpandBody(p) end
+    end
+    AIM.Conn = RunService.Heartbeat:Connect(AIM_Loop)
+    TLG.PNotif("🎯 Aimbot", "✅ Activado", C.Grn)
+end
+function TLG.AIM_Stop()
+    if not AIM.On then return end
+    AIM.On = false
+    if AIM.Conn then pcall(function() AIM.Conn:Disconnect() end); AIM.Conn = nil end
+    AIM_RestoreAll()
+    AIM.Target = nil
+    TLG.PNotif("🎯 Aimbot", "❌ Desactivado", C.Rd)
+end
+
+if FOVCircle then
+    task.spawn(function()
+        RunService.RenderStepped:Connect(function()
+            if not AIM.On or not AIM.FOVCircle then
+                FOVCircle.Visible = false
+                return
+            end
+            local cam = workspace.CurrentCamera
+            if not cam then return end
+            FOVCircle.Position = Vector2.new(cam.ViewportSize.X / 2, cam.ViewportSize.Y / 2)
+            FOVCircle.Radius = math.min(AIM.Range * 0.05, cam.ViewportSize.X * 0.4)
+            FOVCircle.Color = TLG.A()
+            FOVCircle.Visible = true
+        end)
+    end)
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- 🔵 HITBOX / GOD ORB / SPECTATE
+-- ═══════════════════════════════════════════════════════════════
+local HB = {On = false, Sz = 50, Tr = 0.5}
 local function ApplyHB(p)
     if p == TLG.LP then return end
-    local ch = p.Character
-    if not ch then return end
-    local h = ch:FindFirstChild("HumanoidRootPart")
-    if not h then return end
+    local ch = p.Character; if not ch then return end
+    local h = ch:FindFirstChild("HumanoidRootPart"); if not h then return end
     pcall(function()
         h.Size = Vector3.new(HB.Sz, HB.Sz, HB.Sz)
         h.Transparency = HB.Tr
@@ -346,12 +463,12 @@ local function ApplyHB(p)
     end)
 end
 function TLG.HBStart()
-    if HB.C then return end
+    if HB.Conn then return end
     HB.On = true
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= TLG.LP then pcall(ApplyHB, p) end
     end
-    HB.C = RunService.Heartbeat:Connect(function()
+    HB.Conn = RunService.Heartbeat:Connect(function()
         if not HB.On then return end
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= TLG.LP then pcall(ApplyHB, p) end
@@ -360,7 +477,7 @@ function TLG.HBStart()
 end
 function TLG.HBStop()
     HB.On = false
-    if HB.C then pcall(function() HB.C:Disconnect() end); HB.C = nil end
+    if HB.Conn then pcall(function() HB.Conn:Disconnect() end); HB.Conn = nil end
 end
 
 TLG.GO = {T = nil, C = nil, On = false, Ang = 0}
@@ -384,12 +501,10 @@ function TLG.GOSt(p)
         local mh = mc:WaitForChild("HumanoidRootPart", 5)
         local mhu = mc:FindFirstChildOfClass("Humanoid")
         if not mh or not mhu then TLG.GOS(); return end
-        mh.Anchored = true
-        mhu.PlatformStand = true
+        mh.Anchored = true; mhu.PlatformStand = true
         TLG.GO.C = RunService.PreSimulation:Connect(function(dt)
             if not TLG.GO.On or not TLG.GO.T or not TLG.GO.T.Parent then TLG.GOS(); return end
-            local tc = TLG.GO.T.Character
-            if not tc then TLG.GOS(); return end
+            local tc = TLG.GO.T.Character; if not tc then TLG.GOS(); return end
             local th = tc:FindFirstChild("HumanoidRootPart")
             local thu = tc:FindFirstChildOfClass("Humanoid")
             if not th or not thu or thu.Health <= 0 then TLG.GOS(); return end
@@ -412,33 +527,61 @@ function TLG.SpS()
 end
 function TLG.SpSt(p)
     if not p or not p.Parent then return end
-    TLG.SpS()
-    TLG.Sp.T = p
+    TLG.SpS(); TLG.Sp.T = p
     TLG.Sp.C = RunService.RenderStepped:Connect(function()
         if not TLG.Sp.T or not TLG.Sp.T.Parent then TLG.SpS(); return end
-        local ch = TLG.Sp.T.Character
-        if not ch then TLG.SpS(); return end
+        local ch = TLG.Sp.T.Character; if not ch then TLG.SpS(); return end
         local hu = ch:FindFirstChildOfClass("Humanoid")
         if hu and hu.Health > 0 and TLG.Cam then TLG.Cam.CameraSubject = hu
         elseif hu and hu.Health <= 0 then TLG.SpS() end
     end)
 end
 
--- FLY
-TLG.Fly = {On = false, Spd = 15000, C = nil}
+-- ═══════════════════════════════════════════════════════════════
+-- ✈️ FLY / 🏃 SPEED
+-- ═══════════════════════════════════════════════════════════════
+TLG.Fly = {On = false, Spd = 15000, C = nil, Noclip = true, Keys = {Up = false, Down = false}}
+local function FlyCleanupPart(h)
+    if not h then return end
+    pcall(function()
+        for _, n in ipairs({"TLG_FlyBV", "TLG_FlyBG", "BodyVelocity", "BodyGyro"}) do
+            local o = h:FindFirstChild(n); if o then o:Destroy() end
+        end
+    end)
+end
 function TLG.FlyE()
     TLG.Fly.On = false
+    TLG.Fly.Keys.Up = false; TLG.Fly.Keys.Down = false
     local ch = TLG.LP.Character
     if ch then
         local h = ch:FindFirstChild("HumanoidRootPart")
         local hu = ch:FindFirstChildOfClass("Humanoid")
-        if h then pcall(function()
-            local bv = h:FindFirstChild("BodyVelocity"); if bv then bv:Destroy() end
-            local bg = h:FindFirstChild("BodyGyro"); if bg then bg:Destroy() end
-        end) end
+        FlyCleanupPart(h)
         if hu then pcall(function() hu.PlatformStand = false end) end
+        if TLG.Fly.Noclip then
+            for _, p in ipairs(ch:GetDescendants()) do
+                if p:IsA("BasePart") then pcall(function() p.CanCollide = true end) end
+            end
+        end
     end
     if TLG.Fly.C then pcall(function() TLG.Fly.C:Disconnect() end); TLG.Fly.C = nil end
+end
+local function FlyGetMoveVector()
+    local mv = Vector3.zero
+    local pm = TLG.LP:FindFirstChild("PlayerScripts")
+    if pm then
+        local pmod = pm:FindFirstChild("PlayerModule")
+        if pmod then
+            local ok, controls = pcall(function()
+                local m = require(pmod); return m:GetControls()
+            end)
+            if ok and controls then
+                local ok2, v = pcall(function() return controls:GetMoveVector() end)
+                if ok2 and v then mv = v end
+            end
+        end
+    end
+    return mv
 end
 function TLG.FlyS()
     if TLG.Fly.On then return end
@@ -448,59 +591,66 @@ function TLG.FlyS()
         local h = ch:WaitForChild("HumanoidRootPart", 5)
         local hu = ch:FindFirstChildOfClass("Humanoid")
         if not h or not hu then TLG.Fly.On = false; return end
-        local bv = Instance.new("BodyVelocity", h)
-        bv.MaxForce = Vector3.new(1e10, 1e10, 1e10)
-        bv.Velocity = Vector3.zero
-        local bg = Instance.new("BodyGyro", h)
-        bg.MaxTorque = Vector3.new(1e10, 1e10, 1e10)
-        bg.P = 9e4
-        bg.CFrame = h.CFrame
+        FlyCleanupPart(h)
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "TLG_FlyBV"; bv.MaxForce = Vector3.new(1e10, 1e10, 1e10)
+        bv.Velocity = Vector3.zero; bv.Parent = h
+        local bg = Instance.new("BodyGyro")
+        bg.Name = "TLG_FlyBG"; bg.MaxTorque = Vector3.new(1e10, 1e10, 1e10)
+        bg.P = 9e4; bg.CFrame = h.CFrame; bg.Parent = h
         hu.PlatformStand = true
         TLG.Fly.C = RunService.RenderStepped:Connect(function()
             if not TLG.Fly.On then TLG.FlyE(); return end
-            if not h or not h.Parent then TLG.FlyE(); return end
-            if not bv or not bv.Parent then
-                bv = Instance.new("BodyVelocity", h)
-                bv.MaxForce = Vector3.new(1e10, 1e10, 1e10)
+            local curCh = TLG.LP.Character; if not curCh then return end
+            h = curCh:FindFirstChild("HumanoidRootPart")
+            hu = curCh:FindFirstChildOfClass("Humanoid")
+            if not h or not hu then return end
+            bv = h:FindFirstChild("TLG_FlyBV")
+            bg = h:FindFirstChild("TLG_FlyBG")
+            if not bv then
+                bv = Instance.new("BodyVelocity"); bv.Name = "TLG_FlyBV"
+                bv.MaxForce = Vector3.new(1e10, 1e10, 1e10); bv.Parent = h
             end
-            if not bg or not bg.Parent then
-                bg = Instance.new("BodyGyro", h)
-                bg.MaxTorque = Vector3.new(1e10, 1e10, 1e10)
-                bg.P = 9e4
+            if not bg then
+                bg = Instance.new("BodyGyro"); bg.Name = "TLG_FlyBG"
+                bg.MaxTorque = Vector3.new(1e10, 1e10, 1e10); bg.P = 9e4; bg.Parent = h
             end
             if not hu.PlatformStand then hu.PlatformStand = true end
-            bg.CFrame = TLG.Cam.CFrame
-            local mv = Vector3.zero
-            local pm = TLG.LP:FindFirstChild("PlayerScripts")
-            if pm then
-                local pmod = pm:FindFirstChild("PlayerModule")
-                if pmod then
-                    local ok, controls = pcall(function()
-                        local m = require(pmod)
-                        return m:GetControls()
-                    end)
-                    if ok and controls then
-                        local ok2, v = pcall(function() return controls:GetMoveVector() end)
-                        if ok2 and v then mv = v end
-                    end
+            if TLG.Fly.Noclip then
+                for _, p in ipairs(curCh:GetDescendants()) do
+                    if p:IsA("BasePart") then p.CanCollide = false end
                 end
             end
-            if mv.Magnitude < 0.05 then
-                bv.Velocity = Vector3.zero
-            else
-                local cf = TLG.Cam.CFrame
-                local dir = (cf.LookVector * -mv.Z) + (cf.RightVector * mv.X)
-                if dir.Magnitude > 0.05 then
-                    bv.Velocity = dir.Unit * TLG.Fly.Spd
-                else
-                    bv.Velocity = Vector3.zero
-                end
-            end
+            local cam = TLG.Cam or workspace.CurrentCamera
+            if cam then bg.CFrame = cam.CFrame end
+            local mv = FlyGetMoveVector()
+            local dir = Vector3.zero
+            if cam then dir = (cam.CFrame.LookVector * -mv.Z) + (cam.CFrame.RightVector * mv.X) end
+            local y = 0
+            if TLG.Fly.Keys.Up then y = y + 1 end
+            if TLG.Fly.Keys.Down then y = y - 1 end
+            if y ~= 0 then dir = dir + Vector3.new(0, y, 0) end
+            bv.Velocity = dir.Magnitude > 0.05 and dir.Unit * TLG.Fly.Spd or Vector3.zero
         end)
     end)
 end
+UserInputService.InputBegan:Connect(function(i, gp)
+    if gp then return end
+    if i.KeyCode == Enum.KeyCode.Space then TLG.Fly.Keys.Up = true
+    elseif i.KeyCode == Enum.KeyCode.LeftControl or i.KeyCode == Enum.KeyCode.C then TLG.Fly.Keys.Down = true end
+end)
+UserInputService.InputEnded:Connect(function(i)
+    if i.KeyCode == Enum.KeyCode.Space then TLG.Fly.Keys.Up = false
+    elseif i.KeyCode == Enum.KeyCode.LeftControl or i.KeyCode == Enum.KeyCode.C then TLG.Fly.Keys.Down = false end
+end)
+TLG.LP.CharacterAdded:Connect(function()
+    if TLG.Fly.On then
+        TLG.Fly.On = false
+        if TLG.Fly.C then pcall(function() TLG.Fly.C:Disconnect() end); TLG.Fly.C = nil end
+        task.wait(0.4); TLG.FlyS()
+    end
+end)
 
--- SPEED
 TLG.Speed = {On = false, Val = 300}
 RunService.RenderStepped:Connect(function()
     if TLG.Speed.On then
@@ -509,85 +659,265 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-print("[TLG V6.8] ✅ Parte 1/3 cargada")
+-- ═══════════════════════════════════════════════════════════════
+-- 🛡️ PROTECCIONES
+-- ═══════════════════════════════════════════════════════════════
+local AntiVoid = {On=false, Conn=nil, Y=-100}
+function TLG.AntiVoidStart()
+    if AntiVoid.On then return end
+    AntiVoid.On = true
+    AntiVoid.Conn = RunService.Heartbeat:Connect(function()
+        if not AntiVoid.On then return end
+        local h = TLG.LP.Character and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
+        if h and h.Position.Y < AntiVoid.Y then
+            h.CFrame = CFrame.new(h.Position.X, 200, h.Position.Z)
+            TLG.PNotif("🛡️ Anti-Void", "Rescatado del void", C.Cyan)
+        end
+    end)
+end
+function TLG.AntiVoidStop()
+    AntiVoid.On = false
+    if AntiVoid.Conn then pcall(function() AntiVoid.Conn:Disconnect() end); AntiVoid.Conn = nil end
+end
+
+local AntiFling = {On=false, Conn=nil}
+function TLG.AntiFlingStart()
+    if AntiFling.On then return end
+    AntiFling.On = true
+    AntiFling.Conn = RunService.Heartbeat:Connect(function()
+        if not AntiFling.On then return end
+        local ch = TLG.LP.Character; if not ch then return end
+        local h = ch:FindFirstChild("HumanoidRootPart")
+        local hu = ch:FindFirstChildOfClass("Humanoid")
+        if h and hu and hu.PlatformStand then hu.PlatformStand = false end
+        if h then
+            local av = h.AssemblyLinearVelocity
+            if av.Magnitude > 500 and not TLG.Fly.On then
+                h.AssemblyLinearVelocity = av.Unit * 50
+            end
+        end
+    end)
+end
+function TLG.AntiFlingStop()
+    AntiFling.On = false
+    if AntiFling.Conn then pcall(function() AntiFling.Conn:Disconnect() end); AntiFling.Conn = nil end
+end
+
+local AntiStun = {On=false, Conn=nil}
+local function AntiStunForce()
+    if not AntiStun.On then return end
+    local ch = TLG.LP and TLG.LP.Character; if not ch then return end
+    local v = ch:FindFirstChild("Stun") or ch:FindFirstChild("Stunned") or ch:FindFirstChild("StunValue")
+    if v then
+        pcall(function()
+            if v:IsA("BoolValue") then v.Value = false
+            elseif v:IsA("NumberValue") or v:IsA("IntValue") then v.Value = -1 end
+        end)
+    end
+    pcall(function()
+        local s = ch:GetAttribute("Stun")
+        if s ~= nil then ch:SetAttribute("Stun", 0) end
+    end)
+end
+function TLG.AntiStunStart()
+    if AntiStun.On then return end
+    AntiStun.On = true
+    AntiStunForce()
+    AntiStun.Conn = RunService.Heartbeat:Connect(AntiStunForce)
+end
+function TLG.AntiStunStop()
+    AntiStun.On = false
+    if AntiStun.Conn then pcall(function() AntiStun.Conn:Disconnect() end); AntiStun.Conn = nil end
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- 🚨 PANIC / AUTO-REJOIN / AUTO-COLLECT
+-- ═══════════════════════════════════════════════════════════════
+function TLG.Panic()
+    pcall(function() TLG.FlyE() end)
+    pcall(function() TLG.HBStop() end)
+    pcall(function() TLG.GOS() end)
+    pcall(function() TLG.SpS() end)
+    pcall(function() TLG.AIM_Stop() end)
+    pcall(function() TLG.ESPStop() end)
+    pcall(function() TLG.AntiVoidStop() end)
+    pcall(function() TLG.AntiFlingStop() end)
+    pcall(function() TLG.AntiStunStop() end)
+    pcall(function() TLG.NoclipStop() end)
+    pcall(function() TLG.OrbitalMapStop() end)
+    TLG.Speed.On = false
+    TLG.PNotif("🚨 PANIC", "Todo desactivado", C.Rd)
+end
+
+local AutoRejoin = {On=false}
+function TLG.QueueOnTeleport() end
+function TLG.AutoRejoinToggle(v)
+    AutoRejoin.On = v == true
+    if v then TLG.PNotif("🔄 Auto-Rejoin", "Activado", C.Grn) end
+end
+TeleportService.TeleportInitFailed:Connect(function(_, result)
+    if AutoRejoin.On then
+        task.wait(3)
+        pcall(function() TeleportService:Teleport(game.PlaceId, TLG.LP) end)
+    end
+end)
+pcall(function()
+    TLG.LP.OnTeleport:Connect(function(state)
+        if AutoRejoin.On and state == Enum.TeleportState.Failed then
+            task.wait(2)
+            pcall(function() TeleportService:Teleport(game.PlaceId, TLG.LP) end)
+        end
+    end)
+end)
+
+local AutoPrompt = {On=false, Conn=nil, Range=25}
+function TLG.AutoPromptStart()
+    if AutoPrompt.On then return end
+    AutoPrompt.On = true
+    AutoPrompt.Conn = RunService.Heartbeat:Connect(function()
+        if not AutoPrompt.On then return end
+        local h = TLG.LP.Character and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
+        if not h then return end
+        for _, p in ipairs(workspace:GetDescendants()) do
+            if p:IsA("ProximityPrompt") and p.Enabled and p.Parent and p.Parent:IsA("BasePart") then
+                local d = (p.Parent.Position - h.Position).Magnitude
+                if d <= AutoPrompt.Range then
+                    pcall(function()
+                        if fireproximityprompt then
+                            fireproximityprompt(p)
+                        else
+                            p:InputHoldBegin(); p:InputHoldEnd()
+                        end
+                    end)
+                end
+            end
+        end
+    end)
+end
+function TLG.AutoPromptStop()
+    AutoPrompt.On = false
+    if AutoPrompt.Conn then pcall(function() AutoPrompt.Conn:Disconnect() end); AutoPrompt.Conn = nil end
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- 👥 JOIN/LEAVE NOTIFICACIONES
+-- ═══════════════════════════════════════════════════════════════
+Players.PlayerAdded:Connect(function(p)
+    if p ~= TLG.LP then
+        task.wait(0.3)
+        TLG.PNotif("➕ " .. p.DisplayName, "Se unió al servidor", C.Grn)
+    end
+end)
+Players.PlayerRemoving:Connect(function(p)
+    if p ~= TLG.LP then
+        TLG.PNotif("➖ " .. p.DisplayName, "Salió del servidor", C.Rd)
+    end
+end)
+
+-- ═══════════════════════════════════════════════════════════════
+-- 💾 SAVE / LOAD CONFIG
+-- ═══════════════════════════════════════════════════════════════
+local ConfigFile = "TLG_Config.json"
+function TLG.SaveConfig()
+    local data = {
+        Theme = TLG.CurrentTheme,
+        Fly = {Spd = TLG.Fly.Spd, Noclip = TLG.Fly.Noclip},
+        Speed = {Val = TLG.Speed.Val},
+        Aim = {
+            HeadSize = AIM.HeadSize, BodySize = AIM.BodySize,
+            Range = AIM.Range, AutoAttack = AIM.AutoAttack,
+            TeleportNear = AIM.TeleportNear, TeleDist = AIM.TeleDist,
+            FaceTarget = AIM.FaceTarget, TeamCheck = AIM.TeamCheck,
+            WallCheck = AIM.WallCheck, Prediction = AIM.Prediction,
+            FOVCircle = AIM.FOVCircle
+        },
+        AutoPrompt = {On = AutoPrompt.On, Range = AutoPrompt.Range},
+    }
+    local ok = pcall(function()
+        if writefile then writefile(ConfigFile, HttpService:JSONEncode(data)) end
+    end)
+    if ok then TLG.PNotif("💾 Config", "Guardado correctamente", C.Grn)
+    else TLG.PNotif("💾 Config", "No se pudo guardar", C.Rd) end
+end
+function TLG.LoadConfig()
+    if not (isfile and isfile(ConfigFile)) then return end
+    local ok, data = pcall(function() return HttpService:JSONDecode(readfile(ConfigFile)) end)
+    if not ok or not data then return end
+    if data.Theme and Themes[data.Theme] then TLG.CurrentTheme = data.Theme end
+    if data.Fly then
+        TLG.Fly.Spd = data.Fly.Spd or TLG.Fly.Spd
+        TLG.Fly.Noclip = data.Fly.Noclip ~= false
+    end
+    if data.Speed then TLG.Speed.Val = data.Speed.Val or TLG.Speed.Val end
+    if data.Aim then for k, v in pairs(data.Aim) do AIM[k] = v end end
+    if data.AutoPrompt then AutoPrompt.Range = data.AutoPrompt.Range or AutoPrompt.Range end
+    TLG.PNotif("💾 Config", "Cargado", C.Cyan)
+end
+task.spawn(function() task.wait(1); pcall(TLG.LoadConfig) end)
+
+print("[TLG V7.1] ✅ Parte 1/3 cargada")
 
 -- ═══ PARTE 2/3 — UI PRINCIPAL ═══
 local W_S = TLG.IsMobile and UDim2.new(0,400,0,280) or UDim2.new(0,640,0,420)
 local W_P = UDim2.new(0.5,-W_S.X.Offset/2,0.5,-W_S.Y.Offset/2)
 
-
--- ═══════════════════════════════════════════════════════════════
--- SKYBOX TLG
--- ═══════════════════════════════════════════════════════════════
-local Sky = {On=false, Current="ninguno", Ids=nil, Conn=nil, Original={Captured=false, HadSky=false, Bk=nil, Dn=nil, Ft=nil, Lf=nil, Rt=nil, Up=nil, Orientation=Vector3.zero, StarCount=nil, Celestial=nil}}
+local Sky = {On=false, Current="ninguno", Ids=nil, Conn=nil, Original={Captured=false, HadSky=false}}
 local SkyPresets = {
     {name="❌ Ninguno", id="ninguno", ids=nil},
     {name="🏠 Roblox Sample", id="sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
     {name="🌌 Galaxia", id="galaxia", ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
-    {name="🌠 Espacio Vaporwave", id="vaporwave", ids={"rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834","rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"}},
+    {name="🌠 Vaporwave", id="vaporwave", ids={"rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834","rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"}},
     {name="🌅 Sunset", id="sunset", ids={"rbxassetid://323494035","rbxassetid://323494368","rbxassetid://323494130","rbxassetid://323494252","rbxassetid://323494067","rbxassetid://323493360"}},
     {name="🔵 Blue Space", id="blue_space", ids={"rbxassetid://135483466","rbxassetid://135483484","rbxassetid://135483461","rbxassetid://135483495","rbxassetid://135483499","rbxassetid://135483475"}},
     {name="🔴 Red Night", id="red_night", ids={"rbxassetid://401664839","rbxassetid://401664862","rbxassetid://401664960","rbxassetid://401664881","rbxassetid://401664901","rbxassetid://401664936"}},
     {name="🪐 Blue Planet", id="blue_planet", ids={"rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524","rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"}},
-    {name="🔵 Blue Planet 2", id="blue_planet_2", ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}}
 }
 local function SkyCaptureOriginal()
     pcall(function()
         if Sky.Original.Captured then return end
-        local s=Lighting:FindFirstChildOfClass("Sky")
-        Sky.Original.Captured=true; Sky.Original.HadSky=s~=nil
+        local s = Lighting:FindFirstChildOfClass("Sky")
+        Sky.Original.Captured = true
+        Sky.Original.HadSky = s ~= nil
         if s then
-            Sky.Original.Bk=s.SkyboxBk; Sky.Original.Dn=s.SkyboxDn; Sky.Original.Ft=s.SkyboxFt
-            Sky.Original.Lf=s.SkyboxLf; Sky.Original.Rt=s.SkyboxRt; Sky.Original.Up=s.SkyboxUp
-            Sky.Original.Orientation=s.SkyboxOrientation; Sky.Original.StarCount=s.StarCount; Sky.Original.Celestial=s.CelestialBodiesShown
+            Sky.Original.Bk = s.SkyboxBk; Sky.Original.Dn = s.SkyboxDn
+            Sky.Original.Ft = s.SkyboxFt; Sky.Original.Lf = s.SkyboxLf
+            Sky.Original.Rt = s.SkyboxRt; Sky.Original.Up = s.SkyboxUp
+            Sky.Original.Orientation = s.SkyboxOrientation
         end
     end)
 end
 local function SkyGet()
-    local s=Lighting:FindFirstChild("TLG_Sky")
-    if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
+    local s = Lighting:FindFirstChild("TLG_Sky")
+    if not s then s = Instance.new("Sky"); s.Name = "TLG_Sky"; s.Parent = Lighting end
     return s
 end
 local function SkySet(ids)
     if not ids then return end
-    local s=SkyGet()
-    s.SkyboxBk=ids[1]; s.SkyboxDn=ids[2]; s.SkyboxFt=ids[3]
-    s.SkyboxLf=ids[4]; s.SkyboxRt=ids[5]; s.SkyboxUp=ids[6]
-    s.SkyboxOrientation=Vector3.new(0,0,0)
-    pcall(function() s.CelestialBodiesShown=true; s.StarCount=3000 end)
-end
-local function SkyRestoreOriginal()
-    pcall(function()
-        local s=Lighting:FindFirstChild("TLG_Sky")
-        if Sky.Original.HadSky then
-            if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
-            s.SkyboxBk=Sky.Original.Bk; s.SkyboxDn=Sky.Original.Dn; s.SkyboxFt=Sky.Original.Ft
-            s.SkyboxLf=Sky.Original.Lf; s.SkyboxRt=Sky.Original.Rt; s.SkyboxUp=Sky.Original.Up
-            s.SkyboxOrientation=Sky.Original.Orientation
-            if Sky.Original.StarCount then s.StarCount=Sky.Original.StarCount end
-            if Sky.Original.Celestial~=nil then s.CelestialBodiesShown=Sky.Original.Celestial end
-        elseif s then s:Destroy() end
-        Sky.On=false; Sky.Ids=nil; Sky.Current="ninguno"
-    end)
+    local s = SkyGet()
+    s.SkyboxBk = ids[1]; s.SkyboxDn = ids[2]; s.SkyboxFt = ids[3]
+    s.SkyboxLf = ids[4]; s.SkyboxRt = ids[5]; s.SkyboxUp = ids[6]
+    s.SkyboxOrientation = Vector3.new(0,0,0)
 end
 local function SkyApply(ids)
     SkyCaptureOriginal()
-    if Sky.Conn then pcall(function() Sky.Conn:Disconnect() end); Sky.Conn=nil end
-    if not ids then SkyRestoreOriginal(); return end
-    Sky.Ids=ids; Sky.On=true; SkySet(ids)
-    Sky.Conn=RunService.Heartbeat:Connect(function()
-        if not Sky.On or not Sky.Ids then return end
-        pcall(function()
-            local s=Lighting:FindFirstChild("TLG_Sky")
-            if not s then s=SkyGet() end
-            if s.SkyboxBk~=Sky.Ids[1] or s.SkyboxDn~=Sky.Ids[2] or s.SkyboxFt~=Sky.Ids[3] or s.SkyboxLf~=Sky.Ids[4] or s.SkyboxRt~=Sky.Ids[5] or s.SkyboxUp~=Sky.Ids[6] then SkySet(Sky.Ids) end
-        end)
-    end)
+    if Sky.Conn then pcall(function() Sky.Conn:Disconnect() end); Sky.Conn = nil end
+    if not ids then
+        local s = Lighting:FindFirstChild("TLG_Sky")
+        if Sky.Original.HadSky then
+            if not s then s = SkyGet() end
+            s.SkyboxBk = Sky.Original.Bk; s.SkyboxDn = Sky.Original.Dn
+            s.SkyboxFt = Sky.Original.Ft; s.SkyboxLf = Sky.Original.Lf
+            s.SkyboxRt = Sky.Original.Rt; s.SkyboxUp = Sky.Original.Up
+        elseif s then s:Destroy() end
+        Sky.On = false; Sky.Current = "ninguno"
+        return
+    end
+    Sky.Ids = ids; Sky.On = true; SkySet(ids)
 end
 
 local W = Instance.new("Frame", SG)
 W.Size = W_S
-W.Position = UDim2.new(0.5,0,0.5,0)
+W.Position = W_P
 W.BackgroundColor3 = C.BG
 W.BorderSizePixel = 0
 W.ClipsDescendants = true
@@ -596,17 +926,13 @@ W.ZIndex = 1
 Instance.new("UICorner", W).CornerRadius = UDim.new(0,12)
 
 local WS = Instance.new("UIStroke", W)
-WS.Thickness = 2
-WS.Color = TLG.A()
+WS.Thickness = 2; WS.Color = TLG.A()
 TLG.PGlow(WS, 0.05, 0.35, 1.5)
 
 local Wgrad = Instance.new("UIGradient", W)
-Wgrad.Color = ColorSequence.new(C.BG, C.BG2)
-Wgrad.Rotation = 135
+Wgrad.Color = ColorSequence.new(C.BG, C.BG2); Wgrad.Rotation = 135
 
-TLG.W = W
-TLG.W_S = W_S
-TLG.W_P = W_P
+TLG.W = W; TLG.W_S = W_S; TLG.W_P = W_P
 
 local function AddPattern(parent, size, color, transp, rotation)
     local holder = Instance.new("Frame", parent)
@@ -620,12 +946,9 @@ local function AddPattern(parent, size, color, transp, rotation)
             icon.Size = UDim2.new(0,size,0,size)
             icon.Position = UDim2.new(0, i*size + (j%2)*size/2, 0, j*size)
             icon.BackgroundTransparency = 1
-            icon.Text = "💀"
-            icon.TextSize = size * 0.7
-            icon.TextColor3 = color
-            icon.TextTransparency = transp
-            icon.Rotation = rotation
-            icon.ZIndex = 0
+            icon.Text = "💀"; icon.TextSize = size * 0.7
+            icon.TextColor3 = color; icon.TextTransparency = transp
+            icon.Rotation = rotation; icon.ZIndex = 0
         end
     end
 end
@@ -638,31 +961,17 @@ TB.BackgroundTransparency = 0.05
 TB.BorderSizePixel = 0
 TB.ZIndex = 5
 Instance.new("UICorner", TB).CornerRadius = UDim.new(0,12)
-
-local HF = Instance.new("Frame", TB)
-HF.Size = UDim2.new(1,0,0,12)
-HF.Position = UDim2.new(0,0,1,-12)
-HF.BackgroundColor3 = C.BG2
-HF.BackgroundTransparency = 0.05
-HF.BorderSizePixel = 0
-HF.ZIndex = 5
-
 AddPattern(TB, 32, C.Yel, 0.85, 0)
 
 local DcIco = Instance.new("TextLabel", TB)
 DcIco.Size = UDim2.new(0,26,0,26)
 DcIco.Position = UDim2.new(0,10,0.5,-13)
 DcIco.BackgroundColor3 = C.BG3
-DcIco.Text = "💀"
-DcIco.TextSize = 15
+DcIco.Text = "💀"; DcIco.TextSize = 15
 DcIco.Font = Enum.Font.GothamBold
-DcIco.TextColor3 = C.Yel
-DcIco.ZIndex = 10
+DcIco.TextColor3 = C.Yel; DcIco.ZIndex = 10
 Instance.new("UICorner", DcIco).CornerRadius = UDim.new(1,0)
-
-local DcS = Instance.new("UIStroke", DcIco)
-DcS.Color = C.Yel
-DcS.Thickness = 1.5
+local DcS = Instance.new("UIStroke", DcIco); DcS.Color = C.Yel; DcS.Thickness = 1.5
 TLG.PGlow(DcS, 0.1, 0.5, 1.2)
 
 local MainTitle = Instance.new("TextLabel", TB)
@@ -670,8 +979,7 @@ MainTitle.Size = UDim2.new(0,180,0,18)
 MainTitle.Position = UDim2.new(0,42,0,6)
 MainTitle.BackgroundTransparency = 1
 MainTitle.Font = Enum.Font.GothamBold
-MainTitle.Text = "TLG GOLD HUB"
-MainTitle.TextSize = 13
+MainTitle.Text = "TLG GOLD HUB"; MainTitle.TextSize = 13
 MainTitle.TextColor3 = C.Yel
 MainTitle.TextXAlignment = Enum.TextXAlignment.Left
 MainTitle.ZIndex = 10
@@ -681,11 +989,25 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V6.8"
-SubTitle.TextSize = 9
+SubTitle.Text = "Meme Sea • V7.1"; SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.ZIndex = 10
+
+local PanicBtn = Instance.new("TextButton", TB)
+PanicBtn.Size = UDim2.new(0,28,0,28)
+PanicBtn.Position = UDim2.new(1,-135,0.5,-14)
+PanicBtn.BackgroundColor3 = C.BG3
+PanicBtn.Text = "🚨"
+PanicBtn.TextSize = 14
+PanicBtn.Font = Enum.Font.GothamBold
+PanicBtn.BorderSizePixel = 0
+PanicBtn.AutoButtonColor = false
+PanicBtn.ZIndex = 10
+Instance.new("UICorner", PanicBtn).CornerRadius = UDim.new(0,6)
+local PanicS = Instance.new("UIStroke", PanicBtn)
+PanicS.Color = C.Rd; PanicS.Thickness = 1.5
+PanicBtn.MouseButton1Click:Connect(TLG.Panic)
 
 local StatsPanel = Instance.new("Frame", TB)
 StatsPanel.Size = UDim2.new(0,130,0,24)
@@ -695,20 +1017,15 @@ StatsPanel.BackgroundTransparency = 0.3
 StatsPanel.BorderSizePixel = 0
 StatsPanel.ZIndex = 8
 Instance.new("UICorner", StatsPanel).CornerRadius = UDim.new(0,6)
-
 local StatS = Instance.new("UIStroke", StatsPanel)
-StatS.Color = C.Yel
-StatS.Thickness = 1
-StatS.Transparency = 0.6
+StatS.Color = C.Yel; StatS.Thickness = 1; StatS.Transparency = 0.6
 
 local FpsLabel = Instance.new("TextLabel", StatsPanel)
 FpsLabel.Size = UDim2.new(0.5,-6,1,0)
 FpsLabel.Position = UDim2.new(0,4,0,0)
 FpsLabel.BackgroundTransparency = 1
 FpsLabel.Font = Enum.Font.GothamBold
-FpsLabel.Text = "FPS: --"
-FpsLabel.TextColor3 = C.Grn
-FpsLabel.TextSize = 10
+FpsLabel.Text = "FPS: --"; FpsLabel.TextColor3 = C.Grn; FpsLabel.TextSize = 10
 FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
 FpsLabel.ZIndex = 9
 
@@ -717,23 +1034,19 @@ PingLabel.Size = UDim2.new(0.5,-6,1,0)
 PingLabel.Position = UDim2.new(0.5,2,0,0)
 PingLabel.BackgroundTransparency = 1
 PingLabel.Font = Enum.Font.GothamBold
-PingLabel.Text = "Ping: --"
-PingLabel.TextColor3 = C.Cyan
-PingLabel.TextSize = 10
+PingLabel.Text = "Ping: --"; PingLabel.TextColor3 = C.Cyan; PingLabel.TextSize = 10
 PingLabel.TextXAlignment = Enum.TextXAlignment.Right
 PingLabel.ZIndex = 9
 
 task.spawn(function()
-    local fc = 0
-    local lt = os.clock()
+    local fc, lt = 0, os.clock()
     RunService.RenderStepped:Connect(function()
         fc = fc + 1
         local n = os.clock()
         if n - lt >= 1 then
             FpsLabel.Text = "FPS: " .. math.floor(fc / (n - lt))
             PingLabel.Text = "Ping: " .. TLG.GetPing() .. "ms"
-            fc = 0
-            lt = n
+            fc = 0; lt = n
         end
     end)
 end)
@@ -743,20 +1056,16 @@ STtl.Size = UDim2.new(0,60,1,0)
 STtl.Position = UDim2.new(1,-64,0,0)
 STtl.BackgroundTransparency = 1
 STtl.Font = Enum.Font.GothamBold
-STtl.Text = "👑"
-STtl.TextSize = 14
+STtl.Text = "👑"; STtl.TextSize = 14
 STtl.TextColor3 = C.Yel
 STtl.TextXAlignment = Enum.TextXAlignment.Right
 STtl.ZIndex = 7
-
 TLG.STtl = STtl
 
 local dg, dS, dP = false, nil, nil
 TB.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        dg = true
-        dS = i.Position
-        dP = W.Position
+        dg = true; dS = i.Position; dP = W.Position
     end
 end)
 UserInputService.InputChanged:Connect(function(i)
@@ -766,9 +1075,7 @@ UserInputService.InputChanged:Connect(function(i)
     end
 end)
 UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        dg = false
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then dg = false end
 end)
 
 local TabBar = Instance.new("Frame", W)
@@ -785,7 +1092,6 @@ TScr.Position = UDim2.new(0,5,0,0)
 TScr.BackgroundTransparency = 1
 TScr.BorderSizePixel = 0
 TScr.ScrollBarThickness = 0
-TScr.ScrollBarImageTransparency = 1
 TScr.CanvasSize = UDim2.new(0,0,0,0)
 TScr.ZIndex = 5
 TScr.ScrollingDirection = Enum.ScrollingDirection.X
@@ -794,7 +1100,6 @@ pcall(function() TScr.AutomaticCanvasSize = Enum.AutomaticSize.X end)
 local TLy = Instance.new("UIListLayout", TScr)
 TLy.FillDirection = Enum.FillDirection.Horizontal
 TLy.VerticalAlignment = Enum.VerticalAlignment.Center
-TLy.HorizontalAlignment = Enum.HorizontalAlignment.Left
 TLy.Padding = UDim.new(0,6)
 
 local Cont = Instance.new("Frame", W)
@@ -803,62 +1108,41 @@ Cont.Position = UDim2.new(0,5,0,88)
 Cont.BackgroundTransparency = 1
 Cont.ZIndex = 3
 
-TLG.TabBar = TabBar
-TLG.Cont = Cont
-
+TLG.TabBar = TabBar; TLG.Cont = Cont
 local Tabs = {}
 
 local function Tab(name, icon)
     local b = Instance.new("TextButton", TScr)
     b.Size = UDim2.new(0,80,0,32)
-    b.BackgroundColor3 = C.BG3
-    b.BackgroundTransparency = 1
-    b.Text = ""
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 6
+    b.BackgroundColor3 = C.BG3; b.BackgroundTransparency = 1
+    b.Text = ""; b.BorderSizePixel = 0; b.AutoButtonColor = false; b.ZIndex = 6
     Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
     local ico = Instance.new("TextLabel", b)
-    ico.Size = UDim2.new(1,0,0,14)
-    ico.Position = UDim2.new(0,0,0,3)
-    ico.BackgroundTransparency = 1
-    ico.Text = icon
-    ico.TextSize = 13
-    ico.ZIndex = 7
+    ico.Size = UDim2.new(1,0,0,14); ico.Position = UDim2.new(0,0,0,3)
+    ico.BackgroundTransparency = 1; ico.Text = icon; ico.TextSize = 13; ico.ZIndex = 7
     local lb = Instance.new("TextLabel", b)
-    lb.Size = UDim2.new(1,0,0,12)
-    lb.Position = UDim2.new(0,0,0,18)
-    lb.BackgroundTransparency = 1
-    lb.Font = Enum.Font.GothamSemibold
-    lb.Text = name
-    lb.TextColor3 = C.Gr
-    lb.TextSize = 9
-    lb.ZIndex = 7
+    lb.Size = UDim2.new(1,0,0,12); lb.Position = UDim2.new(0,0,0,18)
+    lb.BackgroundTransparency = 1; lb.Font = Enum.Font.GothamSemibold
+    lb.Text = name; lb.TextColor3 = C.Gr; lb.TextSize = 9; lb.ZIndex = 7
     local ul = Instance.new("Frame", b)
     ul.Size = UDim2.new(0,0,0,3)
     ul.Position = UDim2.new(0.5,0,1,-3)
     ul.AnchorPoint = Vector2.new(0.5,1)
-    ul.BackgroundColor3 = C.Yel
-    ul.BorderSizePixel = 0
-    ul.ZIndex = 8
+    ul.BackgroundColor3 = C.Yel; ul.BorderSizePixel = 0; ul.ZIndex = 8
     Instance.new("UICorner", ul).CornerRadius = UDim.new(1,0)
     local pg = Instance.new("ScrollingFrame", Cont)
     pg.Size = UDim2.new(1,0,1,0)
-    pg.BackgroundTransparency = 1
-    pg.BorderSizePixel = 0
+    pg.BackgroundTransparency = 1; pg.BorderSizePixel = 0
     pg.ScrollBarThickness = TLG.IsMobile and 8 or 5
     pg.ScrollBarImageColor3 = C.Yel
     pg.CanvasSize = UDim2.new(0,0,0,0)
     pg.ZIndex = 4
     pcall(function() pg.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
     pg.Visible = false
-    local pl = Instance.new("UIListLayout", pg)
-    pl.Padding = UDim.new(0,6)
+    local pl = Instance.new("UIListLayout", pg); pl.Padding = UDim.new(0,6)
     local pp = Instance.new("UIPadding", pg)
-    pp.PaddingTop = UDim.new(0,8)
-    pp.PaddingLeft = UDim.new(0,8)
-    pp.PaddingRight = UDim.new(0,8)
-    pp.PaddingBottom = UDim.new(0,8)
+    pp.PaddingTop = UDim.new(0,8); pp.PaddingLeft = UDim.new(0,8)
+    pp.PaddingRight = UDim.new(0,8); pp.PaddingBottom = UDim.new(0,8)
     table.insert(Tabs, {b = b, l = lb, p = pg, u = ul, ico = ico})
     b.MouseButton1Click:Connect(function()
         for _, t in ipairs(Tabs) do
@@ -884,30 +1168,19 @@ local function Sec(p, txt, ico)
     s.Size = UDim2.new(1,0,0,30)
     s.BackgroundColor3 = C.BG2
     s.BackgroundTransparency = 0.3
-    s.BorderSizePixel = 0
-    s.ZIndex = 5
+    s.BorderSizePixel = 0; s.ZIndex = 5
     Instance.new("UICorner", s).CornerRadius = UDim.new(0,7)
-    local sS = Instance.new("UIStroke", s)
-    sS.Thickness = 1
-    sS.Transparency = 0.7
-    sS.Color = C.Yel
+    local sS = Instance.new("UIStroke", s); sS.Thickness = 1; sS.Transparency = 0.7; sS.Color = C.Yel
     local bar = Instance.new("Frame", s)
-    bar.Size = UDim2.new(0,3,0,16)
-    bar.Position = UDim2.new(0,8,0.5,-8)
-    bar.BorderSizePixel = 0
-    bar.ZIndex = 7
-    bar.BackgroundColor3 = C.Yel
+    bar.Size = UDim2.new(0,3,0,16); bar.Position = UDim2.new(0,8,0.5,-8)
+    bar.BorderSizePixel = 0; bar.ZIndex = 7; bar.BackgroundColor3 = C.Yel
     Instance.new("UICorner", bar).CornerRadius = UDim.new(1,0)
     local l = Instance.new("TextLabel", s)
-    l.Size = UDim2.new(1,-34,1,0)
-    l.Position = UDim2.new(0,20,0,0)
-    l.BackgroundTransparency = 1
-    l.Font = Enum.Font.GothamBold
+    l.Size = UDim2.new(1,-34,1,0); l.Position = UDim2.new(0,20,0,0)
+    l.BackgroundTransparency = 1; l.Font = Enum.Font.GothamBold
     l.Text = (ico or "") .. "  " .. txt
-    l.TextSize = 11
-    l.TextColor3 = C.Wh
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.ZIndex = 6
+    l.TextSize = 11; l.TextColor3 = C.Wh
+    l.TextXAlignment = Enum.TextXAlignment.Left; l.ZIndex = 6
 end
 
 local function Lbl(p, txt, col)
@@ -916,11 +1189,8 @@ local function Lbl(p, txt, col)
     l.Size = UDim2.new(1,0,0,12)
     l.BackgroundTransparency = 1
     l.Font = Enum.Font.Gotham
-    l.Text = txt
-    l.TextColor3 = col
-    l.TextSize = 9
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.ZIndex = 5
+    l.Text = txt; l.TextColor3 = col; l.TextSize = 9
+    l.TextXAlignment = Enum.TextXAlignment.Left; l.ZIndex = 5
     return l
 end
 
@@ -928,103 +1198,69 @@ local function Tog(p, txt, def, cb)
     local sv = def == true
     local f = Instance.new("Frame", p)
     f.Size = UDim2.new(1,0,0,32)
-    f.BackgroundColor3 = C.BG2
-    f.BackgroundTransparency = 0.1
-    f.BorderSizePixel = 0
-    f.ZIndex = 5
+    f.BackgroundColor3 = C.BG2; f.BackgroundTransparency = 0.1
+    f.BorderSizePixel = 0; f.ZIndex = 5
     Instance.new("UICorner", f).CornerRadius = UDim.new(0,6)
     local l = Instance.new("TextLabel", f)
-    l.Size = UDim2.new(1,-60,1,0)
-    l.Position = UDim2.new(0,10,0,0)
-    l.BackgroundTransparency = 1
-    l.Font = Enum.Font.GothamSemibold
-    l.Text = txt
-    l.TextColor3 = C.Wh
-    l.TextSize = 10
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.ZIndex = 7
+    l.Size = UDim2.new(1,-60,1,0); l.Position = UDim2.new(0,10,0,0)
+    l.BackgroundTransparency = 1; l.Font = Enum.Font.GothamSemibold
+    l.Text = txt; l.TextColor3 = C.Wh; l.TextSize = 10
+    l.TextXAlignment = Enum.TextXAlignment.Left; l.ZIndex = 7
     local sw = Instance.new("Frame", f)
-    sw.Size = UDim2.new(0,36,0,18)
-    sw.Position = UDim2.new(1,-48,0.5,-9)
+    sw.Size = UDim2.new(0,36,0,18); sw.Position = UDim2.new(1,-48,0.5,-9)
     sw.BackgroundColor3 = sv and C.Yel or C.GrD
-    sw.BorderSizePixel = 0
-    sw.ZIndex = 6
+    sw.BorderSizePixel = 0; sw.ZIndex = 6
     Instance.new("UICorner", sw).CornerRadius = UDim.new(1,0)
     local kn = Instance.new("Frame", sw)
     kn.Size = UDim2.new(0,14,0,14)
     kn.Position = sv and UDim2.new(1,-16,0.5,-7) or UDim2.new(0,2,0.5,-7)
-    kn.BackgroundColor3 = C.Wh
-    kn.BorderSizePixel = 0
-    kn.ZIndex = 7
+    kn.BackgroundColor3 = C.Wh; kn.BorderSizePixel = 0; kn.ZIndex = 7
     Instance.new("UICorner", kn).CornerRadius = UDim.new(1,0)
     local st = sv
     local btn = Instance.new("TextButton", f)
-    btn.Size = UDim2.new(1,0,1,0)
-    btn.BackgroundTransparency = 1
-    btn.Text = ""
-    btn.ZIndex = 10
+    btn.Size = UDim2.new(1,0,1,0); btn.BackgroundTransparency = 1; btn.Text = ""; btn.ZIndex = 10
     btn.MouseButton1Click:Connect(function()
         st = not st
         TweenService:Create(sw, TweenInfo.new(0.25, Enum.EasingStyle.Back), {BackgroundColor3 = st and C.Yel or C.GrD}):Play()
         TweenService:Create(kn, TweenInfo.new(0.25, Enum.EasingStyle.Back), {Position = st and UDim2.new(1,-16,0.5,-7) or UDim2.new(0,2,0.5,-7)}):Play()
         pcall(cb, st)
     end)
+    return btn
 end
 
 local function Sli(p, txt, mn, mx, def, cb)
     local sv = def
     local f = Instance.new("Frame", p)
     f.Size = UDim2.new(1,0,0,40)
-    f.BackgroundColor3 = C.BG2
-    f.BackgroundTransparency = 0.1
-    f.BorderSizePixel = 0
-    f.ZIndex = 5
+    f.BackgroundColor3 = C.BG2; f.BackgroundTransparency = 0.1
+    f.BorderSizePixel = 0; f.ZIndex = 5
     Instance.new("UICorner", f).CornerRadius = UDim.new(0,6)
     local l = Instance.new("TextLabel", f)
-    l.Size = UDim2.new(0.6,-12,0,12)
-    l.Position = UDim2.new(0,10,0,4)
-    l.BackgroundTransparency = 1
-    l.Font = Enum.Font.GothamSemibold
-    l.Text = txt
-    l.TextColor3 = C.Wh
-    l.TextSize = 9
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.ZIndex = 7
+    l.Size = UDim2.new(0.6,-12,0,12); l.Position = UDim2.new(0,10,0,4)
+    l.BackgroundTransparency = 1; l.Font = Enum.Font.GothamSemibold
+    l.Text = txt; l.TextColor3 = C.Wh; l.TextSize = 9
+    l.TextXAlignment = Enum.TextXAlignment.Left; l.ZIndex = 7
     local vl = Instance.new("TextLabel", f)
-    vl.Size = UDim2.new(0.4,-10,0,12)
-    vl.Position = UDim2.new(0.6,2,0,4)
-    vl.BackgroundTransparency = 1
-    vl.Font = Enum.Font.GothamBold
-    vl.Text = tostring(sv)
-    vl.TextSize = 9
-    vl.TextXAlignment = Enum.TextXAlignment.Right
-    vl.ZIndex = 7
+    vl.Size = UDim2.new(0.4,-10,0,12); vl.Position = UDim2.new(0.6,2,0,4)
+    vl.BackgroundTransparency = 1; vl.Font = Enum.Font.GothamBold
+    vl.Text = tostring(sv); vl.TextSize = 9
+    vl.TextXAlignment = Enum.TextXAlignment.Right; vl.ZIndex = 7
     local b = Instance.new("Frame", f)
-    b.Size = UDim2.new(1,-20,0,6)
-    b.Position = UDim2.new(0,10,0,24)
-    b.BackgroundColor3 = C.BG
-    b.BorderSizePixel = 0
-    b.ZIndex = 6
+    b.Size = UDim2.new(1,-20,0,6); b.Position = UDim2.new(0,10,0,24)
+    b.BackgroundColor3 = C.BG; b.BorderSizePixel = 0; b.ZIndex = 6
     Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
     local fi = Instance.new("Frame", b)
     fi.Size = UDim2.new((sv-mn)/(mx-mn),0,1,0)
-    fi.BorderSizePixel = 0
-    fi.ZIndex = 7
-    fi.BackgroundColor3 = C.Yel
+    fi.BorderSizePixel = 0; fi.ZIndex = 7; fi.BackgroundColor3 = C.Yel
     Instance.new("UICorner", fi).CornerRadius = UDim.new(1,0)
     local kn = Instance.new("Frame", b)
     kn.Size = UDim2.new(0,12,0,12)
     kn.Position = UDim2.new((sv-mn)/(mx-mn),-6,0.5,-6)
-    kn.BackgroundColor3 = C.Wh
-    kn.BorderSizePixel = 0
-    kn.ZIndex = 8
+    kn.BackgroundColor3 = C.Wh; kn.BorderSizePixel = 0; kn.ZIndex = 8
     Instance.new("UICorner", kn).CornerRadius = UDim.new(1,0)
     local tn = Instance.new("TextButton", f)
-    tn.Size = UDim2.new(1,-6,0,40)
-    tn.Position = UDim2.new(0,3,0,0)
-    tn.BackgroundTransparency = 1
-    tn.Text = ""
-    tn.ZIndex = 10
+    tn.Size = UDim2.new(1,-6,0,40); tn.Position = UDim2.new(0,3,0,0)
+    tn.BackgroundTransparency = 1; tn.Text = ""; tn.ZIndex = 10
     local dragging = false
     local function up(i)
         local pp = math.clamp((i.Position.X - b.AbsolutePosition.X) / b.AbsoluteSize.X, 0, 1)
@@ -1036,8 +1272,7 @@ local function Sli(p, txt, mn, mx, def, cb)
     end
     tn.InputBegan:Connect(function(i)
         if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            up(i)
+            dragging = true; up(i)
         end
     end)
     UserInputService.InputChanged:Connect(function(i)
@@ -1055,177 +1290,120 @@ end
 local function Btn(p, txt, col, cb)
     local b = Instance.new("TextButton", p)
     b.Size = UDim2.new(1,0,0,30)
-    b.BackgroundColor3 = C.BG2
-    b.BackgroundTransparency = 0.1
-    b.Font = Enum.Font.GothamBold
-    b.Text = txt
-    b.TextColor3 = col or C.Wh
-    b.TextSize = 10
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 5
+    b.BackgroundColor3 = C.BG2; b.BackgroundTransparency = 0.1
+    b.Font = Enum.Font.GothamBold; b.Text = txt
+    b.TextColor3 = col or C.Wh; b.TextSize = 10
+    b.BorderSizePixel = 0; b.AutoButtonColor = false; b.ZIndex = 5
     Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
-    local bS = Instance.new("UIStroke", b)
-    bS.Thickness = 1
-    bS.Transparency = 0.4
-    bS.Color = C.Yel
+    local bS = Instance.new("UIStroke", b); bS.Thickness = 1; bS.Transparency = 0.4; bS.Color = C.Yel
     TLG.Ripple(b)
     b.MouseButton1Click:Connect(function() pcall(cb) end)
     return b
 end
 
-TLG.Tabs = Tabs
-TLG.Sec = Sec
-TLG.Lbl = Lbl
-TLG.Tog = Tog
-TLG.Sli = Sli
-TLG.Btn = Btn
+TLG.Tabs = Tabs; TLG.Sec = Sec; TLG.Lbl = Lbl; TLG.Tog = Tog; TLG.Sli = Sli; TLG.Btn = Btn
 
+-- TABS
 local PInfo = Tab("Info", "📊")
-local PCb = Tab("Combat", "⚔️")
-local PAb = Tab("Aimbot", "🎯")
-local PFl = Tab("Fly", "✈")
-local PIs = Tab("Islands", "🏝️")
-local PSc = Tab("Scripts", "📜")
-local PTo = Tab("Tools", "🔧")
-local PEs = Tab("ESP", "👁️")
-local PVi = Tab("Visuals", "🎨")
-local POp = Tab("Optimize", "⚡")
-local PSe = Tab("Settings", "⚙️")
+local PSt   = Tab("Stats", "📈")
+local PCb   = Tab("Combat", "⚔️")
+local PAb   = Tab("Aimbot", "🎯")
+local PFl   = Tab("Fly", "✈")
+local PIs   = Tab("Islands", "🏝️")
+local PSc   = Tab("Scripts", "📜")
+local PTo   = Tab("Tools", "🔧")
+local PEs   = Tab("ESP", "👁️")
+local PVi   = Tab("Visuals", "🎨")
+local POp   = Tab("Optimize", "⚡")
+local PSe   = Tab("Settings", "⚙️")
 
 task.wait(0.1)
 if Tabs[1] then
-    Tabs[1].l.TextColor3 = C.Yel
-    Tabs[1].ico.TextTransparency = 0
+    Tabs[1].l.TextColor3 = C.Yel; Tabs[1].ico.TextTransparency = 0
     Tabs[1].p.Visible = true
-    Tabs[1].b.BackgroundColor3 = C.BG3
-    Tabs[1].b.BackgroundTransparency = 0.5
+    Tabs[1].b.BackgroundColor3 = C.BG3; Tabs[1].b.BackgroundTransparency = 0.5
     TweenService:Create(Tabs[1].u, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
 end
 
-TLG.PInfo = PInfo
-TLG.PCb = PCb
-TLG.PAb = PAb
-TLG.PFl = PFl
-TLG.PIs = PIs
-TLG.PSc = PSc
-TLG.PTo = PTo
-TLG.PEs = PEs
-TLG.PVi = PVi
-TLG.POp = POp
-TLG.PSe = PSe
+TLG.PInfo = PInfo; TLG.PSt = PSt; TLG.PCb = PCb; TLG.PAb = PAb; TLG.PFl = PFl
+TLG.PIs = PIs; TLG.PSc = PSc; TLG.PTo = PTo; TLG.PEs = PEs
+TLG.PVi = PVi; TLG.POp = POp; TLG.PSe = PSe
 
--- INFO con flechas
+-- ═══════════════════════════════════════════════════════════════
+-- INFO TAB (con stats Meme Sea completas)
+-- ═══════════════════════════════════════════════════════════════
 do
     Sec(PInfo, "📊 JUGADOR SELECCIONADO", "💀")
     local Selector = Instance.new("Frame", PInfo)
-    Selector.Size = UDim2.new(1,0,0,130)
-    Selector.BackgroundColor3 = C.BG2
-    Selector.BackgroundTransparency = 0.2
-    Selector.BorderSizePixel = 0
-    Selector.ZIndex = 5
+    Selector.Size = UDim2.new(1,0,0,145)
+    Selector.BackgroundColor3 = C.BG2; Selector.BackgroundTransparency = 0.2
+    Selector.BorderSizePixel = 0; Selector.ZIndex = 5
     Instance.new("UICorner", Selector).CornerRadius = UDim.new(0,10)
 
     local ArrowL = Instance.new("TextButton", Selector)
-    ArrowL.Size = UDim2.new(0,38,0,90)
-    ArrowL.Position = UDim2.new(0,8,0.5,-45)
-    ArrowL.BackgroundColor3 = C.BG3
-    ArrowL.BackgroundTransparency = 0.2
-    ArrowL.Text = "‹"
-    ArrowL.Font = Enum.Font.GothamBold
-    ArrowL.TextSize = 32
-    ArrowL.TextColor3 = C.Yel
-    ArrowL.BorderSizePixel = 0
-    ArrowL.AutoButtonColor = false
-    ArrowL.ZIndex = 7
+    ArrowL.Size = UDim2.new(0,38,0,105); ArrowL.Position = UDim2.new(0,8,0.5,-52)
+    ArrowL.BackgroundColor3 = C.BG3; ArrowL.BackgroundTransparency = 0.2
+    ArrowL.Text = "‹"; ArrowL.Font = Enum.Font.GothamBold; ArrowL.TextSize = 32
+    ArrowL.TextColor3 = C.Yel; ArrowL.BorderSizePixel = 0; ArrowL.AutoButtonColor = false; ArrowL.ZIndex = 7
     Instance.new("UICorner", ArrowL).CornerRadius = UDim.new(0,8)
 
     local ArrowR = Instance.new("TextButton", Selector)
-    ArrowR.Size = UDim2.new(0,38,0,90)
-    ArrowR.Position = UDim2.new(1,-46,0.5,-45)
-    ArrowR.BackgroundColor3 = C.BG3
-    ArrowR.BackgroundTransparency = 0.2
-    ArrowR.Text = "›"
-    ArrowR.Font = Enum.Font.GothamBold
-    ArrowR.TextSize = 32
-    ArrowR.TextColor3 = C.Yel
-    ArrowR.BorderSizePixel = 0
-    ArrowR.AutoButtonColor = false
-    ArrowR.ZIndex = 7
+    ArrowR.Size = UDim2.new(0,38,0,105); ArrowR.Position = UDim2.new(1,-46,0.5,-52)
+    ArrowR.BackgroundColor3 = C.BG3; ArrowR.BackgroundTransparency = 0.2
+    ArrowR.Text = "›"; ArrowR.Font = Enum.Font.GothamBold; ArrowR.TextSize = 32
+    ArrowR.TextColor3 = C.Yel; ArrowR.BorderSizePixel = 0; ArrowR.AutoButtonColor = false; ArrowR.ZIndex = 7
     Instance.new("UICorner", ArrowR).CornerRadius = UDim.new(0,8)
 
     local IP = Instance.new("Frame", Selector)
-    IP.Size = UDim2.new(1,-100,0,110)
-    IP.Position = UDim2.new(0,50,0.5,-55)
-    IP.BackgroundColor3 = C.BG3
-    IP.BackgroundTransparency = 0.3
-    IP.BorderSizePixel = 0
-    IP.ZIndex = 6
+    IP.Size = UDim2.new(1,-100,0,125); IP.Position = UDim2.new(0,50,0.5,-62)
+    IP.BackgroundColor3 = C.BG3; IP.BackgroundTransparency = 0.3
+    IP.BorderSizePixel = 0; IP.ZIndex = 6
     Instance.new("UICorner", IP).CornerRadius = UDim.new(0,8)
 
     local PName = Instance.new("TextLabel", IP)
-    PName.Size = UDim2.new(1,-16,0,22)
-    PName.Position = UDim2.new(0,8,0,4)
-    PName.BackgroundTransparency = 1
-    PName.Font = Enum.Font.GothamBold
-    PName.Text = "— Ninguno —"
-    PName.TextSize = 13
-    PName.TextColor3 = C.Yel
-    PName.TextXAlignment = Enum.TextXAlignment.Center
-    PName.ZIndex = 8
+    PName.Size = UDim2.new(1,-16,0,20); PName.Position = UDim2.new(0,8,0,4)
+    PName.BackgroundTransparency = 1; PName.Font = Enum.Font.GothamBold
+    PName.Text = "— Ninguno —"; PName.TextSize = 13; PName.TextColor3 = C.Yel
+    PName.TextXAlignment = Enum.TextXAlignment.Center; PName.ZIndex = 8
 
     local PStats = Instance.new("TextLabel", IP)
-    PStats.Size = UDim2.new(1,-16,0,62)
-    PStats.Position = UDim2.new(0,8,0,28)
-    PStats.BackgroundTransparency = 1
-    PStats.Font = Enum.Font.GothamSemibold
-    PStats.Text = "📊 Lv —\n❤️ —\n⚡ —"
-    PStats.TextSize = 10
-    PStats.TextColor3 = C.Wh
+    PStats.Size = UDim2.new(1,-16,0,68); PStats.Position = UDim2.new(0,8,0,26)
+    PStats.BackgroundTransparency = 1; PStats.Font = Enum.Font.GothamSemibold
+    PStats.Text = "📊 Lv —\n❤️ —\n⚔️ Sword —\n🥊 Melee —\n⚡ Power —"
+    PStats.TextSize = 10; PStats.TextColor3 = C.Wh
     PStats.TextXAlignment = Enum.TextXAlignment.Center
-    PStats.TextYAlignment = Enum.TextYAlignment.Top
-    PStats.ZIndex = 8
+    PStats.TextYAlignment = Enum.TextYAlignment.Top; PStats.ZIndex = 8
 
     local PStats2 = Instance.new("TextLabel", IP)
-    PStats2.Size = UDim2.new(1,-16,0,20)
-    PStats2.Position = UDim2.new(0,8,0,94)
-    PStats2.BackgroundTransparency = 1
-    PStats2.Font = Enum.Font.Gotham
-    PStats2.Text = "💰 —   💎 —"
-    PStats2.TextSize = 9
-    PStats2.TextColor3 = C.Yel
-    PStats2.TextXAlignment = Enum.TextXAlignment.Center
-    PStats2.ZIndex = 8
+    PStats2.Size = UDim2.new(1,-16,0,24); PStats2.Position = UDim2.new(0,8,0,98)
+    PStats2.BackgroundTransparency = 1; PStats2.Font = Enum.Font.GothamBold
+    PStats2.Text = "💰 —   💎 —"; PStats2.TextSize = 10; PStats2.TextColor3 = C.Yel
+    PStats2.TextXAlignment = Enum.TextXAlignment.Center; PStats2.ZIndex = 8
 
-    local PlayerList = {}
-    local CurrentIndex = 1
-
+    local PlayerList, CurrentIndex = {}, 1
     local function RefreshList()
         PlayerList = {}
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= TLG.LP then table.insert(PlayerList, p) end
         end
-        if CurrentIndex > #PlayerList then
-            CurrentIndex = math.max(1, #PlayerList)
-        end
+        if CurrentIndex > #PlayerList then CurrentIndex = math.max(1, #PlayerList) end
     end
-
     local function UpdateDisplay()
         if #PlayerList == 0 then
-            PName.Text = "— Sin jugadores —"
-            PStats.Text = "No hay otros"
-            PStats2.Text = ""
+            PName.Text = "— Sin jugadores —"; PStats.Text = "No hay otros"; PStats2.Text = ""
             return
         end
-        local plr = PlayerList[CurrentIndex]
-        if not plr then return end
+        local plr = PlayerList[CurrentIndex]; if not plr then return end
         TLG.SelectedTarget = plr
         PName.Text = "👤 " .. plr.DisplayName
         local s = TLG.GetStats(plr)
-        PStats.Text = "📊 Lv " .. s.Level .. "\n❤️ " .. s.Health .. "/" .. s.MaxHealth .. "\n⚡ Power " .. s.Power .. "\n🥊 Melee " .. s.Melee
+        PStats.Text = "📊 Lv " .. s.Level ..
+                      "\n❤️ " .. s.Health .. "/" .. s.MaxHealth ..
+                      "\n⚔️ Sword " .. s.Weapon ..
+                      "\n🥊 Melee " .. s.Melee ..
+                      "\n⚡ Power " .. s.Power
         PStats2.Text = "💰 " .. s.Cash .. "  💎 " .. s.Gems
     end
-
     ArrowL.MouseButton1Click:Connect(function()
         if #PlayerList == 0 then RefreshList() end
         if #PlayerList == 0 then return end
@@ -1242,303 +1420,333 @@ do
         UpdateDisplay()
         TLG.PNotif("👤", "▶ " .. PlayerList[CurrentIndex].DisplayName, C.Yel)
     end)
-
     RefreshList()
     if #PlayerList > 0 then UpdateDisplay() end
-
     task.spawn(function()
         while true do
-            task.wait(3)
-            if PInfo.Visible then
-                RefreshList()
-                UpdateDisplay()
-            end
+            task.wait(2)
+            if PInfo.Visible then RefreshList(); UpdateDisplay() end
         end
     end)
-
     Players.PlayerAdded:Connect(function() task.wait(0.5); RefreshList(); UpdateDisplay() end)
     Players.PlayerRemoving:Connect(function(p)
         task.wait(0.5)
         if TLG.SelectedTarget == p then TLG.SelectedTarget = nil end
-        RefreshList()
-        UpdateDisplay()
+        RefreshList(); UpdateDisplay()
     end)
 
     Sec(PInfo, "⚡ ACCIONES", "⚡")
-    local GODORB_BTN = Instance.new("TextButton", PInfo)
-    GODORB_BTN.Size = UDim2.new(1,0,0,36)
-    GODORB_BTN.BackgroundColor3 = C.BG3
-    GODORB_BTN.BackgroundTransparency = 0.2
-    GODORB_BTN.Font = Enum.Font.GothamBold
-    GODORB_BTN.Text = "🌀 GOD ORB"
-    GODORB_BTN.TextSize = 12
-    GODORB_BTN.TextColor3 = C.Yel
-    GODORB_BTN.BorderSizePixel = 0
-    GODORB_BTN.AutoButtonColor = false
-    GODORB_BTN.ZIndex = 5
-    Instance.new("UICorner", GODORB_BTN).CornerRadius = UDim.new(0,8)
-    TLG.Ripple(GODORB_BTN)
-    GODORB_BTN.MouseButton1Click:Connect(function()
-        if not TLG.SelectedTarget then
-            TLG.PNotif("⚠️", "Seleccioná un jugador", C.Rd)
-            return
-        end
+    local GODORB_BTN = Btn(PInfo, "🌀 GOD ORB", C.Yel, function()
+        if not TLG.SelectedTarget then TLG.PNotif("⚠️", "Seleccioná un jugador", C.Rd); return end
         if TLG.GO.T == TLG.SelectedTarget then
-            TLG.GOS()
-            GODORB_BTN.Text = "🌀 GOD ORB"
+            TLG.GOS(); GODORB_BTN.Text = "🌀 GOD ORB"
             TLG.PNotif("🌀", "Detenido", C.Rd)
         else
-            TLG.GOSt(TLG.SelectedTarget)
-            GODORB_BTN.Text = "🛑 STOP GOD ORB"
+            TLG.GOSt(TLG.SelectedTarget); GODORB_BTN.Text = "🛑 STOP GOD ORB"
             TLG.PNotif("🌀", "Orbitando " .. TLG.SelectedTarget.DisplayName, C.Yel)
         end
     end)
+    GODORB_BTN.Size = UDim2.new(1,0,0,36)
 
-    local SPEC_BTN = Instance.new("TextButton", PInfo)
-    SPEC_BTN.Size = UDim2.new(1,0,0,36)
-    SPEC_BTN.BackgroundColor3 = C.BG3
-    SPEC_BTN.BackgroundTransparency = 0.2
-    SPEC_BTN.Font = Enum.Font.GothamBold
-    SPEC_BTN.Text = "🎥 SPECTATE"
-    SPEC_BTN.TextSize = 12
-    SPEC_BTN.TextColor3 = C.Cyan
-    SPEC_BTN.BorderSizePixel = 0
-    SPEC_BTN.AutoButtonColor = false
-    SPEC_BTN.ZIndex = 5
-    Instance.new("UICorner", SPEC_BTN).CornerRadius = UDim.new(0,8)
-    TLG.Ripple(SPEC_BTN)
-    SPEC_BTN.MouseButton1Click:Connect(function()
-        if not TLG.SelectedTarget then
-            TLG.PNotif("⚠️", "Seleccioná un jugador", C.Rd)
-            return
-        end
+    local SPEC_BTN = Btn(PInfo, "🎥 SPECTATE", C.Cyan, function()
+        if not TLG.SelectedTarget then TLG.PNotif("⚠️", "Seleccioná un jugador", C.Rd); return end
         if TLG.Sp.T == TLG.SelectedTarget then
-            TLG.SpS()
-            SPEC_BTN.Text = "🎥 SPECTATE"
+            TLG.SpS(); SPEC_BTN.Text = "🎥 SPECTATE"
             TLG.PNotif("🎥", "Detenido", C.Rd)
         else
-            TLG.SpSt(TLG.SelectedTarget)
-            SPEC_BTN.Text = "🛑 STOP SPECTATE"
+            TLG.SpSt(TLG.SelectedTarget); SPEC_BTN.Text = "🛑 STOP SPECTATE"
             TLG.PNotif("🎥", "Viendo " .. TLG.SelectedTarget.DisplayName, C.Cyan)
+        end
+    end)
+    SPEC_BTN.Size = UDim2.new(1,0,0,36)
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- 📊 STATS TAB — Tus propias stats en vivo (Meme Sea)
+-- ═══════════════════════════════════════════════════════════════
+do
+    Sec(PSt, "👤 TU PERFIL", "👤")
+
+    local Profile = Instance.new("Frame", PSt)
+    Profile.Size = UDim2.new(1, 0, 0, 78)
+    Profile.BackgroundColor3 = C.BG2
+    Profile.BackgroundTransparency = 0.15
+    Profile.BorderSizePixel = 0
+    Profile.ZIndex = 5
+    Instance.new("UICorner", Profile).CornerRadius = UDim.new(0, 10)
+    local profS = Instance.new("UIStroke", Profile)
+    profS.Color = C.Yel; profS.Thickness = 1.5; profS.Transparency = 0.3
+
+    local av = Instance.new("ImageLabel", Profile)
+    av.Size = UDim2.new(0, 60, 0, 60)
+    av.Position = UDim2.new(0, 10, 0.5, -30)
+    av.BackgroundColor3 = C.BG3
+    av.BorderSizePixel = 0
+    av.ZIndex = 7
+    Instance.new("UICorner", av).CornerRadius = UDim.new(0, 8)
+    local avS = Instance.new("UIStroke", av); avS.Color = C.Yel; avS.Thickness = 1.5
+    task.spawn(function()
+        local ok, url = pcall(function()
+            return Players:GetUserThumbnailAsync(TLG.LP.UserId,
+                Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+        end)
+        if ok and url then av.Image = url end
+    end)
+
+    local nm = Instance.new("TextLabel", Profile)
+    nm.Size = UDim2.new(1, -80, 0, 20)
+    nm.Position = UDim2.new(0, 78, 0, 8)
+    nm.BackgroundTransparency = 1
+    nm.Font = Enum.Font.GothamBold
+    nm.Text = TLG.LP.DisplayName
+    nm.TextSize = 14
+    nm.TextColor3 = C.Yel
+    nm.TextXAlignment = Enum.TextXAlignment.Left
+    nm.ZIndex = 7
+
+    local un = Instance.new("TextLabel", Profile)
+    un.Size = UDim2.new(1, -80, 0, 14)
+    un.Position = UDim2.new(0, 78, 0, 26)
+    un.BackgroundTransparency = 1
+    un.Font = Enum.Font.Gotham
+    un.Text = "@" .. TLG.LP.Name .. "  •  ID: " .. TLG.LP.UserId
+    un.TextSize = 9
+    un.TextColor3 = C.Gr
+    un.TextXAlignment = Enum.TextXAlignment.Left
+    un.ZIndex = 7
+
+    local srv = Instance.new("TextLabel", Profile)
+    srv.Size = UDim2.new(1, -80, 0, 14)
+    srv.Position = UDim2.new(0, 78, 0, 42)
+    srv.BackgroundTransparency = 1
+    srv.Font = Enum.Font.Gotham
+    local sid = (game.JobId ~= "" and game.JobId:sub(1,8)) or "Local"
+    srv.Text = "🌐 " .. sid .. "  •  📍 " .. game.PlaceId
+    srv.TextSize = 9
+    srv.TextColor3 = C.Cyan
+    srv.TextXAlignment = Enum.TextXAlignment.Left
+    srv.ZIndex = 7
+
+    -- ── VIDA con barra ────────────────────────────────────────
+    Sec(PSt, "❤️ VIDA", "❤️")
+    local HPFrame = Instance.new("Frame", PSt)
+    HPFrame.Size = UDim2.new(1, 0, 0, 50)
+    HPFrame.BackgroundColor3 = C.BG2
+    HPFrame.BackgroundTransparency = 0.15
+    HPFrame.BorderSizePixel = 0
+    HPFrame.ZIndex = 5
+    Instance.new("UICorner", HPFrame).CornerRadius = UDim.new(0, 8)
+
+    local HPText = Instance.new("TextLabel", HPFrame)
+    HPText.Size = UDim2.new(0.5, -10, 0, 16)
+    HPText.Position = UDim2.new(0, 10, 0, 6)
+    HPText.BackgroundTransparency = 1
+    HPText.Font = Enum.Font.GothamBold
+    HPText.Text = "❤️ 0 / 0"
+    HPText.TextSize = 11
+    HPText.TextColor3 = C.Wh
+    HPText.TextXAlignment = Enum.TextXAlignment.Left
+    HPText.ZIndex = 7
+
+    local HPPercent = Instance.new("TextLabel", HPFrame)
+    HPPercent.Size = UDim2.new(0.5, -10, 0, 16)
+    HPPercent.Position = UDim2.new(0.5, 0, 0, 6)
+    HPPercent.BackgroundTransparency = 1
+    HPPercent.Font = Enum.Font.GothamBold
+    HPPercent.Text = "100%"
+    HPPercent.TextSize = 11
+    HPPercent.TextColor3 = C.Grn
+    HPPercent.TextXAlignment = Enum.TextXAlignment.Right
+    HPPercent.ZIndex = 7
+
+    local HPBarBg = Instance.new("Frame", HPFrame)
+    HPBarBg.Size = UDim2.new(1, -20, 0, 12)
+    HPBarBg.Position = UDim2.new(0, 10, 0, 28)
+    HPBarBg.BackgroundColor3 = C.BG
+    HPBarBg.BorderSizePixel = 0
+    HPBarBg.ZIndex = 6
+    Instance.new("UICorner", HPBarBg).CornerRadius = UDim.new(1, 0)
+
+    local HPBar = Instance.new("Frame", HPBarBg)
+    HPBar.Size = UDim2.new(1, 0, 1, 0)
+    HPBar.BackgroundColor3 = C.Grn
+    HPBar.BorderSizePixel = 0
+    HPBar.ZIndex = 7
+    Instance.new("UICorner", HPBar).CornerRadius = UDim.new(1, 0)
+    local HPGrad = Instance.new("UIGradient", HPBar)
+    HPGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 80)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 200, 80)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 255, 140))
+    }
+
+    -- ── STATS PRINCIPALES ─────────────────────────────────────
+    Sec(PSt, "📊 ESTADÍSTICAS", "📊")
+
+    local function StatCard(parent, icon, label, color)
+        local card = Instance.new("Frame", parent)
+        card.Size = UDim2.new(1, 0, 0, 32)
+        card.BackgroundColor3 = C.BG2
+        card.BackgroundTransparency = 0.15
+        card.BorderSizePixel = 0
+        card.ZIndex = 5
+        Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
+        local cs = Instance.new("UIStroke", card)
+        cs.Color = color or C.Yel; cs.Thickness = 1; cs.Transparency = 0.6
+
+        local ic = Instance.new("TextLabel", card)
+        ic.Size = UDim2.new(0, 26, 1, 0)
+        ic.Position = UDim2.new(0, 6, 0, 0)
+        ic.BackgroundTransparency = 1
+        ic.Text = icon
+        ic.TextSize = 14
+        ic.ZIndex = 7
+
+        local lb = Instance.new("TextLabel", card)
+        lb.Size = UDim2.new(0.55, -30, 1, 0)
+        lb.Position = UDim2.new(0, 32, 0, 0)
+        lb.BackgroundTransparency = 1
+        lb.Font = Enum.Font.GothamSemibold
+        lb.Text = label
+        lb.TextSize = 10
+        lb.TextColor3 = C.Gr
+        lb.TextXAlignment = Enum.TextXAlignment.Left
+        lb.ZIndex = 7
+
+        local vl = Instance.new("TextLabel", card)
+        vl.Size = UDim2.new(0.45, -10, 1, 0)
+        vl.Position = UDim2.new(0.55, 0, 0, 0)
+        vl.BackgroundTransparency = 1
+        vl.Font = Enum.Font.GothamBold
+        vl.Text = "—"
+        vl.TextSize = 12
+        vl.TextColor3 = color or C.Yel
+        vl.TextXAlignment = Enum.TextXAlignment.Right
+        vl.ZIndex = 7
+
+        return vl
+    end
+
+    local vLevel   = StatCard(PSt, "📊", "Nivel",         C.Yel)
+    local vSword   = StatCard(PSt, "⚔️", "Sword Level",   C.Cyan)
+    local vMelee   = StatCard(PSt, "🥊", "Melee Level",   Color3.fromRGB(255, 160, 60))
+    local vPower   = StatCard(PSt, "⚡", "Meme Power",    C.Yel)
+    local vCash    = StatCard(PSt, "💰", "Cash / Belly",  C.Grn)
+    local vGems    = StatCard(PSt, "💎", "Gems",          C.Cyan)
+    local vRank    = StatCard(PSt, "🏆", "Rank",          Color3.fromRGB(255, 200, 80))
+    local vRebirth = StatCard(PSt, "🔄", "Rebirths",      Color3.fromRGB(190, 90, 255))
+
+    -- ── SESIÓN ────────────────────────────────────────────────
+    Sec(PSt, "⏱️ SESIÓN", "⏱️")
+    local vSession = StatCard(PSt, "⏱️", "Tiempo jugado", C.Cyan)
+    local vFPS     = StatCard(PSt, "🎮", "FPS",          C.Grn)
+    local vPing    = StatCard(PSt, "📡", "Ping",         Color3.fromRGB(255, 200, 80))
+
+    -- ── ACTUALIZADOR ──────────────────────────────────────────
+    TLG.SessionStart = TLG.SessionStart or os.clock()
+    local function GetSelfStatsFull()
+        return TLG.GetStats(TLG.LP)
+    end
+    local function FormatPlaytime()
+        local e = math.floor(os.clock() - TLG.SessionStart)
+        local h = math.floor(e / 3600)
+        local m = math.floor((e % 3600) / 60)
+        local s = e % 60
+        return string.format("%02d:%02d:%02d", h, m, s)
+    end
+
+    task.spawn(function()
+        while true do
+            if PSt.Visible then
+                local s = GetSelfStatsFull()
+                -- HP
+                local hp  = s.Health
+                local mx  = math.max(1, s.MaxHealth)
+                local pct = math.clamp(hp / mx, 0, 1)
+                HPText.Text = "❤️ " .. hp .. " / " .. mx
+                HPPercent.Text = math.floor(pct * 100) .. "%"
+                TweenService:Create(HPBar, TweenInfo.new(0.25), {Size = UDim2.new(pct, 0, 1, 0)}):Play()
+                if pct > 0.6 then HPBar.BackgroundColor3 = C.Grn
+                elseif pct > 0.3 then HPBar.BackgroundColor3 = Color3.fromRGB(255, 200, 80)
+                else HPBar.BackgroundColor3 = C.Rd end
+
+                -- Stats
+                vLevel.Text   = tostring(s.Level)
+                vSword.Text   = tostring(s.Weapon)
+                vMelee.Text   = tostring(s.Melee)
+                vPower.Text   = tostring(s.Power)
+                vCash.Text    = tostring(s.Cash)
+                vGems.Text    = tostring(s.Gems)
+                vRank.Text    = s.Rank > 0 and tostring(s.Rank) or "—"
+                vRebirth.Text = s.Rebirths > 0 and tostring(s.Rebirths) or "—"
+
+                -- Sesión
+                vSession.Text = FormatPlaytime()
+                vFPS.Text     = FpsLabel.Text:gsub("FPS: ", "")
+                vPing.Text    = TLG.GetPing() .. "ms"
+            end
+            task.wait(1)
         end
     end)
 end
 
--- COMBAT
+-- ═══════════════════════════════════════════════════════════════
+-- COMBAT TAB
+-- ═══════════════════════════════════════════════════════════════
 do
     Sec(PCb, "🔵 HITBOX", "🔵")
-    Tog(PCb, "Activar", false, function(v) if v then TLG.HBStart() else TLG.HBStop() end end)
+    Tog(PCb, "Activar Hitbox", false, function(v) if v then TLG.HBStart() else TLG.HBStop() end end)
     Sli(PCb, "Tamaño", 10, 200, 50, function(v) HB.Sz = v end)
     Sli(PCb, "Transparencia", 0, 100, 50, function(v) HB.Tr = v / 100 end)
 
     Sec(PCb, "🎯 AIM ASSIST", "🎯")
-    Tog(PCb, "Activar", false, function(v)
-        if v then
-            TLG.AIM_Start()
-        else
-            TLG.AIM_Stop()
-        end
+    Tog(PCb, "Activar Aimbot", false, function(v)
+        if v then TLG.AIM_Start() else TLG.AIM_Stop() end
     end)
-    Sli(PCb, "Suavizado", 1, 100, 35, function(v) if TLG.Ai then TLG.Ai.Sm = v / 100 end end)
-    Sli(PCb, "Distancia", 100, 3000, 1000, function(v) if TLG.Ai then TLG.Ai.D = v end end)
+    Sli(PCb, "Rango", 500, 10000, AIM.Range, function(v) AIM.Range = v end)
+    Sli(PCb, "Head Size", 10, 500, AIM.HeadSize, function(v) AIM.HeadSize = v end)
+    Sli(PCb, "Body Size", 10, 500, AIM.BodySize, function(v) AIM.BodySize = v end)
+    Sli(PCb, "Distancia TP", 2, 30, AIM.TeleDist, function(v) AIM.TeleDist = v end)
+    Tog(PCb, "Auto-Attack", AIM.AutoAttack, function(v) AIM.AutoAttack = v end)
+    Tog(PCb, "Teletransporte", AIM.TeleportNear, function(v) AIM.TeleportNear = v end)
+    Tog(PCb, "Mirar al enemigo", AIM.FaceTarget, function(v) AIM.FaceTarget = v end)
+    Tog(PCb, "Team Check", AIM.TeamCheck, function(v) AIM.TeamCheck = v end)
+    Tog(PCb, "Wall Check", AIM.WallCheck, function(v) AIM.WallCheck = v end)
+    Tog(PCb, "Prediction", AIM.Prediction, function(v) AIM.Prediction = v end)
+    Tog(PCb, "FOV Circle", AIM.FOVCircle, function(v) AIM.FOVCircle = v end)
 end
 
--- AIMBOT
+-- ═══════════════════════════════════════════════════════════════
+-- AIMBOT TAB
+-- ═══════════════════════════════════════════════════════════════
 do
     Sec(PAb, "🎯 AIMBOT PRO", "🎯")
-    local AIM = {On = false, Conn = nil, Target = nil, HeadSize = 50, BodySize = 50, Range = 5000, AutoAttack = true, AttackRate = 0.05, TeleportNear = true, TeleDist = 5, FaceTarget = true, ExpandHead = true, ExpandBody = true, OriginalData = {}, LastAttack = 0, RateCounter = 0, RateTimer = os.clock()}
-    TLG.AIM = AIM
-    local ANTI = TLG.ANTI_DETECT or {Enabled = true, Jitter = true, RateLimit = true, SmoothTP = true, MaxAttacksPerSec = 20}
-    TLG.ANTI_DETECT = ANTI
-
-    local function SaveOrig(plr, part, tipo)
-        if not AIM.OriginalData[plr] then AIM.OriginalData[plr] = {} end
-        if not AIM.OriginalData[plr][tipo] then
-            AIM.OriginalData[plr][tipo] = {Size = part.Size, Transparency = part.Transparency, CanCollide = part.CanCollide, Material = part.Material, Color = part.Color}
-        end
-    end
-    local function ExpandHead(plr)
-        if not AIM.ExpandHead then return end
-        local ch = plr.Character
-        if not ch then return end
-        local h = ch:FindFirstChild("Head")
-        if not h then return end
-        SaveOrig(plr, h, "Head")
-        pcall(function()
-            h.Size = Vector3.new(AIM.HeadSize, AIM.HeadSize, AIM.HeadSize)
-            h.Transparency = 1
-            h.CanCollide = false
-            h.Material = Enum.Material.Neon
-            h.Color = TLG.A()
-        end)
-    end
-    local function ExpandBody(plr)
-        if not AIM.ExpandBody then return end
-        local ch = plr.Character
-        if not ch then return end
-        local h = ch:FindFirstChild("HumanoidRootPart")
-        if not h then return end
-        SaveOrig(plr, h, "Body")
-        pcall(function()
-            h.Size = Vector3.new(AIM.BodySize, AIM.BodySize, AIM.BodySize)
-            h.Transparency = 1
-            h.CanCollide = false
-        end)
-    end
-    local function RestoreAll()
-        for plr, d in pairs(AIM.OriginalData) do
-            if plr.Character then
-                for tipo, v in pairs(d) do
-                    local p = plr.Character:FindFirstChild(tipo == "Head" and "Head" or "HumanoidRootPart")
-                    if p then
-                        pcall(function()
-                            p.Size = v.Size
-                            p.Transparency = v.Transparency
-                            p.CanCollide = v.CanCollide
-                            p.Material = v.Material
-                            p.Color = v.Color
-                        end)
-                    end
-                end
-            end
-        end
-        AIM.OriginalData = {}
-    end
-    local function FindTarget()
-        local b = nil
-        local bd = AIM.Range
-        local mc = TLG.LP.Character
-        if not mc then return nil end
-        local mh = mc:FindFirstChild("HumanoidRootPart")
-        if not mh then return nil end
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= TLG.LP and p.Character then
-                local h = p.Character:FindFirstChild("HumanoidRootPart")
-                local hu = p.Character:FindFirstChildOfClass("Humanoid")
-                if h and hu and hu.Health > 0 then
-                    local d = (h.Position - mh.Position).Magnitude
-                    if d < bd then bd = d; b = p end
-                end
-            end
-        end
-        return b
-    end
-    local function Atk()
-        local mc = TLG.LP.Character
-        if not mc then return end
-        local t = mc:FindFirstChildOfClass("Tool")
-        if t then pcall(function() t:Activate() end) end
-    end
-    local function TPn(target)
-        if not AIM.TeleportNear then return end
-        local mc = TLG.LP.Character
-        if not mc then return end
-        local mh = mc:FindFirstChild("HumanoidRootPart")
-        local tc = target.Character
-        if not tc then return end
-        local th = tc:FindFirstChild("HumanoidRootPart")
-        if not mh or not th then return end
-        local dist = (th.Position - mh.Position).Magnitude
-        if dist <= AIM.TeleDist then return end
-        local dir = (th.Position - mh.Position).Unit
-        local np = th.Position - dir * AIM.TeleDist
-        pcall(function() mh.CFrame = CFrame.new(np, th.Position) end)
-    end
-    local function FaceTarget(target)
-        if not AIM.FaceTarget then return end
-        local mc = TLG.LP.Character
-        if not mc then return end
-        local mh = mc:FindFirstChild("HumanoidRootPart")
-        local tc = target.Character
-        if not tc then return end
-        local th = tc:FindFirstChild("HumanoidRootPart")
-        if not mh or not th then return end
-        pcall(function()
-            mh.CFrame = CFrame.new(mh.Position, Vector3.new(th.Position.X, mh.Position.Y, th.Position.Z))
-        end)
-    end
-    local function Loop()
-        if not AIM.On then return end
-        local t = FindTarget()
-        AIM.Target = t
-        if not t then return end
-        ExpandHead(t)
-        ExpandBody(t)
-        FaceTarget(t)
-        TPn(t)
-        if AIM.AutoAttack then
-            local n = os.clock()
-            if ANTI.RateLimit then
-                if n - AIM.RateTimer >= 1 then AIM.RateCounter = 0; AIM.RateTimer = n end
-                if AIM.RateCounter >= ANTI.MaxAttacksPerSec then return end
-            end
-            local interval = AIM.AttackRate * (ANTI.Jitter and (0.7 + math.random() * 0.6) or 1)
-            if n - AIM.LastAttack >= interval then
-                AIM.LastAttack = n
-                AIM.RateCounter = AIM.RateCounter + 1
-                Atk()
-            end
-        end
-    end
-    local function Start()
-        if AIM.On then return end
-        AIM.On = true
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= TLG.LP then ExpandHead(p); ExpandBody(p) end
-        end
-        AIM.Conn = RunService.Heartbeat:Connect(Loop)
-        TLG.PNotif("🎯 Aimbot", "✅ Activado", C.Grn)
-    end
-    local function Stop()
-        if not AIM.On then return end
-        AIM.On = false
-        if AIM.Conn then pcall(function() AIM.Conn:Disconnect() end); AIM.Conn = nil end
-        RestoreAll()
-        AIM.Target = nil
-        TLG.PNotif("🎯 Aimbot", "❌ Desactivado", C.Rd)
-    end
-    TLG.AIM_Start = Start
-    TLG.AIM_Stop = Stop
-
-    local mb = Instance.new("TextButton", PAb)
-    mb.Size = UDim2.new(1,0,0,44)
-    mb.BackgroundColor3 = C.BG2
-    mb.BackgroundTransparency = 0.05
-    mb.Font = Enum.Font.GothamBold
-    mb.Text = "🎯 ACTIVAR AIMBOT"
-    mb.TextColor3 = C.Yel
-    mb.TextSize = 12
-    mb.BorderSizePixel = 0
-    mb.AutoButtonColor = false
-    mb.ZIndex = 5
-    Instance.new("UICorner", mb).CornerRadius = UDim.new(0,10)
-    local mbS = Instance.new("UIStroke", mb)
-    mbS.Thickness = 2
-    mbS.Color = C.Yel
-    TLG.PGlow(mbS, 0.1, 0.5, 1.5)
-    TLG.Ripple(mb)
-    mb.MouseButton1Click:Connect(function()
+    local mb = Btn(PAb, "🎯 ACTIVAR AIMBOT", C.Yel, function()
         if AIM.On then
-            Stop()
-            mb.Text = "🎯 ACTIVAR AIMBOT"
+            TLG.AIM_Stop(); mb.Text = "🎯 ACTIVAR AIMBOT"
         else
-            Start()
-            mb.Text = "🛑 DESACTIVAR"
+            TLG.AIM_Start(); mb.Text = "🛑 DESACTIVAR"
         end
     end)
+    mb.Size = UDim2.new(1,0,0,44)
+    mb.TextSize = 12
 
     Lbl(PAb, "Hitbox 50 studs balanceado", C.Cyan)
-    Lbl(PAb, "Auto-attack con jitter", C.Grn)
+    Lbl(PAb, "Auto-attack + prediction + jitter", C.Grn)
 
     Sec(PAb, "⚙️ AJUSTES", "⚙️")
-    Sli(PAb, "Head Size", 10, 500, 50, function(v) AIM.HeadSize = v end)
-    Sli(PAb, "Body Size", 10, 500, 50, function(v) AIM.BodySize = v end)
-    Sli(PAb, "Rango", 500, 10000, 5000, function(v) AIM.Range = v end)
-    Sli(PAb, "Distancia TP", 2, 30, 5, function(v) AIM.TeleDist = v end)
+    Sli(PAb, "Head Size", 10, 500, AIM.HeadSize, function(v) AIM.HeadSize = v end)
+    Sli(PAb, "Body Size", 10, 500, AIM.BodySize, function(v) AIM.BodySize = v end)
+    Sli(PAb, "Rango", 500, 10000, AIM.Range, function(v) AIM.Range = v end)
+    Sli(PAb, "Distancia TP", 2, 30, AIM.TeleDist, function(v) AIM.TeleDist = v end)
     Sli(PAb, "Ataques/seg", 10, 60, 20, function(v) AIM.AttackRate = 1 / v end)
     Tog(PAb, "Auto-Attack", true, function(v) AIM.AutoAttack = v end)
     Tog(PAb, "Teletransporte", true, function(v) AIM.TeleportNear = v end)
     Tog(PAb, "Mirar al enemigo", true, function(v) AIM.FaceTarget = v end)
+    Tog(PAb, "Team Check", false, function(v) AIM.TeamCheck = v end)
+    Tog(PAb, "Wall Check", false, function(v) AIM.WallCheck = v end)
+    Tog(PAb, "Prediction", true, function(v) AIM.Prediction = v end)
+    Tog(PAb, "FOV Circle", true, function(v) AIM.FOVCircle = v end)
 
     Sec(PAb, "🛡 ANTI-DETECT", "🛡")
     Tog(PAb, "Anti-Detección", true, function(v) ANTI.Enabled = v end)
@@ -1547,63 +1755,112 @@ do
     Sli(PAb, "Max Ataques/s", 10, 50, 20, function(v) ANTI.MaxAttacksPerSec = v end)
 end
 
--- FLY
+-- ═══════════════════════════════════════════════════════════════
+-- FLY TAB
+-- ═══════════════════════════════════════════════════════════════
 do
     Sec(PFl, "✈ FLY", "✈")
-    Tog(PFl, "Activar", false, function(v) if v then TLG.FlyS() else TLG.FlyE() end end)
+    Tog(PFl, "Activar Fly", false, function(v) if v then TLG.FlyS() else TLG.FlyE() end end)
     Sli(PFl, "Velocidad", 100, 50000, 15000, function(v) TLG.Fly.Spd = v end)
+    Tog(PFl, "Noclip al volar", true, function(v) TLG.Fly.Noclip = v == true end)
+    Lbl(PFl, "Space = subir  |  Ctrl / C = bajar", C.Cyan)
+
     Sec(PFl, "🏃 SPEED", "🏃")
-    Tog(PFl, "Activar", false, function(v) TLG.Speed.On = v end)
+    Tog(PFl, "Activar Speed", false, function(v) TLG.Speed.On = v end)
     Sli(PFl, "Velocidad", 16, 1000, 300, function(v) TLG.Speed.Val = v end)
+
     Sec(PFl, "🚀 FUGA", "🚀")
     Btn(PFl, "🚀 Ejecutar Fuga", C.Wh, function()
-        local c = TLG.LP.Character
-        local h = c and c:FindFirstChild("HumanoidRootPart")
-        if h then
-            h.CFrame = h.CFrame + Vector3.new(0, 5000, 0)
-            TLG.PNotif("🚀", "Fuga", C.Yel)
-        end
+        if TLG.Fuga and TLG.Fuga() then TLG.PNotif("🚀", "Fuga ejecutada", C.Yel) end
     end)
 end
 
--- ISLANDS
+-- ═══════════════════════════════════════════════════════════════
+-- ISLANDS TAB
+-- ═══════════════════════════════════════════════════════════════
 do
     Sec(PIs, "🏝️ TELETRANSPORTE", "🏝️")
-    local Islas = {["Floppa Island"] = Vector3.new(0, 50, 0), ["Snow Island"] = Vector3.new(0, 50, 0), ["Gorilla Island"] = Vector3.new(0, 50, 0), ["Sand Island"] = Vector3.new(0, 50, 0), ["Pumpkin Island"] = Vector3.new(0, 50, 0), ["Moai Island"] = Vector3.new(0, 50, 0), ["Forgotten Island"] = Vector3.new(0, 50, 0), ["MrBeast Island"] = Vector3.new(0, 50, 0), ["Noob Arena"] = Vector3.new(0, 50, 0), ["PVP Arena"] = Vector3.new(0, 50, 0)}
-    local function TPTo(name, pos)
-        local ch = TLG.LP.Character
-        if not ch then return end
-        local h = ch:FindFirstChild("HumanoidRootPart")
-        if not h then return end
-        local fd = workspace:FindFirstChild(name, true)
-        if fd then
-            local p = fd
-            if p:IsA("Model") then p = p.PrimaryPart or p:FindFirstChildWhichIsA("BasePart") end
-            if p then
-                h.CFrame = CFrame.new(p.Position + Vector3.new(0, 50, 0))
-                return
+    Lbl(PIs, "Busca el modelo de la isla en el mapa.", C.Gr)
+    local Islas = {
+        {name = "Floppa Island", aliases = {"Floppa Island", "FloppaIsland", "Floppa"}},
+        {name = "Snow Island", aliases = {"Snow Island", "SnowIsland", "Snow"}},
+        {name = "Gorilla Island", aliases = {"Gorilla Island", "GorillaIsland", "Gorilla"}},
+        {name = "Sand Island", aliases = {"Sand Island", "SandIsland", "Sand"}},
+        {name = "Pumpkin Island", aliases = {"Pumpkin Island", "PumpkinIsland", "Pumpkin"}},
+        {name = "Moai Island", aliases = {"Moai Island", "MoaiIsland", "Moai"}},
+        {name = "Sus Island", aliases = {"Sus Island", "SusIsland", "Sus"}},
+        {name = "Forgotten Island", aliases = {"Forgotten Island", "ForgottenIsland", "Forgotten"}},
+        {name = "MrBeast Island", aliases = {"MrBeast Island", "MrBeastIsland", "MrBeast"}},
+        {name = "Noob Arena", aliases = {"Noob Arena", "NoobArena", "Noob"}},
+        {name = "PVP Arena", aliases = {"PVP Arena", "PVPArena", "PvP Arena", "PVP"}},
+    }
+    local function FindPartFrom(inst)
+        if not inst then return nil end
+        if inst:IsA("BasePart") then return inst end
+        if inst:IsA("Model") then
+            if inst.PrimaryPart then return inst.PrimaryPart end
+            local p = inst:FindFirstChildWhichIsA("BasePart", true)
+            if p then return p end
+        end
+        return inst:FindFirstChildWhichIsA("BasePart", true)
+    end
+    local function FindIsland(aliases)
+        for _, alias in ipairs(aliases) do
+            local fd = workspace:FindFirstChild(alias)
+            if fd then
+                local part = FindPartFrom(fd)
+                if part then return part, alias end
             end
         end
-        if pos then h.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0)) end
+        for _, alias in ipairs(aliases) do
+            local lower = alias:lower()
+            for _, d in ipairs(workspace:GetDescendants()) do
+                if (d:IsA("Model") or d:IsA("Folder") or d:IsA("BasePart")) and d.Name:lower() == lower then
+                    local part = FindPartFrom(d)
+                    if part then return part, d.Name end
+                end
+            end
+        end
+        return nil, nil
     end
-    local lista = {}
-    for n, p in pairs(Islas) do table.insert(lista, {n = n, p = p}) end
-    table.sort(lista, function(a, b) return a.n < b.n end)
-    for _, i in ipairs(lista) do
-        Btn(PIs, "🏝️ " .. i.n, C.Wh, function() TPTo(i.n, i.p); TLG.PNotif("🏝️", "TP " .. i.n, C.Cyan) end)
+    local function TPTo(entry)
+        local ch = TLG.LP.Character
+        if not ch then TLG.PNotif("🏝️", "Sin personaje", C.Rd); return end
+        local h = ch:FindFirstChild("HumanoidRootPart")
+        if not h then TLG.PNotif("🏝️", "Sin HRP", C.Rd); return end
+        local part, foundName = FindIsland(entry.aliases)
+        if part then
+            h.CFrame = CFrame.new(part.Position + Vector3.new(0, 60, 0))
+            TLG.PNotif("🏝️", "TP → " .. (foundName or entry.name), C.Cyan)
+        else
+            TLG.PNotif("🏝️", "No encontrada: " .. entry.name, C.Rd)
+        end
     end
+    table.sort(Islas, function(a, b) return a.name < b.name end)
+    for _, entry in ipairs(Islas) do
+        Btn(PIs, "🏝️ " .. entry.name, C.Wh, function() TPTo(entry) end)
+    end
+    Btn(PIs, "🔄 Escanear islas", C.Yel, function()
+        local found = 0
+        for _, entry in ipairs(Islas) do
+            if FindIsland(entry.aliases) then found = found + 1 end
+        end
+        TLG.PNotif("🏝️", "Encontradas " .. found .. "/" .. #Islas, found > 0 and C.Grn or C.Rd)
+    end)
 end
 
--- SCRIPTS
+-- ═══════════════════════════════════════════════════════════════
+-- SCRIPTS TAB
+-- ═══════════════════════════════════════════════════════════════
 do
     Sec(PSc, "🔄 SERVER", "🔄")
     Btn(PSc, "🔁 Rejoin", C.Cyan, function()
-        if TLG.QueueOnTeleport then TLG.QueueOnTeleport() end
+        TLG.QueueOnTeleport()
         task.wait(0.5)
         pcall(function() TeleportService:Teleport(game.PlaceId, TLG.LP) end)
     end)
     Btn(PSc, "🔄 Cambiar Server", C.Yel, function()
-        if TLG.QueueOnTeleport then TLG.QueueOnTeleport() end
+        TLG.QueueOnTeleport()
         task.spawn(function()
             local ok, res = pcall(function()
                 return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
@@ -1611,7 +1868,9 @@ do
             if ok and res and res.data then
                 local sv = {}
                 for _, s in ipairs(res.data) do
-                    if s.playing < s.maxPlayers and s.id ~= game.JobId and s.playing > 0 then table.insert(sv, s) end
+                    if s.playing < s.maxPlayers and s.id ~= game.JobId and s.playing > 0 then
+                        table.insert(sv, s)
+                    end
                 end
                 if #sv > 0 then
                     local el = sv[math.random(1, #sv)]
@@ -1622,291 +1881,558 @@ do
     end)
 end
 
-print("[TLG V6.8] ✅ Parte 2/3 cargada")
+print("[TLG V7.1] ✅ Parte 2/3 cargada")
 
--- ═══ PARTE 3/3 — RESTO DE TABS ═══
--- TOOLS
-do
-    Sec(PTo, "🚀 FABs FLOTANTES", "🚀")
-    Lbl(PTo, "Mostrar/Ocultar botones flotantes", C.Cyan)
-    Tog(PTo, "Mostrar FABs", true, function(v)
-        TLG.FAB_Toggle_State = v
-        if TLG.FAB_Frame_Ref then TLG.FAB_Frame_Ref.Visible = v end
-    end)
-    Lbl(PTo, "El God Orb del FAB usa el seleccionado", C.Yel)
+-- ═══ PARTE 3/3 — RESTO DE TABS Y FEATURES ═══
+
+-- FUGA
+local Fuga = {On = false, Height = 5000}
+local function FugaGetRoot()
+    local ch = TLG.LP and TLG.LP.Character
+    return ch and ch:FindFirstChild("HumanoidRootPart")
+end
+function TLG.FugaSetHeight(v) Fuga.Height = math.clamp(tonumber(v) or 5000, 100, 20000) end
+function TLG.Fuga()
+    local root = FugaGetRoot()
+    if not root then return false end
+    return pcall(function() root.CFrame = root.CFrame + Vector3.new(0, Fuga.Height, 0) end)
 end
 
--- ==================================================
--- TOOLS ENGINE — INPUT V9 BURST CLEAN (sin botones)
--- ==================================================
-do
-    local InputV9 = {
-        On = true,
-        BurstCount = 3,
-        BurstInterval = 0.018,
-        BaseBuffer = 0.045,
-        ActionWindow = 0.20,
-        ToolGrace = 0.08,
-        Ping = 50,
-        Tool = nil,
-        Character = nil,
-        Humanoid = nil,
-        Stun = nil,
-        Held = {},
-        Queue = {},
-        Running = {},
-        History = {},
-        Target = nil,
-        LastTool = 0,
-        LastPing = 0,
-        LastSample = 0,
-        LastTarget = 0,
-        Connections = {},
-    }
-
-    TLG.InputV9 = InputV9
-
-    local V9Players = game:GetService("Players")
-    local V9UIS = game:GetService("UserInputService")
-    local V9RS = game:GetService("RunService")
-    local V9Stats = game:GetService("Stats")
-    local V9LP = V9Players.LocalPlayer
-
-    local Keys = {
-        [Enum.KeyCode.Z] = true,
-        [Enum.KeyCode.X] = true,
-        [Enum.KeyCode.C] = true,
-        [Enum.KeyCode.V] = true,
-    }
-
-    local function v9DisconnectAll()
-        for _, c in ipairs(InputV9.Connections) do
-            pcall(function() c:Disconnect() end)
+-- TOOLS EXTRA
+local Noclip = {On = false, Conn = nil}
+function TLG.NoclipStart()
+    if Noclip.On then return end
+    Noclip.On = true
+    Noclip.Conn = RunService.Stepped:Connect(function()
+        if not Noclip.On then return end
+        local ch = TLG.LP.Character; if not ch then return end
+        for _, p in ipairs(ch:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide = false end
         end
-        table.clear(InputV9.Connections)
-    end
-
-    local function v9Ping()
-        local ok, value = pcall(function()
-            local network = V9Stats:FindFirstChild("Network")
-            if not network then return nil end
-            local item = network:FindFirstChild("ServerStatsItem")
-            local dp = item and item:FindFirstChild("Data Ping")
-            if not dp then dp = network:FindFirstChild("Data Ping") end
-            if not dp then return nil end
-            return tonumber(string.match(dp:GetValueString(), "%d+"))
-        end)
-        if ok and value and value > 0 then return value end
-        return InputV9.Ping
-    end
-
-    local function v9UpdateTiming(now)
-        if now - InputV9.LastPing < 0.75 then return end
-        InputV9.LastPing = now
-        InputV9.Ping = v9Ping()
-        local ps = InputV9.Ping / 1000
-        InputV9.BaseBuffer = math.clamp(ps * 0.65, 0.035, 0.09)
-        InputV9.ActionWindow = math.clamp(ps * 1.6, 0.16, 0.28)
-    end
-
-    local function v9UpdateTool()
-        local ch = InputV9.Character
-        local tool = ch and ch:FindFirstChildOfClass("Tool") or nil
-        if tool ~= InputV9.Tool then
-            InputV9.Tool = tool
-            InputV9.LastTool = os.clock()
-        end
-    end
-
-    local function v9Activate(tool)
-        if not InputV9.On or not tool or not tool.Parent then return false end
-        return pcall(function() tool:Activate() end)
-    end
-
-    local function v9Burst(key)
-        if InputV9.Running[key] then return end
-        local tool = InputV9.Tool
-        if not tool then v9UpdateTool(); tool = InputV9.Tool end
-        if not tool then return end
-        InputV9.Running[key] = true
-        task.spawn(function()
-            for i = 1, InputV9.BurstCount do
-                if not InputV9.On or not tool.Parent then break end
-                if i > 1 then task.wait(InputV9.BurstInterval) end
-                v9Activate(tool)
+    end)
+end
+function TLG.NoclipStop()
+    Noclip.On = false
+    if Noclip.Conn then pcall(function() Noclip.Conn:Disconnect() end); Noclip.Conn = nil end
+    local ch = TLG.LP.Character
+    if ch then
+        for _, p in ipairs(ch:GetDescendants()) do
+            if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then
+                pcall(function() p.CanCollide = true end)
             end
-            InputV9.Running[key] = nil
+        end
+    end
+end
+
+local InfJump = {On = false, Conn = nil}
+function TLG.InfJumpStart()
+    if InfJump.On then return end
+    InfJump.On = true
+    InfJump.Conn = UserInputService.JumpRequest:Connect(function()
+        if not InfJump.On then return end
+        local hu = TLG.LP.Character and TLG.LP.Character:FindFirstChildOfClass("Humanoid")
+        if hu then pcall(function() hu:ChangeState(Enum.HumanoidStateType.Jumping) end) end
+    end)
+end
+function TLG.InfJumpStop()
+    InfJump.On = false
+    if InfJump.Conn then pcall(function() InfJump.Conn:Disconnect() end); InfJump.Conn = nil end
+end
+
+local ClickTP = {On = false, Conn = nil}
+function TLG.ClickTPStart()
+    if ClickTP.On then return end
+    ClickTP.On = true
+    ClickTP.Conn = UserInputService.InputBegan:Connect(function(input, gp)
+        if gp or not ClickTP.On then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            local cam = TLG.Cam or workspace.CurrentCamera; if not cam then return end
+            local mouse = TLG.LP:GetMouse()
+            local unitRay = cam:ScreenPointToRay(mouse.X, mouse.Y)
+            local ray = Ray.new(unitRay.Origin, unitRay.Direction * 2000)
+            local _, pos = workspace:FindPartOnRayWithIgnoreList(ray, {TLG.LP.Character})
+            if pos then
+                local h = TLG.LP.Character and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
+                if h then h.CFrame = CFrame.new(pos + Vector3.new(0, 4, 0)) end
+            end
+        end
+    end)
+end
+function TLG.ClickTPStop()
+    ClickTP.On = false
+    if ClickTP.Conn then pcall(function() ClickTP.Conn:Disconnect() end); ClickTP.Conn = nil end
+end
+
+local AntiAFK = {On = false, Conn = nil}
+function TLG.AntiAFKStart()
+    if AntiAFK.On then return end
+    AntiAFK.On = true
+    local vu = game:GetService("VirtualUser")
+    AntiAFK.Conn = TLG.LP.Idled:Connect(function()
+        if not AntiAFK.On then return end
+        pcall(function() vu:CaptureController(); vu:ClickButton2(Vector2.new()) end)
+    end)
+end
+function TLG.AntiAFKStop()
+    AntiAFK.On = false
+    if AntiAFK.Conn then pcall(function() AntiAFK.Conn:Disconnect() end); AntiAFK.Conn = nil end
+end
+
+local NoFall = {On = false, Conn = nil}
+function TLG.NoFallStart()
+    if NoFall.On then return end
+    NoFall.On = true
+    local function hook(hu)
+        if not hu then return end
+        if NoFall.Conn then pcall(function() NoFall.Conn:Disconnect() end) end
+        NoFall.Conn = hu.StateChanged:Connect(function(_, new)
+            if not NoFall.On then return end
+            if new == Enum.HumanoidStateType.Freefall or new == Enum.HumanoidStateType.FallingDown then
+                pcall(function() hu:ChangeState(Enum.HumanoidStateType.GettingUp) end)
+            end
         end)
     end
+    local ch = TLG.LP.Character
+    if ch then hook(ch:FindFirstChildOfClass("Humanoid")) end
+    TLG.LP.CharacterAdded:Connect(function(c)
+        task.wait(0.3)
+        if NoFall.On then hook(c:FindFirstChildOfClass("Humanoid")) end
+    end)
+end
+function TLG.NoFallStop()
+    NoFall.On = false
+    if NoFall.Conn then pcall(function() NoFall.Conn:Disconnect() end); NoFall.Conn = nil end
+end
 
-    local function v9Queue(key)
-        InputV9.Queue[key] = os.clock()
+local Fullbright = {On = false, Orig = nil}
+function TLG.FullbrightStart()
+    if Fullbright.On then return end
+    Fullbright.On = true
+    Fullbright.Orig = {
+        Brightness = Lighting.Brightness, ClockTime = Lighting.ClockTime,
+        FogEnd = Lighting.FogEnd, GlobalShadows = Lighting.GlobalShadows,
+        Ambient = Lighting.Ambient
+    }
+    Lighting.Brightness = 2; Lighting.ClockTime = 14
+    Lighting.FogEnd = 1000000; Lighting.GlobalShadows = false
+    Lighting.Ambient = Color3.fromRGB(180, 180, 180)
+end
+function TLG.FullbrightStop()
+    Fullbright.On = false
+    if Fullbright.Orig then
+        pcall(function()
+            Lighting.Brightness = Fullbright.Orig.Brightness
+            Lighting.ClockTime = Fullbright.Orig.ClockTime
+            Lighting.FogEnd = Fullbright.Orig.FogEnd
+            Lighting.GlobalShadows = Fullbright.Orig.GlobalShadows
+            Lighting.Ambient = Fullbright.Orig.Ambient
+        end)
     end
+end
 
-    local function v9Character(char)
-        InputV9.Character = char
-        InputV9.Humanoid = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid", 3)
-        InputV9.Stun = char:FindFirstChild("Stun")
-        InputV9.Tool = char:FindFirstChildOfClass("Tool")
-        InputV9.LastTool = os.clock()
-        table.clear(InputV9.Queue)
-        table.clear(InputV9.Held)
-        table.clear(InputV9.Running)
-        table.clear(InputV9.History)
+local function RemoveFog()
+    pcall(function()
+        Lighting.FogEnd = 1000000; Lighting.FogStart = 0
+        local atmo = Lighting:FindFirstChildOfClass("Atmosphere")
+        if atmo then atmo.Density = 0; atmo.Haze = 0 end
+    end)
+    TLG.PNotif("Fog", "Niebla eliminada", C.Cyan)
+end
+
+local HipHeight = {On = false, Val = 2, Conn = nil}
+function TLG.HipHeightSet(v) HipHeight.Val = tonumber(v) or 2 end
+function TLG.HipHeightStart()
+    if HipHeight.On then return end
+    HipHeight.On = true
+    HipHeight.Conn = RunService.Heartbeat:Connect(function()
+        if not HipHeight.On then return end
+        local hu = TLG.LP.Character and TLG.LP.Character:FindFirstChildOfClass("Humanoid")
+        if hu then pcall(function() hu.HipHeight = HipHeight.Val end) end
+    end)
+end
+function TLG.HipHeightStop()
+    HipHeight.On = false
+    if HipHeight.Conn then pcall(function() HipHeight.Conn:Disconnect() end); HipHeight.Conn = nil end
+    local hu = TLG.LP.Character and TLG.LP.Character:FindFirstChildOfClass("Humanoid")
+    if hu then pcall(function() hu.HipHeight = 2 end) end
+end
+
+local OrbitalMap = {On = false, Distance = 250, Height = 80, Speed = 35, Angle = 0, Connection = nil}
+local function OrbitalRoot()
+    local ch = TLG.LP and TLG.LP.Character
+    return ch and ch:FindFirstChild("HumanoidRootPart")
+end
+function TLG.OrbitalMapStart()
+    if OrbitalMap.On then return end
+    local root = OrbitalRoot(); if not root then return end
+    OrbitalMap.On = true; OrbitalMap.Angle = 0
+    local center = root.Position
+    OrbitalMap.Connection = RunService.RenderStepped:Connect(function(dt)
+        if not OrbitalMap.On then return end
+        local cur = OrbitalRoot()
+        if not cur or not cur.Parent then TLG.OrbitalMapStop(); return end
+        OrbitalMap.Angle = OrbitalMap.Angle + math.rad(OrbitalMap.Speed) * dt
+        local x = math.cos(OrbitalMap.Angle) * OrbitalMap.Distance
+        local z = math.sin(OrbitalMap.Angle) * OrbitalMap.Distance
+        local target = center + Vector3.new(x, OrbitalMap.Height, z)
+        cur.CFrame = CFrame.lookAt(target, center)
+    end)
+end
+function TLG.OrbitalMapStop()
+    OrbitalMap.On = false
+    if OrbitalMap.Connection then pcall(function() OrbitalMap.Connection:Disconnect() end); OrbitalMap.Connection = nil end
+end
+function TLG.OrbitalMapSetDistance(v) OrbitalMap.Distance = math.clamp(tonumber(v) or 250, 25, 2000) end
+function TLG.OrbitalMapSetHeight(v)   OrbitalMap.Height   = math.clamp(tonumber(v) or 80, -500, 1000) end
+function TLG.OrbitalMapSetSpeed(v)    OrbitalMap.Speed    = math.clamp(tonumber(v) or 35, 1, 20000) end
+
+-- TOOLS TAB UI
+do
+    Sec(PTo, "🔧 MOVIMIENTO", "🔧")
+    Tog(PTo, "Fly", false, function(v) if v then TLG.FlyS() else TLG.FlyE() end end)
+    Sli(PTo, "Velocidad Fly", 100, 20000, TLG.Fly.Spd, function(v) TLG.Fly.Spd = v end)
+    Tog(PTo, "Speed", false, function(v) TLG.Speed.On = v end)
+    Sli(PTo, "Velocidad", 16, 1000, TLG.Speed.Val, function(v) TLG.Speed.Val = v end)
+
+    Sec(PTo, "🚀 FUGA", "🚀")
+    Btn(PTo, "🚀 Ejecutar Fuga", C.Yel, function()
+        if TLG.Fuga() then TLG.PNotif("🚀", "Fuga ejecutada", C.Yel) end
+    end)
+    Sli(PTo, "Altura de Fuga", 100, 20000, 5000, function(v) TLG.FugaSetHeight(v) end)
+
+    Sec(PTo, "🌀 ORBITAL MAP", "🌀")
+    Tog(PTo, "Orbital Mapa", false, function(v)
+        if v then TLG.OrbitalMapStart() else TLG.OrbitalMapStop() end
+    end)
+    Sli(PTo, "Distancia", 25, 2000, 250, function(v) TLG.OrbitalMapSetDistance(v) end)
+    Sli(PTo, "Altura", -500, 1000, 80, function(v) TLG.OrbitalMapSetHeight(v) end)
+    Sli(PTo, "Velocidad", 1, 20000, 35, function(v) TLG.OrbitalMapSetSpeed(v) end)
+
+    Sec(PTo, "👻 NOCLIP / JUMP", "👻")
+    Tog(PTo, "Noclip", false, function(v) if v then TLG.NoclipStart() else TLG.NoclipStop() end end)
+    Tog(PTo, "Infinite Jump", false, function(v) if v then TLG.InfJumpStart() else TLG.InfJumpStop() end end)
+    Tog(PTo, "Click TP (Ctrl+Click)", false, function(v)
+        if v then TLG.ClickTPStart() else TLG.ClickTPStop() end
+    end)
+
+    Sec(PTo, "🛡️ PROTECCIÓN", "🛡️")
+    Tog(PTo, "Anti-Void", false, function(v) if v then TLG.AntiVoidStart() else TLG.AntiVoidStop() end end)
+    Tog(PTo, "Anti-Fling", false, function(v) if v then TLG.AntiFlingStart() else TLG.AntiFlingStop() end end)
+    Tog(PTo, "Anti-Stun", false, function(v) if v then TLG.AntiStunStart() else TLG.AntiStunStop() end end)
+    Tog(PTo, "Anti AFK", false, function(v) if v then TLG.AntiAFKStart() else TLG.AntiAFKStop() end end)
+    Tog(PTo, "No Fall Damage", false, function(v) if v then TLG.NoFallStart() else TLG.NoFallStop() end end)
+
+    Sec(PTo, "🎁 AUTO-COLLECT", "🎁")
+    Tog(PTo, "Auto-Collect Prompts", false, function(v)
+        if v then TLG.AutoPromptStart() else TLG.AutoPromptStop() end
+    end)
+    Sli(PTo, "Rango Collect", 5, 100, 25, function(v) AutoPrompt.Range = v end)
+    Lbl(PTo, "Recoge automáticamente prompts cercanos (Meme Sea).", C.Gr)
+
+    Sec(PTo, "💡 VISIÓN", "💡")
+    Tog(PTo, "Fullbright", false, function(v) if v then TLG.FullbrightStart() else TLG.FullbrightStop() end end)
+    Btn(PTo, "🌫 Quitar Niebla", C.Cyan, RemoveFog)
+
+    Sec(PTo, "📏 HIP HEIGHT", "📏")
+    Tog(PTo, "Activar HipHeight", false, function(v)
+        if v then TLG.HipHeightStart() else TLG.HipHeightStop() end
+    end)
+    Sli(PTo, "Altura cadera", 0, 50, 2, function(v) TLG.HipHeightSet(v) end)
+
+    Sec(PTo, "⚙️ UTILIDADES", "⚙️")
+    Btn(PTo, "🔄 Reset Character", C.Rd, function()
+        local ch = TLG.LP.Character
+        if ch then
+            local hu = ch:FindFirstChildOfClass("Humanoid")
+            if hu then hu.Health = 0 end
+        end
+        TLG.PNotif("🔄", "Personaje reseteado", C.Rd)
+    end)
+    Btn(PTo, "🪑 Sit / Unsit", C.Wh, function()
+        local hu = TLG.LP.Character and TLG.LP.Character:FindFirstChildOfClass("Humanoid")
+        if hu then
+            hu.Sit = not hu.Sit
+            TLG.PNotif("🪑", hu.Sit and "Sentado" or "De pie", C.Yel)
+        end
+    end)
+    Btn(PTo, "📍 TP a Spawn", C.Cyan, function()
+        local h = TLG.LP.Character and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
+        if h then
+            local spawn = workspace:FindFirstChildWhichIsA("SpawnLocation", true)
+            if spawn then
+                h.CFrame = spawn.CFrame + Vector3.new(0, 5, 0)
+                TLG.PNotif("📍", "TP a Spawn", C.Cyan)
+            else
+                TLG.PNotif("📍", "Spawn no encontrado", C.Rd)
+            end
+        end
+    end)
+end
+
+-- ESP SYSTEM
+local ESP = {
+    On = false,
+    Names = true, Distance = true, Health = true,
+    Box = false, Tracer = false, Fill = true,
+    FillTransparency = 0.78,
+    MaxDistance = 5000,
+    Objects = {}
+}
+TLG.ESP = ESP
+
+local TracerConn = nil
+local function UpdateTracers()
+    if not ESP.On or not ESP.Tracer then
+        if TracerConn then TracerConn:Disconnect(); TracerConn = nil end
+        return
     end
-
-    local function v9RecordTargets(now)
-        if now - InputV9.LastSample < 1/60 then return end
-        InputV9.LastSample = now
-        local myChar = InputV9.Character
-        local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
-        if not myRoot then return end
-
-        for _, plr in ipairs(V9Players:GetPlayers()) do
-            if plr ~= V9LP then
-                local ch = plr.Character
-                local root = ch and ch:FindFirstChild("HumanoidRootPart")
-                if root then
-                    local d = (root.Position - myRoot.Position).Magnitude
-                    if d <= 100 then
-                        local h = InputV9.History[plr] or {}
-                        h[#h + 1] = {t = now, p = root.Position}
-                        local cutoff = now - 0.30
-                        local first = 1
-                        while h[first] and h[first].t < cutoff do first += 1 end
-                        if first > 1 then
-                            local n = 1
-                            for i = first, #h do h[n], n = h[i], n + 1 end
-                            for i = n, #h do h[i] = nil end
+    if TracerConn then return end
+    TracerConn = RunService.RenderStepped:Connect(function()
+        if not ESP.On or not ESP.Tracer then return end
+        local cam = workspace.CurrentCamera
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= TLG.LP then
+                local pack = ESP.Objects[plr]
+                if pack and pack.Tracer and pack.Tracer.Parent then
+                    local ch = plr.Character
+                    local root = ch and ch:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        local pos, onScreen = cam:WorldToViewportPoint(root.Position)
+                        if onScreen then
+                            pack.Tracer.Position = UDim2.new(0, pos.X, 0, pos.Y)
+                            pack.Tracer.Visible = true
+                        else
+                            pack.Tracer.Visible = false
                         end
-                        while #h > 30 do table.remove(h, 1) end
-                        InputV9.History[plr] = h
-                    else
-                        InputV9.History[plr] = nil
                     end
                 end
             end
         end
-    end
-
-    local function v9RecentTarget(now)
-        if now - InputV9.LastTarget < 0.05 then return end
-        InputV9.LastTarget = now
-        local ch = InputV9.Character
-        local root = ch and ch:FindFirstChild("HumanoidRootPart")
-        if not root then InputV9.Target = nil; return end
-        local best, bestD = nil, math.huge
-        for _, plr in ipairs(V9Players:GetPlayers()) do
-            if plr ~= V9LP then
-                local h = InputV9.History[plr]
-                local sample = h and h[#h]
-                if sample then
-                    local d = (sample.p - root.Position).Magnitude
-                    if d < bestD and d <= 100 then best, bestD = plr, d end
-                end
-            end
-        end
-        InputV9.Target = best
-    end
-
-    table.insert(InputV9.Connections, V9UIS.InputBegan:Connect(function(input, processed)
-        if processed or not InputV9.On then return end
-        local key = input.KeyCode
-        if not Keys[key] or InputV9.Held[key] then return end
-        InputV9.Held[key] = true
-        v9Queue(key)
-    end))
-
-    table.insert(InputV9.Connections, V9UIS.InputEnded:Connect(function(input)
-        local key = input.KeyCode
-        if Keys[key] then InputV9.Held[key] = nil end
-    end))
-
-    table.insert(InputV9.Connections, V9LP.CharacterAdded:Connect(function(char)
-        task.spawn(function()
-            char:WaitForChild("Humanoid", 3)
-            v9Character(char)
-        end)
-    end))
-
-    table.insert(InputV9.Connections, V9Players.PlayerRemoving:Connect(function(plr)
-        InputV9.History[plr] = nil
-        if InputV9.Target == plr then InputV9.Target = nil end
-    end))
-
-    table.insert(InputV9.Connections, V9RS.RenderStepped:Connect(function()
-        if not InputV9.On then return end
-        local now = os.clock()
-        v9UpdateTiming(now)
-        v9UpdateTool()
-        v9RecordTargets(now)
-        v9RecentTarget(now)
-
-        if InputV9.Stun and InputV9.Stun.Parent then
-            pcall(function() InputV9.Stun.Value = -1 end)
-        end
-
-        for key, pressed in pairs(InputV9.Queue) do
-            if now - pressed > InputV9.ActionWindow then
-                InputV9.Queue[key] = nil
-            elseif now - pressed >= InputV9.BaseBuffer and not InputV9.Running[key] then
-                if InputV9.Tool or now - InputV9.LastTool <= InputV9.ToolGrace then
-                    InputV9.Queue[key] = nil
-                    v9Burst(key)
-                end
-            end
-        end
-    end))
-
-    if V9LP.Character then
-        v9Character(V9LP.Character)
-    end
-
-    -- API interna, sin botones en la pestaña Tools.
-    function TLG.InputV9Enable(value)
-        InputV9.On = value == true
-        if not InputV9.On then
-            table.clear(InputV9.Queue)
-            table.clear(InputV9.Held)
-            table.clear(InputV9.Running)
-        end
-    end
-
-    function TLG.InputV9SetBurst(count, interval)
-        InputV9.BurstCount = math.clamp(tonumber(count) or 3, 1, 5)
-        InputV9.BurstInterval = math.clamp(tonumber(interval) or 0.018, 0.01, 0.08)
-    end
-
-    -- Perfil rápido por defecto. No crea botones ni altera la UI.
-    InputV9.BurstCount = 3
-    InputV9.BurstInterval = 0.015
-
-    pcall(function()
-        if TLG.PNotif then
-            TLG.PNotif("⚡", "Fast Attack V9 activo", C.Cyan)
-        end
     end)
 end
 
--- ESP
+local function ESPDestroy(plr)
+    local pack = ESP.Objects[plr]
+    if not pack then return end
+    for _, obj in pairs(pack) do
+        pcall(function() if obj and obj.Parent then obj:Destroy() end end)
+    end
+    ESP.Objects[plr] = nil
+end
+
+local function ESPCreate(plr)
+    if plr == TLG.LP or not ESP.On then return end
+    ESPDestroy(plr)
+    local ch = plr.Character
+    local head = ch and ch:FindFirstChild("Head")
+    local root = ch and ch:FindFirstChild("HumanoidRootPart")
+    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+    if not ch or not head or not root or not hum then return end
+
+    local color = TLG.A()
+
+    local hl = Instance.new("Highlight")
+    hl.Name = "TLG_ESP_Highlight"
+    hl.Adornee = ch
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.FillColor = color
+    hl.FillTransparency = ESP.Fill and ESP.FillTransparency or 1
+    hl.OutlineColor = color
+    hl.OutlineTransparency = 0
+    hl.Parent = ch
+
+    local bb = Instance.new("BillboardGui")
+    bb.Name = "TLG_ESP_Info"
+    bb.Adornee = head
+    bb.AlwaysOnTop = true
+    bb.Size = UDim2.new(0, 180, 0, 55)
+    bb.StudsOffset = Vector3.new(0, 3, 0)
+    bb.MaxDistance = ESP.MaxDistance
+    bb.Parent = head
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.TextColor3 = color
+    label.TextStrokeTransparency = 0.25
+    label.TextStrokeColor3 = Color3.new(0, 0, 0)
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.Parent = bb
+
+    local box = Instance.new("Frame")
+    box.Name = "TLG_ESP_Box"
+    box.BackgroundTransparency = 1
+    box.BorderSizePixel = 0
+    box.Visible = false
+    box.ZIndex = 100
+    box.Parent = SG
+    local boxStroke = Instance.new("UIStroke", box)
+    boxStroke.Color = color
+    boxStroke.Thickness = 1.5
+
+    local tracer = Instance.new("Frame")
+    tracer.Name = "TLG_ESP_Tracer"
+    tracer.Size = UDim2.new(0, 1, 0, 1)
+    tracer.BackgroundColor3 = color
+    tracer.BorderSizePixel = 0
+    tracer.Visible = false
+    tracer.ZIndex = 100
+    tracer.Parent = SG
+
+    ESP.Objects[plr] = {
+        Highlight = hl, Billboard = bb, Label = label,
+        Box = box, BoxStroke = boxStroke, Tracer = tracer
+    }
+end
+
+local function ESPUpdate(plr)
+    if not ESP.On then return end
+    local pack = ESP.Objects[plr]
+    local ch = plr.Character
+    local root = ch and ch:FindFirstChild("HumanoidRootPart")
+    local head = ch and ch:FindFirstChild("Head")
+    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+
+    if not ch or not root or not head or not hum then
+        ESPCreate(plr); return
+    end
+    if not pack or not pack.Highlight or not pack.Highlight.Parent then
+        ESPCreate(plr); pack = ESP.Objects[plr]
+    end
+    if not pack then return end
+
+    local color = TLG.A()
+    pack.Highlight.FillColor = color
+    pack.Highlight.OutlineColor = color
+    pack.Highlight.FillTransparency = ESP.Fill and ESP.FillTransparency or 1
+    pack.Label.TextColor3 = color
+    pack.BoxStroke.Color = color
+    pack.Tracer.BackgroundColor3 = color
+
+    local mh = TLG.LP.Character and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
+    local distance = mh and math.floor((mh.Position - root.Position).Magnitude) or 0
+
+    if distance > ESP.MaxDistance then
+        pack.Billboard.Enabled = false
+        pack.Highlight.Enabled = false
+        pack.Box.Visible = false
+        pack.Tracer.Visible = false
+        return
+    end
+    pack.Billboard.Enabled = true
+    pack.Highlight.Enabled = true
+    pack.Billboard.MaxDistance = ESP.MaxDistance
+
+    local lines = {}
+    if ESP.Names then table.insert(lines, plr.DisplayName .. "  @" .. plr.Name) end
+    if ESP.Distance then table.insert(lines, "📏 " .. distance .. " studs") end
+    if ESP.Health then
+        local hp = math.floor(hum.Health); local maxhp = math.max(1, math.floor(hum.MaxHealth))
+        table.insert(lines, "❤ " .. hp .. "/" .. maxhp)
+    end
+    pack.Label.Text = table.concat(lines, "\n")
+
+    if ESP.Box then
+        local cam = workspace.CurrentCamera
+        if cam then
+            local top = head.Position + Vector3.new(0, head.Size.Y / 2 + 0.5, 0)
+            local bottom = root.Position - Vector3.new(0, root.Size.Y / 2, 0)
+            local topPos, topOn = cam:WorldToViewportPoint(top)
+            local botPos, botOn = cam:WorldToViewportPoint(bottom)
+            if topOn and botOn then
+                local height = math.abs(botPos.Y - topPos.Y)
+                local width = height * 0.55
+                pack.Box.Size = UDim2.new(0, width, 0, height)
+                pack.Box.Position = UDim2.new(0, topPos.X - width/2, 0, topPos.Y)
+                pack.Box.Visible = true
+            else
+                pack.Box.Visible = false
+            end
+        end
+    else
+        pack.Box.Visible = false
+    end
+
+    pack.Tracer.Visible = ESP.Tracer
+end
+
+function TLG.ESPStart()
+    if ESP.On then return end
+    ESP.On = true
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= TLG.LP then pcall(ESPCreate, plr) end
+    end
+    ESP.PlayerAdded = Players.PlayerAdded:Connect(function(plr)
+        if ESP.On then task.wait(0.15); pcall(ESPCreate, plr) end
+    end)
+    ESP.PlayerRemoving = Players.PlayerRemoving:Connect(function(plr) ESPDestroy(plr) end)
+    ESP.CharacterConnections = ESP.CharacterConnections or {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= TLG.LP then
+            ESP.CharacterConnections[plr] = plr.CharacterAdded:Connect(function()
+                if ESP.On then task.wait(0.25); pcall(ESPCreate, plr) end
+            end)
+        end
+    end
+    ESP.Render = RunService.RenderStepped:Connect(function()
+        if not ESP.On then return end
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= TLG.LP then pcall(ESPUpdate, plr) end
+        end
+    end)
+    UpdateTracers()
+end
+
+function TLG.ESPStop()
+    ESP.On = false
+    if ESP.PlayerAdded then pcall(function() ESP.PlayerAdded:Disconnect() end); ESP.PlayerAdded = nil end
+    if ESP.PlayerRemoving then pcall(function() ESP.PlayerRemoving:Disconnect() end); ESP.PlayerRemoving = nil end
+    if ESP.Render then pcall(function() ESP.Render:Disconnect() end); ESP.Render = nil end
+    if TracerConn then pcall(function() TracerConn:Disconnect() end); TracerConn = nil end
+    for _, conn in pairs(ESP.CharacterConnections or {}) do
+        pcall(function() conn:Disconnect() end)
+    end
+    ESP.CharacterConnections = {}
+    for plr in pairs(ESP.Objects) do ESPDestroy(plr) end
+end
+
+TLG.ESPToggleNames = function(v) ESP.Names = v == true end
+TLG.ESPToggleDistance = function(v) ESP.Distance = v == true end
+TLG.ESPToggleHealth = function(v) ESP.Health = v == true end
+TLG.ESPToggleBox = function(v) ESP.Box = v == true end
+TLG.ESPToggleTracer = function(v)
+    ESP.Tracer = v == true
+    UpdateTracers()
+end
+TLG.ESPToggleFill = function(v) ESP.Fill = v == true end
+TLG.ESPSetDistance = function(v) ESP.MaxDistance = math.clamp(tonumber(v) or 5000, 100, 10000) end
+
 do
-    Sec(PEs, "👁️ ESP", "👁️")
+    Sec(PEs, "👁️ PLAYER ESP", "👁️")
     Tog(PEs, "Activar ESP", false, function(v)
-        if v then
-            TLG.PNotif("ESP", "La función ESP no está implementada en esta versión", C.Yel)
-        end
+        if v then TLG.ESPStart() else TLG.ESPStop() end
     end)
+    Tog(PEs, "Nombres", true, function(v) TLG.ESPToggleNames(v) end)
+    Tog(PEs, "Distancia", true, function(v) TLG.ESPToggleDistance(v) end)
+    Tog(PEs, "Vida", true, function(v) TLG.ESPToggleHealth(v) end)
+    Tog(PEs, "Box ESP", false, function(v) TLG.ESPToggleBox(v) end)
+    Tog(PEs, "Tracer (línea)", false, function(v) TLG.ESPToggleTracer(v) end)
+    Tog(PEs, "Relleno (Highlight Fill)", true, function(v) TLG.ESPToggleFill(v) end)
+    Sli(PEs, "Rango ESP", 100, 10000, 5000, function(v) TLG.ESPSetDistance(v) end)
+    Sli(PEs, "Transparencia relleno", 0, 100, 78, function(v) ESP.FillTransparency = v / 100 end)
 end
 
--- VISUALS
+-- VISUALS TAB
 do
     Sec(PVi, "🎨 LIGHTING", "🎨")
     local presets = {
-        {"❌ Ninguno", function() Lighting.Brightness = 1; Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128); Lighting.ClockTime = 14 end},
-        {"🌅 Atardecer", function() Lighting.Brightness = 2; Lighting.Ambient = Color3.fromRGB(200,150,100); Lighting.OutdoorAmbient = Color3.fromRGB(255,150,100); Lighting.ClockTime = 18 end},
-        {"🌙 Noche", function() Lighting.Brightness = 0.5; Lighting.Ambient = Color3.fromRGB(30,30,50); Lighting.OutdoorAmbient = Color3.fromRGB(50,50,100); Lighting.ClockTime = 0 end},
-        {"🔥 Infierno", function() Lighting.Brightness = 2; Lighting.Ambient = Color3.fromRGB(150,50,20); Lighting.OutdoorAmbient = Color3.fromRGB(255,100,50); Lighting.ClockTime = 16 end},
-        {"❄️ Hielo", function() Lighting.Brightness = 2.5; Lighting.Ambient = Color3.fromRGB(150,180,220); Lighting.OutdoorAmbient = Color3.fromRGB(200,220,255); Lighting.ClockTime = 12 end}
+        {"❌ Ninguno", function() Lighting.Brightness=1; Lighting.Ambient=Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient=Color3.fromRGB(128,128,128); Lighting.ClockTime=14 end},
+        {"🌅 Atardecer", function() Lighting.Brightness=2; Lighting.Ambient=Color3.fromRGB(200,150,100); Lighting.OutdoorAmbient=Color3.fromRGB(255,150,100); Lighting.ClockTime=18 end},
+        {"🌙 Noche", function() Lighting.Brightness=0.5; Lighting.Ambient=Color3.fromRGB(30,30,50); Lighting.OutdoorAmbient=Color3.fromRGB(50,50,100); Lighting.ClockTime=0 end},
+        {"🔥 Infierno", function() Lighting.Brightness=2; Lighting.Ambient=Color3.fromRGB(150,50,20); Lighting.OutdoorAmbient=Color3.fromRGB(255,100,50); Lighting.ClockTime=16 end},
+        {"❄️ Hielo", function() Lighting.Brightness=2.5; Lighting.Ambient=Color3.fromRGB(150,180,220); Lighting.OutdoorAmbient=Color3.fromRGB(200,220,255); Lighting.ClockTime=12 end}
     }
     for _, p in ipairs(presets) do
         Btn(PVi, p[1], C.Yel, p[2])
@@ -1915,21 +2441,44 @@ do
     Sec(PVi, "🌌 SKYBOX", "🌌")
     for _, sky in ipairs(SkyPresets) do
         Btn(PVi, sky.name, C.Yel, function()
-            SkyApply(sky.ids)
-            Sky.Current = sky.id
+            SkyApply(sky.ids); Sky.Current = sky.id
             TLG.PNotif("🌌 SKYBOX", sky.name, C.Yel)
         end)
     end
+
+    Sec(PVi, "📷 CAMERA FOV", "📷")
+    local camFOV = {Enabled = false, Value = 70}
+    Tog(PVi, "Camera FOV", false, function(v)
+        camFOV.Enabled = v
+        local cam = workspace.CurrentCamera
+        if cam then cam.FieldOfView = v and camFOV.Value or 70 end
+    end)
+    Sli(PVi, "FOV", 40, 120, 70, function(v)
+        camFOV.Value = v
+        if camFOV.Enabled then
+            local cam = workspace.CurrentCamera
+            if cam then cam.FieldOfView = v end
+        end
+    end)
 end
 
--- OPTIMIZE
+-- OPTIMIZE TAB
 do
     Sec(POp, "⚡ FPS", "⚡")
+    local OrigDecals = {}
     Tog(POp, "Quitar Texturas", false, function(v)
         if v then
             for _, d in ipairs(workspace:GetDescendants()) do
-                if d:IsA("Decal") or d:IsA("Texture") then d.Transparency = 1 end
+                if d:IsA("Decal") or d:IsA("Texture") then
+                    if not OrigDecals[d] then OrigDecals[d] = d.Transparency end
+                    d.Transparency = 1
+                end
             end
+        else
+            for d, t in pairs(OrigDecals) do
+                if d.Parent then pcall(function() d.Transparency = t end) end
+            end
+            OrigDecals = {}
         end
     end)
     Tog(POp, "Quitar Sombras", false, function(v)
@@ -1937,8 +2486,18 @@ do
     end)
 end
 
--- SETTINGS
+-- SETTINGS TAB
 do
+    Sec(PSe, "💾 CONFIGURACIÓN", "💾")
+    Btn(PSe, "💾 Guardar Config", C.Grn, TLG.SaveConfig)
+    Btn(PSe, "📂 Cargar Config", C.Cyan, TLG.LoadConfig)
+
+    Sec(PSe, "🔄 SESIÓN", "🔄")
+    Tog(PSe, "Auto-Rejoin al kick", false, function(v) TLG.AutoRejoinToggle(v) end)
+
+    Sec(PSe, "🚨 EMERGENCIA", "🚨")
+    Btn(PSe, "🚨 PANIC — Desactivar todo", C.Rd, TLG.Panic)
+
     Sec(PSe, "🎨 TEMA", "🎨")
     local tl = {}
     for n, _ in pairs(TLG.Themes) do table.insert(tl, n) end
@@ -1971,11 +2530,12 @@ do
                     x.b.TextColor3 = C.Wh
                 end
             end
+            TLG.PNotif("🎨 Tema", tn, TLG.Themes[tn].A)
         end)
     end
 end
 
--- FABs
+-- FAB FLOTANTE
 local FSG = Instance.new("ScreenGui")
 FSG.Name = "TLG_FAB_Float"
 FSG.ResetOnSpawn = false
@@ -1994,11 +2554,8 @@ FM.ZIndex = 10
 FM.Visible = false
 TLG.FAB_Frame_Ref = FM
 Instance.new("UICorner", FM).CornerRadius = UDim.new(0,12)
-
 local FS = Instance.new("UIStroke", FM)
-FS.Thickness = 2
-FS.Color = C.Yel
-FS.Transparency = 0.2
+FS.Thickness = 2; FS.Color = C.Yel; FS.Transparency = 0.2
 TLG.PGlow(FS, 0.1, 0.5, 1.5)
 
 local FH = Instance.new("TextLabel", FM)
@@ -2007,16 +2564,13 @@ FH.Position = UDim2.new(0,0,0,2)
 FH.BackgroundTransparency = 1
 FH.Font = Enum.Font.GothamBold
 FH.Text = "💀 ACCIONES RÁPIDAS"
-FH.TextColor3 = C.Yel
-FH.TextSize = 8
-FH.ZIndex = 12
+FH.TextColor3 = C.Yel; FH.TextSize = 8; FH.ZIndex = 12
 
 local FHo = Instance.new("Frame", FM)
 FHo.Size = UDim2.new(1,-10,1,-20)
 FHo.Position = UDim2.new(0,5,0,18)
 FHo.BackgroundTransparency = 1
 FHo.ZIndex = 11
-
 local FLy = Instance.new("UIListLayout", FHo)
 FLy.FillDirection = Enum.FillDirection.Horizontal
 FLy.Padding = UDim.new(0,4)
@@ -2033,41 +2587,24 @@ local function CF(i, t, cb)
     b.ZIndex = 12
     b.ClipsDescendants = true
     Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-    local bS = Instance.new("UIStroke", b)
-    bS.Thickness = 2
-    bS.Color = C.Yel
-    bS.Transparency = 0.4
+    local bS = Instance.new("UIStroke", b); bS.Thickness = 2; bS.Color = C.Yel; bS.Transparency = 0.4
     local iL = Instance.new("TextLabel", b)
-    iL.Size = UDim2.new(1,0,0,22)
-    iL.Position = UDim2.new(0,0,0,4)
-    iL.BackgroundTransparency = 1
-    iL.Text = i
-    iL.TextSize = 18
-    iL.TextColor3 = C.Wh
-    iL.Font = Enum.Font.GothamBold
-    iL.ZIndex = 13
+    iL.Size = UDim2.new(1,0,0,22); iL.Position = UDim2.new(0,0,0,4)
+    iL.BackgroundTransparency = 1; iL.Text = i; iL.TextSize = 18; iL.TextColor3 = C.Wh
+    iL.Font = Enum.Font.GothamBold; iL.ZIndex = 13
     local nL = Instance.new("TextLabel", b)
-    nL.Size = UDim2.new(1,0,0,10)
-    nL.Position = UDim2.new(0,0,1,-14)
-    nL.BackgroundTransparency = 1
-    nL.Text = t
-    nL.TextColor3 = C.Wh
-    nL.TextSize = 7
-    nL.Font = Enum.Font.GothamBold
-    nL.ZIndex = 13
+    nL.Size = UDim2.new(1,0,0,10); nL.Position = UDim2.new(0,0,1,-14)
+    nL.BackgroundTransparency = 1; nL.Text = t; nL.TextColor3 = C.Wh
+    nL.TextSize = 7; nL.Font = Enum.Font.GothamBold; nL.ZIndex = 13
     local function SA(s)
         if s then
             b.BackgroundColor3 = C.Yel
-            iL.TextColor3 = C.BG
-            nL.TextColor3 = C.BG
-            bS.Color = C.Wh
-            bS.Transparency = 0
+            iL.TextColor3 = C.BG; nL.TextColor3 = C.BG
+            bS.Color = C.Wh; bS.Transparency = 0
         else
             b.BackgroundColor3 = C.BG2
-            iL.TextColor3 = C.Wh
-            nL.TextColor3 = C.Wh
-            bS.Color = C.Yel
-            bS.Transparency = 0.4
+            iL.TextColor3 = C.Wh; nL.TextColor3 = C.Wh
+            bS.Color = C.Yel; bS.Transparency = 0.4
         end
     end
     b.MouseButton1Click:Connect(function()
@@ -2079,29 +2616,20 @@ local function CF(i, t, cb)
 end
 
 CF("🚀", "FUGA", function()
-    local c = TLG.LP.Character
-    local h = c and c:FindFirstChild("HumanoidRootPart")
-    if h then h.CFrame = h.CFrame + Vector3.new(0, 5000, 0) end
+    if TLG.Fuga then TLG.Fuga() end
 end)
 CF("✈", "FLY", function()
-    if TLG.Fly.On then
-        TLG.FlyE()
-    else
-        TLG.FlyS()
-    end
+    if TLG.Fly.On then TLG.FlyE() else TLG.FlyS() end
     return TLG.Fly.On
 end)
 CF("🌀", "GOD ORB", function()
     if TLG.GO.On then
-        TLG.GOS()
-        return false
+        TLG.GOS(); return false
     else
         if TLG.SelectedTarget and TLG.SelectedTarget.Parent and TLG.SelectedTarget.Character then
-            TLG.GOSt(TLG.SelectedTarget)
-            return true
+            TLG.GOSt(TLG.SelectedTarget); return true
         else
-            TLG.PNotif("⚠️", "Seleccioná un jugador", C.Yel)
-            return false
+            TLG.PNotif("⚠️", "Seleccioná un jugador", C.Yel); return false
         end
     end
 end)
@@ -2109,9 +2637,7 @@ end)
 local fdg, fs, fp = false, nil, nil
 FH.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        fdg = true
-        fs = i.Position
-        fp = FM.Position
+        fdg = true; fs = i.Position; fp = FM.Position
     end
 end)
 UserInputService.InputChanged:Connect(function(i)
@@ -2121,9 +2647,7 @@ UserInputService.InputChanged:Connect(function(i)
     end
 end)
 UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        fdg = false
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then fdg = false end
 end)
 
 -- WATERMARK
@@ -2137,38 +2661,22 @@ WM.BorderSizePixel = 0
 WM.ZIndex = 50
 Instance.new("UICorner", WM).CornerRadius = UDim.new(0,8)
 local WMS = Instance.new("UIStroke", WM)
-WMS.Color = C.Yel
-WMS.Thickness = 2
-WMS.Transparency = 0.2
+WMS.Color = C.Yel; WMS.Thickness = 2; WMS.Transparency = 0.2
 TLG.PGlow(WMS, 0.1, 0.6, 1.5)
 local WIc = Instance.new("TextLabel", WM)
-WIc.Size = UDim2.new(0,22,1,0)
-WIc.Position = UDim2.new(0,4,0,0)
-WIc.BackgroundTransparency = 1
-WIc.Text = "💀"
-WIc.TextSize = 13
-WIc.Font = Enum.Font.GothamBold
-WIc.TextColor3 = C.Yel
-WIc.ZIndex = 51
+WIc.Size = UDim2.new(0,22,1,0); WIc.Position = UDim2.new(0,4,0,0)
+WIc.BackgroundTransparency = 1; WIc.Text = "💀"; WIc.TextSize = 13
+WIc.Font = Enum.Font.GothamBold; WIc.TextColor3 = C.Yel; WIc.ZIndex = 51
 local WTx = Instance.new("TextLabel", WM)
-WTx.Size = UDim2.new(1,-56,1,0)
-WTx.Position = UDim2.new(0,28,0,0)
-WTx.BackgroundTransparency = 1
-WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG GOLD V6.8"
-WTx.TextSize = 9
-WTx.TextColor3 = C.Wh
-WTx.TextXAlignment = Enum.TextXAlignment.Left
-WTx.ZIndex = 51
+WTx.Size = UDim2.new(1,-56,1,0); WTx.Position = UDim2.new(0,28,0,0)
+WTx.BackgroundTransparency = 1; WTx.Font = Enum.Font.GothamBold
+WTx.Text = "TLG GOLD V7.1"; WTx.TextSize = 9; WTx.TextColor3 = C.Wh
+WTx.TextXAlignment = Enum.TextXAlignment.Left; WTx.ZIndex = 51
 local WTm = Instance.new("TextLabel", WM)
-WTm.Size = UDim2.new(0,46,1,0)
-WTm.Position = UDim2.new(1,-50,0,0)
-WTm.BackgroundTransparency = 1
-WTm.Font = Enum.Font.GothamBold
-WTm.TextSize = 9
-WTm.TextColor3 = C.Yel
-WTm.TextXAlignment = Enum.TextXAlignment.Right
-WTm.ZIndex = 51
+WTm.Size = UDim2.new(0,46,1,0); WTm.Position = UDim2.new(1,-50,0,0)
+WTm.BackgroundTransparency = 1; WTm.Font = Enum.Font.GothamBold
+WTm.TextSize = 9; WTm.TextColor3 = C.Yel
+WTm.TextXAlignment = Enum.TextXAlignment.Right; WTm.ZIndex = 51
 task.spawn(function()
     while WTm.Parent do
         WTm.Text = os.date("%H:%M")
@@ -2176,26 +2684,22 @@ task.spawn(function()
     end
 end)
 
+-- MINIMIZAR
 local min = false
 local function SetMin(st)
     min = st
     if min then
         TweenService:Create(W, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(W_S.X.Scale, W_S.X.Offset, 0, 42)}):Play()
-        TabBar.Visible = false
-        Cont.Visible = false
+        TabBar.Visible = false; Cont.Visible = false
         STtl.Text = "👑 ▶"
     else
         TweenService:Create(W, TweenInfo.new(0.4, Enum.EasingStyle.Quart), {Size = W_S}):Play()
-        TabBar.Visible = true
-        Cont.Visible = true
+        TabBar.Visible = true; Cont.Visible = true
         STtl.Text = "👑"
     end
 end
 local CB = Instance.new("TextButton", DcIco)
-CB.Size = UDim2.new(1,0,1,0)
-CB.BackgroundTransparency = 1
-CB.Text = ""
-CB.ZIndex = 10
+CB.Size = UDim2.new(1,0,1,0); CB.BackgroundTransparency = 1; CB.Text = ""; CB.ZIndex = 10
 CB.MouseButton1Click:Connect(function() SetMin(not min) end)
 if UserInputService.KeyboardEnabled then
     UserInputService.InputBegan:Connect(function(i, gp)
@@ -2208,728 +2712,6 @@ pcall(function()
     TweenService:Create(W, TweenInfo.new(0.8, Enum.EasingStyle.Back), {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-if TLG.FAB_Toggle_State then FM.Visible = true end
-TLG.PNotif("👑 TLG GOLD V6.8", "💀 Gold Skull Edition", C.Yel)
+TLG.PNotif("👑 TLG GOLD V7.1", "💀 Meme Sea Stats Edition", C.Yel)
 
--- ═══════════════════════════════════════════════════════════════
--- 👁️ TLG ESP — PLAYER ESP
--- ═══════════════════════════════════════════════════════════════
-local ESP = {
-    On = false,
-    Names = true,
-    Distance = true,
-    Health = true,
-    Tracer = false,
-    MaxDistance = 5000,
-    Objects = {}
-}
-
-local function ESPDestroy(plr)
-    local pack = ESP.Objects[plr]
-    if not pack then return end
-    for _, obj in pairs(pack) do
-        pcall(function()
-            if obj and obj.Parent then obj:Destroy() end
-        end)
-    end
-    ESP.Objects[plr] = nil
-end
-
-local function ESPCreate(plr)
-    if plr == TLG.LP or not ESP.On then return end
-    ESPDestroy(plr)
-
-    local ch = plr.Character
-    local head = ch and ch:FindFirstChild("Head")
-    local root = ch and ch:FindFirstChild("HumanoidRootPart")
-    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
-    if not ch or not head or not root or not hum then return end
-
-    local color = TLG.A()
-
-    local hl = Instance.new("Highlight")
-    hl.Name = "TLG_ESP_Highlight"
-    hl.Adornee = ch
-    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    hl.FillColor = color
-    hl.FillTransparency = 0.78
-    hl.OutlineColor = color
-    hl.OutlineTransparency = 0
-    hl.Parent = ch
-
-    local bb = Instance.new("BillboardGui")
-    bb.Name = "TLG_ESP_Info"
-    bb.Adornee = head
-    bb.AlwaysOnTop = true
-    bb.Size = UDim2.new(0, 180, 0, 55)
-    bb.StudsOffset = Vector3.new(0, 3, 0)
-    bb.MaxDistance = ESP.MaxDistance
-    bb.Parent = head
-
-    local label = Instance.new("TextLabel")
-    label.Name = "Info"
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 12
-    label.TextColor3 = color
-    label.TextStrokeTransparency = 0.25
-    label.TextStrokeColor3 = Color3.new(0, 0, 0)
-    label.TextYAlignment = Enum.TextYAlignment.Center
-    label.Parent = bb
-
-    ESP.Objects[plr] = {
-        Highlight = hl,
-        Billboard = bb,
-        Label = label
-    }
-end
-
-local function ESPUpdate(plr)
-    if not ESP.On then return end
-
-    local pack = ESP.Objects[plr]
-    local ch = plr.Character
-    local root = ch and ch:FindFirstChild("HumanoidRootPart")
-    local head = ch and ch:FindFirstChild("Head")
-    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
-
-    if not ch or not root or not head or not hum then
-        ESPCreate(plr)
-        return
-    end
-
-    if not pack or not pack.Highlight or not pack.Highlight.Parent then
-        ESPCreate(plr)
-        pack = ESP.Objects[plr]
-    end
-
-    if not pack then return end
-
-    local color = TLG.A()
-    pack.Highlight.FillColor = color
-    pack.Highlight.OutlineColor = color
-    pack.Label.TextColor3 = color
-
-    local distance = math.floor((TLG.LP.Character
-        and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
-        and (TLG.LP.Character.HumanoidRootPart.Position - root.Position).Magnitude)
-        or 0)
-
-    if distance > ESP.MaxDistance then
-        pack.Billboard.Enabled = false
-        pack.Highlight.Enabled = false
-        return
-    end
-
-    pack.Billboard.Enabled = true
-    pack.Highlight.Enabled = true
-    pack.Billboard.MaxDistance = ESP.MaxDistance
-
-    local lines = {}
-
-    if ESP.Names then
-        table.insert(lines, plr.DisplayName .. "  @" .. plr.Name)
-    end
-
-    if ESP.Distance then
-        table.insert(lines, "📏 " .. distance .. " studs")
-    end
-
-    if ESP.Health then
-        local hp = math.floor(hum.Health)
-        local maxhp = math.max(1, math.floor(hum.MaxHealth))
-        table.insert(lines, "❤ " .. hp .. "/" .. maxhp)
-    end
-
-    pack.Label.Text = table.concat(lines, "\n")
-end
-
-function TLG.ESPStart()
-    if ESP.On then return end
-    ESP.On = true
-
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= TLG.LP then
-            pcall(ESPCreate, plr)
-        end
-    end
-
-    ESP.PlayerAdded = Players.PlayerAdded:Connect(function(plr)
-        if ESP.On then
-            task.wait(0.15)
-            pcall(ESPCreate, plr)
-        end
-    end)
-
-    ESP.PlayerRemoving = Players.PlayerRemoving:Connect(function(plr)
-        ESPDestroy(plr)
-    end)
-
-    ESP.CharacterConnections = ESP.CharacterConnections or {}
-
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= TLG.LP then
-            ESP.CharacterConnections[plr] = plr.CharacterAdded:Connect(function()
-                if ESP.On then
-                    task.wait(0.25)
-                    pcall(ESPCreate, plr)
-                end
-            end)
-        end
-    end
-
-    ESP.Render = RunService.RenderStepped:Connect(function()
-        if not ESP.On then return end
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= TLG.LP then
-                pcall(ESPUpdate, plr)
-            end
-        end
-    end)
-end
-
-function TLG.ESPStop()
-    ESP.On = false
-
-    if ESP.PlayerAdded then
-        pcall(function() ESP.PlayerAdded:Disconnect() end)
-        ESP.PlayerAdded = nil
-    end
-
-    if ESP.PlayerRemoving then
-        pcall(function() ESP.PlayerRemoving:Disconnect() end)
-        ESP.PlayerRemoving = nil
-    end
-
-    if ESP.Render then
-        pcall(function() ESP.Render:Disconnect() end)
-        ESP.Render = nil
-    end
-
-    for plr, conn in pairs(ESP.CharacterConnections or {}) do
-        pcall(function() conn:Disconnect() end)
-    end
-    ESP.CharacterConnections = {}
-
-    for plr in pairs(ESP.Objects) do
-        ESPDestroy(plr)
-    end
-end
-
--- Controles públicos para la pestaña ESP.
-function TLG.ESPToggleNames(v)
-    ESP.Names = v == true
-end
-
-function TLG.ESPToggleDistance(v)
-    ESP.Distance = v == true
-end
-
-function TLG.ESPToggleHealth(v)
-    ESP.Health = v == true
-end
-
-function TLG.ESPSetDistance(v)
-    ESP.MaxDistance = math.clamp(tonumber(v) or 5000, 100, 10000)
-end
-
--- ═══════════════════════════════════════════════════════════════
--- INTEGRACIÓN DE CONTROLES EN LA PESTAÑA ESP
--- ═══════════════════════════════════════════════════════════════
-task.spawn(function()
-    task.wait(0.2)
-    pcall(function()
-        if typeof(PEs) == "Instance" then
-            Sec(PEs, "👁️ PLAYER ESP", "👁️")
-
-            Tog(PEs, "Activar ESP", false, function(v)
-                if v then
-                    TLG.ESPStart()
-                else
-                    TLG.ESPStop()
-                end
-            end)
-
-            Tog(PEs, "Nombres", true, function(v)
-                TLG.ESPToggleNames(v)
-            end)
-
-            Tog(PEs, "Distancia", true, function(v)
-                TLG.ESPToggleDistance(v)
-            end)
-
-            Tog(PEs, "Vida", true, function(v)
-                TLG.ESPToggleHealth(v)
-            end)
-
-            Sli(PEs, "Rango ESP", 100, 10000, 5000, function(v)
-                TLG.ESPSetDistance(v)
-            end)
-
-            Sec(PEs, "ℹ️ INFORMACIÓN", "💡")
-            Lbl(PEs, "ESP muestra jugadores con Highlight y nombre/distancia/vida.")
-        end
-    end)
-end)
-
-
--- ═══════════════════════════════════════════════════════════════
--- 🌀 ORBITAL MAP — TOOLS
--- Orbit around the center of the current map.
--- Mobile + PC friendly. No extra external remotes.
--- ═══════════════════════════════════════════════════════════════
-local OrbitalMap = {
-    On = false,
-    Distance = 250,
-    Height = 80,
-    Speed = 35,
-    Angle = 0,
-    Connection = nil,
-    Original = nil,
-}
-
-local function OrbitalRoot()
-    local ch = TLG.LP and TLG.LP.Character
-    return ch and ch:FindFirstChild("HumanoidRootPart")
-end
-
-local function FindMapCenter()
-    local root = OrbitalRoot()
-    if root then
-        -- Use the current position as the initial map reference.
-        return Vector3.new(root.Position.X, root.Position.Y, root.Position.Z)
-    end
-    return Vector3.zero
-end
-
-function TLG.OrbitalMapStart()
-    if OrbitalMap.On then return end
-
-    local root = OrbitalRoot()
-    if not root then return end
-
-    OrbitalMap.On = true
-    OrbitalMap.Angle = 0
-    OrbitalMap.Original = root.CFrame
-
-    local center = FindMapCenter()
-
-    OrbitalMap.Connection = RunService.RenderStepped:Connect(function(dt)
-        if not OrbitalMap.On then return end
-
-        local currentRoot = OrbitalRoot()
-        if not currentRoot or not currentRoot.Parent then
-            TLG.OrbitalMapStop()
-            return
-        end
-
-        OrbitalMap.Angle += math.rad(OrbitalMap.Speed) * dt
-
-        local x = math.cos(OrbitalMap.Angle) * OrbitalMap.Distance
-        local z = math.sin(OrbitalMap.Angle) * OrbitalMap.Distance
-        local target = center + Vector3.new(x, OrbitalMap.Height, z)
-
-        currentRoot.CFrame = CFrame.lookAt(target, center)
-    end)
-end
-
-function TLG.OrbitalMapStop()
-    OrbitalMap.On = false
-
-    if OrbitalMap.Connection then
-        pcall(function()
-            OrbitalMap.Connection:Disconnect()
-        end)
-        OrbitalMap.Connection = nil
-    end
-end
-
-function TLG.OrbitalMapSetDistance(v)
-    OrbitalMap.Distance = math.clamp(tonumber(v) or 250, 25, 2000)
-end
-
-function TLG.OrbitalMapSetHeight(v)
-    OrbitalMap.Height = math.clamp(tonumber(v) or 80, -500, 1000)
-end
-
-function TLG.OrbitalMapSetSpeed(v)
-    OrbitalMap.Speed = math.clamp(tonumber(v) or 35, 1, 20000)
-end
-
--- Integrate controls into the existing Tools tab without creating a
--- separate tab or extra floating buttons.
-task.spawn(function()
-    task.wait(0.3)
-    pcall(function()
-        if typeof(PTo) == "Instance" then
-            Sec(PTo, "🌀 ORBITAL MAP", "🌀")
-
-            Tog(PTo, "Orbital Mapa", false, function(v)
-                if v then
-                    TLG.OrbitalMapStart()
-                else
-                    TLG.OrbitalMapStop()
-                end
-            end)
-
-            Sli(PTo, "Distancia", 25, 2000, 250, function(v)
-                TLG.OrbitalMapSetDistance(v)
-            end)
-
-            Sli(PTo, "Altura", -500, 1000, 80, function(v)
-                TLG.OrbitalMapSetHeight(v)
-            end)
-
-            Sli(PTo, "Velocidad", 1, 20000, 35, function(v)
-                TLG.OrbitalMapSetSpeed(v)
-            end)
-        end
-    end)
-end)
-
-
--- ═══════════════════════════════════════════════════════════════
--- 🛡️ ANTI STUN — TOOLS
--- Prevents local Stun values from being changed away from -1.
--- This only affects the local character state exposed to the client.
--- ═══════════════════════════════════════════════════════════════
-local AntiStun = {
-    On = false,
-    Connection = nil,
-    CharacterConnection = nil,
-    StunConnection = nil,
-}
-
-local function AntiStunFind()
-    local ch = TLG.LP and TLG.LP.Character
-    if not ch then return nil end
-
-    return ch:FindFirstChild("Stun")
-        or ch:FindFirstChild("Stunned")
-        or ch:FindFirstChild("StunValue")
-end
-
-local function AntiStunForce()
-    if not AntiStun.On then return end
-
-    local value = AntiStunFind()
-    if not value then return end
-
-    pcall(function()
-        if value:IsA("BoolValue") then
-            value.Value = false
-        elseif value:IsA("NumberValue") or value:IsA("IntValue") then
-            value.Value = -1
-        end
-    end)
-end
-
-function TLG.AntiStunStart()
-    if AntiStun.On then return end
-    AntiStun.On = true
-
-    AntiStunForce()
-
-    AntiStun.Connection = RunService.Heartbeat:Connect(function()
-        AntiStunForce()
-    end)
-
-    AntiStun.CharacterConnection = TLG.LP.CharacterAdded:Connect(function(char)
-        task.wait(0.2)
-        if AntiStun.On then
-            AntiStunForce()
-        end
-
-        pcall(function()
-            if AntiStun.StunConnection then
-                AntiStun.StunConnection:Disconnect()
-            end
-            local value = char:FindFirstChild("Stun")
-                or char:FindFirstChild("Stunned")
-                or char:FindFirstChild("StunValue")
-            if value then
-                AntiStun.StunConnection = value.Changed:Connect(function()
-                    AntiStunForce()
-                end)
-            end
-        end)
-    end)
-
-    local value = AntiStunFind()
-    if value then
-        AntiStun.StunConnection = value.Changed:Connect(function()
-            AntiStunForce()
-        end)
-    end
-end
-
-function TLG.AntiStunStop()
-    AntiStun.On = false
-
-    for _, key in ipairs({"Connection", "CharacterConnection", "StunConnection"}) do
-        local c = AntiStun[key]
-        if c then
-            pcall(function() c:Disconnect() end)
-            AntiStun[key] = nil
-        end
-    end
-end
-
-task.spawn(function()
-    task.wait(0.35)
-    pcall(function()
-        if typeof(PTo) == "Instance" then
-            Sec(PTo, "🛡️ ANTI STUN", "🛡️")
-
-            Tog(PTo, "Anti Stun", false, function(v)
-                if v then
-                    TLG.AntiStunStart()
-                else
-                    TLG.AntiStunStop()
-                end
-            end)
-
-            Lbl(PTo, "Mantiene el estado local de Stun desactivado cuando el juego lo expone al cliente.")
-        end
-    end)
-end)
-
-
--- ═══════════════════════════════════════════════════════════════
--- 🚀 FUGA — TOOLS
--- Adjustable vertical escape height, up to 20,000 studs.
--- ═══════════════════════════════════════════════════════════════
-local Fuga = {
-    On = false,
-    Height = 5000,
-    Connection = nil,
-}
-
-local function FugaGetRoot()
-    local ch = TLG.LP and TLG.LP.Character
-    return ch and ch:FindFirstChild("HumanoidRootPart")
-end
-
-function TLG.FugaSetHeight(v)
-    Fuga.Height = math.clamp(tonumber(v) or 5000, 100, 20000)
-end
-
-function TLG.Fuga()
-    local root = FugaGetRoot()
-    if not root then return false end
-
-    local ok = pcall(function()
-        root.CFrame = root.CFrame + Vector3.new(0, Fuga.Height, 0)
-    end)
-
-    return ok
-end
-
-function TLG.FugaToggle(v)
-    Fuga.On = v == true
-
-    if Fuga.On then
-        TLG.Fuga()
-    end
-end
-
-task.spawn(function()
-    task.wait(0.45)
-    pcall(function()
-        if typeof(PTo) == "Instance" then
-            Sec(PTo, "🚀 FUGA", "🚀")
-
-            Tog(PTo, "Fuga", false, function(v)
-                TLG.FugaToggle(v)
-            end)
-
-            Sli(PTo, "Altura de Fuga", 100, 20000, 5000, function(v)
-                TLG.FugaSetHeight(v)
-            end)
-
-            Lbl(PTo, "Fuga vertical configurable: hasta 20,000 studs.")
-        end
-    end)
-end)
-
-
--- ═══════════════════════════════════════════════════════════════
--- 🚀 FUGA FAB — FLOATING BUTTON
--- Tap/click the floating button to move upward by the selected
--- Fuga height. Works with touch and mouse.
--- ═══════════════════════════════════════════════════════════════
-task.spawn(function()
-    task.wait(0.7)
-    pcall(function()
-        local parent = (typeof(GetParent) == "function" and GetParent()) or CoreGui
-        local old = parent:FindFirstChild("TLG_FugaFAB")
-        if old then old:Destroy() end
-
-        local gui = Instance.new("ScreenGui")
-        gui.Name = "TLG_FugaFAB"
-        gui.ResetOnSpawn = false
-        gui.IgnoreGuiInset = true
-        gui.Parent = parent
-
-        local button = Instance.new("TextButton")
-        button.Name = "FugaButton"
-        button.Size = UDim2.fromOffset(58, 58)
-        button.Position = UDim2.new(1, -75, 0.65, 0)
-        button.BackgroundColor3 = TLG.A()
-        button.BackgroundTransparency = 0.08
-        button.Text = "🚀"
-        button.TextSize = 27
-        button.TextColor3 = Color3.new(1, 1, 1)
-        button.AutoButtonColor = true
-        button.Parent = gui
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(1, 0)
-        corner.Parent = button
-
-        local stroke = Instance.new("UIStroke")
-        stroke.Thickness = 2
-        stroke.Color = TLG.A2()
-        stroke.Parent = button
-
-        local dragging = false
-        local dragStart
-        local startPos
-
-        local function moveButton(input)
-            local delta = input.Position - dragStart
-            button.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
-        end
-
-        button.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1
-                or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
-                dragStart = input.Position
-                startPos = button.Position
-            end
-        end)
-
-        button.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement
-                or input.UserInputType == Enum.UserInputType.Touch then
-                if dragging then
-                    moveButton(input)
-                end
-            end
-        end)
-
-        UserInputService.InputChanged:Connect(function(input)
-            if dragging and (
-                input.UserInputType == Enum.UserInputType.MouseMovement
-                or input.UserInputType == Enum.UserInputType.Touch
-            ) then
-                moveButton(input)
-            end
-        end)
-
-        local pressStart = 0
-        button.MouseButton1Down:Connect(function()
-            pressStart = os.clock()
-        end)
-
-        button.MouseButton1Up:Connect(function()
-            if os.clock() - pressStart < 0.35 then
-                pcall(function()
-                    TLG.Fuga()
-                end)
-            end
-            dragging = false
-        end)
-
-        -- Touch release fallback.
-        button.TouchTap:Connect(function()
-            pcall(function()
-                TLG.Fuga()
-            end)
-            dragging = false
-        end)
-
-        -- Keep the FAB aligned with the current theme.
-        task.spawn(function()
-            while gui.Parent do
-                pcall(function()
-                    button.BackgroundColor3 = TLG.A()
-                    stroke.Color = TLG.A2()
-                end)
-                task.wait(1)
-            end
-        end)
-    end)
-end)
-
-
--- ═══════════════════════════════════════════════════════════════
--- 📷 CAMERA FOV — COMBAT
--- ═══════════════════════════════════════════════════════════════
-local CameraFOV = {
-    Enabled = false,
-    Value = 70,
-    Connection = nil,
-}
-
-local function ApplyCameraFOV()
-    local cam = workspace.CurrentCamera
-    if not cam then return end
-
-    pcall(function()
-        cam.FieldOfView = math.clamp(
-            tonumber(CameraFOV.Value) or 70,
-            40,
-            120
-        )
-    end)
-end
-
-function TLG.SetCameraFOV(v)
-    CameraFOV.Value = math.clamp(tonumber(v) or 70, 40, 120)
-    if CameraFOV.Enabled then
-        ApplyCameraFOV()
-    end
-end
-
-function TLG.SetCameraFOVEnabled(v)
-    CameraFOV.Enabled = v == true
-
-    if CameraFOV.Enabled then
-        ApplyCameraFOV()
-    else
-        pcall(function()
-            if workspace.CurrentCamera then
-                workspace.CurrentCamera.FieldOfView = 70
-            end
-        end)
-    end
-end
-
-task.spawn(function()
-    task.wait(0.5)
-    pcall(function()
-        if typeof(PCo) == "Instance" then
-            Sec(PCo, "📷 CAMERA FOV", "📷")
-
-            Tog(PCo, "Camera FOV", false, function(v)
-                TLG.SetCameraFOVEnabled(v)
-            end)
-
-            Sli(PCo, "FOV", 40, 120, 70, function(v)
-                TLG.SetCameraFOV(v)
-            end)
-
-            Lbl(PCo, "Ajusta el campo de visión de la cámara.")
-        end
-    end)
-end)
-
-print("[TLG GOLD V6.8] 💀 Cargado completamente")
+print("[TLG GOLD V7.1] 💀 Cargado — Meme Sea Stats integradas")
