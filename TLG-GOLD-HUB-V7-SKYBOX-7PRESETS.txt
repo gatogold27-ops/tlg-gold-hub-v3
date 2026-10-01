@@ -157,8 +157,6 @@ local function TLG_EpicIntro()
         pcall(function() Intro:Destroy() end)
     end)
 end
-TLG_EpicIntro()
-
 function TLG.GetPing()
     local p = 0
     pcall(function() p = math.floor((TLG.LP:GetNetworkPing() or 0) * 1000) end)
@@ -193,6 +191,9 @@ local C = {
     Yel = Color3.fromRGB(255,215,0)
 }
 TLG.C = C
+
+-- Start the intro only after C/theme colors have been initialized.
+TLG_EpicIntro()
 
 local NotifHolder = nil
 local function GetNotifHolder()
@@ -2775,7 +2776,7 @@ task.spawn(function()
         button.Name = "FugaButton"
         button.Size = UDim2.fromOffset(58, 58)
         button.Position = UDim2.new(1, -75, 0.65, 0)
-        button.BackgroundColor3 = C3(A())
+        button.BackgroundColor3 = TLG.A()
         button.BackgroundTransparency = 0.08
         button.Text = "🚀"
         button.TextSize = 27
@@ -2789,7 +2790,7 @@ task.spawn(function()
 
         local stroke = Instance.new("UIStroke")
         stroke.Thickness = 2
-        stroke.Color = C3(A2())
+        stroke.Color = TLG.A2()
         stroke.Parent = button
 
         local dragging = false
@@ -2859,12 +2860,75 @@ task.spawn(function()
         task.spawn(function()
             while gui.Parent do
                 pcall(function()
-                    button.BackgroundColor3 = C3(A())
-                    stroke.Color = C3(A2())
+                    button.BackgroundColor3 = TLG.A()
+                    stroke.Color = TLG.A2()
                 end)
                 task.wait(1)
             end
         end)
+    end)
+end)
+
+
+-- ═══════════════════════════════════════════════════════════════
+-- 📷 CAMERA FOV — COMBAT
+-- ═══════════════════════════════════════════════════════════════
+local CameraFOV = {
+    Enabled = false,
+    Value = 70,
+    Connection = nil,
+}
+
+local function ApplyCameraFOV()
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+
+    pcall(function()
+        cam.FieldOfView = math.clamp(
+            tonumber(CameraFOV.Value) or 70,
+            40,
+            120
+        )
+    end)
+end
+
+function TLG.SetCameraFOV(v)
+    CameraFOV.Value = math.clamp(tonumber(v) or 70, 40, 120)
+    if CameraFOV.Enabled then
+        ApplyCameraFOV()
+    end
+end
+
+function TLG.SetCameraFOVEnabled(v)
+    CameraFOV.Enabled = v == true
+
+    if CameraFOV.Enabled then
+        ApplyCameraFOV()
+    else
+        pcall(function()
+            if workspace.CurrentCamera then
+                workspace.CurrentCamera.FieldOfView = 70
+            end
+        end)
+    end
+end
+
+task.spawn(function()
+    task.wait(0.5)
+    pcall(function()
+        if typeof(PCo) == "Instance" then
+            Sec(PCo, "📷 CAMERA FOV", "📷")
+
+            Tog(PCo, "Camera FOV", false, function(v)
+                TLG.SetCameraFOVEnabled(v)
+            end)
+
+            Sli(PCo, "FOV", 40, 120, 70, function(v)
+                TLG.SetCameraFOV(v)
+            end)
+
+            Lbl(PCo, "Ajusta el campo de visión de la cámara.")
+        end
     end)
 end)
 
