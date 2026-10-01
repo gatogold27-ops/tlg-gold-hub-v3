@@ -71,6 +71,158 @@ pcall(function() SG.Parent = TLG.SP end)
 if not SG.Parent then pcall(function() SG.Parent = CoreGui end) end
 TLG.SG = SG
 
+-- ═══════════════════════════════════════════════════════════════
+-- ⚡ INTRO ÉPICA — TLG GOLD HUB
+-- ═══════════════════════════════════════════════════════════════
+local function TLG_EpicIntro()
+    task.spawn(function()
+        local Intro = Instance.new("Frame")
+        Intro.Name = "TLG_EpicIntro"
+        Intro.Size = UDim2.fromScale(1, 1)
+        Intro.Position = UDim2.fromScale(0, 0)
+        Intro.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+        Intro.BackgroundTransparency = 0
+        Intro.BorderSizePixel = 0
+        Intro.ZIndex = 9999
+        Intro.Parent = SG
+
+        local Glow = Instance.new("Frame")
+        Glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        Glow.Position = UDim2.fromScale(0.5, 0.46)
+        Glow.Size = UDim2.fromOffset(360, 190)
+        Glow.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+        Glow.BackgroundTransparency = 0.94
+        Glow.BorderSizePixel = 0
+        Glow.ZIndex = 10000
+        Glow.Parent = Intro
+
+        local Corner = Instance.new("UICorner")
+        Corner.CornerRadius = UDim.new(0, 28)
+        Corner.Parent = Glow
+
+        local Title = Instance.new("TextLabel")
+        Title.AnchorPoint = Vector2.new(0.5, 0.5)
+        Title.Position = UDim2.fromScale(0.5, 0.40)
+        Title.Size = UDim2.fromScale(0.9, 0.12)
+        Title.BackgroundTransparency = 1
+        Title.Text = "💀  TLG GOLD HUB  💀"
+        Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+        Title.TextTransparency = 1
+        Title.TextScaled = true
+        Title.Font = Enum.Font.GothamBlack
+        Title.ZIndex = 10001
+        Title.Parent = Intro
+
+        local Sub = Instance.new("TextLabel")
+        Sub.AnchorPoint = Vector2.new(0.5, 0.5)
+        Sub.Position = UDim2.fromScale(0.5, 0.51)
+        Sub.Size = UDim2.fromScale(0.9, 0.07)
+        Sub.BackgroundTransparency = 1
+        Sub.Text = "GOLD SKULL EDITION  •  V6.8"
+        Sub.TextColor3 = Color3.fromRGB(245, 245, 245)
+        Sub.TextTransparency = 1
+        Sub.TextScaled = true
+        Sub.Font = Enum.Font.GothamBold
+        Sub.ZIndex = 10001
+        Sub.Parent = Intro
+
+        local Status = Instance.new("TextLabel")
+        Status.AnchorPoint = Vector2.new(0.5, 0.5)
+        Status.Position = UDim2.fromScale(0.5, 0.60)
+        Status.Size = UDim2.fromScale(0.9, 0.05)
+        Status.BackgroundTransparency = 1
+        Status.Text = "⚡ INICIANDO SISTEMA..."
+        Status.TextColor3 = Color3.fromRGB(0, 220, 255)
+        Status.TextTransparency = 1
+        Status.TextScaled = true
+        Status.Font = Enum.Font.GothamBold
+        Status.ZIndex = 10001
+        Status.Parent = Intro
+
+        local BarBG = Instance.new("Frame")
+        BarBG.AnchorPoint = Vector2.new(0.5, 0.5)
+        BarBG.Position = UDim2.fromScale(0.5, 0.69)
+        BarBG.Size = UDim2.fromScale(0.62, 0.012)
+        BarBG.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+        BarBG.BorderSizePixel = 0
+        BarBG.ZIndex = 10001
+        BarBG.Parent = Intro
+
+        local BarCorner = Instance.new("UICorner")
+        BarCorner.CornerRadius = UDim.new(1, 0)
+        BarCorner.Parent = BarBG
+
+        local Bar = Instance.new("Frame")
+        Bar.Size = UDim2.fromScale(0, 1)
+        Bar.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        Bar.BorderSizePixel = 0
+        Bar.ZIndex = 10002
+        Bar.Parent = BarBG
+
+        local BarCorner2 = Instance.new("UICorner")
+        BarCorner2.CornerRadius = UDim.new(1, 0)
+        BarCorner2.Parent = Bar
+
+        local function Tween(obj, info, props)
+            local tw = TweenService:Create(obj, info, props)
+            tw:Play()
+            return tw
+        end
+
+        Tween(Title, TweenInfo.new(0.65, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TextTransparency = 0
+        })
+
+        task.wait(0.15)
+
+        Tween(Sub, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TextTransparency = 0
+        })
+
+        task.wait(0.15)
+
+        Tween(Status, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            TextTransparency = 0
+        })
+
+        Tween(Bar, TweenInfo.new(1.75, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = UDim2.fromScale(1, 1)
+        })
+
+        task.wait(0.65)
+        Status.Text = "👑 CARGANDO GOLD SYSTEM..."
+        task.wait(0.55)
+        Status.Text = "🌌 PREPARANDO VISUALES..."
+        task.wait(0.55)
+        Status.Text = "✓ TLG GOLD HUB LISTO"
+
+        task.wait(0.55)
+
+        Tween(Title, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            TextTransparency = 1
+        })
+        Tween(Sub, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            TextTransparency = 1
+        })
+        Tween(Status, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            TextTransparency = 1
+        })
+        Tween(Glow, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            BackgroundTransparency = 1
+        })
+        local fade = Tween(Intro, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            BackgroundTransparency = 1
+        })
+        fade.Completed:Wait()
+
+        pcall(function()
+            Intro:Destroy()
+        end)
+    end)
+end
+
+TLG_EpicIntro()
+
 function TLG.GetPing()
     local p = 0
     pcall(function() p = math.floor((TLG.LP:GetNetworkPing() or 0) * 1000) end)
@@ -435,43 +587,43 @@ local SkyPresets = {
     {name="❌ Ninguno", id="ninguno", ids=nil},
 
     {name="🏠 Roblox Sample", id="sample", ids={
-        "rbxassetid://162001887", "rbxassetid://161998893", "rbxassetid://162001897",
-        "rbxassetid://162001904", "rbxassetid://162001919", "rbxassetid://162001926"
+        "rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897",
+        "rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"
     }},
 
     {name="🌌 Galaxia", id="galaxia", ids={
-        "rbxassetid://159454299", "rbxassetid://159454296", "rbxassetid://159454293",
-        "rbxassetid://159454286", "rbxassetid://159454300", "rbxassetid://159454288"
+        "rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293",
+        "rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"
     }},
 
     {name="🌠 Espacio Vaporwave", id="vaporwave", ids={
-        "rbxassetid://8631780182", "rbxassetid://8631784904", "rbxassetid://8631769834",
-        "rbxassetid://8631777199", "rbxassetid://8631735555", "rbxassetid://8631782345"
+        "rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834",
+        "rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"
     }},
 
     {name="🌅 Sunset", id="sunset", ids={
-        "rbxassetid://323494035", "rbxassetid://323494368", "rbxassetid://323494130",
-        "rbxassetid://323494252", "rbxassetid://323494067", "rbxassetid://323493360"
+        "rbxassetid://323494035","rbxassetid://323494368","rbxassetid://323494130",
+        "rbxassetid://323494252","rbxassetid://323494067","rbxassetid://323493360"
     }},
 
     {name="🔵 Blue Space", id="blue_space", ids={
-        "rbxassetid://135483466", "rbxassetid://135483484", "rbxassetid://135483461",
-        "rbxassetid://135483495", "rbxassetid://135483499", "rbxassetid://135483475"
+        "rbxassetid://135483466","rbxassetid://135483484","rbxassetid://135483461",
+        "rbxassetid://135483495","rbxassetid://135483499","rbxassetid://135483475"
     }},
 
     {name="🔴 Red Night", id="red_night", ids={
-        "rbxassetid://401664839", "rbxassetid://401664862", "rbxassetid://401664960",
-        "rbxassetid://401664881", "rbxassetid://401664901", "rbxassetid://401664936"
+        "rbxassetid://401664839","rbxassetid://401664862","rbxassetid://401664960",
+        "rbxassetid://401664881","rbxassetid://401664901","rbxassetid://401664936"
     }},
 
     {name="🪐 Blue Planet", id="blue_planet", ids={
-        "rbxassetid://218955819", "rbxassetid://218953419", "rbxassetid://218954524",
-        "rbxassetid://218958493", "rbxassetid://218957134", "rbxassetid://218950090"
+        "rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524",
+        "rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"
     }},
 
     {name="🔵 Blue Planet 2", id="blue_planet_2", ids={
-        "rbxassetid://16888989874", "rbxassetid://16888991855", "rbxassetid://16888995219",
-        "rbxassetid://16888998994", "rbxassetid://16889000916", "rbxassetid://16889004122"
+        "rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219",
+        "rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"
     }}
 }
 local function SkyCaptureOriginal()
@@ -1118,7 +1270,7 @@ do
     PName.ZIndex = 8
 
     local PStats = Instance.new("TextLabel", IP)
-    PStats.Size = UDim2.new(1,-16,0,40)
+    PStats.Size = UDim2.new(1,-16,0,62)
     PStats.Position = UDim2.new(0,8,0,28)
     PStats.BackgroundTransparency = 1
     PStats.Font = Enum.Font.GothamSemibold
@@ -1130,8 +1282,8 @@ do
     PStats.ZIndex = 8
 
     local PStats2 = Instance.new("TextLabel", IP)
-    PStats2.Size = UDim2.new(1,-16,0,22)
-    PStats2.Position = UDim2.new(0,8,0,72)
+    PStats2.Size = UDim2.new(1,-16,0,20)
+    PStats2.Position = UDim2.new(0,8,0,94)
     PStats2.BackgroundTransparency = 1
     PStats2.Font = Enum.Font.Gotham
     PStats2.Text = "💰 —   💎 —"
@@ -1165,7 +1317,7 @@ do
         TLG.SelectedTarget = plr
         PName.Text = "👤 " .. plr.DisplayName
         local s = TLG.GetStats(plr)
-        PStats.Text = "📊 Lv " .. s.Level .. "\n❤️ " .. s.Health .. "/" .. s.MaxHealth .. "\n⚡ " .. s.Power
+        PStats.Text = "📊 Lv " .. s.Level .. "\n❤️ " .. s.Health .. "/" .. s.MaxHealth .. "\n⚡ Power " .. s.Power .. "\n🥊 Melee " .. s.Melee
         PStats2.Text = "💰 " .. s.Cash .. "  💎 " .. s.Gems
     end
 
@@ -1592,32 +1744,15 @@ end
 -- VISUALS
 do
     Sec(PVi, "🎨 LIGHTING", "🎨")
-    local lightingPresets = {
+    local presets = {
         {"❌ Ninguno", function() Lighting.Brightness = 1; Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128); Lighting.ClockTime = 14 end},
         {"🌅 Atardecer", function() Lighting.Brightness = 2; Lighting.Ambient = Color3.fromRGB(200,150,100); Lighting.OutdoorAmbient = Color3.fromRGB(255,150,100); Lighting.ClockTime = 18 end},
         {"🌙 Noche", function() Lighting.Brightness = 0.5; Lighting.Ambient = Color3.fromRGB(30,30,50); Lighting.OutdoorAmbient = Color3.fromRGB(50,50,100); Lighting.ClockTime = 0 end},
         {"🔥 Infierno", function() Lighting.Brightness = 2; Lighting.Ambient = Color3.fromRGB(150,50,20); Lighting.OutdoorAmbient = Color3.fromRGB(255,100,50); Lighting.ClockTime = 16 end},
         {"❄️ Hielo", function() Lighting.Brightness = 2.5; Lighting.Ambient = Color3.fromRGB(150,180,220); Lighting.OutdoorAmbient = Color3.fromRGB(200,220,255); Lighting.ClockTime = 12 end}
     }
-    for _, p in ipairs(lightingPresets) do
+    for _, p in ipairs(presets) do
         Btn(PVi, p[1], C.Yel, p[2])
-    end
-
-    Sec(PVi, "🌌 SKYBOX", "🌌")
-    Lbl(PVi, "7 Skyboxes confirmadas • 6 caras cada una", C.Cyan)
-
-    for _, preset in ipairs(SkyPresets) do
-        local skyPreset = preset
-        Btn(PVi, skyPreset.name, C.Yel, function()
-            local ok, err = pcall(function()
-                SkyApply(skyPreset.ids)
-            end)
-            if ok then
-                TLG.PNotif("🌌 SKYBOX", skyPreset.name .. " aplicada", C.Grn)
-            else
-                TLG.PNotif("🌌 SKYBOX", "Error: " .. tostring(err), C.Rd)
-            end
-        end)
     end
 end
 
