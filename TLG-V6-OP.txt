@@ -1107,3 +1107,66 @@ task.wait(0.8)
 FM.Visible=true
 Ntf("👑 TLG GOLD HUB V6","✅ Cargado",C.Yl)
 print("[TLG GOLD HUB V6] 💀 OK")
+
+-- ===== PROTECCIÓN CONTRA LIMPIEZA DE DELTA =====
+-- 1) Proteger la GUI antes de parentarla (si el executor lo soporta)
+pcall(function()
+    if syn and syn.protect_gui then syn.protect_gui(SG) end
+end)
+pcall(function()
+    if protect_gui then protect_gui(SG) end
+end)
+
+-- 2) Re-parentar por si Delta la tiró a nil
+local function ReParent()
+    pcall(function()
+        if SG and not SG.Parent then
+            if gethui then SG.Parent=gethui()
+            else SG.Parent=CG end
+        end
+        if FSG and not FSG.Parent then
+            if gethui then FSG.Parent=gethui()
+            else FSG.Parent=CG end
+        end
+    end)
+end
+
+-- 3) Vigilante: si algo borra la GUI, la vuelve a poner
+SG.AncestryChanged:Connect(function(_,parent)
+    if not parent then
+        task.wait(0.1)
+        ReParent()
+    end
+end)
+FSG.AncestryChanged:Connect(function(_,parent)
+    if not parent then
+        task.wait(0.1)
+        pcall(function()
+            if gethui then FSG.Parent=gethui()
+            else FSG.Parent=CG end
+        end)
+    end
+end)
+
+-- 4) KEEP-ALIVE: mantiene el script corriendo para que Delta no limpie
+task.spawn(function()
+    while true do
+        task.wait(3)
+        ReParent()
+        -- Si ambos murieron definitivamente, recrear el ScreenGui principal
+        if not SG then break end
+    end
+end)
+
+-- 5) Anti-destroy de la GUI principal (por si alguien la destruye)
+SG.Destroying:Connect(function()
+    task.wait(0.1)
+    if not SG.Parent then ReParent() end
+end)
+
+-- 6) Loop final que evita que el hilo principal termine
+--    ESTO ES LO MÁS IMPORTANTE PARA DELTA
+while true do
+    task.wait(10)
+    ReParent()
+end
