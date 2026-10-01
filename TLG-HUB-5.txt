@@ -1,20 +1,22 @@
-
--- ═══════════════════════════════════════════════════════════════
--- 👑 TLG GOLD HUB V6.3 — 🎯 10K AIMBOT EDITION 🎯
--- ═══════════════════════════════════════════════════════════════
-
 local TS=game:GetService("TweenService")local UI=game:GetService("UserInputService")local P=game:GetService("Players")local RS=game:GetService("RunService")local CG=game:GetService("CoreGui")local Http=game:GetService("HttpService")local TPS=game:GetService("TeleportService")local VIM=game:GetService("VirtualInputManager")local L=game:GetService("Lighting")local Stat=game:GetService("Stats")local LP=P.LocalPlayer local Cam=workspace.CurrentCamera local IS_M=UI.TouchEnabled and not UI.KeyboardEnabled
-local SelectedTarget=nil
-local FAB_Toggle_State=true
-local FAB_Frame_Ref=nil
+local SelectedTarget=nil local FAB_Toggle_State=true local FAB_Frame_Ref=nil
+local AUTO_EXEC={Enabled=true,ScriptURL="https://raw.githubusercontent.com/gatogold27-ops/tlg-gold-hub-v3/refs/heads/main/TLG-PREMIUM-CORTO",LastQueue=nil,QueueCooldown=3}
+local function QueueOnTeleport()if not AUTO_EXEC.Enabled then return false end local qot=nil pcall(function()if queue_on_teleport then qot=queue_on_teleport elseif syn and syn.queue_on_teleport then qot=syn.queue_on_teleport elseif fluxus and fluxus.queue_on_teleport then qot=fluxus.queue_on_teleport elseif queueonteleport then qot=queueonteleport end end)if not qot then return false end if AUTO_EXEC.LastQueue and (tick()-AUTO_EXEC.LastQueue)<AUTO_EXEC.QueueCooldown then return false end local code=("loadstring(game:HttpGet('%s'))()"):format(AUTO_EXEC.ScriptURL)local ok=pcall(qot,code)if ok then AUTO_EXEC.LastQueue=tick()return true end return false end
+task.spawn(function()task.wait(1)QueueOnTeleport()end)
+pcall(function()LP.OnTeleport:Connect(function(state)if state==Enum.TeleportState.Started then QueueOnTeleport()end end)end)
+local ANTI_DETECT={Enabled=true,Jitter=true,RateLimit=true,SmoothTP=true,RandomPause=true,MaxAttacksPerSec=20,MinPauseBetween=0.1,MaxPauseBetween=0.5}
+local function AD_GetJitter(base)if not ANTI_DETECT.Jitter then return base end local v=base*(0.7+math.random()*0.6)return math.max(base*0.7,v)end
+local function AD_GetRandomPause()if not ANTI_DETECT.RandomPause then return 0 end return ANTI_DETECT.MinPauseBetween+math.random()*(ANTI_DETECT.MaxPauseBetween-ANTI_DETECT.MinPauseBetween)end
+local function AD_ShouldPause()if not ANTI_DETECT.RandomPause then return false end return math.random()<0.05 end
+local function AD_SmoothTP(from,to,speed)if not ANTI_DETECT.SmoothTP then return to end local dir=(to-from)local dist=dir.Magnitude if dist<5 then return to end local step=math.min(dist,speed or 150)return from+dir.Unit*step end
 workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()if workspace.CurrentCamera then Cam=workspace.CurrentCamera end end)
 local function GP()pcall(function()if gethui then local h=gethui()if h and h~=game then return h end end end)pcall(function()if syn and syn.protect_gui then local g=Instance.new("ScreenGui")syn.protect_gui(g)g.Parent=CG return g end end)local ok=pcall(function()local f=Instance.new("Folder")f.Parent=CG f:Destroy()return CG end)if ok then return CG end return LP:WaitForChild("PlayerGui")end
-local SP=GP()for _,n in ipairs({"TLG_GoldV4","TLG_GoldV3","TLG_GoldV5","TLG_GoldV6","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float","TLG_Intro","TLG_Watermark","TLG_FlyTest"})do pcall(function()local o=SP:FindFirstChild(n)if o then o:Destroy()end end)pcall(function()local o=CG:FindFirstChild(n)if o then o:Destroy()end end)end
+local SP=GP()for _,n in ipairs({"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float","TLG_Intro","TLG_Watermark"})do pcall(function()local o=SP:FindFirstChild(n)if o then o:Destroy()end end)pcall(function()local o=CG:FindFirstChild(n)if o then o:Destroy()end end)end
 local SG=Instance.new("ScreenGui")SG.Name="TLG_GoldV6"SG.ResetOnSpawn=false SG.IgnoreGuiInset=true SG.DisplayOrder=200 pcall(function()SG.Parent=SP end)if not SG.Parent then pcall(function()SG.Parent=CG end)end
 local function GPg()local p=0 pcall(function()p=math.floor((LP:GetNetworkPing()or 0)*1000)end)return p end
 local TH={["👑 Gold"]={A=Color3.fromRGB(255,215,0),A2=Color3.fromRGB(255,235,100)},["💜 Purple"]={A=Color3.fromRGB(190,90,255),A2=Color3.fromRGB(230,150,255)},["💙 Cyan"]={A=Color3.fromRGB(0,240,255),A2=Color3.fromRGB(120,255,255)},["❤️ Red"]={A=Color3.fromRGB(255,70,90),A2=Color3.fromRGB(255,160,160)},["💚 Green"]={A=Color3.fromRGB(80,255,130),A2=Color3.fromRGB(160,255,180)},["💗 Pink"]={A=Color3.fromRGB(255,110,210),A2=Color3.fromRGB(255,180,235)},["🧡 Orange"]={A=Color3.fromRGB(255,160,60),A2=Color3.fromRGB(255,210,130)},["🤍 White"]={A=Color3.fromRGB(250,250,255),A2=Color3.fromRGB(255,255,255)}}
 local CurT="👑 Gold"local CA=nil local function A()return CA or TH[CurT].A end local function A2()return CA or TH[CurT].A2 end
-local C={BG=Color3.fromRGB(18,18,24),BG2=Color3.fromRGB(26,26,34),BG3=Color3.fromRGB(36,36,46),Wh=Color3.fromRGB(250,250,255),Gr=Color3.fromRGB(160,160,175),GrD=Color3.fromRGB(80,80,95),Grn=Color3.fromRGB(100,255,140),Rd=Color3.fromRGB(255,80,100),Cyan=Color3.fromRGB(0,240,255),Yel=Color3.fromRGB(255,210,80)}
+local C={BG=Color3.fromRGB(10,10,10),BG2=Color3.fromRGB(18,18,18),BG3=Color3.fromRGB(28,28,28),BG4=Color3.fromRGB(38,38,38),Wh=Color3.fromRGB(255,255,255),Gr=Color3.fromRGB(160,150,120),GrD=Color3.fromRGB(80,70,50),Grn=Color3.fromRGB(100,255,140),Rd=Color3.fromRGB(255,80,100),Cyan=Color3.fromRGB(0,240,255),Yel=Color3.fromRGB(255,215,0)}
 local TStk,TLbl,TBar={},{},{}local function RegS(s)table.insert(TStk,s)pcall(function()s.Color=A()end)end local function RegL(l)table.insert(TLbl,l)pcall(function()l.TextColor3=A()end)end local function RegB(b)table.insert(TBar,b)pcall(function()b.BackgroundColor3=A()end)end
 local function ApTh()for _,s in ipairs(TStk)do pcall(function()s.Color=A()end)end for _,l in ipairs(TLbl)do pcall(function()l.TextColor3=A()end)end for _,b in ipairs(TBar)do pcall(function()b.BackgroundColor3=A()end)end end
 local function PGlow(st,mn,mx,d)mn=mn or 0.2 mx=mx or 0.8 d=d or 1.5 task.spawn(function()while st and st.Parent do local t1=TS:Create(st,TweenInfo.new(d,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=mx})t1:Play()t1.Completed:Wait()if not st.Parent then break end local t2=TS:Create(st,TweenInfo.new(d,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Transparency=mn})t2:Play()t2.Completed:Wait()end end)end
@@ -26,55 +28,14 @@ local FOVCircle=nil local Drawing_OK=false pcall(function()if Drawing and Drawin
 local FOVSettings={Enabled=false,Radius=180,Color=A(),Transparency=0.4}
 local function UpdFOV()if not Drawing_OK then return end pcall(function()if not FOVCircle then FOVCircle=Drawing.new("Circle")FOVCircle.Thickness=2 FOVCircle.NumSides=64 FOVCircle.Filled=false end FOVCircle.Radius=FOVSettings.Radius FOVCircle.Color=FOVSettings.Color FOVCircle.Transparency=FOVSettings.Transparency FOVCircle.Visible=FOVSettings.Enabled FOVCircle.Position=Vector2.new(Cam.ViewportSize.X/2,Cam.ViewportSize.Y/2)end)end
 RS.RenderStepped:Connect(function()if FOVCircle then UpdFOV()end end)
-local function GS(plr)
-    local s={Level=0,Health=0,MaxHealth=0,Gems=0,Cash=0,Exp=0,MaxExp=0,Melee=0,Weapon=0,Power=0,WName="--",PName="--"}
-    pcall(function()local ch=plr.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then s.Health=math.floor(hu.Health)s.MaxHealth=math.floor(hu.MaxHealth)end end end)
-    local function sc(f,d)if not f or(d or 0)>4 then return end for _,v in ipairs(f:GetChildren())do if v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue")then local n=v.Name:lower()local val=tonumber(v.Value)or 0 if n=="level"or n=="lvl"then s.Level=val elseif n=="gem"or n=="gems"then s.Gems=val elseif n=="cash"or n=="money"then s.Cash=val elseif n=="exp"or n=="xp"then s.Exp=val elseif n=="maxexp"or n=="max_exp"then s.MaxExp=val elseif n=="melee"or n=="meleelevel"then s.Melee=val elseif n=="sword"or n=="swordlevel"or n=="weapon"or n=="arma"then s.Weapon=val elseif n=="power"or n=="poder"or n=="memepowerlevel"then s.Power=val elseif n=="swordequip"or n=="weaponequip"then s.WName=tostring(v.Value)elseif n=="powerequip"then s.PName=tostring(v.Value)end elseif v:IsA("Folder")or v:IsA("Configuration")then sc(v,(d or 0)+1)end end end
-    for _,n in ipairs({"leaderstats","PlayerData","Stats","Data","Values","SaveData","Statistics"})do pcall(function()sc(plr:FindFirstChild(n),0)end)end
-    if s.Level==0 then pcall(function()sc(plr,0)end)end
-    return s
-end
+local function GS(plr)local s={Level=0,Health=0,MaxHealth=0,Gems=0,Cash=0,Exp=0,MaxExp=0,Melee=0,Weapon=0,Power=0,WName="--",PName="--"}pcall(function()local ch=plr.Character if ch then local hu=ch:FindFirstChildOfClass("Humanoid")if hu then s.Health=math.floor(hu.Health)s.MaxHealth=math.floor(hu.MaxHealth)end end end)local function sc(f,d)if not f or(d or 0)>4 then return end for _,v in ipairs(f:GetChildren())do if v:IsA("IntValue")or v:IsA("NumberValue")or v:IsA("StringValue")then local n=v.Name:lower()local val=tonumber(v.Value)or 0 if n=="level"or n=="lvl"then s.Level=val elseif n=="gem"or n=="gems"then s.Gems=val elseif n=="cash"or n=="money"then s.Cash=val elseif n=="exp"or n=="xp"then s.Exp=val elseif n=="maxexp"or n=="max_exp"then s.MaxExp=val elseif n=="melee"or n=="meleelevel"then s.Melee=val elseif n=="sword"or n=="swordlevel"or n=="weapon"or n=="arma"then s.Weapon=val elseif n=="power"or n=="poder"or n=="memepowerlevel"then s.Power=val elseif n=="swordequip"or n=="weaponequip"then s.WName=tostring(v.Value)elseif n=="powerequip"then s.PName=tostring(v.Value)end elseif v:IsA("Folder")or v:IsA("Configuration")then sc(v,(d or 0)+1)end end end for _,n in ipairs({"leaderstats","PlayerData","Stats","Data","Values","SaveData","Statistics"})do pcall(function()sc(plr:FindFirstChild(n),0)end)end if s.Level==0 then pcall(function()sc(plr,0)end)end return s end
 local HB={On=false,Sz=50,Tr=0.5,C=nil}
 local function AHB(p)if p==LP then return end local ch=p.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")if not h then return end pcall(function()h.Size=Vector3.new(HB.Sz,HB.Sz,HB.Sz)h.Transparency=HB.Tr h.LocalTransparencyModifier=0 h.Material=Enum.Material.Neon h.Color=A()h.CanCollide=false end)end
 local function HBS()if HB.C then return end HB.On=true for _,p in ipairs(P:GetPlayers())do if p~=LP then pcall(AHB,p)end end HB.C=RS.Heartbeat:Connect(function()if not HB.On then return end for _,p in ipairs(P:GetPlayers())do if p~=LP then pcall(AHB,p)end end end)end
 local function HBE()HB.On=false if HB.C then pcall(function()HB.C:Disconnect()end)HB.C=nil end end
 local GO={T=nil,C=nil,D=8,S=5,Al=3,Ang=0,On=false}
-local function GOS()
-    GO.T=nil GO.On=false
-    if GO.C then pcall(function()GO.C:Disconnect()end)GO.C=nil end
-    local ch=LP.Character
-    if ch then
-        local h=ch:FindFirstChild("HumanoidRootPart")
-        local hu=ch:FindFirstChildOfClass("Humanoid")
-        if h then pcall(function()h.Anchored=false end)end
-        if hu then pcall(function()hu.PlatformStand=false end)end
-    end
-end
-local function GOSt(p)
-    if not p or not p.Parent then return end
-    GOS()
-    GO.T=p GO.On=true GO.Ang=0
-    task.spawn(function()
-        local mc=LP.Character or LP.CharacterAdded:Wait()
-        local mh=mc:WaitForChild("HumanoidRootPart",5)
-        local mhu=mc:FindFirstChildOfClass("Humanoid")
-        if not mh or not mhu then GOS()return end
-        mh.Anchored=true
-        mhu.PlatformStand=true
-        GO.C=RS.PreSimulation:Connect(function(dt)
-            if not GO.On or not GO.T or not GO.T.Parent then GOS()return end
-            local tc=GO.T.Character
-            if not tc then GOS()return end
-            local th=tc:FindFirstChild("HumanoidRootPart")
-            local thu=tc:FindFirstChildOfClass("Humanoid")
-            if not th or not thu or thu.Health<=0 then GOS()return end
-            GO.Ang=GO.Ang+GO.S*dt
-            if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end
-            local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.Al,math.sin(GO.Ang)*GO.D)
-            mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)
-        end)
-    end)
-end
+local function GOS()GO.T=nil GO.On=false if GO.C then pcall(function()GO.C:Disconnect()end)GO.C=nil end local ch=LP.Character if ch then local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if h then pcall(function()h.Anchored=false end)end if hu then pcall(function()hu.PlatformStand=false end)end end end
+local function GOSt(p)if not p or not p.Parent then return end GOS()GO.T=p GO.On=true GO.Ang=0 task.spawn(function()local mc=LP.Character or LP.CharacterAdded:Wait()local mh=mc:WaitForChild("HumanoidRootPart",5)local mhu=mc:FindFirstChildOfClass("Humanoid")if not mh or not mhu then GOS()return end mh.Anchored=true mhu.PlatformStand=true GO.C=RS.PreSimulation:Connect(function(dt)if not GO.On or not GO.T or not GO.T.Parent then GOS()return end local tc=GO.T.Character if not tc then GOS()return end local th=tc:FindFirstChild("HumanoidRootPart")local thu=tc:FindFirstChildOfClass("Humanoid")if not th or not thu or thu.Health<=0 then GOS()return end GO.Ang=GO.Ang+GO.S*dt if GO.Ang>math.pi*2 then GO.Ang=GO.Ang-math.pi*2 end local off=Vector3.new(math.cos(GO.Ang)*GO.D,GO.Al,math.sin(GO.Ang)*GO.D)mh.CFrame=CFrame.new(th.Position+off,th.Position)*CFrame.Angles(0,math.pi,0)end)end)end
 local Sp={T=nil,C=nil}
 local function SpS()if Sp.C then pcall(function()Sp.C:Disconnect()end)Sp.C=nil end Sp.T=nil if LP.Character then local hu=LP.Character:FindFirstChildOfClass("Humanoid")if hu and Cam then Cam.CameraSubject=hu end end end
 local function SpSt(p)if not p or not p.Parent then return end SpS()Sp.T=p Sp.C=RS.RenderStepped:Connect(function()if not Sp.T or not Sp.T.Parent then SpS()return end local ch=Sp.T.Character if not ch then SpS()return end local hu=ch:FindFirstChildOfClass("Humanoid")if hu and hu.Health>0 and Cam then Cam.CameraSubject=hu elseif hu and hu.Health<=0 then SpS()end end)end
@@ -101,53 +62,10 @@ local function TTSC(c)TT.Active=false TT.Char=c TT.CurTool=nil pcall(function()c
 local function TTS()if TT.On then return end TT.On=true table.insert(TT.Cnx,LP.CharacterAdded:Connect(function(c)task.wait(0.1)TTSC(c)end))if LP.Character then TTSC(LP.Character)end table.insert(TT.Cnx,RS.Heartbeat:Connect(function()if not TT.Active then return end local now=os.clock()TTUTo()for k,pt in pairs(TT.Buf)do if now-pt<=TTC.MaxAB then if not TT.Burst[k]then TT.Buf[k]=nil TTAB(k)end else TT.Buf[k]=nil end end if UI.TouchEnabled and TT.CurTool and now-TTLA>=TTAI then TTLA=now local t=TT.CurTool task.spawn(function()for i=1,TTC.BC do if not TT.Active or not t.Parent then break end if i>1 then task.wait(TTC.BI)end pcall(function()t:Activate()end)end end)end end))if not UI.TouchEnabled then table.insert(TT.Cnx,UI.InputBegan:Connect(function(inp,gp)if gp or not TT.Active then return end if TTK[inp.KeyCode]and not TT.Held[inp.KeyCode]then TT.Held[inp.KeyCode]=true TT.Buf[inp.KeyCode]=os.clock()TTAB(inp.KeyCode)end end))table.insert(TT.Cnx,UI.InputEnded:Connect(function(inp)if TTK[inp.KeyCode]then TT.Held[inp.KeyCode]=nil end end))end PNotif("⚡ Timing Tools","Activado",C.Grn)end
 local function TTE()if not TT.On then return end TT.On=false TT.Active=false for _,c in ipairs(TT.Cnx)do pcall(function()c:Disconnect()end)end TT.Cnx={}TT.Buf={}TT.Held={}TT.Burst={}PNotif("⚡ Timing Tools","Desactivado",C.Rd)end
 local AS={On=false,Conn=nil,Spam=nil}
-local function ASS()
-    if AS.On then return end
-    AS.On=true
-    AS.Conn=RS.Heartbeat:Connect(function()
-        if not AS.On then return end
-        pcall(function()
-            local ch=LP.Character
-            if not ch then return end
-            local st=ch:FindFirstChild("Stun")
-            if st and st:IsA("NumberValue")then st.Value=-1 end
-            for _,v in ipairs(ch:GetChildren())do if v:IsA("NumberValue")and(v.Name:lower():find("stun")or v.Name:lower():find("freeze")or v.Name:lower():find("slow"))then v.Value=-1 end end
-            local hu=ch:FindFirstChildOfClass("Humanoid")
-            if hu then
-                if hu.WalkSpeed<16 then hu.WalkSpeed=16 end
-                if hu.JumpPower<50 then hu.JumpPower=50 end
-                if hu.PlatformStand then hu.PlatformStand=false end
-                for _,s in ipairs({Enum.HumanoidStateType.FallingDown,Enum.HumanoidStateType.Ragdoll,Enum.HumanoidStateType.Physics})do pcall(function()hu:SetStateEnabled(s,false)end)end
-            end
-        end)
-    end)
-    AS.Spam=task.spawn(function()while AS.On do task.wait(0.03)pcall(function()local ch=LP.Character if not ch then return end local t=ch:FindFirstChildOfClass("Tool")if not t then return end local pr=UI:IsKeyDown(Enum.KeyCode.Z)or UI:IsKeyDown(Enum.KeyCode.X)or UI:IsKeyDown(Enum.KeyCode.C)or UI:IsKeyDown(Enum.KeyCode.V)if pr then pcall(function()t:Activate()end)end end)end end)
-    PNotif("💫 Anti-Stun ULTRA","Activado",C.Grn)
-end
-local function ASE()if not AS.On then return end AS.On=false if AS.Conn then pcall(function()AS.Conn:Disconnect()end)AS.Conn=nil end AS.Spam=nil PNotif("💫 Anti-Stun ULTRA","Desactivado",C.Rd)end
-local Ma={On=false,Delay=0.08,Busy=false,AutoAim=true,SwitchTool=true,Cooldown=true,Loop=false,LoopCnx=nil}
-local function Ma_GetNearestEnemy()local best=nil local bd=100 local mc=LP.Character if not mc then return nil end local mh=mc:FindFirstChild("HumanoidRootPart")if not mh then return nil end for _,p in ipairs(P:GetPlayers())do if p~=LP then local ch=p.Character if ch then local h=ch:FindFirstChild("HumanoidRootPart")local hu=ch:FindFirstChildOfClass("Humanoid")if h and hu and hu.Health>0 then local d=(h.Position-mh.Position).Magnitude if d<bd then bd=d best=p end end end end end return best end
-local function Ma_FaceTarget()if not Ma.AutoAim then return end local target=Ma_GetNearestEnemy()if not target then return end local mc=LP.Character local mh=mc and mc:FindFirstChild("HumanoidRootPart")local tc=target.Character local th=tc and tc:FindFirstChild("HumanoidRootPart")if mh and th then mh.CFrame=CFrame.new(mh.Position,Vector3.new(th.Position.X,mh.Position.Y,th.Position.Z))end end
-local function Ma_GetAllTools()local ch=LP.Character if not ch then return{}end local tools={}for _,v in ipairs(ch:GetChildren())do if v:IsA("Tool")then table.insert(tools,v)end end return tools end
-local function Ma_IsOnCooldown(tool)if not tool or not Ma.Cooldown then return false end local ok,cd=pcall(function()return tool:GetAttribute("Cooldown")end)if ok and cd and cd>0 then return true end local c=tool:FindFirstChild("Cooldown")if c and(c:IsA("NumberValue")or c:IsA("IntValue"))then return c.Value>0 end return false end
-local function Ma_ActivateTool(tool)if not tool or not tool.Parent then return false end if Ma_IsOnCooldown(tool)then return false end local ok=pcall(function()tool:Activate()end)return ok end
-local function MaRun()
-    if Ma.Busy or not Ma.On then return end
-    Ma.Busy=true
-    task.spawn(function()
-        pcall(function()
-            if Ma.AutoAim then Ma_FaceTarget()end
-            if Ma.SwitchTool then local tools=Ma_GetAllTools()for _,tool in ipairs(tools)do if Ma_ActivateTool(tool)then task.wait(0.02)end end
-            else local ch=LP.Character if ch then local t=ch:FindFirstChildOfClass("Tool")if t then Ma_ActivateTool(t)task.wait(0.03)Ma_ActivateTool(t)task.wait(0.03)Ma_ActivateTool(t)end end end
-            task.wait(Ma.Delay)
-        end)
-        Ma.Busy=false
-    end)
-end
-local function MaStartLoop()if Ma.LoopCnx then return end Ma.LoopCnx=RS.Heartbeat:Connect(function()if Ma.On and Ma.Loop and not Ma.Busy then MaRun()end end)end
-local function MaStopLoop()if Ma.LoopCnx then pcall(function()Ma.LoopCnx:Disconnect()end)Ma.LoopCnx=nil end end
+local function ASS()if AS.On then return end AS.On=true AS.Conn=RS.Heartbeat:Connect(function()if not AS.On then return end pcall(function()local ch=LP.Character if not ch then return end local st=ch:FindFirstChild("Stun")if st and st:IsA("NumberValue")then st.Value=-1 end for _,v in ipairs(ch:GetChildren())do if v:IsA("NumberValue")and(v.Name:lower():find("stun")or v.Name:lower():find("freeze")or v.Name:lower():find("slow"))then v.Value=-1 end end local hu=ch:FindFirstChildOfClass("Humanoid")if hu then if hu.WalkSpeed<16 then hu.WalkSpeed=16 end if hu.JumpPower<50 then hu.JumpPower=50 end if hu.PlatformStand then hu.PlatformStand=false end for _,s in ipairs({Enum.HumanoidStateType.FallingDown,Enum.HumanoidStateType.Ragdoll,Enum.HumanoidStateType.Physics})do pcall(function()hu:SetStateEnabled(s,false)end)end end end)end)AS.Spam=task.spawn(function()while AS.On do task.wait(0.03)pcall(function()local ch=LP.Character if not ch then return end local t=ch:FindFirstChildOfClass("Tool")if not t then return end local pr=UI:IsKeyDown(Enum.KeyCode.Z)or UI:IsKeyDown(Enum.KeyCode.X)or UI:IsKeyDown(Enum.KeyCode.C)or UI:IsKeyDown(Enum.KeyCode.V)if pr then pcall(function()t:Activate()end)end end)end end)PNotif("💫 Anti-Stun","Activado",C.Grn)end
+local function ASE()if not AS.On then return end AS.On=false if AS.Conn then pcall(function()AS.Conn:Disconnect()end)AS.Conn=nil end AS.Spam=nil PNotif("💫 Anti-Stun","Desactivado",C.Rd)end
 local Sky={On=false,Cur="original",Sv=false,OS={e=false}}
-local SkyP={{n="Original",id="original",ids=nil},{n="Galaxia",id="galaxia",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},{n="Planeta",id="planeta",ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}},{n="Lunar",id="lunar",ids={"rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365025444","rbxassetid://14365026442"}},{n="Black Hole",id="blackhole",ids={"rbxassetid://14365025444","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365026442"}},{n="Nebulosa",id="nebulosaP",ids={"rbxassetid://8107841671","rbxassetid://6444884785","rbxassetid://8107841671","rbxassetid://8107841671","rbxassetid://8107841671","rbxassetid://8107841671"}}}
+local SkyP={{n="Original",id="original",ids=nil},{n="Galaxia",id="galaxia",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},{n="Planeta",id="planeta",ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}},{n="Lunar",id="lunar",ids={"rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365025444","rbxassetid://14365026442"}},{n="BlackHole",id="blackhole",ids={"rbxassetid://14365025444","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365026442"}}}
 local function SkySv()if Sky.Sv then return end pcall(function()local s=L:FindFirstChildOfClass("Sky")if s then Sky.OS.e=true Sky.OS.Bk=s.SkyboxBk Sky.OS.Dn=s.SkyboxDn Sky.OS.Ft=s.SkyboxFt Sky.OS.Lf=s.SkyboxLf Sky.OS.Rt=s.SkyboxRt Sky.OS.Up=s.SkyboxUp end Sky.Sv=true end)end
 local function SkyAp(ids)if not Sky.Sv then SkySv()end pcall(function()local s=L:FindFirstChildOfClass("Sky")if ids==nil then if Sky.OS.e and s then s.SkyboxBk=Sky.OS.Bk s.SkyboxDn=Sky.OS.Dn s.SkyboxFt=Sky.OS.Ft s.SkyboxLf=Sky.OS.Lf s.SkyboxRt=Sky.OS.Rt s.SkyboxUp=Sky.OS.Up end Sky.On=false return end if not s then s=Instance.new("Sky")s.Name="TLG_Sky"s.Parent=L end s.SkyboxBk=ids[1]s.SkyboxDn=ids[2]s.SkyboxFt=ids[3]s.SkyboxLf=ids[4]s.SkyboxRt=ids[5]s.SkyboxUp=ids[6]Sky.On=true end)end
 local ESP={On=false,ShN=true,ShHP=true,Cache={},C=nil}
@@ -162,7 +80,7 @@ local function AiF()local b=nil local bd=Ai.D for _,p in ipairs(P:GetPlayers())d
 local function AiS()if Ai.On then return end Ai.On=true Ai.C=RS.RenderStepped:Connect(function()if not Ai.On or not Cam then return end local o=AiF()if o then local cp=Cam.CFrame.Position local dr=(o.Position-cp).Unit Cam.CFrame=Cam.CFrame:Lerp(CFrame.new(cp,cp+dr),Ai.Sm)end end)end
 local Fv={On=false,Orig=70,V=120}pcall(function()if Cam then Fv.Orig=Cam.FieldOfView end end)task.spawn(function()while true do RS.RenderStepped:Wait()if Fv.On and Cam then pcall(function()Cam.FieldOfView=Fv.V end)end end end)
 local function FvAp(v)Fv.V=v Fv.On=true pcall(function()Cam.FieldOfView=v end)end local function FvR()Fv.On=false pcall(function()Cam.FieldOfView=Fv.Orig end)end
-local Isl={["Floppa Island"]=Vector3.new(0,50,0),["Snow Island"]=Vector3.new(0,50,0),["Gorilla Island"]=Vector3.new(0,50,0),["Sand Island"]=Vector3.new(0,50,0),["Pumpkin Island"]=Vector3.new(0,50,0),["Moai Island"]=Vector3.new(0,50,0),["Sus Island"]=Vector3.new(0,50,0),["Halloween Island"]=Vector3.new(0,50,0),["Forgotten Island"]=Vector3.new(0,50,0),["MrBeast Island"]=Vector3.new(0,50,0),["Noob Arena"]=Vector3.new(0,50,0),["PVP Arena"]=Vector3.new(0,50,0),["Sus Mountain"]=Vector3.new(0,50,0)}
+local Isl={["Floppa Island"]=Vector3.new(0,50,0),["Snow Island"]=Vector3.new(0,50,0),["Gorilla Island"]=Vector3.new(0,50,0),["Sand Island"]=Vector3.new(0,50,0),["Pumpkin Island"]=Vector3.new(0,50,0),["Moai Island"]=Vector3.new(0,50,0),["Forgotten Island"]=Vector3.new(0,50,0),["MrBeast Island"]=Vector3.new(0,50,0),["Noob Arena"]=Vector3.new(0,50,0),["PVP Arena"]=Vector3.new(0,50,0)}
 local function TPT(n,pos)local ch=LP.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")if not h then return end local fd=workspace:FindFirstChild(n,true)if not fd then for _,v in ipairs(workspace:GetChildren())do if v:IsA("Model")then local fo=v:FindFirstChild(n,true)if fo then fd=fo break end end end end if fd then local p=fd if p:IsA("Model")then p=p.PrimaryPart or p:FindFirstChildWhichIsA("BasePart")end if p then h.CFrame=CFrame.new(p.Position+Vector3.new(0,50,0))return end end if pos then h.CFrame=CFrame.new(pos+Vector3.new(0,50,0))end end
 local AB={On=false,C1=nil}
 local function ABS()if AB.On then return end AB.On=true pcall(function()if hookfunction then local oK oK=hookfunction(LP.Kick,function(self,...)if not AB.On then return oK(self,...)end return nil end)end end)pcall(function()AB.C1=SG.AncestryChanged:Connect(function(_,np)if not AB.On then return end if not np then task.wait(0.1)pcall(function()SG.Parent=SP end)end end)end)end
@@ -172,636 +90,249 @@ local function OSv()if OPT.Sv.L then return end OPT.Sv.L={GS=L.GlobalShadows,B=L
 local function OAp()if OPT.Tex then pcall(function()for _,d in ipairs(workspace:GetDescendants())do if d:IsA("Decal")or d:IsA("Texture")then d.Transparency=1 end end end)end if OPT.Part2 then pcall(function()for _,d in ipairs(workspace:GetDescendants())do if d:IsA("ParticleEmitter")or d:IsA("Trail")then d.Enabled=false end end end)end if OPT.Shad then pcall(function()L.GlobalShadows=false end)end if OPT.Parts then pcall(function()for _,d in ipairs(workspace:GetDescendants())do if d:IsA("BasePart")then d.Material=Enum.Material.SmoothPlastic d.Reflectance=0 end end end)end end
 local function OS()if OPT.On then return end OPT.On=true OSv()OAp()end
 local function OE()OPT.On=false pcall(function()if OPT.Sv.L then for k,v in pairs(OPT.Sv.L)do L[k]=v end end end)end
--- ═══ INTRO CINEMÁTICA ═══
-local IB=Instance.new("Frame",SG)IB.Size=UDim2.new(1,0,1,0)IB.BackgroundColor3=Color3.fromRGB(8,8,14)IB.BorderSizePixel=0 IB.ZIndex=99999
-local R1=Instance.new("Frame",IB)R1.Size=UDim2.new(0,200,0,200)R1.Position=UDim2.new(0.5,-100,0.5,-100)R1.BackgroundTransparency=1 R1.ZIndex=100000 local R1S=Instance.new("UIStroke",R1)R1S.Thickness=4 R1S.Color=A()Instance.new("UICorner",R1).CornerRadius=UDim.new(1,0)
-local R2=Instance.new("Frame",IB)R2.Size=UDim2.new(0,300,0,300)R2.Position=UDim2.new(0.5,-150,0.5,-150)R2.BackgroundTransparency=1 R2.ZIndex=100000 local R2S=Instance.new("UIStroke",R2)R2S.Thickness=3 R2S.Color=A2()R2S.Transparency=0.5 Instance.new("UICorner",R2).CornerRadius=UDim.new(1,0)
-local Cr=Instance.new("TextLabel",IB)Cr.Size=UDim2.new(0,80,0,80)Cr.Position=UDim2.new(0.5,-40,0.5,-40)Cr.BackgroundTransparency=1 Cr.Text="👑"Cr.Font=Enum.Font.GothamBlack Cr.TextSize=60 Cr.TextColor3=A()Cr.TextTransparency=1 Cr.ZIndex=100002
-local Ttl=Instance.new("TextLabel",IB)Ttl.Size=UDim2.new(1,0,0,50)Ttl.Position=UDim2.new(0,0,0.5,60)Ttl.BackgroundTransparency=1 Ttl.Font=Enum.Font.GothamBlack Ttl.Text="TLG GOLD HUB V6.3"Ttl.TextScaled=true Ttl.TextColor3=Color3.fromRGB(255,255,255)Ttl.TextStrokeColor3=A()Ttl.TextStrokeTransparency=1 Ttl.TextTransparency=1 Ttl.ZIndex=100001
-local Sub=Instance.new("TextLabel",IB)Sub.Size=UDim2.new(1,0,0,20)Sub.Position=UDim2.new(0,0,0.5,115)Sub.BackgroundTransparency=1 Sub.Font=Enum.Font.GothamSemibold Sub.Text="🎯 10K AIMBOT EDITION"Sub.TextColor3=A()Sub.TextSize=12 Sub.TextTransparency=1 Sub.ZIndex=100001
-local Bar=Instance.new("Frame",IB)Bar.Size=UDim2.new(0,240,0,3)Bar.Position=UDim2.new(0.5,-120,0.5,150)Bar.BackgroundColor3=Color3.fromRGB(30,30,40)Bar.BorderSizePixel=0 Bar.ZIndex=100000 Instance.new("UICorner",Bar).CornerRadius=UDim.new(1,0)
-local BF=Instance.new("Frame",Bar)BF.Size=UDim2.new(0,0,1,0)BF.BackgroundColor3=A()BF.BorderSizePixel=0 BF.ZIndex=100001 Instance.new("UICorner",BF).CornerRadius=UDim.new(1,0)
-task.spawn(function()
-    task.spawn(function()while R1.Parent do R1.Rotation=(R1.Rotation+3)%360 R2.Rotation=(R2.Rotation-2)%360 task.wait(0.02)end end)
-    task.wait(0.1)
-    TS:Create(Cr,TweenInfo.new(0.4,Enum.EasingStyle.Back),{TextTransparency=0}):Play()
-    TS:Create(R1S,TweenInfo.new(0.6),{Thickness=6,Transparency=0.5}):Play()
-    TS:Create(R2S,TweenInfo.new(0.8),{Transparency=0.2}):Play()
-    task.wait(0.3)
-    TS:Create(Ttl,TweenInfo.new(0.4),{TextTransparency=0,TextStrokeTransparency=0.3}):Play()
-    task.wait(0.15)
-    TS:Create(Sub,TweenInfo.new(0.4),{TextTransparency=0}):Play()
-    TS:Create(BF,TweenInfo.new(1.2,Enum.EasingStyle.Quart),{Size=UDim2.new(1,0,1,0)}):Play()
-    task.wait(1.4)
-    local Fl=Instance.new("Frame",IB)Fl.Size=UDim2.new(1,0,1,0)Fl.BackgroundColor3=Color3.fromRGB(255,255,255)Fl.BackgroundTransparency=1 Fl.BorderSizePixel=0 Fl.ZIndex=100003
-    TS:Create(Fl,TweenInfo.new(0.15),{BackgroundTransparency=0}):Play()
-    task.wait(0.15)
-    TS:Create(Fl,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
-    TS:Create(Ttl,TweenInfo.new(0.35),{TextTransparency=1}):Play()
-    TS:Create(Sub,TweenInfo.new(0.35),{TextTransparency=1}):Play()
-    TS:Create(Cr,TweenInfo.new(0.35),{TextTransparency=1}):Play()
-    TS:Create(Bar,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
-    TS:Create(BF,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play()
-    TS:Create(IB,TweenInfo.new(0.5),{BackgroundTransparency=1}):Play()
-    task.wait(0.55)
-    pcall(function()IB:Destroy()end)
-end)
-task.wait(2.4)
--- ═══ UI PRINCIPAL ═══
-local W_S=IS_M and UDim2.new(0,440,0,320)or UDim2.new(0,720,0,480)
+
+-- UI PRINCIPAL
+local W_S=IS_M and UDim2.new(0,440,0,340)or UDim2.new(0,720,0,500)
 local W_P=UDim2.new(0.5,-W_S.X.Offset/2,0.5,-W_S.Y.Offset/2)
-local W=Instance.new("Frame",SG)W.Size=UDim2.new(0,0,0,0)W.Position=UDim2.new(0.5,0,0.5,0)W.BackgroundColor3=C.BG W.BorderSizePixel=0 W.ClipsDescendants=true W.ZIndex=1 Instance.new("UICorner",W).CornerRadius=UDim.new(0,14)
+local W=Instance.new("Frame",SG)W.Size=UDim2.new(0,0,0,0)W.Position=UDim2.new(0.5,0,0.5,0)W.BackgroundColor3=C.BG W.BorderSizePixel=0 W.ClipsDescendants=true W.Active=true W.ZIndex=1 Instance.new("UICorner",W).CornerRadius=UDim.new(0,14)
 local WS=Instance.new("UIStroke",W)WS.Thickness=2.5 RegS(WS)PGlow(WS,0.05,0.35,1.5)
-local TB=Instance.new("Frame",W)TB.Size=UDim2.new(1,0,0,42)TB.BackgroundColor3=C.BG3 TB.BorderSizePixel=0 TB.ZIndex=5 Instance.new("UICorner",TB).CornerRadius=UDim.new(0,14)
-local Ico=Instance.new("TextLabel",TB)Ico.Size=UDim2.new(0,32,0,32)Ico.Position=UDim2.new(0,8,0.5,-16)Ico.BackgroundColor3=C.BG2 Ico.Text="👑"Ico.TextSize=16 Ico.Font=Enum.Font.GothamBold Ico.TextColor3=A()Ico.ZIndex=7 Instance.new("UICorner",Ico).CornerRadius=UDim.new(1,0)RegL(Ico)
-local IcoS=Instance.new("UIStroke",Ico)IcoS.Color=A()IcoS.Thickness=2 RegS(IcoS)PGlow(IcoS,0.1,0.5,1.2)
-local Ttl2=Instance.new("TextLabel",TB)Ttl2.Size=UDim2.new(0,180,1,0)Ttl2.Position=UDim2.new(0,46,0,0)Ttl2.BackgroundTransparency=1 Ttl2.Font=Enum.Font.GothamBold Ttl2.Text="TLG GOLD HUB V6.3"Ttl2.TextSize=11 Ttl2.TextColor3=C.Wh Ttl2.TextXAlignment=Enum.TextXAlignment.Left Ttl2.ZIndex=7
-local SB=Instance.new("Frame",TB)SB.Size=UDim2.new(0,150,0,22)SB.Position=UDim2.new(1,-240,0.5,-11)SB.BackgroundColor3=C.BG SB.BackgroundTransparency=0.2 SB.BorderSizePixel=0 SB.ZIndex=6 Instance.new("UICorner",SB).CornerRadius=UDim.new(1,0)
-local FL=Instance.new("TextLabel",SB)FL.Size=UDim2.new(0.5,-6,1,0)FL.Position=UDim2.new(0,6,0,0)FL.BackgroundTransparency=1 FL.Font=Enum.Font.GothamBold FL.Text="FPS: --"FL.TextColor3=C.Grn FL.TextSize=10 FL.TextXAlignment=Enum.TextXAlignment.Left FL.ZIndex=7
-local PLb=Instance.new("TextLabel",SB)PLb.Size=UDim2.new(0.5,-6,1,0)PLb.Position=UDim2.new(0.5,0,0,0)PLb.BackgroundTransparency=1 PLb.Font=Enum.Font.GothamBold PLb.Text="Ping: --"PLb.TextColor3=C.Cyan PLb.TextSize=10 PLb.TextXAlignment=Enum.TextXAlignment.Right PLb.ZIndex=7
-task.spawn(function()local fc=0 local lt=os.clock()RS.RenderStepped:Connect(function()fc=fc+1 local n=os.clock()if n-lt>=1 then FL.Text="FPS: "..math.floor(fc/(n-lt))PLb.Text="Ping: "..GPg().."ms"fc=0 lt=n end end)end)
-local STtl=Instance.new("TextLabel",TB)STtl.Size=UDim2.new(0,70,1,0)STtl.Position=UDim2.new(1,-80,0,0)STtl.BackgroundTransparency=1 STtl.Font=Enum.Font.GothamBold STtl.Text="👑 MENU"STtl.TextSize=10 STtl.TextColor3=A()STtl.TextXAlignment=Enum.TextXAlignment.Right STtl.ZIndex=7 RegL(STtl)
+
+-- Patrón de calaveras doradas
+local function AddPattern(parent,size,color,transparency,rotation)local holder=Instance.new("Frame",parent)holder.Size=UDim2.new(1,0,1,0)holder.BackgroundTransparency=1 holder.ZIndex=0 holder.ClipsDescendants=true for i=0,8 do for j=0,6 do local icon=Instance.new("TextLabel",holder)icon.Size=UDim2.new(0,size,0,size)icon.Position=UDim2.new(0,i*size+(j%2)*size/2,0,j*size)icon.BackgroundTransparency=1 icon.Text="💀"icon.TextSize=size*0.7 icon.TextColor3=C.Yel icon.TextTransparency=transparency icon.Rotation=rotation icon.ZIndex=0 end end return holder end
+AddPattern(W,60,C.Yel,0.92,15)
+
+-- Header dorado con calaveras
+local TB=Instance.new("Frame",W)TB.Size=UDim2.new(1,0,0,56)TB.BackgroundColor3=C.BG2 TB.BackgroundTransparency=0.05 TB.BorderSizePixel=0 TB.ZIndex=5 Instance.new("UICorner",TB).CornerRadius=UDim.new(0,14)
+local HF=Instance.new("Frame",TB)HF.Size=UDim2.new(1,0,0,14)HF.Position=UDim2.new(0,0,1,-14)HF.BackgroundColor3=C.BG2 HF.BackgroundTransparency=0.05 HF.BorderSizePixel=0 HF.ZIndex=5
+AddPattern(TB,45,C.Yel,0.85,0)
+local DcIco=Instance.new("TextLabel",TB)DcIco.Size=UDim2.new(0,32,0,32)DcIco.Position=UDim2.new(0,14,0.5,-16)DcIco.BackgroundTransparency=1 DcIco.Text="💀"DcIco.TextSize=22 DcIco.Font=Enum.Font.GothamBold DcIco.TextColor3=C.Yel DcIco.ZIndex=10
+local MainTitle=Instance.new("TextLabel",TB)MainTitle.Size=UDim2.new(1,-120,0,20)MainTitle.Position=UDim2.new(0,60,0,12)MainTitle.BackgroundTransparency=1 MainTitle.Font=Enum.Font.GothamBold MainTitle.Text="TLG GOLD HUB"MainTitle.TextSize=16 MainTitle.TextColor3=C.Yel MainTitle.TextXAlignment=Enum.TextXAlignment.Left MainTitle.ZIndex=10
+local SubTitle=Instance.new("TextLabel",TB)SubTitle.Size=UDim2.new(1,-120,0,14)SubTitle.Position=UDim2.new(0,60,0,32)SubTitle.BackgroundTransparency=1 SubTitle.Font=Enum.Font.Gotham SubTitle.Text="Meme Sea Edition • V6.6"SubTitle.TextSize=10 SubTitle.TextColor3=C.Gr SubTitle.TextXAlignment=Enum.TextXAlignment.Left SubTitle.ZIndex=10
+local STtl=Instance.new("TextLabel",TB)STtl.Size=UDim2.new(0,70,1,0)STtl.Position=UDim2.new(1,-80,0,0)STtl.BackgroundTransparency=1 STtl.Font=Enum.Font.GothamBold STtl.Text="👑 MENU"STtl.TextSize=10 STtl.TextColor3=C.Yel STtl.TextXAlignment=Enum.TextXAlignment.Right STtl.ZIndex=7 RegL(STtl)
 local dg,dS,dP=false,nil,nil
 TB.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg=true dS=i.Position dP=W.Position end end)
 UI.InputChanged:Connect(function(i)if dg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-dS W.Position=UDim2.new(dP.X.Scale,dP.X.Offset+d.X,dP.Y.Scale,dP.Y.Offset+d.Y)end end)
 UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg=false end end)
-local TabBar=Instance.new("Frame",W)TabBar.Size=UDim2.new(1,0,0,42)TabBar.Position=UDim2.new(0,0,0,42)TabBar.BackgroundColor3=C.BG2 TabBar.BackgroundTransparency=0.2 TabBar.BorderSizePixel=0 TabBar.ZIndex=4
+
+-- Tab Bar
+local TabBar=Instance.new("Frame",W)TabBar.Size=UDim2.new(1,0,0,44)TabBar.Position=UDim2.new(0,0,0,56)TabBar.BackgroundColor3=C.BG2 TabBar.BackgroundTransparency=0.3 TabBar.BorderSizePixel=0 TabBar.ZIndex=4
 local TScr=Instance.new("ScrollingFrame",TabBar)TScr.Size=UDim2.new(1,-10,1,0)TScr.Position=UDim2.new(0,5,0,0)TScr.BackgroundTransparency=1 TScr.BorderSizePixel=0 TScr.ScrollBarThickness=0 TScr.CanvasSize=UDim2.new(0,0,0,0)TScr.ZIndex=5 pcall(function()TScr.AutomaticCanvasSize=Enum.AutomaticSize.X end)pcall(function()TScr.ScrollingDirection=Enum.ScrollingDirection.X end)
-local TLy=Instance.new("UIListLayout",TScr)TLy.FillDirection=Enum.FillDirection.Horizontal TLy.VerticalAlignment=Enum.VerticalAlignment.Center TLy.Padding=UDim.new(0,4)
-local Cont=Instance.new("Frame",W)Cont.Size=UDim2.new(1,-10,1,-94)Cont.Position=UDim2.new(0,5,0,90)Cont.BackgroundTransparency=1 Cont.ZIndex=3
+local TLy=Instance.new("UIListLayout",TScr)TLy.FillDirection=Enum.FillDirection.Horizontal TLy.VerticalAlignment=Enum.VerticalAlignment.Center TLy.HorizontalAlignment=Enum.HorizontalAlignment.Center TLy.Padding=UDim.new(0,8)
+local Cont=Instance.new("Frame",W)Cont.Size=UDim2.new(1,-10,1,-110)Cont.Position=UDim2.new(0,5,0,106)Cont.BackgroundTransparency=1 Cont.ZIndex=3
 local Tabs={}
-local function Tab(n,ic)local b=Instance.new("TextButton",TScr)b.Size=UDim2.new(0,108,0,34)b.BackgroundColor3=C.BG3 b.BackgroundTransparency=0.7 b.Text=""b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=6 Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)local bG=Instance.new("UIStroke",b)bG.Thickness=1.5 bG.Color=A()bG.Transparency=0.4 RegS(bG)local lb=Instance.new("TextLabel",b)lb.Size=UDim2.new(1,0,1,0)lb.BackgroundTransparency=1 lb.Font=Enum.Font.GothamBold lb.Text=ic.." "..n lb.TextColor3=C.Wh lb.TextSize=10 lb.ZIndex=7 local ul=Instance.new("Frame",b)ul.Size=UDim2.new(0,0,0,2)ul.Position=UDim2.new(0.5,0,1,-3)ul.AnchorPoint=Vector2.new(0.5,1)ul.BackgroundColor3=A2()ul.BorderSizePixel=0 ul.ZIndex=8 Instance.new("UICorner",ul).CornerRadius=UDim.new(1,0)local pg=Instance.new("ScrollingFrame",Cont)pg.Size=UDim2.new(1,0,1,0)pg.BackgroundTransparency=1 pg.BorderSizePixel=0 pg.ScrollBarThickness=IS_M and 8 or 5 pg.ScrollBarImageColor3=A()pg.CanvasSize=UDim2.new(0,0,0,0)pg.ZIndex=4 pcall(function()pg.AutomaticCanvasSize=Enum.AutomaticSize.Y end)pg.Visible=false local pl=Instance.new("UIListLayout",pg)pl.Padding=UDim.new(0,5)local pp=Instance.new("UIPadding",pg)pp.PaddingTop=UDim.new(0,6)pp.PaddingLeft=UDim.new(0,6)pp.PaddingRight=UDim.new(0,10)pp.PaddingBottom=UDim.new(0,10)table.insert(Tabs,{b=b,l=lb,p=pg,u=ul})b.MouseButton1Click:Connect(function()for _,t in ipairs(Tabs)do t.l.TextColor3=C.Gr t.p.Visible=false t.b.BackgroundColor3=C.BG3 t.b.BackgroundTransparency=0.7 TS:Create(t.u,TweenInfo.new(0.2),{Size=UDim2.new(0,0,0,2)}):Play()end lb.TextColor3=C.BG pg.Visible=true b.BackgroundColor3=A()b.BackgroundTransparency=0 TS:Create(ul,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,2)}):Play()end)return pg end
-local function Sec(p,t,ic)local s=Instance.new("Frame",p)s.Size=UDim2.new(1,0,0,32)s.BackgroundColor3=C.BG2 s.BackgroundTransparency=0.05 s.BorderSizePixel=0 s.ZIndex=5 Instance.new("UICorner",s).CornerRadius=UDim.new(0,8)local sS=Instance.new("UIStroke",s)sS.Thickness=1.5 sS.Transparency=0.3 RegS(sS)local bar=Instance.new("Frame",s)bar.Size=UDim2.new(0,4,0,18)bar.Position=UDim2.new(0,10,0.5,-9)bar.BorderSizePixel=0 bar.ZIndex=7 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)RegB(bar)local l=Instance.new("TextLabel",s)l.Size=UDim2.new(1,-30,1,0)l.Position=UDim2.new(0,24,0,0)l.BackgroundTransparency=1 l.Font=Enum.Font.GothamBold l.Text=(ic or "").."  "..t l.TextSize=12 l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=6 RegL(l)end
+local function Tab(n,ic)local b=Instance.new("TextButton",TScr)b.Size=UDim2.new(0,90,0,36)b.BackgroundColor3=C.BG3 b.BackgroundTransparency=1 b.Text=""b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=6 Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
+local ico=Instance.new("TextLabel",b)ico.Size=UDim2.new(1,0,0,16)ico.Position=UDim2.new(0,0,0,3)ico.BackgroundTransparency=1 ico.Text=ic ico.TextSize=14 ico.ZIndex=7
+local lb=Instance.new("TextLabel",b)lb.Size=UDim2.new(1,0,0,12)lb.Position=UDim2.new(0,0,0,20)lb.BackgroundTransparency=1 lb.Font=Enum.Font.GothamSemibold lb.Text=n lb.TextColor3=C.Gr lb.TextSize=9 lb.ZIndex=7
+local ul=Instance.new("Frame",b)ul.Size=UDim2.new(0,0,0,3)ul.Position=UDim2.new(0.5,0,1,-3)ul.AnchorPoint=Vector2.new(0.5,1)ul.BackgroundColor3=C.Yel ul.BorderSizePixel=0 ul.ZIndex=8 Instance.new("UICorner",ul).CornerRadius=UDim.new(1,0)
+local pg=Instance.new("ScrollingFrame",Cont)pg.Size=UDim2.new(1,0,1,0)pg.BackgroundTransparency=1 pg.BorderSizePixel=0 pg.ScrollBarThickness=IS_M and 8 or 5 pg.ScrollBarImageColor3=C.Yel pg.CanvasSize=UDim2.new(0,0,0,0)pg.ZIndex=4 pcall(function()pg.AutomaticCanvasSize=Enum.AutomaticSize.Y end)pg.Visible=false
+local pl=Instance.new("UIListLayout",pg)pl.Padding=UDim.new(0,8)
+local pp=Instance.new("UIPadding",pg)pp.PaddingTop=UDim.new(0,10)pp.PaddingLeft=UDim.new(0,10)pp.PaddingRight=UDim.new(0,10)pp.PaddingBottom=UDim.new(0,10)
+table.insert(Tabs,{b=b,l=lb,p=pg,u=ul,ico=ico})
+b.MouseButton1Click:Connect(function()for _,t in ipairs(Tabs)do t.l.TextColor3=C.Gr t.ico.TextTransparency=0.5 t.p.Visible=false t.b.BackgroundColor3=C.BG3 t.b.BackgroundTransparency=1 TS:Create(t.u,TweenInfo.new(0.2),{Size=UDim2.new(0,0,0,3)}):Play()end lb.TextColor3=C.Yel ico.TextTransparency=0 pg.Visible=true b.BackgroundColor3=C.BG3 b.BackgroundTransparency=0.5 TS:Create(ul,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,3)}):Play()end)return pg end
+local function Sec(p,t,ic)local s=Instance.new("Frame",p)s.Size=UDim2.new(1,0,0,36)s.BackgroundColor3=C.BG2 s.BackgroundTransparency=0.3 s.BorderSizePixel=0 s.ZIndex=5 Instance.new("UICorner",s).CornerRadius=UDim.new(0,8)local sS=Instance.new("UIStroke",s)sS.Thickness=1 sS.Transparency=0.7 sS.Color=C.Yel RegS(sS)local bar=Instance.new("Frame",s)bar.Size=UDim2.new(0,3,0,20)bar.Position=UDim2.new(0,10,0.5,-10)bar.BorderSizePixel=0 bar.ZIndex=7 bar.BackgroundColor3=C.Yel Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)RegB(bar)local l=Instance.new("TextLabel",s)l.Size=UDim2.new(1,-40,1,0)l.Position=UDim2.new(0,24,0,0)l.BackgroundTransparency=1 l.Font=Enum.Font.GothamBold l.Text=(ic or "").."  "..t l.TextSize=12 l.TextColor3=C.Wh l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=6 RegL(l)end
 local function Lbl(p,t,c)if typeof(c)~="Color3"then c=C.Gr end local l=Instance.new("TextLabel",p)l.Size=UDim2.new(1,0,0,14)l.BackgroundTransparency=1 l.Font=Enum.Font.Gotham l.Text=t l.TextColor3=c l.TextSize=10 l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=5 return l end
 local function Tog(p,t,d,cb)local sv=d==true local f=Instance.new("Frame",p)f.Size=UDim2.new(1,0,0,36)f.BackgroundColor3=C.BG2 f.BackgroundTransparency=0.1 f.BorderSizePixel=0 f.ZIndex=5 Instance.new("UICorner",f).CornerRadius=UDim.new(0,6)local l=Instance.new("TextLabel",f)l.Size=UDim2.new(1,-70,1,0)l.Position=UDim2.new(0,12,0,0)l.BackgroundTransparency=1 l.Font=Enum.Font.GothamSemibold l.Text=t l.TextColor3=C.Wh l.TextSize=11 l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=7 local sl=Instance.new("TextLabel",f)sl.Size=UDim2.new(0,40,1,0)sl.Position=UDim2.new(1,-95,0,0)sl.BackgroundTransparency=1 sl.Font=Enum.Font.GothamBold sl.Text=sv and "ON"or"OFF"sl.TextColor3=sv and C.Grn or C.Rd sl.TextSize=10 sl.TextXAlignment=Enum.TextXAlignment.Right sl.ZIndex=7 local sw=Instance.new("Frame",f)sw.Size=UDim2.new(0,40,0,20)sw.Position=UDim2.new(1,-52,0.5,-10)sw.BackgroundColor3=sv and A()or C.GrD sw.BorderSizePixel=0 sw.ZIndex=6 Instance.new("UICorner",sw).CornerRadius=UDim.new(1,0)local kn=Instance.new("Frame",sw)kn.Size=UDim2.new(0,16,0,16)kn.Position=sv and UDim2.new(1,-18,0.5,-8)or UDim2.new(0,2,0.5,-8)kn.BackgroundColor3=C.Wh kn.BorderSizePixel=0 kn.ZIndex=7 Instance.new("UICorner",kn).CornerRadius=UDim.new(1,0)local st=sv local btn=Instance.new("TextButton",f)btn.Size=UDim2.new(1,0,1,0)btn.BackgroundTransparency=1 btn.Text=""btn.ZIndex=10 btn.MouseButton1Click:Connect(function()st=not st TS:Create(sw,TweenInfo.new(0.3,Enum.EasingStyle.Back),{BackgroundColor3=st and A()or C.GrD}):Play()TS:Create(kn,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Position=st and UDim2.new(1,-18,0.5,-8)or UDim2.new(0,2,0.5,-8)}):Play()sl.Text=st and "ON"or"OFF"sl.TextColor3=st and C.Grn or C.Rd pcall(cb,st)end)end
 local function Sli(p,t,mn,mx,d,cb)local sv=d local f=Instance.new("Frame",p)f.Size=UDim2.new(1,0,0,46)f.BackgroundColor3=C.BG2 f.BackgroundTransparency=0.1 f.BorderSizePixel=0 f.ZIndex=5 Instance.new("UICorner",f).CornerRadius=UDim.new(0,6)local l=Instance.new("TextLabel",f)l.Size=UDim2.new(0.6,-14,0,14)l.Position=UDim2.new(0,12,0,6)l.BackgroundTransparency=1 l.Font=Enum.Font.GothamSemibold l.Text=t l.TextColor3=C.Wh l.TextSize=10 l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=7 local vl=Instance.new("TextLabel",f)vl.Size=UDim2.new(0.4,-10,0,14)vl.Position=UDim2.new(0.6,2,0,6)vl.BackgroundTransparency=1 vl.Font=Enum.Font.GothamBold vl.Text=tostring(sv)vl.TextSize=10 vl.TextXAlignment=Enum.TextXAlignment.Right vl.ZIndex=7 RegL(vl)local b=Instance.new("Frame",f)b.Size=UDim2.new(1,-24,0,8)b.Position=UDim2.new(0,12,0,30)b.BackgroundColor3=C.BG b.BorderSizePixel=0 b.ZIndex=6 Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)local fi=Instance.new("Frame",b)fi.Size=UDim2.new((sv-mn)/(mx-mn),0,1,0)fi.BorderSizePixel=0 fi.ZIndex=7 Instance.new("UICorner",fi).CornerRadius=UDim.new(1,0)RegB(fi)local kn=Instance.new("Frame",b)kn.Size=UDim2.new(0,16,0,16)kn.Position=UDim2.new((sv-mn)/(mx-mn),-8,0.5,-8)kn.BackgroundColor3=C.Wh kn.BorderSizePixel=0 kn.ZIndex=8 Instance.new("UICorner",kn).CornerRadius=UDim.new(1,0)local tn=Instance.new("TextButton",f)tn.Size=UDim2.new(1,-8,0,46)tn.Position=UDim2.new(0,4,0,0)tn.BackgroundTransparency=1 tn.Text=""tn.ZIndex=10 local dg2=false local function up(i)local pp=math.clamp((i.Position.X-b.AbsolutePosition.X)/b.AbsoluteSize.X,0,1)local v=math.floor(mn+(mx-mn)*pp)fi.Size=UDim2.new(pp,0,1,0)kn.Position=UDim2.new(pp,-8,0.5,-8)vl.Text=tostring(v)pcall(cb,v)end tn.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg2=true up(i)end end)UI.InputChanged:Connect(function(i)if dg2 and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then up(i)end end)UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg2=false end end)end
-local function Btn(p,t,c,cb)local b=Instance.new("TextButton",p)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=C.BG2 b.BackgroundTransparency=0.1 b.Font=Enum.Font.GothamBold b.Text=t b.TextColor3=c or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)local bS=Instance.new("UIStroke",b)bS.Thickness=1.5 bS.Transparency=0.4 bS.Color=A()RegS(bS)Rip(b)b.MouseButton1Click:Connect(function()pcall(cb)end)return b end
+local function Btn(p,t,c,cb)local b=Instance.new("TextButton",p)b.Size=UDim2.new(1,0,0,34)b.BackgroundColor3=C.BG2 b.BackgroundTransparency=0.1 b.Font=Enum.Font.GothamBold b.Text=t b.TextColor3=c or C.Wh b.TextSize=11 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)local bS=Instance.new("UIStroke",b)bS.Thickness=1.5 bS.Transparency=0.4 bS.Color=C.Yel RegS(bS)Rip(b)b.MouseButton1Click:Connect(function()pcall(cb)end)return b end
+
 local PInfo=Tab("Info","📊")local PCb=Tab("Combat","⚔️")local PAb=Tab("Aimbot","🎯")local PFl=Tab("Fly","✈")local PIs=Tab("Islands","🏝️")local PSc=Tab("Scripts","📜")local PTo=Tab("Tools","🔧")local PEs=Tab("ESP","👁️")local PVi=Tab("Visuals","🎨")local POp=Tab("Optimize","⚡")local PSe=Tab("Settings","⚙️")
-task.wait(0.1)if Tabs[1]then Tabs[1].l.TextColor3=C.BG Tabs[1].p.Visible=true Tabs[1].b.BackgroundColor3=A()Tabs[1].b.BackgroundTransparency=0 TS:Create(Tabs[1].u,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,2)}):Play()end
--- INFO
+task.wait(0.1)if Tabs[1]then Tabs[1].l.TextColor3=C.Yel Tabs[1].ico.TextTransparency=0 Tabs[1].p.Visible=true Tabs[1].b.BackgroundColor3=C.BG3 Tabs[1].b.BackgroundTransparency=0.5 TS:Create(Tabs[1].u,TweenInfo.new(0.3,Enum.EasingStyle.Back),{Size=UDim2.new(0.7,0,0,3)}):Play()end
+
+-- INFO con flechas (DORADO)
 do
-    Sec(PInfo,"📊 LISTA DE JUGADORES","📊")
-    local SPJ=Instance.new("ScrollingFrame",PInfo)SPJ.Size=UDim2.new(1,0,0,360)SPJ.BackgroundColor3=C.BG2 SPJ.BackgroundTransparency=0.1 SPJ.BorderSizePixel=0 SPJ.ScrollBarThickness=6 SPJ.ScrollBarImageColor3=A()SPJ.CanvasSize=UDim2.new(0,0,0,0)SPJ.ZIndex=5 pcall(function()SPJ.AutomaticCanvasSize=Enum.AutomaticSize.Y end)Instance.new("UICorner",SPJ).CornerRadius=UDim.new(0,8)local SPJS=Instance.new("UIStroke",SPJ)SPJS.Thickness=1.5 SPJS.Transparency=0.4 SPJS.Color=A()RegS(SPJS)local SPJL=Instance.new("UIListLayout",SPJ)SPJL.Padding=UDim.new(0,8)local SPJP=Instance.new("UIPadding",SPJ)SPJP.PaddingTop=UDim.new(0,8)SPJP.PaddingLeft=UDim.new(0,8)SPJP.PaddingRight=UDim.new(0,8)SPJP.PaddingBottom=UDim.new(0,8)
-    local CardButtons={}
-    local function BuildCard(plr,isMe)
-        local s=GS(plr)
-        local card=Instance.new("Frame",SPJ)card.Size=UDim2.new(1,-4,0,290)card.BackgroundColor3=C.BG card.BorderSizePixel=0 card.ZIndex=7 Instance.new("UICorner",card).CornerRadius=UDim.new(0,8)
-        local cS=Instance.new("UIStroke",card)cS.Thickness=1.5 cS.Transparency=0.4 cS.Color=isMe and A2() or A()RegS(cS)
-        local n=Instance.new("TextLabel",card)n.Size=UDim2.new(1,-16,0,22)n.Position=UDim2.new(0,8,0,6)n.BackgroundTransparency=1 n.Font=Enum.Font.GothamBold n.Text=(isMe and "👑 " or "👤 ")..plr.DisplayName..(isMe and " (vos)" or "")n.TextColor3=isMe and A2() or A()n.TextSize=12 n.TextXAlignment=Enum.TextXAlignment.Left n.ZIndex=8 RegL(n)
-        local sep=Instance.new("Frame",card)sep.Size=UDim2.new(1,-16,0,1)sep.Position=UDim2.new(0,8,0,30)sep.BackgroundColor3=C.BG3 sep.BorderSizePixel=0 sep.ZIndex=8
-        local stats={{"📊 Nivel",s.Level,A()},{"💎 Gemas",s.Gems,C.Cyan},{"💰 Cash",s.Cash,C.Yel},{"✨ Exp",s.Exp.."/"..s.MaxExp,C.Grn},{"❤️ Vida",s.Health.."/"..s.MaxHealth,C.Rd},{"🎯 Melee",s.Melee,C.Cyan},{"⚔️ Weapon",s.Weapon..(s.WName~="--"and " ("..s.WName..")" or ""),C.Grn},{"⚡ Power",s.Power..(s.PName~="--"and " ("..s.PName..")" or ""),A2()}}
-        for i,d in ipairs(stats)do local row=Instance.new("TextLabel",card)row.Size=UDim2.new(1,-16,0,18)row.Position=UDim2.new(0,8,0,36+(i-1)*20)row.BackgroundTransparency=1 row.Font=Enum.Font.GothamSemibold row.Text=d[1]..": "..tostring(d[2])row.TextColor3=d[3]row.TextSize=10 row.TextXAlignment=Enum.TextXAlignment.Left row.ZIndex=8 end
-        if not isMe then
-            local gb=Instance.new("TextButton",card)gb.Size=UDim2.new(0.5,-12,0,28)gb.Position=UDim2.new(0,8,0,206)gb.BackgroundColor3=C.BG3 gb.Font=Enum.Font.GothamBold gb.TextColor3=A()gb.TextSize=10 gb.BorderSizePixel=0 gb.AutoButtonColor=false gb.ZIndex=8 Instance.new("UICorner",gb).CornerRadius=UDim.new(0,6)Rip(gb)
-            local function UpdOrb()
-                if GO.T==plr and GO.On then
-                    gb.Text="🛑 Stop God Orb"gb.BackgroundColor3=C.Rd gb.TextColor3=C.Wh
-                elseif SelectedTarget==plr then
-                    gb.Text="🎯 Seleccionado"gb.BackgroundColor3=A()gb.TextColor3=C.BG
-                else
-                    gb.Text="🌀 God Orb"gb.BackgroundColor3=C.BG3 gb.TextColor3=A()
-                end
-            end
-            UpdOrb()
-            gb.MouseButton1Click:Connect(function()
-                SelectedTarget=plr
-                if GO.T==plr and GO.On then
-                    GOS()
-                    PNotif("🌀 God Orb","Detenido",C.Rd)
-                else
-                    GOSt(plr)
-                    PNotif("🌀 God Orb","Orbitando "..plr.DisplayName.." (seleccionado)",C.Grn)
-                end
-                for _,btn in pairs(CardButtons)do if btn.updO then btn.updO()end end
-            end)
-            local sb=Instance.new("TextButton",card)sb.Size=UDim2.new(0.5,-12,0,28)sb.Position=UDim2.new(0.5,4,0,206)sb.BackgroundColor3=C.BG3 sb.Font=Enum.Font.GothamBold sb.TextColor3=C.Cyan sb.TextSize=10 sb.BorderSizePixel=0 sb.AutoButtonColor=false sb.ZIndex=8 Instance.new("UICorner",sb).CornerRadius=UDim.new(0,6)Rip(sb)
-            local function UpdSpec()if Sp.T==plr then sb.Text="🛑 Stop Spec"sb.BackgroundColor3=C.Rd sb.TextColor3=C.Wh else sb.Text="🎥 Spectate"sb.BackgroundColor3=C.BG3 sb.TextColor3=C.Cyan end end
-            UpdSpec()
-            sb.MouseButton1Click:Connect(function()if Sp.T==plr then SpS()PNotif("🎥 Spectate","Detenido",C.Rd)else SpSt(plr)PNotif("🎥 Spectate","Viendo "..plr.DisplayName,C.Cyan)end for _,btn in pairs(CardButtons)do if btn.updS then btn.updS()end end end)
-            CardButtons[plr]={updO=UpdOrb,updS=UpdSpec}
-        end
-    end
-    local function RefStats()pcall(function()CardButtons={}for _,c in ipairs(SPJ:GetChildren())do if c:IsA("Frame")then c:Destroy()end end BuildCard(LP,true)for _,p in ipairs(P:GetPlayers())do if p~=LP then BuildCard(p,false)end end end)end
-    RefStats()
-    task.spawn(function()while true do task.wait(2)if PInfo.Visible then for _,btn in pairs(CardButtons)do if btn.updO then btn.updO()end if btn.updS then btn.updS()end end end end end)
-    P.PlayerAdded:Connect(function()task.wait(0.5)pcall(RefStats)end)
-    P.PlayerRemoving:Connect(function(p)task.wait(0.5)CardButtons[p]=nil if SelectedTarget==p then SelectedTarget=nil end pcall(RefStats)end)
-    Sec(PInfo,"🛑 DETENER","🛑")
-    local btnSO=Instance.new("TextButton",PInfo)btnSO.Size=UDim2.new(1,0,0,40)btnSO.BackgroundColor3=C.BG2 btnSO.BackgroundTransparency=0.1 btnSO.Font=Enum.Font.GothamBold btnSO.Text="🌀 Detener God Orb"btnSO.TextColor3=C.Rd btnSO.TextSize=12 btnSO.BorderSizePixel=0 btnSO.AutoButtonColor=false btnSO.ZIndex=5 Instance.new("UICorner",btnSO).CornerRadius=UDim.new(0,8)Rip(btnSO)
-    btnSO.MouseButton1Click:Connect(function()GOS()PNotif("🌀 God Orb","Detenido",C.Rd)for _,btn in pairs(CardButtons)do if btn.updO then btn.updO()end end end)
-    local btnSS=Instance.new("TextButton",PInfo)btnSS.Size=UDim2.new(1,0,0,40)btnSS.BackgroundColor3=C.BG2 btnSS.BackgroundTransparency=0.1 btnSS.Font=Enum.Font.GothamBold btnSS.Text="🎥 Detener Spectate"btnSS.TextColor3=C.Rd btnSS.TextSize=12 btnSS.BorderSizePixel=0 btnSS.AutoButtonColor=false btnSS.ZIndex=5 Instance.new("UICorner",btnSS).CornerRadius=UDim.new(0,8)Rip(btnSS)
-    btnSS.MouseButton1Click:Connect(function()SpS()PNotif("🎥 Spectate","Detenido",C.Rd)for _,btn in pairs(CardButtons)do if btn.updS then btn.updS()end end end)
+    Sec(PInfo,"📊 JUGADOR SELECCIONADO","💀")
+    local Selector=Instance.new("Frame",PInfo)Selector.Size=UDim2.new(1,0,0,180)Selector.BackgroundColor3=C.BG2 Selector.BackgroundTransparency=0.2 Selector.BorderSizePixel=0 Selector.ZIndex=5 Instance.new("UICorner",Selector).CornerRadius=UDim.new(0,12)
+    local Sel_S=Instance.new("UIStroke",Selector)Sel_S.Thickness=1 Sel_S.Transparency=0.6 Sel_S.Color=C.Yel RegS(Sel_S)
+    local ArrowL=Instance.new("TextButton",Selector)ArrowL.Size=UDim2.new(0,44,0,120)ArrowL.Position=UDim2.new(0,10,0.5,-60)ArrowL.BackgroundColor3=C.BG3 ArrowL.BackgroundTransparency=0.2 ArrowL.Text="‹"ArrowL.Font=Enum.Font.GothamBold ArrowL.TextSize=36 ArrowL.TextColor3=C.Yel ArrowL.BorderSizePixel=0 ArrowL.AutoButtonColor=false ArrowL.ZIndex=7 Instance.new("UICorner",ArrowL).CornerRadius=UDim.new(0,8)
+    local AL_S=Instance.new("UIStroke",ArrowL)AL_S.Thickness=1.5 AL_S.Color=C.Yel AL_S.Transparency=0.4 RegS(AL_S)
+    Rip(ArrowL)
+    ArrowL.MouseEnter:Connect(function()TS:Create(ArrowL,TweenInfo.new(0.15),{BackgroundColor3=C.Yel}):Play()TS:Create(ArrowL,TweenInfo.new(0.15),{TextColor3=C.BG}):Play()end)
+    ArrowL.MouseLeave:Connect(function()TS:Create(ArrowL,TweenInfo.new(0.15),{BackgroundColor3=C.BG3}):Play()TS:Create(ArrowL,TweenInfo.new(0.15),{TextColor3=C.Yel}):Play()end)
+    local ArrowR=Instance.new("TextButton",Selector)ArrowR.Size=UDim2.new(0,44,0,120)ArrowR.Position=UDim2.new(1,-54,0.5,-60)ArrowR.BackgroundColor3=C.BG3 ArrowR.BackgroundTransparency=0.2 ArrowR.Text="›"ArrowR.Font=Enum.Font.GothamBold ArrowR.TextSize=36 ArrowR.TextColor3=C.Yel ArrowR.BorderSizePixel=0 ArrowR.AutoButtonColor=false ArrowR.ZIndex=7 Instance.new("UICorner",ArrowR).CornerRadius=UDim.new(0,8)
+    local AR_S=Instance.new("UIStroke",ArrowR)AR_S.Thickness=1.5 AR_S.Color=C.Yel AR_S.Transparency=0.4 RegS(AR_S)
+    Rip(ArrowR)
+    ArrowR.MouseEnter:Connect(function()TS:Create(ArrowR,TweenInfo.new(0.15),{BackgroundColor3=C.Yel}):Play()TS:Create(ArrowR,TweenInfo.new(0.15),{TextColor3=C.BG}):Play()end)
+    ArrowR.MouseLeave:Connect(function()TS:Create(ArrowR,TweenInfo.new(0.15),{BackgroundColor3=C.BG3}):Play()TS:Create(ArrowR,TweenInfo.new(0.15),{TextColor3=C.Yel}):Play()end)
+    local IP=Instance.new("Frame",Selector)IP.Size=UDim2.new(1,-120,0,140)IP.Position=UDim2.new(0,60,0.5,-70)IP.BackgroundColor3=C.BG3 IP.BackgroundTransparency=0.3 IP.BorderSizePixel=0 IP.ZIndex=6 Instance.new("UICorner",IP).CornerRadius=UDim.new(0,8)
+    local PName=Instance.new("TextLabel",IP)PName.Size=UDim2.new(1,-20,0,28)PName.Position=UDim2.new(0,10,0,8)PName.BackgroundTransparency=1 PName.Font=Enum.Font.GothamBold PName.Text="— Ninguno —"PName.TextSize=15 PName.TextColor3=C.Yel PName.TextXAlignment=Enum.TextXAlignment.Center PName.ZIndex=8 RegL(PName)
+    local PStats=Instance.new("TextLabel",IP)PStats.Size=UDim2.new(1,-20,0,50)PStats.Position=UDim2.new(0,10,0,40)PStats.BackgroundTransparency=1 PStats.Font=Enum.Font.GothamSemibold PStats.Text="📊 Lv —\n❤️ —\n⚡ —"PStats.TextSize=11 PStats.TextColor3=C.Wh PStats.TextXAlignment=Enum.TextXAlignment.Center PStats.TextYAlignment=Enum.TextYAlignment.Top PStats.ZIndex=8 RegL(PStats)
+    local PStats2=Instance.new("TextLabel",IP)PStats2.Size=UDim2.new(1,-20,0,30)PStats2.Position=UDim2.new(0,10,0,100)PStats2.BackgroundTransparency=1 PStats2.Font=Enum.Font.Gotham PStats2.Text="💰 —   💎 —"PStats2.TextSize=10 PStats2.TextColor3=C.Yel PStats2.TextXAlignment=Enum.TextXAlignment.Center PStats2.ZIndex=8 RegL(PStats2)
+    local PlayerList={}local CurrentIndex=1
+    local function RefreshList()PlayerList={}for _,p in ipairs(P:GetPlayers())do if p~=LP then table.insert(PlayerList,p)end end if CurrentIndex>#PlayerList then CurrentIndex=math.max(1,#PlayerList)end end
+    local function UpdateDisplay()if #PlayerList==0 then PName.Text="— Sin jugadores —"PStats.Text="No hay otros jugadores"PStats2.Text=""return end local plr=PlayerList[CurrentIndex]if not plr then return end SelectedTarget=plr PName.Text="👤 "..plr.DisplayName local s=GS(plr)PStats.Text="📊 Lv "..s.Level.."\n❤️ "..s.Health.."/"..s.MaxHealth.."\n⚡ "..s.Power PStats2.Text="💰 "..s.Cash.."   💎 "..s.Gems end
+    ArrowL.MouseButton1Click:Connect(function()if #PlayerList==0 then RefreshList()end if #PlayerList==0 then return end CurrentIndex=CurrentIndex-1 if CurrentIndex<1 then CurrentIndex=#PlayerList end UpdateDisplay()PNotif("👤","◀ "..PlayerList[CurrentIndex].DisplayName,C.Yel)end)
+    ArrowR.MouseButton1Click:Connect(function()if #PlayerList==0 then RefreshList()end if #PlayerList==0 then return end CurrentIndex=CurrentIndex+1 if CurrentIndex>#PlayerList then CurrentIndex=1 end UpdateDisplay()PNotif("👤","▶ "..PlayerList[CurrentIndex].DisplayName,C.Yel)end)
+    RefreshList()if #PlayerList>0 then UpdateDisplay()end
+    task.spawn(function()while true do task.wait(3)if PInfo.Visible then RefreshList()UpdateDisplay()end end end)
+    P.PlayerAdded:Connect(function()task.wait(0.5)RefreshList()UpdateDisplay()end)
+    P.PlayerRemoving:Connect(function(p)task.wait(0.5)if SelectedTarget==p then SelectedTarget=nil end RefreshList()UpdateDisplay()end)
+    
+    Sec(PInfo,"⚡ ACCIONES","⚡")
+    local GODORB_BTN=Instance.new("TextButton",PInfo)GODORB_BTN.Size=UDim2.new(1,0,0,48)GODORB_BTN.BackgroundColor3=C.BG3 GODORB_BTN.BackgroundTransparency=0.2 GODORB_BTN.Font=Enum.Font.GothamBold GODORB_BTN.Text="🌀 GOD ORB"GODORB_BTN.TextSize=14 GODORB_BTN.TextColor3=C.Yel GODORB_BTN.BorderSizePixel=0 GODORB_BTN.AutoButtonColor=false GODORB_BTN.ZIndex=5 Instance.new("UICorner",GODORB_BTN).CornerRadius=UDim.new(0,10)
+    local GO_S=Instance.new("UIStroke",GODORB_BTN)GO_S.Thickness=1.5 GO_S.Color=C.Yel GO_S.Transparency=0.4 RegS(GO_S)
+    Rip(GODORB_BTN)
+    GODORB_BTN.MouseEnter:Connect(function()TS:Create(GODORB_BTN,TweenInfo.new(0.15),{BackgroundTransparency=0}):Play()end)
+    GODORB_BTN.MouseLeave:Connect(function()TS:Create(GODORB_BTN,TweenInfo.new(0.15),{BackgroundTransparency=0.2}):Play()end)
+    GODORB_BTN.MouseButton1Click:Connect(function()if not SelectedTarget then PNotif("⚠️","Seleccioná un jugador primero",C.Rd)return end if GO.T==SelectedTarget and GO.On then GOS()GODORB_BTN.Text="🌀 GOD ORB"TS:Create(GODORB_BTN,TweenInfo.new(0.2),{BackgroundColor3=C.BG3,TextColor3=C.Yel}):Play()PNotif("🌀","Detenido",C.Rd)else GOSt(SelectedTarget)GODORB_BTN.Text="🛑 STOP GOD ORB"TS:Create(GODORB_BTN,TweenInfo.new(0.2),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()PNotif("🌀","Orbitando "..SelectedTarget.DisplayName,C.Yel)end end)
+    local SPEC_BTN=Instance.new("TextButton",PInfo)SPEC_BTN.Size=UDim2.new(1,0,0,48)SPEC_BTN.BackgroundColor3=C.BG3 SPEC_BTN.BackgroundTransparency=0.2 SPEC_BTN.Font=Enum.Font.GothamBold SPEC_BTN.Text="🎥 SPECTATE"SPEC_BTN.TextSize=14 SPEC_BTN.TextColor3=C.Cyan SPEC_BTN.BorderSizePixel=0 SPEC_BTN.AutoButtonColor=false SPEC_BTN.ZIndex=5 Instance.new("UICorner",SPEC_BTN).CornerRadius=UDim.new(0,10)
+    local SP_S=Instance.new("UIStroke",SPEC_BTN)SP_S.Thickness=1.5 SP_S.Color=C.Cyan SP_S.Transparency=0.4 RegS(SP_S)
+    Rip(SPEC_BTN)
+    SPEC_BTN.MouseEnter:Connect(function()TS:Create(SPEC_BTN,TweenInfo.new(0.15),{BackgroundTransparency=0}):Play()end)
+    SPEC_BTN.MouseLeave:Connect(function()TS:Create(SPEC_BTN,TweenInfo.new(0.15),{BackgroundTransparency=0.2}):Play()end)
+    SPEC_BTN.MouseButton1Click:Connect(function()if not SelectedTarget then PNotif("⚠️","Seleccioná un jugador primero",C.Rd)return end if Sp.T==SelectedTarget then SpS()SPEC_BTN.Text="🎥 SPECTATE"TS:Create(SPEC_BTN,TweenInfo.new(0.2),{BackgroundColor3=C.BG3,TextColor3=C.Cyan}):Play()PNotif("🎥","Detenido",C.Rd)else SpSt(SelectedTarget)SPEC_BTN.Text="🛑 STOP SPECTATE"TS:Create(SPEC_BTN,TweenInfo.new(0.2),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()PNotif("🎥","Viendo "..SelectedTarget.DisplayName,C.Cyan)end end)
 end
+
 -- COMBAT
 do
-    Sec(PCb,"🔵 HITBOX","🔵")
-    Tog(PCb,"Activar Hitbox",false,function(v)if v then HBS()else HBE()end end)
-    Sli(PCb,"Tamaño",10,200,50,function(v)HB.Sz=v end)
-    Sli(PCb,"Transparencia",0,100,50,function(v)HB.Tr=v/100 end)
-    Sec(PCb,"🎯 AIM ASSIST","🎯")
-    Tog(PCb,"Activar Aim Assist",false,function(v)if v then AiS()else AiE()end end)
-    Sli(PCb,"Suavizado",1,100,35,function(v)Ai.Sm=v/100 end)
-    Sli(PCb,"Distancia",100,3000,1000,function(v)Ai.D=v end)
-    Sec(PCb,"⭕ FOV CIRCLE","⭕")
-    Tog(PCb,"Mostrar FOV Circle",false,function(v)if not Drawing_OK then PNotif("⚠️ FOV","Tu ejecutor no soporta Drawing",C.Yel)return end FOVSettings.Enabled=v if v and not FOVCircle then UpdFOV()end end)
-    Sli(PCb,"Radio del FOV",50,600,180,function(v)FOVSettings.Radius=v end)
-    Sli(PCb,"Transparencia FOV",0,100,40,function(v)FOVSettings.Transparency=v/100 end)
-    Sec(PCb,"📷 FOV CÁMARA","📷")
-    Tog(PCb,"Activar FOV Cámara",false,function(v)if v then FvAp(Fv.V)else FvR()end end)
-    Sli(PCb,"Valor FOV",30,300,120,function(v)Fv.V=v if Fv.On then FvAp(v)end end)
+    Sec(PCb,"🔵 HITBOX","🔵")Tog(PCb,"Activar Hitbox",false,function(v)if v then HBS()else HBE()end end)Sli(PCb,"Tamaño",10,200,50,function(v)HB.Sz=v end)Sli(PCb,"Transparencia",0,100,50,function(v)HB.Tr=v/100 end)
+    Sec(PCb,"🎯 AIM ASSIST","🎯")Tog(PCb,"Activar Aim Assist",false,function(v)if v then AiS()else AiE()end end)Sli(PCb,"Suavizado",1,100,35,function(v)Ai.Sm=v/100 end)Sli(PCb,"Distancia",100,3000,1000,function(v)Ai.D=v end)
+    Sec(PCb,"⭕ FOV","⭕")Tog(PCb,"Mostrar FOV Circle",false,function(v)if not Drawing_OK then PNotif("⚠️","Sin Drawing support",C.Yel)return end FOVSettings.Enabled=v if v and not FOVCircle then UpdFOV()end end)Sli(PCb,"Radio",50,600,180,function(v)FOVSettings.Radius=v end)
+    Sec(PCb,"📷 FOV CAM","📷")Tog(PCb,"Activar",false,function(v)if v then FvAp(Fv.V)else FvR()end end)Sli(PCb,"Valor",30,300,120,function(v)Fv.V=v if Fv.On then FvAp(v)end end)
 end
--- 🎯 AIMBOT 10K
+
+-- AIMBOT
 do
-    Sec(PAb,"🎯 AIMBOT PRO (Meme Sea)","🎯")
-    local AIM={On=false,Conn=nil,Target=nil,HeadSize=10000,BodySize=10000,Range=999999,AutoAttack=true,AttackRate=0.025,TeleportNear=true,TeleDist=5,FaceTarget=true,ExpandHead=true,ExpandBody=true,OriginalData={},LastAttack=0}
-    local function SaveOriginal(plr,part,tipo)
-        if not AIM.OriginalData[plr]then AIM.OriginalData[plr]={}end
-        if not AIM.OriginalData[plr][tipo]then
-            AIM.OriginalData[plr][tipo]={Size=part.Size,Transparency=part.Transparency,CanCollide=part.CanCollide,Material=part.Material,Color=part.Color}
-        end
-    end
-    local function ExpandHead(plr)
-        if not AIM.ExpandHead then return end
-        local ch=plr.Character
-        if not ch then return end
-        local head=ch:FindFirstChild("Head")
-        if not head then return end
-        SaveOriginal(plr,head,"Head")
-        pcall(function()
-            head.Size=Vector3.new(AIM.HeadSize,AIM.HeadSize,AIM.HeadSize)
-            head.Transparency=1
-            head.CanCollide=false
-            head.Material=Enum.Material.Neon
-            head.Color=A()
-        end)
-    end
-    local function ExpandBody(plr)
-        if not AIM.ExpandBody then return end
-        local ch=plr.Character
-        if not ch then return end
-        local hrp=ch:FindFirstChild("HumanoidRootPart")
-        if not hrp then return end
-        SaveOriginal(plr,hrp,"Body")
-        pcall(function()
-            hrp.Size=Vector3.new(AIM.BodySize,AIM.BodySize,AIM.BodySize)
-            hrp.Transparency=1
-            hrp.CanCollide=false
-        end)
-    end
-    local function RestoreAll()
-        for plr,data in pairs(AIM.OriginalData)do
-            if plr.Character then
-                for tipo,d in pairs(data)do
-                    local part=plr.Character:FindFirstChild(tipo=="Head"and "Head"or "HumanoidRootPart")
-                    if part then pcall(function()
-                        part.Size=d.Size
-                        part.Transparency=d.Transparency
-                        part.CanCollide=d.CanCollide
-                        part.Material=d.Material
-                        part.Color=d.Color
-                    end)end
-                end
-            end
-        end
-        AIM.OriginalData={}
-    end
-    local function FindTarget()
-        local best=nil local bd=AIM.Range
-        local mc=LP.Character if not mc then return nil end
-        local mh=mc:FindFirstChild("HumanoidRootPart") if not mh then return nil end
-        for _,p in ipairs(P:GetPlayers())do
-            if p~=LP and p.Character then
-                local h=p.Character:FindFirstChild("HumanoidRootPart")
-                local hu=p.Character:FindFirstChildOfClass("Humanoid")
-                if h and hu and hu.Health>0 then
-                    local d=(h.Position-mh.Position).Magnitude
-                    if d<bd then bd=d best=p end
-                end
-            end
-        end
-        return best,bd
-    end
-    local function Attack()
-        local mc=LP.Character
-        if not mc then return end
-        local tool=mc:FindFirstChildOfClass("Tool")
-        if tool then pcall(function()tool:Activate()end)end
-    end
-    local function TeleportNear(target)
-        if not AIM.TeleportNear then return end
-        local mc=LP.Character
-        if not mc then return end
-        local mh=mc:FindFirstChild("HumanoidRootPart")
-        local tc=target.Character
-        if not tc then return end
-        local th=tc:FindFirstChild("HumanoidRootPart")
-        if not mh or not th then return end
-        local dist=(th.Position-mh.Position).Magnitude
-        if dist<=AIM.TeleDist then return end
-        local dir=(th.Position-mh.Position).Unit
-        local newPos=th.Position-dir*AIM.TeleDist
-        pcall(function()mh.CFrame=CFrame.new(newPos,th.Position)end)
-    end
-    local function FaceTarget(target)
-        if not AIM.FaceTarget then return end
-        local mc=LP.Character
-        if not mc then return end
-        local mh=mc:FindFirstChild("HumanoidRootPart")
-        local tc=target.Character
-        if not tc then return end
-        local th=tc:FindFirstChild("HumanoidRootPart")
-        if not mh or not th then return end
-        pcall(function()
-            mh.CFrame=CFrame.new(mh.Position,Vector3.new(th.Position.X,mh.Position.Y,th.Position.Z))
-        end)
-    end
-    local function MainLoop()
-        if not AIM.On then return end
-        local target,dist=FindTarget()
-        AIM.Target=target
-        if not target then return end
-        ExpandHead(target)
-        ExpandBody(target)
-        FaceTarget(target)
-        TeleportNear(target)
-        if AIM.AutoAttack then
-            local now=os.clock()
-            if now-AIM.LastAttack>=AIM.AttackRate then
-                AIM.LastAttack=now
-                Attack()
-            end
-        end
-    end
-    local function AIM_Start()
-        if AIM.On then return end
-        AIM.On=true
-        for _,p in ipairs(P:GetPlayers())do
-            if p~=LP then ExpandHead(p)ExpandBody(p)end
-        end
-        AIM.Conn=RS.Heartbeat:Connect(MainLoop)
-        PNotif("🎯 Aimbot","✅ Activado 10K Hitbox",C.Grn)
-    end
-    local function AIM_Stop()
-        if not AIM.On then return end
-        AIM.On=false
-        if AIM.Conn then pcall(function()AIM.Conn:Disconnect()end)AIM.Conn=nil end
-        RestoreAll()
-        AIM.Target=nil
-        PNotif("🎯 Aimbot","❌ Desactivado",C.Rd)
-    end
-    LP.CharacterAdded:Connect(function()
-        if AIM.On then task.wait(1)RestoreAll()end
-    end)
-    local mb=Instance.new("TextButton",PAb)
-    mb.Size=UDim2.new(1,0,0,48)
-    mb.BackgroundColor3=C.BG2
-    mb.BackgroundTransparency=0.05
-    mb.Font=Enum.Font.GothamBold
-    mb.Text="🎯 ACTIVAR AIMBOT (10K Hitbox)"
-    mb.TextColor3=A()
-    mb.TextSize=13
-    mb.BorderSizePixel=0
-    mb.AutoButtonColor=false
-    mb.ZIndex=5
-    Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)
-    local mbS=Instance.new("UIStroke",mb)
-    mbS.Thickness=2 mbS.Color=A()RegS(mbS)PGlow(mbS,0.1,0.5,1.5)
+    Sec(PAb,"🎯 AIMBOT PRO","🎯")
+    local AIM={On=false,Conn=nil,Target=nil,HeadSize=50,BodySize=50,Range=5000,AutoAttack=true,AttackRate=0.05,TeleportNear=true,TeleDist=5,FaceTarget=true,ExpandHead=true,ExpandBody=true,OriginalData={},LastAttack=0,RateCounter=0,RateTimer=os.clock()}
+    local function SvO(plr,part,t)if not AIM.OriginalData[plr]then AIM.OriginalData[plr]={}end if not AIM.OriginalData[plr][t]then AIM.OriginalData[plr][t]={Size=part.Size,Transparency=part.Transparency,CanCollide=part.CanCollide,Material=part.Material,Color=part.Color}end end
+    local function EH(plr)if not AIM.ExpandHead then return end local ch=plr.Character if not ch then return end local h=ch:FindFirstChild("Head")if not h then return end SvO(plr,h,"Head")pcall(function()h.Size=Vector3.new(AIM.HeadSize,AIM.HeadSize,AIM.HeadSize)h.Transparency=1 h.CanCollide=false h.Material=Enum.Material.Neon h.Color=A()end)end
+    local function EB(plr)if not AIM.ExpandBody then return end local ch=plr.Character if not ch then return end local h=ch:FindFirstChild("HumanoidRootPart")if not h then return end SvO(plr,h,"Body")pcall(function()h.Size=Vector3.new(AIM.BodySize,AIM.BodySize,AIM.BodySize)h.Transparency=1 h.CanCollide=false end)end
+    local function RA()for plr,d in pairs(AIM.OriginalData)do if plr.Character then for t,v in pairs(d)do local p=plr.Character:FindFirstChild(t=="Head"and "Head"or "HumanoidRootPart")if p then pcall(function()p.Size=v.Size p.Transparency=v.Transparency p.CanCollide=v.CanCollide p.Material=v.Material p.Color=v.Color end)end end end end AIM.OriginalData={}end
+    local function FT()local b=nil local bd=AIM.Range local mc=LP.Character if not mc then return nil end local mh=mc:FindFirstChild("HumanoidRootPart")if not mh then return nil end for _,p in ipairs(P:GetPlayers())do if p~=LP and p.Character then local h=p.Character:FindFirstChild("HumanoidRootPart")local hu=p.Character:FindFirstChildOfClass("Humanoid")if h and hu and hu.Health>0 then local d=(h.Position-mh.Position).Magnitude if d<bd then bd=d b=p end end end end return b end
+    local function Atk()local mc=LP.Character if not mc then return end local t=mc:FindFirstChildOfClass("Tool")if t then pcall(function()t:Activate()end)end end
+    local function TPN(target)if not AIM.TeleportNear then return end local mc=LP.Character if not mc then return end local mh=mc:FindFirstChild("HumanoidRootPart")local tc=target.Character if not tc then return end local th=tc:FindFirstChild("HumanoidRootPart")if not mh or not th then return end local dist=(th.Position-mh.Position).Magnitude if dist<=AIM.TeleDist then return end if ANTI_DETECT.SmoothTP then local np=AD_SmoothTP(mh.Position,th.Position,150)pcall(function()mh.CFrame=CFrame.new(np,th.Position)end)else local dir=(th.Position-mh.Position).Unit local np=th.Position-dir*AIM.TeleDist pcall(function()mh.CFrame=CFrame.new(np,th.Position)end)end end
+    local function FTa(target)if not AIM.FaceTarget then return end local mc=LP.Character if not mc then return end local mh=mc:FindFirstChild("HumanoidRootPart")local tc=target.Character if not tc then return end local th=tc:FindFirstChild("HumanoidRootPart")if not mh or not th then return end pcall(function()mh.CFrame=CFrame.new(mh.Position,Vector3.new(th.Position.X,mh.Position.Y,th.Position.Z))end)end
+    local function Loop()if not AIM.On then return end local t=FT()AIM.Target=t if not t then return end EH(t)EB(t)FTa(t)TPN(t)if AIM.AutoAttack then local n=os.clock()if ANTI_DETECT.RateLimit then if n-AIM.RateTimer>=1 then AIM.RateCounter=0 AIM.RateTimer=n end if AIM.RateCounter>=ANTI_DETECT.MaxAttacksPerSec then return end end local interval=AD_GetJitter(AIM.AttackRate)if n-AIM.LastAttack>=interval then AIM.LastAttack=n AIM.RateCounter=AIM.RateCounter+1 if AD_ShouldPause()then task.wait(AD_GetRandomPause())end Atk()end end end
+    local function Start()if AIM.On then return end AIM.On=true for _,p in ipairs(P:GetPlayers())do if p~=LP then EH(p)EB(p)end end AIM.Conn=RS.Heartbeat:Connect(Loop)PNotif("🎯 Aimbot","✅ Activado",C.Grn)end
+    local function Stop()if not AIM.On then return end AIM.On=false if AIM.Conn then pcall(function()AIM.Conn:Disconnect()end)AIM.Conn=nil end RA()AIM.Target=nil PNotif("🎯 Aimbot","❌ Desactivado",C.Rd)end
+    LP.CharacterAdded:Connect(function()if AIM.On then task.wait(1)RA()end end)
+    local mb=Instance.new("TextButton",PAb)mb.Size=UDim2.new(1,0,0,48)mb.BackgroundColor3=C.BG2 mb.BackgroundTransparency=0.05 mb.Font=Enum.Font.GothamBold mb.Text="🎯 ACTIVAR AIMBOT"mb.TextColor3=C.Yel mb.TextSize=13 mb.BorderSizePixel=0 mb.AutoButtonColor=false mb.ZIndex=5 Instance.new("UICorner",mb).CornerRadius=UDim.new(0,10)
+    local mbS=Instance.new("UIStroke",mb)mbS.Thickness=2 mbS.Color=C.Yel RegS(mbS)PGlow(mbS,0.1,0.5,1.5)
     Rip(mb)
-    mb.MouseButton1Click:Connect(function()
-        if AIM.On then
-            AIM_Stop()
-            mb.Text="🎯 ACTIVAR AIMBOT (10K Hitbox)"
-            TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=A()}):Play()
-        else
-            AIM_Start()
-            mb.Text="🛑 DESACTIVAR AIMBOT"
-            TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()
-        end
-    end)
-    Lbl(PAb,"🔥 Head + Body Hitbox de 10,000 studs",C.Cyan)
-    Lbl(PAb,"⚡ Auto-attack 40 veces/segundo",C.Grn)
-    Lbl(PAb,"🌀 Teletransporte + Face Target",C.Yel)
-    Lbl(PAb,"⚠️ MUY potente - usalo con cuidado",C.Rd)
-    Sec(PAb,"⚙️ AJUSTES AVANZADOS","⚙️")
-    Sli(PAb,"Head Hitbox Size",1000,100000,10000,function(v)AIM.HeadSize=v end)
-    Sli(PAb,"Body Hitbox Size",1000,100000,10000,function(v)AIM.BodySize=v end)
-    Sli(PAb,"Rango",1000,999999,999999,function(v)AIM.Range=v end)
+    mb.MouseButton1Click:Connect(function()if AIM.On then Stop()mb.Text="🎯 ACTIVAR AIMBOT"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.BG2,TextColor3=C.Yel}):Play()else Start()mb.Text="🛑 DESACTIVAR"TS:Create(mb,TweenInfo.new(0.3),{BackgroundColor3=C.Rd,TextColor3=C.Wh}):Play()end end)
+    Lbl(PAb,"🔥 Head + Body Hitbox: 50 studs",C.Cyan)Lbl(PAb,"⚡ Auto-attack con jitter + rate limit",C.Grn)
+    Sec(PAb,"⚙️ AJUSTES","⚙️")
+    Sli(PAb,"Head Size",10,500,50,function(v)AIM.HeadSize=v end)
+    Sli(PAb,"Body Size",10,500,50,function(v)AIM.BodySize=v end)
+    Sli(PAb,"Rango",500,10000,5000,function(v)AIM.Range=v end)
     Sli(PAb,"Distancia TP",2,30,5,function(v)AIM.TeleDist=v end)
-    Sli(PAb,"Ataques/seg",10,100,40,function(v)AIM.AttackRate=1/v end)
+    Sli(PAb,"Ataques/seg",10,60,20,function(v)AIM.AttackRate=1/v end)
     Tog(PAb,"Auto-Attack",true,function(v)AIM.AutoAttack=v end)
-    Tog(PAb,"Teletransporte cerca",true,function(v)AIM.TeleportNear=v end)
+    Tog(PAb,"Teletransporte",true,function(v)AIM.TeleportNear=v end)
     Tog(PAb,"Mirar al enemigo",true,function(v)AIM.FaceTarget=v end)
-    Tog(PAb,"Expandir Cabeza (headshot)",true,function(v)AIM.ExpandHead=v end)
-    Tog(PAb,"Expandir Cuerpo",true,function(v)AIM.ExpandBody=v end)
+    Sec(PAb,"🛡 ANTI-DETECT","🛡")
+    Tog(PAb,"Anti-Detección",true,function(v)ANTI_DETECT.Enabled=v end)
+    Tog(PAb,"Jitter",true,function(v)ANTI_DETECT.Jitter=v end)
+    Tog(PAb,"Rate Limit",true,function(v)ANTI_DETECT.RateLimit=v end)
+    Tog(PAb,"TP Suavizado",true,function(v)ANTI_DETECT.SmoothTP=v end)
+    Sli(PAb,"Max Ataques/s",10,50,20,function(v)ANTI_DETECT.MaxAttacksPerSec=v end)
 end
+
 -- FLY
 do
-    Sec(PFl,"✈ FLY ULTRA","✈")
-    Tog(PFl,"Activar Fly",false,function(v)if v then FlyS()else FlyE()end end)
-    Sli(PFl,"Velocidad",100,50000,15000,function(v)Fly.Spd=v end)
-    Lbl(PFl,"Máx 50,000 studs/s",C.Gr)
-    Sec(PFl,"🏃 SPEED ULTRA","🏃")
-    Tog(PFl,"Activar Speed",false,function(v)Speed.On=v end)
-    Sli(PFl,"Velocidad",16,1000,300,function(v)Speed.Val=v end)
-    Sec(PFl,"🚀 FUGA","🚀")
-    Btn(PFl,"🚀 Ejecutar Fuga",C.Wh,function()local c=LP.Character local h=c and c:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)PNotif("🚀","Fuga ejecutada",C.Yel)end end)
+    Sec(PFl,"✈ FLY","✈")Tog(PFl,"Activar Fly",false,function(v)if v then FlyS()else FlyE()end end)Sli(PFl,"Velocidad",100,50000,15000,function(v)Fly.Spd=v end)
+    Sec(PFl,"🏃 SPEED","🏃")Tog(PFl,"Activar Speed",false,function(v)Speed.On=v end)Sli(PFl,"Velocidad",16,1000,300,function(v)Speed.Val=v end)
+    Sec(PFl,"🚀 FUGA","🚀")Btn(PFl,"🚀 Ejecutar Fuga",C.Wh,function()local c=LP.Character local h=c and c:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)PNotif("🚀","Fuga",C.Yel)end end)
 end
+
 -- ISLANDS
 do
     Sec(PIs,"🏝️ TELETRANSPORTE","🏝️")
     local ls={}for n,p in pairs(Isl)do table.insert(ls,{n=n,p=p})end table.sort(ls,function(a,b)return a.n<b.n end)
-    for _,i in ipairs(ls)do Btn(PIs,"🏝️ "..i.n,C.Wh,function()TPT(i.n,i.p)PNotif("🏝️","TP a "..i.n,C.Cyan)end)end
+    for _,i in ipairs(ls)do Btn(PIs,"🏝️ "..i.n,C.Wh,function()TPT(i.n,i.p)PNotif("🏝️","TP "..i.n,C.Cyan)end)end
 end
+
 -- SCRIPTS
 do
     Sec(PSc,"🔄 SERVER","🔄")
-    Btn(PSc,"🔁 Rejoin",C.Cyan,function()task.wait(0.5)pcall(function()TPS:Teleport(game.PlaceId,LP)end)end)
+    Btn(PSc,"🔁 Rejoin",C.Cyan,function()QueueOnTeleport()task.wait(0.5)pcall(function()TPS:Teleport(game.PlaceId,LP)end)end)
+    Btn(PSc,"🔄 Cambiar Server",C.Yel,function()QueueOnTeleport()task.spawn(function()local ok,res=pcall(function()return Http:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))end)if ok and res and res.data then local sv={}for _,s in ipairs(res.data)do if s.playing<s.maxPlayers and s.id~=game.JobId and s.playing>0 then table.insert(sv,s)end end if #sv>0 then local el=sv[math.random(1,#sv)]pcall(function()TPS:TeleportToPlaceInstance(game.PlaceId,el.id,LP)end)end end end)end)
 end
+
 -- TOOLS
 do
     Sec(PTo,"🚀 FABs FLOTANTES","🚀")
-    Lbl(PTo,"Mostrar/Ocultar los botones flotantes",C.Cyan)
-    Tog(PTo,"Mostrar FABs en pantalla",true,function(v)
-        FAB_Toggle_State=v
-        if FAB_Frame_Ref then FAB_Frame_Ref.Visible=v end
-        if v then PNotif("🚀 FABs","✅ Mostrados",C.Grn)
-        else PNotif("🚀 FABs","❌ Ocultados",C.Rd)end
-    end)
-    Lbl(PTo,"El God Orb del FAB orbita al jugador seleccionado",C.Grn)
-    
-    Sec(PTo,"⚡ TIMING TOOLS ULTRA","⚡")
-    Lbl(PTo,"PC: Auto-attack x5 con Z/X/C/V",C.Cyan)
-    Lbl(PTo,"Móvil: Auto-attack continuo rápido",C.Cyan)
+    Lbl(PTo,"Mostrar/Ocultar botones flotantes",C.Cyan)
+    Tog(PTo,"Mostrar FABs",true,function(v)FAB_Toggle_State=v if FAB_Frame_Ref then FAB_Frame_Ref.Visible=v end end)
+    Lbl(PTo,"El God Orb del FAB usa el seleccionado",C.Yel)
+    Sec(PTo,"⚡ TIMING TOOLS","⚡")
     Tog(PTo,"Activar Timing Tools",false,function(v)if v then TTS()else TTE()end end)
     Sli(PTo,"Burst Count",1,15,5,function(v)TTC.BC=v end)
     Sli(PTo,"Burst Interval (ms)",1,50,8,function(v)TTC.BI=v/1000 end)
-    Sec(PTo,"💫 ANTI-STUN ULTRA PRO","💫")
-    Lbl(PTo,"Bypass de stun + freeze + slow",C.Yel)
-    Tog(PTo,"Activar Anti-Stun ULTRA",false,function(v)if v then ASS()else ASE()end end)
-    Sec(PTo,"⚡ MACRO PRO ULTRA","⚡")
-    Lbl(PTo,"Auto-apunta, cambia tools y loop",C.Cyan)
-    Tog(PTo,"Activar Macro",false,function(v)Ma.On=v if v then MaStartLoop()else MaStopLoop()end end)
-    Tog(PTo,"Auto-apuntar",true,function(v)Ma.AutoAim=v end)
-    Tog(PTo,"Cambiar tools",true,function(v)Ma.SwitchTool=v end)
-    Tog(PTo,"Detectar cooldown",true,function(v)Ma.Cooldown=v end)
-    Tog(PTo,"Loop automático",false,function(v)Ma.Loop=v end)
-    Sli(PTo,"Delay",1,50,8,function(v)Ma.Delay=v/10 end)
-    Btn(PTo,"⚡ Ejecutar Macro",C.Grn,function()MaRun()end)
-    Sec(PTo,"🛡 ANTI-VOID ULTRA","🛡")
-    Tog(PTo,"Activar Anti-Void",false,function(v)if v then AVS()else AVE()end end)
-    Sli(PTo,"Umbral Y",-500,-30,-80,function(v)AV.Umbral=v end)
-    Sec(PTo,"💤 ANTI-AFK ULTRA","💤")
-    Tog(PTo,"Activar Anti-AFK",false,function(v)if v then AFS()else AFE()end end)
-    Sec(PTo,"🪐 ORBIT ULTRA","🪐")
-    Tog(PTo,"Activar Orbit",false,function(v)if v then OrbS()else OrbE()end end)
-    Sli(PTo,"Velocidad",500,30000,8000,function(v)Orb.Spd=v end)
-    Sli(PTo,"Distancia",100,8000,3000,function(v)Orb.D=v end)
-    Sli(PTo,"Altura",0,3000,150,function(v)Orb.Al=v end)
+    Sec(PTo,"💫 ANTI-STUN","💫")
+    Tog(PTo,"Activar Anti-Stun",false,function(v)if v then ASS()else ASE()end end)
+    Sec(PTo,"🛡 ANTI-VOID","🛡")Tog(PTo,"Activar",false,function(v)if v then AVS()else AVE()end end)Sli(PTo,"Umbral Y",-500,-30,-80,function(v)AV.Umbral=v end)
+    Sec(PTo,"💤 ANTI-AFK","💤")Tog(PTo,"Activar",false,function(v)if v then AFS()else AFE()end end)
+    Sec(PTo,"🪐 ORBIT","🪐")Tog(PTo,"Activar",false,function(v)if v then OrbS()else OrbE()end end)Sli(PTo,"Velocidad",500,30000,8000,function(v)Orb.Spd=v end)Sli(PTo,"Distancia",100,8000,3000,function(v)Orb.D=v end)
 end
+
 -- ESP
 do
-    Sec(PEs,"👁️ ESP","👁️")
-    Tog(PEs,"Activar ESP",false,function(v)if v then ES()else EE()end end)
-    Tog(PEs,"Nombre + Distancia",true,function(v)ESP.ShN=v end)
-    Tog(PEs,"Vida",true,function(v)ESP.ShHP=v end)
+    Sec(PEs,"👁️ ESP","👁️")Tog(PEs,"Activar ESP",false,function(v)if v then ES()else EE()end end)Tog(PEs,"Nombre",true,function(v)ESP.ShN=v end)Tog(PEs,"Vida",true,function(v)ESP.ShHP=v end)
 end
+
 -- VISUALS
 do
     Sec(PVi,"🎨 LIGHTING","🎨")
     local ps={{"❌ Ninguno",function()L.Brightness=1 L.Ambient=Color3.fromRGB(70,70,70)L.OutdoorAmbient=Color3.fromRGB(128,128,128)L.ClockTime=14 end},{"🌅 Atardecer",function()L.Brightness=2 L.Ambient=Color3.fromRGB(200,150,100)L.OutdoorAmbient=Color3.fromRGB(255,150,100)L.ClockTime=18 end},{"🌙 Noche",function()L.Brightness=0.5 L.Ambient=Color3.fromRGB(30,30,50)L.OutdoorAmbient=Color3.fromRGB(50,50,100)L.ClockTime=0 end},{"🔥 Infierno",function()L.Brightness=2 L.Ambient=Color3.fromRGB(150,50,20)L.OutdoorAmbient=Color3.fromRGB(255,100,50)L.ClockTime=16 end},{"❄️ Hielo",function()L.Brightness=2.5 L.Ambient=Color3.fromRGB(150,180,220)L.OutdoorAmbient=Color3.fromRGB(200,220,255)L.ClockTime=12 end}}
-    for _,p in ipairs(ps)do Btn(PVi,p[1],A(),p[2])end
+    for _,p in ipairs(ps)do Btn(PVi,p[1],C.Yel,p[2])end
     Sec(PVi,"🌌 SKYBOX","🌌")
-    for _,p in ipairs(SkyP)do local b=Instance.new("TextButton",PVi)b.Size=UDim2.new(1,0,0,30)b.BackgroundColor3=(Sky.Cur==p.id)and A()or C.BG2 b.Font=Enum.Font.GothamBold b.Text=p.n b.TextColor3=(Sky.Cur==p.id)and C.BG or C.Wh b.TextSize=10 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)Rip(b)b.MouseButton1Click:Connect(function()Sky.Cur=p.id SkyAp(p.ids)end)end
+    for _,p in ipairs(SkyP)do local b=Instance.new("TextButton",PVi)b.Size=UDim2.new(1,0,0,30)b.BackgroundColor3=(Sky.Cur==p.id)and C.Yel or C.BG2 b.Font=Enum.Font.GothamBold b.Text=p.n b.TextColor3=(Sky.Cur==p.id)and C.BG or C.Wh b.TextSize=10 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)Rip(b)b.MouseButton1Click:Connect(function()Sky.Cur=p.id SkyAp(p.ids)end)end
 end
+
 -- OPTIMIZE
 do
-    Sec(POp,"🛡 ANTI-BAN","🛡")
-    Tog(POp,"Activar Anti-Ban",false,function(v)if v then ABS()else ABE()end end)
-    Sec(POp,"⚡ FPS BOOST","⚡")
-    Tog(POp,"Activar Optimización",false,function(v)if v then OS()else OE()end end)
-    Tog(POp,"Quitar Texturas",false,function(v)OPT.Tex=v if OPT.On then OAp()end end)
-    Tog(POp,"Quitar Partículas",false,function(v)OPT.Part2=v if OPT.On then OAp()end end)
-    Tog(POp,"Quitar Sombras",false,function(v)OPT.Shad=v if OPT.On then OAp()end end)
-    Tog(POp,"Materiales Simples",false,function(v)OPT.Parts=v if OPT.On then OAp()end end)
+    Sec(POp,"🛡 ANTI-BAN","🛡")Tog(POp,"Activar",false,function(v)if v then ABS()else ABE()end end)
+    Sec(POp,"⚡ FPS BOOST","⚡")Tog(POp,"Activar Optimización",false,function(v)if v then OS()else OE()end end)Tog(POp,"Quitar Texturas",false,function(v)OPT.Tex=v if OPT.On then OAp()end end)Tog(POp,"Quitar Partículas",false,function(v)OPT.Part2=v if OPT.On then OAp()end end)Tog(POp,"Quitar Sombras",false,function(v)OPT.Shad=v if OPT.On then OAp()end end)
 end
+
 -- SETTINGS
 do
     Sec(PSe,"🎨 TEMA","🎨")
     local tl={}for n,_ in pairs(TH)do table.insert(tl,n)end table.sort(tl)
     local tbs={}
     for _,tn in ipairs(tl)do local b=Instance.new("TextButton",PSe)b.Size=UDim2.new(1,0,0,30)b.BackgroundColor3=(CurT==tn and not CA)and TH[tn].A or C.BG2 b.Font=Enum.Font.GothamBold b.Text=tn b.TextColor3=(CurT==tn and not CA)and C.BG or C.Wh b.TextSize=10 b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=5 Instance.new("UICorner",b).CornerRadius=UDim.new(0,6)table.insert(tbs,{b=b,n=tn})Rip(b)b.MouseButton1Click:Connect(function()CA=nil CurT=tn ApTh()FOVSettings.Color=A()for _,x in ipairs(tbs)do if x.n==tn then x.b.BackgroundColor3=TH[tn].A x.b.TextColor3=C.BG else x.b.BackgroundColor3=C.BG2 x.b.TextColor3=C.Wh end end end)end
+    Sec(PSe,"🔄 AUTO-EXEC","🔄")
+    Tog(PSe,"Activar Auto-Exec",true,function(v)AUTO_EXEC.Enabled=v if v then QueueOnTeleport()end end)
+    Btn(PSe,"🔄 Re-encolar ahora",C.Yel,function()AUTO_EXEC.LastQueue=nil QueueOnTeleport()PNotif("🔄","Re-encolado",C.Grn)end)
 end
+
 -- FABs
-local FSG=Instance.new("ScreenGui")
-FSG.Name="TLG_FAB_Float"
-FSG.ResetOnSpawn=false
-FSG.DisplayOrder=999
-FSG.IgnoreGuiInset=true
-pcall(function()FSG.Parent=SP end)
-if not FSG.Parent then pcall(function()FSG.Parent=CG end)end
-local FM=Instance.new("Frame",FSG)
-FM.Size=UDim2.new(0,290,0,80)
-FM.Position=UDim2.new(1,-310,0.5,-40)
-FM.BackgroundColor3=C.BG
-FM.BackgroundTransparency=0.2
-FM.BorderSizePixel=0
-FM.ZIndex=10
-FM.Visible=false
-FAB_Frame_Ref=FM
-Instance.new("UICorner",FM).CornerRadius=UDim.new(0,12)
-local FS=Instance.new("UIStroke",FM)
-FS.Thickness=2 FS.Color=A()FS.Transparency=0.2
-PGlow(FS,0.1,0.5,1.5)
-local FH=Instance.new("TextLabel",FM)
-FH.Size=UDim2.new(1,0,0,16)
-FH.Position=UDim2.new(0,0,0,2)
-FH.BackgroundTransparency=1
-FH.Font=Enum.Font.GothamBold
-FH.Text="⚡ ACCIONES RÁPIDAS"
-FH.TextColor3=A()
-FH.TextSize=9
-FH.ZIndex=12
-local FHo=Instance.new("Frame",FM)
-FHo.Size=UDim2.new(1,-10,1,-22)
-FHo.Position=UDim2.new(0,5,0,20)
-FHo.BackgroundTransparency=1
-FHo.ZIndex=11
-local FLy=Instance.new("UIListLayout",FHo)
-FLy.FillDirection=Enum.FillDirection.Horizontal
-FLy.Padding=UDim.new(0,5)
-FLy.HorizontalAlignment=Enum.HorizontalAlignment.Center
-FLy.VerticalAlignment=Enum.VerticalAlignment.Center
+local FSG=Instance.new("ScreenGui")FSG.Name="TLG_FAB_Float"FSG.ResetOnSpawn=false FSG.DisplayOrder=999 FSG.IgnoreGuiInset=true pcall(function()FSG.Parent=SP end)if not FSG.Parent then pcall(function()FSG.Parent=CG end)end
+local FM=Instance.new("Frame",FSG)FM.Size=UDim2.new(0,290,0,80)FM.Position=UDim2.new(1,-310,0.5,-40)FM.BackgroundColor3=C.BG FM.BackgroundTransparency=0.2 FM.BorderSizePixel=0 FM.ZIndex=10 FM.Visible=false FAB_Frame_Ref=FM Instance.new("UICorner",FM).CornerRadius=UDim.new(0,12)
+local FS=Instance.new("UIStroke",FM)FS.Thickness=2 FS.Color=C.Yel FS.Transparency=0.2 PGlow(FS,0.1,0.5,1.5)
+local FH=Instance.new("TextLabel",FM)FH.Size=UDim2.new(1,0,0,16)FH.Position=UDim2.new(0,0,0,2)FH.BackgroundTransparency=1 FH.Font=Enum.Font.GothamBold FH.Text="💀 ACCIONES RÁPIDAS"FH.TextColor3=C.Yel FH.TextSize=9 FH.ZIndex=12
+local FHo=Instance.new("Frame",FM)FHo.Size=UDim2.new(1,-10,1,-22)FHo.Position=UDim2.new(0,5,0,20)FHo.BackgroundTransparency=1 FHo.ZIndex=11
+local FLy=Instance.new("UIListLayout",FHo)FLy.FillDirection=Enum.FillDirection.Horizontal FLy.Padding=UDim.new(0,5)FLy.HorizontalAlignment=Enum.HorizontalAlignment.Center FLy.VerticalAlignment=Enum.VerticalAlignment.Center
 local FSt={Fly=false}
-local function CF(i,t,cb)
-    local b=Instance.new("TextButton",FHo)
-    b.Size=UDim2.new(0,60,0,52)
-    b.BackgroundColor3=C.BG2
-    b.Text=""
-    b.BorderSizePixel=0
-    b.AutoButtonColor=false
-    b.ZIndex=12
-    b.ClipsDescendants=true
-    Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
-    local bS=Instance.new("UIStroke",b)
-    bS.Thickness=2 bS.Color=A()bS.Transparency=0.4
-    local iL=Instance.new("TextLabel",b)
-    iL.Size=UDim2.new(1,0,0,24)
-    iL.Position=UDim2.new(0,0,0,6)
-    iL.BackgroundTransparency=1
-    iL.Text=i
-    iL.TextSize=20
-    iL.TextColor3=C.Wh
-    iL.Font=Enum.Font.GothamBold
-    iL.ZIndex=13
-    local nL=Instance.new("TextLabel",b)
-    nL.Size=UDim2.new(1,0,0,12)
-    nL.Position=UDim2.new(0,0,1,-16)
-    nL.BackgroundTransparency=1
-    nL.Text=t
-    nL.TextColor3=C.Wh
-    nL.TextSize=8
-    nL.Font=Enum.Font.GothamBold
-    nL.ZIndex=13
-    local function SA(s)
-        if s then
-            b.BackgroundColor3=A()
-            iL.TextColor3=C.BG
-            nL.TextColor3=C.BG
-            bS.Color=C.Wh
-            bS.Transparency=0
-        else
-            b.BackgroundColor3=C.BG2
-            iL.TextColor3=C.Wh
-            nL.TextColor3=C.Wh
-            bS.Color=A()
-            bS.Transparency=0.4
-        end
-    end
-    b.MouseButton1Click:Connect(function()
-        local ns=cb()
-        if ns~=nil then SA(ns)end
-    end)
-    SA(false)
-    return b
-end
-CF("🚀","FUGA",function()
-    local c=LP.Character
-    local h=c and c:FindFirstChild("HumanoidRootPart")
-    if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)end
-end)
-CF("✈","FLY",function()
-    if Fly.On then FlyE()FSt.Fly=false
-    else FlyS()FSt.Fly=true end
-    return Fly.On
-end)
-local godFAB=CF("🌀","GOD ORB",function()
-    if GO.On then
-        GOS()
-        PNotif("🌀 God Orb","Detenido",C.Rd)
-        return false
-    else
-        if SelectedTarget and SelectedTarget.Parent and SelectedTarget.Character then
-            GOSt(SelectedTarget)
-            PNotif("🌀 God Orb","Orbitando "..SelectedTarget.DisplayName,C.Grn)
-            return true
-        else
-            PNotif("⚠️ God Orb","Seleccioná un jugador en Info primero",C.Yel)
-            return false
-        end
-    end
-end)
+local function CF(i,t,cb)local b=Instance.new("TextButton",FHo)b.Size=UDim2.new(0,60,0,52)b.BackgroundColor3=C.BG2 b.Text=""b.BorderSizePixel=0 b.AutoButtonColor=false b.ZIndex=12 b.ClipsDescendants=true Instance.new("UICorner",b).CornerRadius=UDim.new(0,8)
+local bS=Instance.new("UIStroke",b)bS.Thickness=2 bS.Color=C.Yel bS.Transparency=0.4
+local iL=Instance.new("TextLabel",b)iL.Size=UDim2.new(1,0,0,24)iL.Position=UDim2.new(0,0,0,6)iL.BackgroundTransparency=1 iL.Text=i iL.TextSize=20 iL.TextColor3=C.Wh iL.Font=Enum.Font.GothamBold iL.ZIndex=13
+local nL=Instance.new("TextLabel",b)nL.Size=UDim2.new(1,0,0,12)nL.Position=UDim2.new(0,0,1,-16)nL.BackgroundTransparency=1 nL.Text=t nL.TextColor3=C.Wh nL.TextSize=8 nL.Font=Enum.Font.GothamBold nL.ZIndex=13
+local function SA(s)if s then b.BackgroundColor3=C.Yel iL.TextColor3=C.BG nL.TextColor3=C.BG bS.Color=C.Wh bS.Transparency=0 else b.BackgroundColor3=C.BG2 iL.TextColor3=C.Wh nL.TextColor3=C.Wh bS.Color=C.Yel bS.Transparency=0.4 end end
+b.MouseButton1Click:Connect(function()local ns=cb()if ns~=nil then SA(ns)end end)SA(false)return b end
+CF("🚀","FUGA",function()local c=LP.Character local h=c and c:FindFirstChild("HumanoidRootPart")if h then h.CFrame=h.CFrame+Vector3.new(0,5000,0)end end)
+CF("✈","FLY",function()if Fly.On then FlyE()FSt.Fly=false else FlyS()FSt.Fly=true end return Fly.On end)
+CF("🌀","GOD ORB",function()if GO.On then GOS()PNotif("🌀","Detenido",C.Rd)return false else if SelectedTarget and SelectedTarget.Parent and SelectedTarget.Character then GOSt(SelectedTarget)PNotif("🌀","Orbitando "..SelectedTarget.DisplayName,C.Yel)return true else PNotif("⚠️","Seleccioná un jugador primero",C.Yel)return false end end end)
 local fdg,fs,fp=false,nil,nil
-FH.InputBegan:Connect(function(i)
-    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-        fdg=true fs=i.Position fp=FM.Position
-    end
-end)
-UI.InputChanged:Connect(function(i)
-    if fdg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
-        local d=i.Position-fs
-        FM.Position=UDim2.new(fp.X.Scale,fp.X.Offset+d.X,fp.Y.Scale,fp.Y.Offset+d.Y)
-    end
-end)
-UI.InputEnded:Connect(function(i)
-    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-        fdg=false
-    end
-end)
+FH.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then fdg=true fs=i.Position fp=FM.Position end end)
+UI.InputChanged:Connect(function(i)if fdg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-fs FM.Position=UDim2.new(fp.X.Scale,fp.X.Offset+d.X,fp.Y.Scale,fp.Y.Offset+d.Y)end end)
+UI.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then fdg=false end end)
+
 -- WATERMARK
-local WM=Instance.new("Frame",SG)
-WM.Name="TLG_Watermark"
-WM.Size=UDim2.new(0,200,0,30)
-WM.Position=UDim2.new(0,10,0,10)
-WM.BackgroundColor3=C.BG2
-WM.BackgroundTransparency=0.2
-WM.BorderSizePixel=0
-WM.ZIndex=50
-WM.Visible=false
-Instance.new("UICorner",WM).CornerRadius=UDim.new(0,8)
-local WMS=Instance.new("UIStroke",WM)
-WMS.Color=A()WMS.Thickness=2 WMS.Transparency=0.2
-PGlow(WMS,0.1,0.6,1.5)
-local WIc=Instance.new("TextLabel",WM)
-WIc.Size=UDim2.new(0,24,1,0)
-WIc.Position=UDim2.new(0,4,0,0)
-WIc.BackgroundTransparency=1
-WIc.Text="👑"
-WIc.TextSize=14
-WIc.Font=Enum.Font.GothamBold
-WIc.TextColor3=A()
-WIc.ZIndex=51
-local WTx=Instance.new("TextLabel",WM)
-WTx.Size=UDim2.new(1,-60,1,0)
-WTx.Position=UDim2.new(0,30,0,0)
-WTx.BackgroundTransparency=1
-WTx.Font=Enum.Font.GothamBold
-WTx.Text="TLG GOLD HUB V6.3"
-WTx.TextSize=10
-WTx.TextColor3=C.Wh
-WTx.TextXAlignment=Enum.TextXAlignment.Left
-WTx.ZIndex=51
-local WTm=Instance.new("TextLabel",WM)
-WTm.Size=UDim2.new(0,50,1,0)
-WTm.Position=UDim2.new(1,-54,0,0)
-WTm.BackgroundTransparency=1
-WTm.Font=Enum.Font.GothamBold
-WTm.TextSize=10
-WTm.TextColor3=A()
-WTm.TextXAlignment=Enum.TextXAlignment.Right
-WTm.ZIndex=51
+local WM=Instance.new("Frame",SG)WM.Name="TLG_Watermark"WM.Size=UDim2.new(0,200,0,30)WM.Position=UDim2.new(0,10,0,10)WM.BackgroundColor3=C.BG2 WM.BackgroundTransparency=0.2 WM.BorderSizePixel=0 WM.ZIndex=50 Instance.new("UICorner",WM).CornerRadius=UDim.new(0,8)
+local WMS=Instance.new("UIStroke",WM)WMS.Color=C.Yel WMS.Thickness=2 WMS.Transparency=0.2 PGlow(WMS,0.1,0.6,1.5)
+local WIc=Instance.new("TextLabel",WM)WIc.Size=UDim2.new(0,24,1,0)WIc.Position=UDim2.new(0,4,0,0)WIc.BackgroundTransparency=1 WIc.Text="💀"WIc.TextSize=14 WIc.Font=Enum.Font.GothamBold WIc.TextColor3=C.Yel WIc.ZIndex=51
+local WTx=Instance.new("TextLabel",WM)WTx.Size=UDim2.new(1,-60,1,0)WTx.Position=UDim2.new(0,30,0,0)WTx.BackgroundTransparency=1 WTx.Font=Enum.Font.GothamBold WTx.Text="TLG GOLD V6.6"WTx.TextSize=10 WTx.TextColor3=C.Wh WTx.TextXAlignment=Enum.TextXAlignment.Left WTx.ZIndex=51
+local WTm=Instance.new("TextLabel",WM)WTm.Size=UDim2.new(0,50,1,0)WTm.Position=UDim2.new(1,-54,0,0)WTm.BackgroundTransparency=1 WTm.Font=Enum.Font.GothamBold WTm.TextSize=10 WTm.TextColor3=C.Yel WTm.TextXAlignment=Enum.TextXAlignment.Right WTm.ZIndex=51
 task.spawn(function()while WTm.Parent do WTm.Text=os.date("%H:%M")task.wait(30)end end)
+
 local min=false
-local function SetMin(st)
-    min=st
-    if min then
-        TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(W_S.X.Scale,W_S.X.Offset,0,42)}):Play()
-        TabBar.Visible=false
-        Cont.Visible=false
-        STtl.Text="👑 ABRIR"
-    else
-        TS:Create(W,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{Size=W_S}):Play()
-        TabBar.Visible=true
-        Cont.Visible=true
-        STtl.Text="👑 MENU"
-    end
-end
-local CB=Instance.new("TextButton",Ico)
-CB.Size=UDim2.new(1,0,1,0)
-CB.BackgroundTransparency=1
-CB.Text=""
-CB.ZIndex=10
-CB.MouseButton1Click:Connect(function()SetMin(not min)end)
-if UI.KeyboardEnabled then
-    UI.InputBegan:Connect(function(i,gp)
-        if gp then return end
-        if i.KeyCode==Enum.KeyCode.RightShift then SetMin(not min)end
-    end)
-end
-pcall(function()
-    TS:Create(W,TweenInfo.new(0.8,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_S,Position=W_P}):Play()
-end)
+local function SetMin(st)min=st if min then TS:Create(W,TweenInfo.new(0.3,Enum.EasingStyle.Quart),{Size=UDim2.new(W_S.X.Scale,W_S.X.Offset,0,56)}):Play()TabBar.Visible=false Cont.Visible=false STtl.Text="👑 ABRIR"else TS:Create(W,TweenInfo.new(0.4,Enum.EasingStyle.Quart),{Size=W_S}):Play()TabBar.Visible=true Cont.Visible=true STtl.Text="👑 MENU"end end
+local CB=Instance.new("TextButton",DcIco)CB.Size=UDim2.new(1,0,1,0)CB.BackgroundTransparency=1 CB.Text=""CB.ZIndex=10 CB.MouseButton1Click:Connect(function()SetMin(not min)end)
+if UI.KeyboardEnabled then UI.InputBegan:Connect(function(i,gp)if gp then return end if i.KeyCode==Enum.KeyCode.RightShift then SetMin(not min)end end)end
+pcall(function()TS:Create(W,TweenInfo.new(0.8,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=W_S,Position=W_P}):Play()end)
 task.wait(0.9)
 if FAB_Toggle_State then FM.Visible=true end
-WM.Visible=true
-PNotif("👑 TLG GOLD HUB V6.3","🎯 10K AIMBOT Edition",A())
-print("[TLG GOLD HUB V6.3] 🎯 Cargado ✓")
+PNotif("👑 TLG GOLD HUB V6.6","💀 Gold Skull Edition",C.Yel)
+print("[TLG GOLD HUB V6.6] 💀 Cargado")
