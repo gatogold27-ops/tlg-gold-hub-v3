@@ -432,11 +432,82 @@ local W_P = UDim2.new(0.5,-W_S.X.Offset/2,0.5,-W_S.Y.Offset/2)
 -- ═══════════════════════════════════════════════════════════════
 local Sky = {On=false, Current="ninguno", Ids=nil, Conn=nil, Original={Captured=false, HadSky=false, Bk=nil, Dn=nil, Ft=nil, Lf=nil, Rt=nil, Up=nil, Orientation=Vector3.zero, StarCount=nil, Celestial=nil}}
 local SkyPresets = {
+    {name="❌ Ninguno", local SkyPresets = {
     {name="❌ Ninguno", id="ninguno", ids=nil},
-    {name="🏠 Roblox Sample", id="sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
-    {name="🌅 Cálido", id="calido", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
-    {name="🌌 Espacio", id="espacio", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}}
-}
+
+    {name="🏠 Roblox Sample", id="sample", ids={
+        "rbxassetid://162001887",
+        "rbxassetid://161998893",
+        "rbxassetid://162001897",
+        "rbxassetid://162001904",
+        "rbxassetid://162001919",
+        "rbxassetid://162001926"
+    }},
+
+    {name="🌌 Galaxia", id="galaxia", ids={
+        "rbxassetid://159454299",
+        "rbxassetid://159454296",
+        "rbxassetid://159454293",
+        "rbxassetid://159454286",
+        "rbxassetid://159454300",
+        "rbxassetid://159454288"
+    }},
+
+    {name="🌠 Espacio Vaporwave", id="vaporwave", ids={
+        "rbxassetid://8631780182",
+        "rbxassetid://8631784904",
+        "rbxassetid://8631769834",
+        "rbxassetid://8631777199",
+        "rbxassetid://8631735555",
+        "rbxassetid://8631782345"
+    }},
+
+    {name="🌅 Sunset", id="sunset", ids={
+        "rbxassetid://323494035",
+        "rbxassetid://323494368",
+        "rbxassetid://323494130",
+        "rbxassetid://323494252",
+        "rbxassetid://323494067",
+        "rbxassetid://323493360"
+    }},
+
+    {name="🔵 Blue Space", id="blue_space", ids={
+        "rbxassetid://135483466",
+        "rbxassetid://135483484",
+        "rbxassetid://135483461",
+        "rbxassetid://135483495",
+        "rbxassetid://135483499",
+        "rbxassetid://135483475"
+    }},
+
+    {name="🔴 Red Night", id="red_night", ids={
+        "rbxassetid://401664839",
+        "rbxassetid://401664862",
+        "rbxassetid://401664960",
+        "rbxassetid://401664881",
+        "rbxassetid://401664901",
+        "rbxassetid://401664936"
+    }},
+
+    {name="🪐 Blue Planet", id="blue_planet", ids={
+        "rbxassetid://218955819",
+        "rbxassetid://218953419",
+        "rbxassetid://218954524",
+        "rbxassetid://218958493",
+        "rbxassetid://218957134",
+        "rbxassetid://218950090"
+    }},
+
+    {name="🔵 Blue Planet 2", id="blue_planet_2", ids={
+        "rbxassetid://16888989874",
+        "rbxassetid://16888991855",
+        "rbxassetid://16888995219",
+        "rbxassetid://16888998994",
+        "rbxassetid://16889000916",
+        "rbxassetid://16889004122"
+    }}
+}="ninguno", ids=nil},
+    {
 local function SkyCaptureOriginal()
     pcall(function()
         if Sky.Original.Captured then return end
