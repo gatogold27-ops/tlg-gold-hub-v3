@@ -492,7 +492,7 @@ local function SkyApply(ids)
 end
 
 local W = Instance.new("Frame", SG)
-W.Size = UDim2.new(0,0,0,0)
+W.Size = W_S
 W.Position = UDim2.new(0.5,0,0.5,0)
 W.BackgroundColor3 = C.BG
 W.BorderSizePixel = 0
@@ -1240,9 +1240,9 @@ do
     Sec(PCb, "🎯 AIM ASSIST", "🎯")
     Tog(PCb, "Activar", false, function(v)
         if v then
-            TLG.AiStart()
+            TLG.AIM_Start()
         else
-            TLG.AiStop()
+            TLG.AIM_Stop()
         end
     end)
     Sli(PCb, "Suavizado", 1, 100, 35, function(v) if TLG.Ai then TLG.Ai.Sm = v / 100 end end)
@@ -1547,9 +1547,7 @@ do
     Sec(PEs, "👁️ ESP", "👁️")
     Tog(PEs, "Activar ESP", false, function(v)
         if v then
-            TLG.ESPStart()
-        else
-            TLG.ESPStop()
+            TLG.PNotif("ESP", "La función ESP no está implementada en esta versión", C.Yel)
         end
     end)
 end
