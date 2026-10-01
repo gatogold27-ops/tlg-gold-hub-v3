@@ -1,4 +1,4 @@
--- TLG GOLD HUB V6 — FULL DELTA-SAFE
+-- TLG GOLD HUB V6 - FULL DELTA-SAFE (Sin Auto-Exec)
 local TS=game:GetService("TweenService")
 local UI=game:GetService("UserInputService")
 local P=game:GetService("Players")
@@ -14,23 +14,6 @@ pcall(function() VIM=game:GetService("VirtualInputManager") end)
 local LP=P.LocalPlayer
 local Cam=workspace.CurrentCamera
 local IS_M=UI.TouchEnabled and not UI.KeyboardEnabled
-
--- ===== AUTO-EXEC =====
-local AE={On=true,URL="https://raw.githubusercontent.com/gatogold27-ops/tlg-gold-hub-v3/refs/heads/main/TLG-PREMIUM-CORTO",Last=nil,Cd=3}
-local function QOT()
-    if not AE.On then return end
-    local f=nil
-    pcall(function()
-        if queue_on_teleport then f=queue_on_teleport
-        elseif syn and syn.queue_on_teleport then f=syn.queue_on_teleport
-        elseif fluxus and fluxus.queue_on_teleport then f=fluxus.queue_on_teleport end
-    end)
-    if not f then return end
-    if AE.Last and tick()-AE.Last<AE.Cd then return end
-    if pcall(f,("loadstring(game:HttpGet('%s'))()"):format(AE.URL)) then AE.Last=tick() end
-end
-task.spawn(function() task.wait(1) QOT() end)
-pcall(function() LP.OnTeleport:Connect(function(s) if s==Enum.TeleportState.Started then QOT() end end) end)
 
 -- ===== ANTI-DETECT =====
 local AD={Jit=true,RL=true,Smooth=true,Max=20,MinP=0.1,MaxP=0.5}
@@ -393,7 +376,7 @@ end
 local AF={On=false,C=nil}
 local function AFE() AF.On=false AF.C=nil end
 local function AFS()
-    if not VIM then Ntf("💤 Anti-AFK","No soportado en este executor",C.Rd) return end
+    if not VIM then Ntf("💤 Anti-AFK","No soportado",C.Rd) return end
     if AF.C then return end
     AF.On=true
     AF.C=task.spawn(function()
@@ -528,7 +511,7 @@ local Fv={On=false,Orig=70,V=120}
 pcall(function() if Cam then Fv.Orig=Cam.FieldOfView end end)
 task.spawn(function() while true do RS.RenderStepped:Wait() if Fv.On and Cam then Cam.FieldOfView=Fv.V end end end)
 
--- ===== AIM ASSIST (viejo, simple) =====
+-- ===== AIM ASSIST =====
 local Ai={On=false,Sm=0.35,D=1000,C=nil}
 local function AiE()
     if Ai.C then Ai.C:Disconnect() Ai.C=nil end
@@ -665,8 +648,8 @@ end
 
 -- ===== SKYBOX =====
 local Sky={Cur="orig",Sv=false,OS={e=false}}
-local SkyP={{
-    n="Original",id="orig",ids=nil},
+local SkyP={
+    {n="Original",id="orig",ids=nil},
     {n="Galaxia",id="gal",ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
     {n="Planeta",id="pl",ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}},
     {n="Lunar",id="lu",ids={"rbxassetid://14365026085","rbxassetid://14365026242","rbxassetid://14365025735","rbxassetid://14365025904","rbxassetid://14365025444","rbxassetid://14365026442"}},
@@ -709,7 +692,6 @@ W.Size=UDim2.new(0,0,0,0) W.Position=UDim2.new(0.5,0,0.5,0) W.BackgroundColor3=C
 Instance.new("UICorner",W).CornerRadius=UDim.new(0,12)
 local WStr=Instance.new("UIStroke",W) WStr.Thickness=2 RS1(WStr) Glow(WStr,0.05,0.3,1.5)
 
--- Header
 local Hd=Instance.new("Frame",W) Hd.Size=UDim2.new(1,0,0,42) Hd.BackgroundColor3=C.BG2 Hd.BackgroundTransparency=0.05 Hd.BorderSizePixel=0 Hd.ZIndex=5
 Instance.new("UICorner",Hd).CornerRadius=UDim.new(0,12)
 local Ic=Instance.new("TextLabel",Hd) Ic.Size=UDim2.new(0,26,0,26) Ic.Position=UDim2.new(0,10,0.5,-13) Ic.BackgroundColor3=C.BG3 Ic.Text="💀" Ic.TextSize=15 Ic.Font=Enum.Font.GothamBold Ic.TextColor3=C.Yl Ic.ZIndex=10
@@ -738,7 +720,6 @@ Hd.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseBu
 UI.InputChanged:Connect(function(i) if dg and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then local d=i.Position-dS W.Position=UDim2.new(dP.X.Scale,dP.X.Offset+d.X,dP.Y.Scale,dP.Y.Offset+d.Y) end end)
 UI.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg=false end end)
 
--- Tab bar
 local TBar=Instance.new("Frame",W) TBar.Size=UDim2.new(1,0,0,38) TBar.Position=UDim2.new(0,0,0,42) TBar.BackgroundColor3=C.BG2 TBar.BackgroundTransparency=0.3 TBar.BorderSizePixel=0 TBar.ZIndex=4
 local TSc=Instance.new("ScrollingFrame",TBar) TSc.Size=UDim2.new(1,-10,1,0) TSc.Position=UDim2.new(0,5,0,0) TSc.BackgroundTransparency=1 TSc.BorderSizePixel=0 TSc.ScrollBarThickness=0 TSc.CanvasSize=UDim2.new(0,0,0,0) TSc.ZIndex=5 TSc.ScrollingDirection=Enum.ScrollingDirection.X
 pcall(function() TSc.AutomaticCanvasSize=Enum.AutomaticSize.X end)
@@ -842,7 +823,6 @@ local PIs=Tab("Islas","🏝️")
 local PTo=Tab("Tools","🔧")
 local PEs=Tab("ESP","👁️")
 local PVi=Tab("Visual","🎨")
-local PSc=Tab("Server","🔄")
 local POp=Tab("Optim","⚡")
 local PSe=Tab("Config","⚙️")
 
@@ -1011,28 +991,6 @@ do
     end
 end
 
--- SERVER
-do
-    Sec(PSc,"SERVER","🔄")
-    Btn(PSc,"🔁 Rejoin",C.Cy,function() QOT() task.wait(0.5) pcall(function() TPS:Teleport(game.PlaceId,LP) end) end)
-    Btn(PSc,"🔄 Cambiar Server",C.Yl,function()
-        QOT()
-        task.spawn(function()
-            local ok,res=pcall(function()
-                return Http:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-            end)
-            if ok and res and res.data then
-                local sv={}
-                for _,s in ipairs(res.data) do if s.playing<s.maxPlayers and s.id~=game.JobId and s.playing>0 then table.insert(sv,s) end end
-                if #sv>0 then
-                    local el=sv[math.random(1,#sv)]
-                    pcall(function() TPS:TeleportToPlaceInstance(game.PlaceId,el.id,LP) end)
-                end
-            end
-        end)
-    end)
-end
-
 -- OPTIMIZE
 do
     Sec(POp,"FPS BOOST","⚡")
@@ -1079,18 +1037,15 @@ do
             end
         end)
     end
-    Sec(PSe,"AUTO-EXEC","🔄")
-    Tog(PSe,"Activar",true,function(v) AE.On=v if v then QOT() end end)
-    Btn(PSe,"Re-encolar",C.Yl,function() AE.Last=nil QOT() Ntf("🔄","Re-encolado",C.Grn) end)
 end
 
--- FABs FLOTANTES (abajo-izquierda)
+-- FABs
 local FSG=Instance.new("ScreenGui") FSG.Name="TLG_FAB_Float" FSG.ResetOnSpawn=false FSG.DisplayOrder=999 FSG.IgnoreGuiInset=true
 pcall(function() FSG.Parent=SP end)
 if not FSG.Parent then pcall(function() FSG.Parent=CG end) end
 local FM=Instance.new("Frame",FSG) FM.Size=UDim2.new(0,240,0,72) FM.Position=UDim2.new(0,10,1,-82) FM.BackgroundColor3=C.BG FM.BackgroundTransparency=0.2 FM.BorderSizePixel=0 FM.ZIndex=10
 Instance.new("UICorner",FM).CornerRadius=UDim.new(0,12)
-local FS=Instance.new("UIStroke",FM) FS.Thickness=2 FS.Color=C.Yl FS.Transparency=0.2 Glow(FS,0.1,0.5,1.5)
+local FStr=Instance.new("UIStroke",FM) FStr.Thickness=2 FStr.Color=C.Yl FStr.Transparency=0.2 Glow(FStr,0.1,0.5,1.5)
 local FH=Instance.new("TextLabel",FM) FH.Size=UDim2.new(1,0,0,14) FH.Position=UDim2.new(0,0,0,2) FH.BackgroundTransparency=1 FH.Font=Enum.Font.GothamBold FH.Text="💀 ACCIONES RÁPIDAS" FH.TextColor3=C.Yl FH.TextSize=8 FH.ZIndex=12
 local FHo=Instance.new("Frame",FM) FHo.Size=UDim2.new(1,-10,1,-20) FHo.Position=UDim2.new(0,5,0,18) FHo.BackgroundTransparency=1 FHo.ZIndex=11
 local FLy=Instance.new("UIListLayout",FHo) FLy.FillDirection=Enum.FillDirection.Horizontal FLy.Padding=UDim.new(0,4) FLy.HorizontalAlignment=Enum.HorizontalAlignment.Center FLy.VerticalAlignment=Enum.VerticalAlignment.Center
@@ -1150,5 +1105,5 @@ end
 pcall(function() TS:Create(W,TweenInfo.new(0.7,Enum.EasingStyle.Back),{Size=WS,Position=WP}):Play() end)
 task.wait(0.8)
 FM.Visible=true
-Ntf("👑 TLG GOLD HUB V6","✅ Cargado (Full)",C.Yl)
-print("[TLG GOLD HUB V6 FULL] 💀 OK en", IS_M and "Mobile" or "PC")
+Ntf("👑 TLG GOLD HUB V6","✅ Cargado",C.Yl)
+print("[TLG GOLD HUB V6] 💀 OK")
