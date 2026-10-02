@@ -260,7 +260,7 @@ end
 -- AIMBOT — hitbox fantasma (no rompe el movimiento)
 local AIM = {
   On = false, Conn = nil, Target = nil,
-  HeadSize = 800, ShowHitbox = false, CharConns = {}
+  HeadSize = 800, MaxTargetRange = 20000, ShowHitbox = false, CharConns = {}
 }
 TLG.AIM = AIM
 
@@ -310,12 +310,15 @@ local function aimFindTarget()
   for _, p in ipairs(PLR:GetPlayers()) do
     if p ~= TLG.LP then
       local ch = p.Character
-      if ch then
-        local hb = ch:FindFirstChild("TLG_Hitbox")
-        local hu = ch:FindFirstChildOfClass("Humanoid")
-        if hb and hu and hu.Health > 0 then
-          local d = (hb.Position - mh.Position).Magnitude
-          if d < bestD then bestD = d; best = p end
+      local hu = ch and ch:FindFirstChildOfClass("Humanoid")
+      local hb = ch and ch:FindFirstChild("TLG_Hitbox")
+      local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+      if hu and hu.Health > 0 and (hb or hrp) then
+        local pos = (hb or hrp).Position
+        local d = (pos - mh.Position).Magnitude
+        if d <= AIM.MaxTargetRange and d < bestD then
+          bestD = d
+          best = p
         end
       end
     end
@@ -637,6 +640,108 @@ RS.RenderStepped:Connect(function()
   end
 end)
 
+-- ANTI ORBIT
+local AntiOrbit = {
+  On=false, Conn=nil, Sample=0, LastPos=nil, LastVel=nil,
+  AngularScore=0, Radius=0, Threshold=0.65,
+  RadiusMin=4, RadiusMax=250, MaxSpeed=350,
+  Stabilize=true
+}
+TLG.AntiOrbit = AntiOrbit
+
+local function antiOrbitRoot()
+  local ch = TLG.LP.Character
+  return ch and ch:FindFirstChild("HumanoidRootPart")
+end
+
+local function antiOrbitReset()
+  AntiOrbit.LastPos = nil
+  AntiOrbit.LastVel = nil
+  AntiOrbit.AngularScore = 0
+  AntiOrbit.Radius = 0
+end
+
+function TLG.AntiOrbitStart()
+  if AntiOrbit.On then return end
+  AntiOrbit.On = true
+  antiOrbitReset()
+
+  AntiOrbit.Conn = RS.Heartbeat:Connect(function(dt)
+    if not AntiOrbit.On then return end
+    local root = antiOrbitRoot()
+    if not root then
+      antiOrbitReset()
+      return
+    end
+
+    local pos = root.Position
+    local vel = root.AssemblyLinearVelocity
+
+    if AntiOrbit.LastPos then
+      local delta = pos - AntiOrbit.LastPos
+      local speed = delta.Magnitude / math.max(dt, 1/240)
+
+      -- Estimate circular motion around the local player's position.
+      local nearbyCount = 0
+      local circularScore = 0
+
+      for _, plr in ipairs(PLR:GetPlayers()) do
+        if plr ~= TLG.LP then
+          local ch = plr.Character
+          local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+          local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+          if hrp and hum and hum.Health > 0 then
+            local offset = hrp.Position - pos
+            local r = offset.Magnitude
+            if r >= AntiOrbit.RadiusMin and r <= AntiOrbit.RadiusMax then
+              nearbyCount += 1
+              local tangent = Vector3.new(-offset.Z, 0, offset.X)
+              if tangent.Magnitude > 0.01 then
+                local alignment = math.abs(
+                  vel:Dot(tangent.Unit) /
+                  math.max(vel.Magnitude, 1)
+                )
+                circularScore = math.max(circularScore, alignment)
+              end
+            end
+          end
+        end
+      end
+
+      AntiOrbit.AngularScore =
+        AntiOrbit.AngularScore * 0.88 + circularScore * 0.12
+
+      -- Local stabilization only. It does not claim server authority.
+      if AntiOrbit.Stabilize and
+         AntiOrbit.AngularScore >= AntiOrbit.Threshold and
+         nearbyCount > 0 and speed > 2 and speed < AntiOrbit.MaxSpeed then
+        root.AssemblyAngularVelocity =
+          root.AssemblyAngularVelocity * 0.25
+
+        if vel.Magnitude > AntiOrbit.MaxSpeed then
+          root.AssemblyLinearVelocity =
+            vel.Unit * AntiOrbit.MaxSpeed
+        end
+      end
+    end
+
+    AntiOrbit.LastPos = pos
+    AntiOrbit.LastVel = vel
+  end)
+
+  TLG.PNotif("🛡️ Anti Orbit", "✅ Activado", C.Grn)
+end
+
+function TLG.AntiOrbitStop()
+  AntiOrbit.On = false
+  if AntiOrbit.Conn then
+    pcall(function() AntiOrbit.Conn:Disconnect() end)
+    AntiOrbit.Conn = nil
+  end
+  antiOrbitReset()
+  TLG.PNotif("🛡️ Anti Orbit", "❌ Desactivado", C.Rd)
+end
+
 -- PROTECCIONES
 local AntiVoid = {On=false, Conn=nil, Y=-100}
 function TLG.AntiVoidStart()
@@ -724,6 +829,7 @@ function TLG.Panic()
   pcall(function() TLG.AntiVoidStop() end)
   pcall(function() TLG.AntiFlingStop() end)
   pcall(function() TLG.AntiStunStop() end)
+  pcall(function() TLG.AntiOrbitStop() end)
   pcall(function() TLG.NoclipStop() end)
   pcall(function() TLG.OrbitalMapStop() end)
   if TLG.FastAttackStop then pcall(TLG.FastAttackStop) end
@@ -754,12 +860,16 @@ pcall(function()
 end)
 
 -- AUTO COLLECT
-local AutoPrompt = {On=false, Conn=nil, Range=25}
+local AutoPrompt = {On=false, Conn=nil, Range=25, LastScan=0, Interval=0.15}
 function TLG.AutoPromptStart()
   if AutoPrompt.On then return end
   AutoPrompt.On = true
+  AutoPrompt.LastScan = 0
   AutoPrompt.Conn = RS.Heartbeat:Connect(function()
     if not AutoPrompt.On then return end
+    local now = os.clock()
+    if now - AutoPrompt.LastScan < AutoPrompt.Interval then return end
+    AutoPrompt.LastScan = now
     local h = TLG.LP.Character
       and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
     if not h then return end
@@ -2004,7 +2114,7 @@ do
   mkPreset("Agresivo", "🔴", 1500, C.Rd)
 
   Sec(PAb, "🎚️ AJUSTE FINO", "🎚️")
-  Sli(PAb, "Head Size", 50, 2048, 800, function(v)
+  Sli(PAb, "Hitbox física", 50, 2048, 800, function(v)
     AIM.HeadSize = v
     if AIM.On then
       for _, p in ipairs(PLR:GetPlayers()) do
@@ -2012,6 +2122,11 @@ do
       end
     end
   end)
+
+  Sli(PAb, "Rango Aimbot", 100, 20000, 20000, function(v)
+    AIM.MaxTargetRange = v
+  end)
+  Lbl(PAb, "Rango lógico máximo: 20,000 studs.", C.Yel)
 
   Sec(PAb, "👁️ VISIBILIDAD HITBOX", "👁️")
   Tog(PAb, "Ver hitbox (debug)", false, function(v)
@@ -2029,7 +2144,7 @@ do
   Lbl(PAb, "• 400  → discreto", C.Grn)
   Lbl(PAb, "• 800  → balance recomendado", C.Yel)
   Lbl(PAb, "• 1500 → agresivo", C.Rd)
-  Lbl(PAb, "• 2048 → máximo legal Roblox", C.Gr)
+  Lbl(PAb, "• 20K → rango lógico de adquisición", C.Yel)
 end
 
 -- FLY TAB
@@ -2423,6 +2538,12 @@ end
 
 -- TOOLS TAB
 do
+  Sec(PTo, "💀 FABS", "💀")
+  Tog(PTo, "Activar / Desactivar FABS", true, function(v)
+    TLG.FAB_SetVisible(v)
+  end)
+  Lbl(PTo, "Muestra u oculta los botones rápidos flotantes.", C.Gr)
+
   Sec(PTo, "🔧 MOVIMIENTO", "🔧")
   Tog(PTo, "Fly", false, function(v)
     if v then TLG.FlyS() else TLG.FlyE() end
@@ -2482,6 +2603,18 @@ do
   end)
   Tog(PTo, "Anti-Fling", false, function(v)
     if v then TLG.AntiFlingStart() else TLG.AntiFlingStop() end
+  end)
+  Tog(PTo, "Anti Orbit", false, function(v)
+    if v then TLG.AntiOrbitStart() else TLG.AntiOrbitStop() end
+  end)
+  Sli(PTo, "Sensibilidad Anti Orbit", 20, 95, 65, function(v)
+    AntiOrbit.Threshold = v / 100
+  end)
+  Sli(PTo, "Radio Anti Orbit", 10, 250, 80, function(v)
+    AntiOrbit.RadiusMax = v
+  end)
+  Tog(PTo, "Estabilización local", true, function(v)
+    AntiOrbit.Stabilize = v == true
   end)
   Tog(PTo, "Anti-Stun", false, function(v)
     if v then TLG.AntiStunStart() else TLG.AntiStunStop() end
@@ -2926,7 +3059,13 @@ FM.BackgroundTransparency = 0.2
 FM.BorderSizePixel = 0
 FM.ZIndex = 10
 FM.Visible = true
+TLG.FAB_Toggle_State = true
 TLG.FAB_Frame_Ref = FM
+TLG.FAB_SetVisible = function(v)
+  TLG.FAB_Toggle_State = v == true
+  if FSG and FSG.Parent then FSG.Enabled = TLG.FAB_Toggle_State end
+end
+
 Instance.new("UICorner", FM).CornerRadius = UDim.new(0,12)
 local FStr = Instance.new("UIStroke", FM)
 FStr.Thickness = 2
@@ -3054,7 +3193,7 @@ do
 
   Sec(PSe, "💀 FAB FLOTANTE", "💀")
   Tog(PSe, "Mostrar FAB", true, function(v)
-    FM.Visible = v
+    TLG.FAB_SetVisible(v)
     TLG.PNotif("💀 FAB", v and "Visible" or "Oculto",
       v and C.Grn or C.Rd)
   end)
