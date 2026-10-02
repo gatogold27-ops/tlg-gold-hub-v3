@@ -1,5 +1,5 @@
--- TLG GOLD HUB V7.3 — Meme Sea Edition
--- Aimbot 20K + Fast Attack INPUT V9 + Stats Meme Sea
+-- TLG GOLD HUB V7.5 — Meme Sea Edition
+-- Ghost Hitbox + Fly Boost + FABs visibles
 
 local TW = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
@@ -257,25 +257,18 @@ function TLG.GetStats(plr)
   return s
 end
 
--- AIMBOT SIMPLE — Hitbox 20K + mirar a la cabeza
+-- AIMBOT — hitbox fantasma (no rompe el movimiento)
 local AIM = {
   On = false, Conn = nil, Target = nil,
-  HeadSize = 20000, OriginalData = {}
+  HeadSize = 800, ShowHitbox = false, CharConns = {}
 }
 TLG.AIM = AIM
 
-local function aimSaveHead(plr)
+local function aimRemoveHitbox(plr)
   local ch = plr.Character
   if not ch then return end
-  local h = ch:FindFirstChild("Head")
-  if not h then return end
-  AIM.OriginalData[plr] = AIM.OriginalData[plr] or {}
-  if not AIM.OriginalData[plr].Head then
-    AIM.OriginalData[plr].Head = {
-      Size = h.Size, Transparency = h.Transparency,
-      CanCollide = h.CanCollide, Material = h.Material, Color = h.Color
-    }
-  end
+  local old = ch:FindFirstChild("TLG_Hitbox")
+  if old then pcall(function() old:Destroy() end) end
 end
 
 local function aimExpandHead(plr)
@@ -283,32 +276,29 @@ local function aimExpandHead(plr)
   if not ch then return end
   local h = ch:FindFirstChild("Head")
   if not h then return end
-  aimSaveHead(plr)
-  pcall(function()
-    h.Size = Vector3.new(AIM.HeadSize, AIM.HeadSize, AIM.HeadSize)
-    h.Transparency = 1
-    h.CanCollide = false
-    h.Material = Enum.Material.Neon
-    h.Color = TLG.A()
-  end)
-end
-
-local function aimRestoreAll()
-  for plr, d in pairs(AIM.OriginalData) do
-    if plr.Character then
-      local h = plr.Character:FindFirstChild("Head")
-      if h and d.Head then
-        pcall(function()
-          h.Size = d.Head.Size
-          h.Transparency = d.Head.Transparency
-          h.CanCollide = d.Head.CanCollide
-          h.Material = d.Head.Material
-          h.Color = d.Head.Color
-        end)
-      end
-    end
-  end
-  AIM.OriginalData = {}
+  aimRemoveHitbox(plr)
+  local s = math.clamp(AIM.HeadSize, 1, 2048)
+  local hb = Instance.new("Part")
+  hb.Name = "TLG_Hitbox"
+  hb.Size = Vector3.new(s, s, s)
+  hb.Transparency = AIM.ShowHitbox and 0.7 or 1
+  hb.CanCollide = false
+  hb.Massless = true
+  hb.Anchored = false
+  hb.CanQuery = true
+  hb.CanTouch = true
+  hb.Material = AIM.ShowHitbox and Enum.Material.ForceField
+    or Enum.Material.Neon
+  hb.Color = TLG.A()
+  hb.TopSurface = Enum.SurfaceType.Smooth
+  hb.BottomSurface = Enum.SurfaceType.Smooth
+  hb.CFrame = h.CFrame
+  hb.Parent = ch
+  local weld = Instance.new("WeldConstraint")
+  weld.Part0 = h
+  weld.Part1 = hb
+  weld.Parent = hb
+  hb.CFrame = h.CFrame
 end
 
 local function aimFindTarget()
@@ -318,58 +308,81 @@ local function aimFindTarget()
   local mh = mc:FindFirstChild("HumanoidRootPart")
   if not mh then return nil end
   for _, p in ipairs(PLR:GetPlayers()) do
-    if p ~= TLG.LP and p.Character then
-      local h = p.Character:FindFirstChild("Head")
-      local hu = p.Character:FindFirstChildOfClass("Humanoid")
-      if h and hu and hu.Health > 0 then
-        local d = (h.Position - mh.Position).Magnitude
-        if d < bestD then bestD = d; best = p end
+    if p ~= TLG.LP then
+      local ch = p.Character
+      if ch then
+        local hb = ch:FindFirstChild("TLG_Hitbox")
+        local hu = ch:FindFirstChildOfClass("Humanoid")
+        if hb and hu and hu.Health > 0 then
+          local d = (hb.Position - mh.Position).Magnitude
+          if d < bestD then bestD = d; best = p end
+        end
       end
     end
   end
   return best
 end
 
-local function aimLookAt(target)
-  local mc = TLG.LP.Character
-  if not mc then return end
-  local mh = mc:FindFirstChild("HumanoidRootPart")
-  local tc = target.Character
-  if not tc then return end
-  local th = tc:FindFirstChild("Head")
-  if not mh or not th then return end
-  pcall(function()
-    mh.CFrame = CFrame.new(mh.Position,
-      Vector3.new(th.Position.X, mh.Position.Y, th.Position.Z))
-  end)
-end
-
 local function aimLoop()
   if not AIM.On then return end
+  for _, p in ipairs(PLR:GetPlayers()) do
+    if p ~= TLG.LP and p.Character then
+      if not p.Character:FindFirstChild("TLG_Hitbox") then
+        pcall(aimExpandHead, p)
+      end
+    end
+  end
   local t = aimFindTarget()
   AIM.Target = t
   if not t then return end
-  aimExpandHead(t)
-  aimLookAt(t)
+  local mc = TLG.LP.Character
+  if not mc then return end
+  local mh = mc:FindFirstChild("HumanoidRootPart")
+  local tc = t.Character
+  local th = tc and tc:FindFirstChild("TLG_Hitbox")
+  if mh and th then
+    pcall(function()
+      mh.CFrame = CFrame.new(mh.Position,
+        Vector3.new(th.Position.X, mh.Position.Y, th.Position.Z))
+    end)
+  end
 end
 
 function TLG.AIM_Start()
   if AIM.On then return end
   AIM.On = true
   for _, p in ipairs(PLR:GetPlayers()) do
-    if p ~= TLG.LP then aimExpandHead(p) end
+    if p ~= TLG.LP then pcall(aimExpandHead, p) end
+  end
+  AIM.CharConns = AIM.CharConns or {}
+  for _, p in ipairs(PLR:GetPlayers()) do
+    if p ~= TLG.LP then
+      AIM.CharConns[p] = p.CharacterAdded:Connect(function()
+        if AIM.On then task.wait(0.3); pcall(aimExpandHead, p) end
+      end)
+    end
   end
   AIM.Conn = RS.Heartbeat:Connect(aimLoop)
-  TLG.PNotif("🎯 Hitbox 20K", "✅ Activado", C.Grn)
+  TLG.PNotif("🎯 Hitbox", "✅ "..AIM.HeadSize, C.Grn)
 end
 
 function TLG.AIM_Stop()
   if not AIM.On then return end
   AIM.On = false
-  if AIM.Conn then pcall(function() AIM.Conn:Disconnect() end); AIM.Conn = nil end
-  aimRestoreAll()
+  if AIM.Conn then
+    pcall(function() AIM.Conn:Disconnect() end); AIM.Conn = nil
+  end
+  if AIM.CharConns then
+    for _, c in pairs(AIM.CharConns) do
+      pcall(function() c:Disconnect() end)
+    end
+    AIM.CharConns = {}
+  end
+  for _, p in ipairs(PLR:GetPlayers()) do
+    if p ~= TLG.LP then pcall(aimRemoveHitbox, p) end
+  end
   AIM.Target = nil
-  TLG.PNotif("🎯 Hitbox 20K", "❌ Desactivado", C.Rd)
+  TLG.PNotif("🎯 Hitbox", "❌ Desactivado", C.Rd)
 end
 
 -- HITBOX MANUAL
@@ -379,8 +392,9 @@ local function applyHB(p)
   local ch = p.Character; if not ch then return end
   local h = ch:FindFirstChild("HumanoidRootPart")
   if not h then return end
+  local s = math.clamp(HB.Sz, 1, 2048)
   pcall(function()
-    h.Size = Vector3.new(HB.Sz, HB.Sz, HB.Sz)
+    h.Size = Vector3.new(s, s, s)
     h.Transparency = HB.Tr
     h.LocalTransparencyModifier = 0
     h.Material = Enum.Material.Neon
@@ -468,9 +482,9 @@ function TLG.SpSt(p)
   end)
 end
 
--- FLY
-TLG.Fly = {On=false, Spd=15000, C=nil, Noclip=true,
-  Keys={Up=false, Down=false}}
+-- FLY (con boost Shift)
+TLG.Fly = {On=false, Spd=15000, BoostMul=3, Boost=false,
+  C=nil, Noclip=true, Keys={Up=false, Down=false}}
 local function flyCleanup(h)
   if not h then return end
   pcall(function()
@@ -487,6 +501,7 @@ function TLG.FlyE()
   if ch then
     local h = ch:FindFirstChild("HumanoidRootPart")
     local hu = ch:FindFirstChildOfClass("Humanoid")
+    if h then pcall(function() h.Anchored = false end) end
     flyCleanup(h)
     if hu then pcall(function() hu.PlatformStand = false end) end
     if TLG.Fly.Noclip then
@@ -525,34 +540,27 @@ function TLG.FlyS()
     local hu = ch:FindFirstChildOfClass("Humanoid")
     if not h or not hu then TLG.Fly.On = false; return end
     flyCleanup(h)
-    local bv = Instance.new("BodyVelocity")
-    bv.Name = "TLG_FlyBV"
-    bv.MaxForce = Vector3.new(1e10, 1e10, 1e10)
-    bv.Velocity = Vector3.zero; bv.Parent = h
     local bg = Instance.new("BodyGyro")
     bg.Name = "TLG_FlyBG"
     bg.MaxTorque = Vector3.new(1e10, 1e10, 1e10)
-    bg.P = 9e4; bg.CFrame = h.CFrame; bg.Parent = h
+    bg.P = 9e4
+    bg.CFrame = h.CFrame
+    bg.Parent = h
     hu.PlatformStand = true
     TLG.Fly.C = RS.RenderStepped:Connect(function()
       if not TLG.Fly.On then TLG.FlyE(); return end
-      local curCh = TLG.LP.Character; if not curCh then return end
+      local curCh = TLG.LP.Character
+      if not curCh then return end
       h = curCh:FindFirstChild("HumanoidRootPart")
       hu = curCh:FindFirstChildOfClass("Humanoid")
       if not h or not hu then return end
-      bv = h:FindFirstChild("TLG_FlyBV")
       bg = h:FindFirstChild("TLG_FlyBG")
-      if not bv then
-        bv = Instance.new("BodyVelocity")
-        bv.Name = "TLG_FlyBV"
-        bv.MaxForce = Vector3.new(1e10, 1e10, 1e10)
-        bv.Parent = h
-      end
       if not bg then
         bg = Instance.new("BodyGyro")
         bg.Name = "TLG_FlyBG"
         bg.MaxTorque = Vector3.new(1e10, 1e10, 1e10)
-        bg.P = 9e4; bg.Parent = h
+        bg.P = 9e4
+        bg.Parent = h
       end
       if not hu.PlatformStand then hu.PlatformStand = true end
       if TLG.Fly.Noclip then
@@ -562,6 +570,7 @@ function TLG.FlyS()
       end
       local cam = TLG.Cam or workspace.CurrentCamera
       if cam then bg.CFrame = cam.CFrame end
+
       local mv = flyGetMove()
       local dir = Vector3.zero
       if cam then
@@ -572,10 +581,24 @@ function TLG.FlyS()
       if TLG.Fly.Keys.Up then y = y + 1 end
       if TLG.Fly.Keys.Down then y = y - 1 end
       if y ~= 0 then dir = dir + Vector3.new(0, y, 0) end
+
+      -- Boost con Shift
+      TLG.Fly.Boost = UIS:IsKeyDown(Enum.KeyCode.LeftShift)
+        or UIS:IsKeyDown(Enum.KeyCode.RightShift)
+
       if dir.Magnitude > 0.05 then
-        bv.Velocity = dir.Unit * TLG.Fly.Spd
+        if h.Anchored then h.Anchored = false end
+        local speed = TLG.Fly.Spd
+        if TLG.Fly.Boost then speed = speed * TLG.Fly.BoostMul end
+        h.AssemblyLinearVelocity = dir.Unit * speed
       else
-        bv.Velocity = Vector3.zero
+        h.AssemblyLinearVelocity = Vector3.zero
+        h.AssemblyAngularVelocity = Vector3.zero
+        if not h.Anchored then h.Anchored = true end
+        if cam then
+          h.CFrame = CFrame.new(h.Position,
+            h.Position + cam.CFrame.LookVector)
+        end
       end
     end)
   end)
@@ -761,14 +784,40 @@ function TLG.AutoPromptStop()
   end
 end
 
--- ⚡ FAST ATTACK — estilo INPUT V9
+-- ⚡ FAST ATTACK (INPUT V9) + AUTO-PAUSA en habilidades
 local FA = {
   On = false, Conn = nil, CharConn = nil, AnimConn = nil,
   Stun = nil, BurstCount = 3, BurstInterval = 0.025,
   BurstRate = 0.15, CachedPing = 50,
-  LastPing = 0, LastBurst = 0, Tool = nil
+  LastPing = 0, LastBurst = 0, Tool = nil,
+  Paused = false, PausedUntil = 0, PauseDuration = 0.6
 }
 TLG.FastAttack = FA
+
+local ABILITY_KEYS = {
+  [Enum.KeyCode.Z] = true, [Enum.KeyCode.X] = true,
+  [Enum.KeyCode.C] = true, [Enum.KeyCode.V] = true,
+  [Enum.KeyCode.F] = true, [Enum.KeyCode.G] = true,
+  [Enum.KeyCode.Q] = true, [Enum.KeyCode.E] = true,
+  [Enum.KeyCode.R] = true,
+}
+
+UIS.InputBegan:Connect(function(input, gp)
+  if gp then return end
+  if not FA.On then return end
+  if ABILITY_KEYS[input.KeyCode] then
+    FA.Paused = true
+    FA.PausedUntil = os.clock() + FA.PauseDuration
+  end
+end)
+UIS.InputBegan:Connect(function(input, gp)
+  if gp then return end
+  if not FA.On then return end
+  if input.UserInputType == Enum.UserInputType.MouseButton2 then
+    FA.Paused = true
+    FA.PausedUntil = os.clock() + 0.3
+  end
+end)
 
 local function faPing()
   local p = 0
@@ -844,6 +893,8 @@ local function faTool()
 end
 
 local function faOnce()
+  if FA.Paused and os.clock() < FA.PausedUntil then return end
+  if FA.Paused then FA.Paused = false end
   local t = FA.Tool
   if not t or not t.Parent then
     faTool(); t = FA.Tool
@@ -855,6 +906,7 @@ end
 local function faBurst()
   for i = 1, FA.BurstCount do
     if not FA.On then return end
+    if FA.Paused and os.clock() < FA.PausedUntil then return end
     faOnce()
     if i < FA.BurstCount then
       task.wait(FA.BurstInterval)
@@ -874,6 +926,9 @@ function TLG.FastAttackStart()
   FA.Conn = RS.Heartbeat:Connect(function()
     if not FA.On then return end
     local now = os.clock()
+    if FA.Paused and now >= FA.PausedUntil then
+      FA.Paused = false
+    end
     if now - FA.LastPing >= 1 then
       FA.CachedPing = faPing()
       FA.LastPing = now
@@ -889,6 +944,7 @@ function TLG.FastAttackStart()
     if stun and stun.Parent then
       pcall(function() stun.Value = -1 end)
     end
+    if FA.Paused then return end
     local iv = FA.BurstRate * (1 + FA.CachedPing / 2000)
     if now - FA.LastBurst >= iv then
       FA.LastBurst = now
@@ -902,6 +958,7 @@ end
 function TLG.FastAttackStop()
   if not FA.On then return end
   FA.On = false
+  FA.Paused = false
   if FA.Conn then
     pcall(function() FA.Conn:Disconnect() end); FA.Conn = nil
   end
@@ -956,7 +1013,7 @@ function TLG.LoadConfig()
 end
 task.spawn(function() task.wait(1); pcall(TLG.LoadConfig) end)
 
-print("[TLG V7.3] Parte 1 ok")
+print("[TLG V7.5] Parte 1 ok")
 
 -- PARTE 2 — UI
 local W_S = TLG.IsMobile and UDim2.new(0,400,0,280)
@@ -1094,7 +1151,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V7.3"; SubTitle.TextSize = 9
+SubTitle.Text = "Meme Sea • V7.5"; SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
 SubTitle.ZIndex = 10
@@ -1862,7 +1919,7 @@ do
   Tog(PCb, "Activar Hitbox", false, function(v)
     if v then TLG.HBStart() else TLG.HBStop() end
   end)
-  Sli(PCb, "Tamaño", 10, 200, 50, function(v) HB.Sz = v end)
+  Sli(PCb, "Tamaño", 10, 2048, 50, function(v) HB.Sz = v end)
   Sli(PCb, "Transparencia", 0, 100, 50, function(v)
     HB.Tr = v / 100
   end)
@@ -1872,19 +1929,107 @@ end
 
 -- AIMBOT TAB
 do
-  Sec(PAb, "🎯 AIMBOT — HITBOX 20K", "🎯")
-  local AB = Btn(PAb, "🎯 ACTIVAR HITBOX 20K", C.Yel, function()
+  Sec(PAb, "🎯 AIMBOT — HITBOX", "🎯")
+  local AB = Btn(PAb, "🎯 ACTIVAR HITBOX", C.Yel, function()
     if AIM.On then
-      TLG.AIM_Stop(); AB.Text = "🎯 ACTIVAR HITBOX 20K"
+      TLG.AIM_Stop(); AB.Text = "🎯 ACTIVAR HITBOX"
     else
       TLG.AIM_Start(); AB.Text = "🛑 DESACTIVAR HITBOX"
     end
   end)
   AB.Size = UDim2.new(1,0,0,54)
   AB.TextSize = 14
-  Lbl(PAb, "• Hitbox gigante de 20,000 studs en la cabeza", C.Cyan)
-  Lbl(PAb, "• Te mira al enemigo más cercano", C.Grn)
-  Lbl(PAb, "• Sin TP, sin auto-attack, sin ajustes", C.Gr)
+
+  Sec(PAb, "📏 PRESETS DE TAMAÑO", "📏")
+  local presetRow = Instance.new("Frame", PAb)
+  presetRow.Size = UDim2.new(1,0,0,42)
+  presetRow.BackgroundTransparency = 1
+  presetRow.ZIndex = 5
+  local prl = Instance.new("UIListLayout", presetRow)
+  prl.FillDirection = Enum.FillDirection.Horizontal
+  prl.Padding = UDim.new(0,6)
+  prl.HorizontalAlignment = Enum.HorizontalAlignment.Center
+  prl.VerticalAlignment = Enum.VerticalAlignment.Center
+
+  local function mkPreset(name, emoji, size, color)
+    local b = Instance.new("TextButton", presetRow)
+    b.Size = UDim2.new(0, 130, 0, 40)
+    b.BackgroundColor3 = C.BG2
+    b.BackgroundTransparency = 0.1
+    b.Text = ""
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.ZIndex = 6
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+    local bs = Instance.new("UIStroke", b)
+    bs.Color = color; bs.Thickness = 1.5
+    bs.Transparency = 0.4
+    local ic = Instance.new("TextLabel", b)
+    ic.Size = UDim2.new(0,26,1,0)
+    ic.Position = UDim2.new(0,4,0,0)
+    ic.BackgroundTransparency = 1
+    ic.Text = emoji; ic.TextSize = 15
+    ic.ZIndex = 7
+    local lb = Instance.new("TextLabel", b)
+    lb.Size = UDim2.new(1,-32,1,0)
+    lb.Position = UDim2.new(0,30,0,0)
+    lb.BackgroundTransparency = 1
+    lb.Font = Enum.Font.GothamBold
+    lb.Text = name
+    lb.TextSize = 10
+    lb.TextColor3 = color
+    lb.TextXAlignment = Enum.TextXAlignment.Left
+    lb.ZIndex = 7
+    b.MouseButton1Click:Connect(function()
+      AIM.HeadSize = size
+      if AIM.On then
+        for _, p in ipairs(PLR:GetPlayers()) do
+          if p ~= TLG.LP then pcall(aimExpandHead, p) end
+        end
+      end
+      TLG.PNotif("📏 Tamaño", name.." ("..size..")", color)
+      bs.Transparency = 0
+      task.delay(0.4, function()
+        if bs.Parent then
+          TW:Create(bs, TweenInfo.new(0.4),
+            {Transparency = 0.4}):Play()
+        end
+      end)
+    end)
+    TLG.Ripple(b)
+  end
+
+  mkPreset("Discreto", "🟢", 400, C.Grn)
+  mkPreset("Balance", "🟡", 800, C.Yel)
+  mkPreset("Agresivo", "🔴", 1500, C.Rd)
+
+  Sec(PAb, "🎚️ AJUSTE FINO", "🎚️")
+  Sli(PAb, "Head Size", 50, 2048, 800, function(v)
+    AIM.HeadSize = v
+    if AIM.On then
+      for _, p in ipairs(PLR:GetPlayers()) do
+        if p ~= TLG.LP then pcall(aimExpandHead, p) end
+      end
+    end
+  end)
+
+  Sec(PAb, "👁️ VISIBILIDAD HITBOX", "👁️")
+  Tog(PAb, "Ver hitbox (debug)", false, function(v)
+    AIM.ShowHitbox = v
+    if AIM.On then
+      for _, p in ipairs(PLR:GetPlayers()) do
+        if p ~= TLG.LP then pcall(aimExpandHead, p) end
+      end
+    end
+  end)
+  Lbl(PAb, "• ON  → ves la hitbox translúcida", C.Cyan)
+  Lbl(PAb, "• OFF → invisible (recomendado)", C.Gr)
+
+  Sec(PAb, "ℹ️ INFO", "💡")
+  Lbl(PAb, "• 400  → discreto", C.Grn)
+  Lbl(PAb, "• 800  → balance recomendado", C.Yel)
+  Lbl(PAb, "• 1500 → agresivo", C.Rd)
+  Lbl(PAb, "• 2048 → máximo legal Roblox", C.Gr)
 end
 
 -- FLY TAB
@@ -1896,10 +2041,14 @@ do
   Sli(PFl, "Velocidad", 100, 50000, 15000, function(v)
     TLG.Fly.Spd = v
   end)
+  Sli(PFl, "Multiplicador Boost (Shift)", 2, 10, 3, function(v)
+    TLG.Fly.BoostMul = v
+  end)
   Tog(PFl, "Noclip al volar", true, function(v)
     TLG.Fly.Noclip = v == true
   end)
-  Lbl(PFl, "Space = subir  |  Ctrl / C = bajar", C.Cyan)
+  Lbl(PFl, "Space = subir  |  Ctrl/C = bajar", C.Cyan)
+  Lbl(PFl, "Shift = Boost (x3 por default)", C.Yel)
 
   Sec(PFl, "🏃 SPEED", "🏃")
   Tog(PFl, "Activar Speed", false, function(v) TLG.Speed.On = v end)
@@ -2023,9 +2172,9 @@ do
   end)
 end
 
-print("[TLG V7.3] Parte 2 ok")
+print("[TLG V7.5] Parte 2 ok")
 
--- PARTE 3 — TOOLS, ESP, etc.
+-- PARTE 3
 
 local Fuga = {On=false, Height=5000}
 function TLG.FugaSetHeight(v)
@@ -2272,7 +2421,7 @@ function TLG.OrbitalMapSetSpeed(v)
   OM.Speed = math.clamp(tonumber(v) or 35, 1, 20000)
 end
 
--- TOOLS TAB UI
+-- TOOLS TAB
 do
   Sec(PTo, "🔧 MOVIMIENTO", "🔧")
   Tog(PTo, "Fly", false, function(v)
@@ -2294,9 +2443,9 @@ do
   Sli(PTo, "Activaciones por ráfaga", 1, 10, 3, function(v)
     FA.BurstCount = v
   end)
-  Lbl(PTo, "• 3 activaciones por ráfaga (INPUT V9)", C.Cyan)
-  Lbl(PTo, "• Stun = -1 + animación acelerada", C.Grn)
-  Lbl(PTo, "• Ping adaptativo automático", C.Gr)
+  Lbl(PTo, "• 3 activaciones por ráfaga", C.Cyan)
+  Lbl(PTo, "• Stun = -1 + anim acelerada", C.Grn)
+  Lbl(PTo, "• Pausa auto en habilidades (Z X C V...)", C.Yel)
 
   Sec(PTo, "🚀 FUGA", "🚀")
   Btn(PTo, "🚀 Ejecutar Fuga", C.Yel, function()
@@ -2734,7 +2883,7 @@ do
   end)
 end
 
--- OPTIMIZE TAB
+-- OPTIMIZE
 do
   Sec(POp, "⚡ FPS", "⚡")
   local orig = {}
@@ -2760,60 +2909,7 @@ do
   end)
 end
 
--- SETTINGS TAB
-do
-  Sec(PSe, "💾 CONFIGURACIÓN", "💾")
-  Btn(PSe, "💾 Guardar Config", C.Grn, TLG.SaveConfig)
-  Btn(PSe, "📂 Cargar Config", C.Cyan, TLG.LoadConfig)
-
-  Sec(PSe, "🔄 SESIÓN", "🔄")
-  Tog(PSe, "Auto-Rejoin al kick", false, function(v)
-    TLG.AutoRejoinToggle(v)
-  end)
-
-  Sec(PSe, "🚨 EMERGENCIA", "🚨")
-  Btn(PSe, "🚨 PANIC — Desactivar todo", C.Rd, TLG.Panic)
-
-  Sec(PSe, "🎨 TEMA", "🎨")
-  local tl = {}
-  for n in pairs(Themes) do table.insert(tl, n) end
-  table.sort(tl)
-  local tbs = {}
-  for _, tn in ipairs(tl) do
-    local b = Instance.new("TextButton", PSe)
-    b.Size = UDim2.new(1,0,0,26)
-    b.BackgroundColor3 = (TLG.CurrentTheme == tn
-      and not TLG.CustomAccent) and Themes[tn].A or C.BG2
-    b.Font = Enum.Font.GothamBold
-    b.Text = tn
-    b.TextColor3 = (TLG.CurrentTheme == tn
-      and not TLG.CustomAccent) and C.BG or C.Wh
-    b.TextSize = 9
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 5
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
-    table.insert(tbs, {b=b, n=tn})
-    TLG.Ripple(b)
-    b.MouseButton1Click:Connect(function()
-      TLG.CustomAccent = nil
-      TLG.CustomAccent2 = nil
-      TLG.CurrentTheme = tn
-      for _, x in ipairs(tbs) do
-        if x.n == tn then
-          x.b.BackgroundColor3 = Themes[tn].A
-          x.b.TextColor3 = C.BG
-        else
-          x.b.BackgroundColor3 = C.BG2
-          x.b.TextColor3 = C.Wh
-        end
-      end
-      TLG.PNotif("🎨", tn, Themes[tn].A)
-    end)
-  end
-end
-
--- FAB
+-- FAB (visible por defecto)
 local FSG = Instance.new("ScreenGui")
 FSG.Name = "TLG_FAB_Float"
 FSG.ResetOnSpawn = false
@@ -2829,7 +2925,7 @@ FM.BackgroundColor3 = C.BG
 FM.BackgroundTransparency = 0.2
 FM.BorderSizePixel = 0
 FM.ZIndex = 10
-FM.Visible = false
+FM.Visible = true
 TLG.FAB_Frame_Ref = FM
 Instance.new("UICorner", FM).CornerRadius = UDim.new(0,12)
 local FStr = Instance.new("UIStroke", FM)
@@ -2942,6 +3038,67 @@ UIS.InputEnded:Connect(function(i)
   end
 end)
 
+-- SETTINGS TAB
+do
+  Sec(PSe, "💾 CONFIGURACIÓN", "💾")
+  Btn(PSe, "💾 Guardar Config", C.Grn, TLG.SaveConfig)
+  Btn(PSe, "📂 Cargar Config", C.Cyan, TLG.LoadConfig)
+
+  Sec(PSe, "🔄 SESIÓN", "🔄")
+  Tog(PSe, "Auto-Rejoin al kick", false, function(v)
+    TLG.AutoRejoinToggle(v)
+  end)
+
+  Sec(PSe, "🚨 EMERGENCIA", "🚨")
+  Btn(PSe, "🚨 PANIC — Desactivar todo", C.Rd, TLG.Panic)
+
+  Sec(PSe, "💀 FAB FLOTANTE", "💀")
+  Tog(PSe, "Mostrar FAB", true, function(v)
+    FM.Visible = v
+    TLG.PNotif("💀 FAB", v and "Visible" or "Oculto",
+      v and C.Grn or C.Rd)
+  end)
+  Lbl(PSe, "Botones rápidos: 🚀 Fuga, ✈ Fly, ⚡ Fast Atk", C.Gr)
+
+  Sec(PSe, "🎨 TEMA", "🎨")
+  local tl = {}
+  for n in pairs(Themes) do table.insert(tl, n) end
+  table.sort(tl)
+  local tbs = {}
+  for _, tn in ipairs(tl) do
+    local b = Instance.new("TextButton", PSe)
+    b.Size = UDim2.new(1,0,0,26)
+    b.BackgroundColor3 = (TLG.CurrentTheme == tn
+      and not TLG.CustomAccent) and Themes[tn].A or C.BG2
+    b.Font = Enum.Font.GothamBold
+    b.Text = tn
+    b.TextColor3 = (TLG.CurrentTheme == tn
+      and not TLG.CustomAccent) and C.BG or C.Wh
+    b.TextSize = 9
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.ZIndex = 5
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+    table.insert(tbs, {b=b, n=tn})
+    TLG.Ripple(b)
+    b.MouseButton1Click:Connect(function()
+      TLG.CustomAccent = nil
+      TLG.CustomAccent2 = nil
+      TLG.CurrentTheme = tn
+      for _, x in ipairs(tbs) do
+        if x.n == tn then
+          x.b.BackgroundColor3 = Themes[tn].A
+          x.b.TextColor3 = C.BG
+        else
+          x.b.BackgroundColor3 = C.BG2
+          x.b.TextColor3 = C.Wh
+        end
+      end
+      TLG.PNotif("🎨", tn, Themes[tn].A)
+    end)
+  end
+end
+
 -- WATERMARK
 local WM = Instance.new("Frame", SG)
 WM.Name = "TLG_Watermark"
@@ -2967,7 +3124,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG GOLD V7.3"
+WTx.Text = "TLG GOLD V7.5"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -3019,6 +3176,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 TLG GOLD V7.3", "💀 Fast Attack INPUT V9", C.Yel)
+TLG.PNotif("👑 TLG GOLD V7.5", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[TLG GOLD V7.3] 💀 Cargado")
+print("[TLG GOLD V7.5] 💀 Cargado")
