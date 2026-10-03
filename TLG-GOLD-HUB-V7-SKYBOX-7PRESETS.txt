@@ -1243,7 +1243,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V8.5"
+SubTitle.Text = "Meme Sea • V8.6"
 SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1313,25 +1313,36 @@ STtl.ZIndex = 7
 
 TLG.STtl = STtl
 
-local dg, dS, dP = false, nil, nil
-TB.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        dg = true
-        dS = i.Position
-        dP = W.Position
-    end
-end)
+local DragS = {active=false, start=nil, pos=nil}
+local function makeDrag(handle)
+    handle.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1
+           or i.UserInputType == Enum.UserInputType.Touch then
+            DragS.active = true
+            DragS.start = i.Position
+            DragS.pos = W.Position
+        end
+    end)
+end
 UIS.InputChanged:Connect(function(i)
-    if dg and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-        local d = i.Position - dS
-        W.Position = UDim2.new(dP.X.Scale, dP.X.Offset + d.X, dP.Y.Scale, dP.Y.Offset + d.Y)
+    if DragS.active and (i.UserInputType == Enum.UserInputType.MouseMovement
+       or i.UserInputType == Enum.UserInputType.Touch) then
+        local d = i.Position - DragS.start
+        local cam = workspace.CurrentCamera
+        local vp = cam and cam.ViewportSize or Vector2.new(1920, 1080)
+        local p0 = DragS.pos
+        local nx = math.clamp(p0.X.Offset + d.X, -vp.X * p0.X.Scale, vp.X * (1 - p0.X.Scale))
+        local ny = math.clamp(p0.Y.Offset + d.Y, -vp.Y * p0.Y.Scale, vp.Y * (1 - p0.Y.Scale))
+        W.Position = UDim2.new(p0.X.Scale, nx, p0.Y.Scale, ny)
     end
 end)
 UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-        dg = false
+    if i.UserInputType == Enum.UserInputType.MouseButton1
+       or i.UserInputType == Enum.UserInputType.Touch then
+        DragS.active = false
     end
 end)
+makeDrag(TB)
 
 local TabBar = Instance.new("Frame", W)
 TabBar.Size = UDim2.new(1,0,0,38)
@@ -1360,13 +1371,34 @@ TLy.HorizontalAlignment = Enum.HorizontalAlignment.Left
 TLy.Padding = UDim.new(0,6)
 
 local Cont = Instance.new("Frame", W)
-Cont.Size = UDim2.new(1,-10,1,-100)
+Cont.Size = UDim2.new(1,-10,1,-116)
 Cont.Position = UDim2.new(0,5,0,88)
 Cont.BackgroundTransparency = 1
 Cont.ZIndex = 3
 
 TLG.TabBar = TabBar
 TLG.Cont = Cont
+
+local BH = Instance.new("Frame", W)
+BH.Name = "TLG_BottomHandle"
+BH.Size = UDim2.new(1,-10,0,20)
+BH.Position = UDim2.new(0,5,1,-24)
+BH.BackgroundColor3 = C.BG2
+BH.BackgroundTransparency = 0.2
+BH.BorderSizePixel = 0
+BH.ZIndex = 8
+Instance.new("UICorner", BH).CornerRadius = UDim.new(0,8)
+local BHs = Instance.new("UIStroke", BH)
+BHs.Color = C.Yel; BHs.Thickness = 1; BHs.Transparency = 0.6
+local BHp = Instance.new("Frame", BH)
+BHp.Size = UDim2.new(0,64,0,4)
+BHp.Position = UDim2.new(0.5,-32,0.5,-2)
+BHp.BackgroundColor3 = C.Yel
+BHp.BorderSizePixel = 0
+BHp.ZIndex = 9
+Instance.new("UICorner", BHp).CornerRadius = UDim.new(1,0)
+makeDrag(BH)
+TLG.BotHandle = BH
 
 local Tabs = {}
 
@@ -3085,7 +3117,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG GOLD V8.5"
+WTx.Text = "TLG GOLD V8.6"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -3111,12 +3143,12 @@ local function setMin(st)
   if min then
     TW:Create(W, TweenInfo.new(0.3, Enum.EasingStyle.Quart),
       {Size = UDim2.new(W_S.X.Scale, W_S.X.Offset, 0, 42)}):Play()
-    TabBar.Visible = false; Cont.Visible = false
+    TabBar.Visible = false; Cont.Visible = false; BH.Visible = false
     STtl.Text = "👑 ▶"
   else
     TW:Create(W, TweenInfo.new(0.4, Enum.EasingStyle.Quart),
       {Size = W_S}):Play()
-    TabBar.Visible = true; Cont.Visible = true
+    TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
     STtl.Text = "👑"
   end
 end
@@ -3137,6 +3169,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 TLG GOLD V8.5", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 TLG GOLD V8.6", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[TLG GOLD V8.5] 💀 Cargado")
+print("[TLG GOLD V8.6] 💀 Cargado")
