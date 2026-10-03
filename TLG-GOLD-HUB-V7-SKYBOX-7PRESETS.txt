@@ -833,6 +833,9 @@ function TLG.Panic()
   pcall(function() TLG.AntiOrbitStop() end)
   pcall(function() TLG.NoclipStop() end)
   pcall(function() TLG.OrbitalMapStop() end)
+  if TLG.FarmStop then pcall(TLG.FarmStop) end
+  if TLG.NPCESPStop then pcall(TLG.NPCESPStop) end
+  if TLG.NPCHBStop then pcall(TLG.NPCHBStop) end
   if TLG.FastAttackStop then pcall(TLG.FastAttackStop) end
   TLG.Speed.On = false
   TLG.PNotif("🚨 PANIC", "Todo desactivado", C.Rd)
@@ -1243,7 +1246,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V8.7"
+SubTitle.Text = "Meme Sea • V9.0"
 SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1475,6 +1478,8 @@ local function Tab(name, icon)
         lb.TextColor3 = C.Yel
         ico.TextTransparency = 0
         pg.Visible = true
+        pg.Position = UDim2.new(0,28,0,0)
+        TW:Create(pg, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0,0,0,0)}):Play()
         b.BackgroundColor3 = C.BG3
         b.BackgroundTransparency = 0.5
         TW:Create(ul, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
@@ -1541,37 +1546,47 @@ end
 
 local function Tog(p, txt, def, cb)
     local sv = def == true
+    local OFFC = Color3.fromRGB(45,45,45)
     local f = Instance.new("Frame", p)
-    f.Size = UDim2.new(1,0,0,32)
-    f.BackgroundColor3 = C.BG2
-    f.BackgroundTransparency = 0.1
+    f.Size = UDim2.new(1,0,0,40)
+    f.BackgroundColor3 = Color3.fromRGB(10,10,10)
+    f.BackgroundTransparency = 0.05
     f.BorderSizePixel = 0
     f.ZIndex = 5
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0,6)
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0,10)
+    local fs = Instance.new("UIStroke", f)
+    fs.Color = C.Yel; fs.Thickness = 1; fs.Transparency = sv and 0.3 or 0.75
     local l = Instance.new("TextLabel", f)
-    l.Size = UDim2.new(1,-60,1,0)
-    l.Position = UDim2.new(0,10,0,0)
+    l.Size = UDim2.new(1,-110,1,0)
+    l.Position = UDim2.new(0,14,0,0)
     l.BackgroundTransparency = 1
     l.Font = Enum.Font.GothamSemibold
     l.Text = txt
     l.TextColor3 = C.Wh
-    l.TextSize = 10
+    l.TextSize = 11
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.ZIndex = 7
     local sw = Instance.new("Frame", f)
-    sw.Size = UDim2.new(0,36,0,18)
-    sw.Position = UDim2.new(1,-48,0.5,-9)
-    sw.BackgroundColor3 = sv and C.Yel or C.GrD
+    sw.Size = UDim2.new(0,46,0,24)
+    sw.Position = UDim2.new(1,-78,0.5,-12)
+    sw.BackgroundColor3 = sv and C.Yel or OFFC
     sw.BorderSizePixel = 0
     sw.ZIndex = 6
     Instance.new("UICorner", sw).CornerRadius = UDim.new(1,0)
     local kn = Instance.new("Frame", sw)
-    kn.Size = UDim2.new(0,14,0,14)
-    kn.Position = sv and UDim2.new(1,-16,0.5,-7) or UDim2.new(0,2,0.5,-7)
+    kn.Size = UDim2.new(0,18,0,18)
+    kn.Position = sv and UDim2.new(1,-21,0.5,-9) or UDim2.new(0,3,0.5,-9)
     kn.BackgroundColor3 = C.Wh
     kn.BorderSizePixel = 0
     kn.ZIndex = 7
     Instance.new("UICorner", kn).CornerRadius = UDim.new(1,0)
+    local dot = Instance.new("Frame", f)
+    dot.Size = UDim2.new(0,10,0,10)
+    dot.Position = UDim2.new(1,-22,0.5,-5)
+    dot.BackgroundColor3 = sv and C.Yel or C.Rd
+    dot.BorderSizePixel = 0
+    dot.ZIndex = 7
+    Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
     local st = sv
     local btn = Instance.new("TextButton", f)
     btn.Size = UDim2.new(1,0,1,0)
@@ -1580,8 +1595,10 @@ local function Tog(p, txt, def, cb)
     btn.ZIndex = 10
     btn.Activated:Connect(function()
         st = not st
-        TW:Create(sw, TweenInfo.new(0.25, Enum.EasingStyle.Back), {BackgroundColor3 = st and C.Yel or C.GrD}):Play()
-        TW:Create(kn, TweenInfo.new(0.25, Enum.EasingStyle.Back), {Position = st and UDim2.new(1,-16,0.5,-7) or UDim2.new(0,2,0.5,-7)}):Play()
+        TW:Create(sw, TweenInfo.new(0.25, Enum.EasingStyle.Back), {BackgroundColor3 = st and C.Yel or OFFC}):Play()
+        TW:Create(kn, TweenInfo.new(0.25, Enum.EasingStyle.Back), {Position = st and UDim2.new(1,-21,0.5,-9) or UDim2.new(0,3,0.5,-9)}):Play()
+        TW:Create(dot, TweenInfo.new(0.25), {BackgroundColor3 = st and C.Yel or C.Rd}):Play()
+        TW:Create(fs, TweenInfo.new(0.25), {Transparency = st and 0.3 or 0.75}):Play()
         safeCB(cb, st)
     end)
 end
@@ -1590,11 +1607,13 @@ local function Sli(p, txt, mn, mx, def, cb)
     local sv = def
     local f = Instance.new("Frame", p)
     f.Size = UDim2.new(1,0,0,40)
-    f.BackgroundColor3 = C.BG2
+    f.BackgroundColor3 = Color3.fromRGB(10,10,10)
     f.BackgroundTransparency = 0.1
     f.BorderSizePixel = 0
     f.ZIndex = 5
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0,6)
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0,10)
+    local fsS = Instance.new("UIStroke", f)
+    fsS.Color = C.Yel; fsS.Thickness = 1; fsS.Transparency = 0.75
     local l = Instance.new("TextLabel", f)
     l.Size = UDim2.new(0.6,-12,0,12)
     l.Position = UDim2.new(0,10,0,4)
@@ -1611,7 +1630,8 @@ local function Sli(p, txt, mn, mx, def, cb)
     vl.BackgroundTransparency = 1
     vl.Font = Enum.Font.GothamBold
     vl.Text = tostring(sv)
-    vl.TextSize = 9
+    vl.TextSize = 10
+    vl.TextColor3 = C.Yel
     vl.TextXAlignment = Enum.TextXAlignment.Right
     vl.ZIndex = 7
     local b = Instance.new("Frame", f)
@@ -1669,8 +1689,8 @@ end
 
 local function Btn(p, txt, col, cb)
     local b = Instance.new("TextButton", p)
-    b.Size = UDim2.new(1,0,0,30)
-    b.BackgroundColor3 = C.BG2
+    b.Size = UDim2.new(1,0,0,34)
+    b.BackgroundColor3 = Color3.fromRGB(10,10,10)
     b.BackgroundTransparency = 0.1
     b.Font = Enum.Font.GothamBold
     b.Text = txt
@@ -1679,12 +1699,14 @@ local function Btn(p, txt, col, cb)
     b.BorderSizePixel = 0
     b.AutoButtonColor = false
     b.ZIndex = 5
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
     local bS = Instance.new("UIStroke", b)
     bS.Thickness = 1
-    bS.Transparency = 0.4
+    bS.Transparency = 0.6
     bS.Color = C.Yel
     TLG.Ripple(b)
+    b.MouseEnter:Connect(function() TW:Create(bS, TweenInfo.new(0.15), {Transparency = 0.1}):Play() end)
+    b.MouseLeave:Connect(function() TW:Create(bS, TweenInfo.new(0.2), {Transparency = 0.6}):Play() end)
     b.Activated:Connect(function() safeCB(cb) end)
     return b
 end
@@ -1698,6 +1720,7 @@ TLG.Btn = Btn
 
 local PInfo = Tab("Info", "📊")
 local PCb = Tab("Combat", "⚔️")
+local PFm = Tab("Farm", "🤖")
 local PAb = Tab("Aimbot", "🎯")
 local PFl = Tab("Fly", "✈")
 local PIs = Tab("Islands", "🏝️")
@@ -1706,6 +1729,8 @@ local PTo = Tab("Tools", "🔧")
 local PEs = Tab("ESP", "👁️")
 local PVi = Tab("Visuals", "🎨")
 local POp = Tab("Optimize", "⚡")
+
+local PCf = Tab("Config", "⚙️")
 
 task.wait(0.1)
 if Tabs[1] then
@@ -1729,17 +1754,30 @@ TLG.PVi = PVi
 TLG.POp = POp
 
 
--- INFO TAB (jugador seleccionado + acciones)
+-- INFO TAB (perfil del jugador seleccionado)
 local infoOK, infoERR = pcall(function()
   local function fmt(n)
     n = math.floor(tonumber(n) or 0)
     local r = tostring(n):reverse():gsub("(%d%d%d)", "%1,"):reverse()
     return (r:gsub("^,", ""))
   end
+  local function short(n)
+    n = tonumber(n) or 0
+    local a = math.abs(n)
+    if a >= 1e12 then return string.format("%.2fT", n / 1e12)
+    elseif a >= 1e9 then return string.format("%.2fB", n / 1e9)
+    elseif a >= 1e6 then return string.format("%.2fM", n / 1e6)
+    elseif a >= 1e4 then return string.format("%.1fK", n / 1e3) end
+    return fmt(n)
+  end
 
   local bSp, bGo
   local list, idx = {}, 1
-  local nameL, infoL
+  local nameL, userL, idL, avatar
+  local vals = {}
+  local avatarFor = nil
+  local avatarCache = {}
+  local labels = {"Nivel","Rebirths","Power","Melee","Weapon","Vida","Cash","Gems","Rank","Kills","Deaths","Essence"}
 
   local function rebuild()
     local cur = TLG.SelectedTarget
@@ -1766,56 +1804,87 @@ local infoOK, infoERR = pcall(function()
     TLG.SelectedTarget = list[idx]
   end
 
+  local function setAvatar(p)
+    if avatarFor == p.UserId then return end
+    avatarFor = p.UserId
+    if avatarCache[p.UserId] then avatar.Image = avatarCache[p.UserId]; return end
+    avatar.Image = ""
+    task.spawn(function()
+      local ok, img = pcall(function()
+        return PLR:GetUserThumbnailAsync(p.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+      end)
+      if ok and img then
+        avatarCache[p.UserId] = img
+        if avatarFor == p.UserId then avatar.Image = img end
+      end
+    end)
+  end
+
   local function refresh()
     local p = TLG.SelectedTarget
     if not p or not p.Parent then rebuild(); p = TLG.SelectedTarget end
     if bSp then bSp.Text = TLG.Sp.T and "🛑 Dejar de espectear" or "👁️ Spectear" end
     if bGo then bGo.Text = TLG.GO.On and "🛑 Detener God Orb" or "🌀 God Orb" end
-    if not p then nameL.Text = "Sin jugadores"; infoL.Text = ""; return end
+    if not p then
+      nameL.Text = "Sin jugadores"; userL.Text = ""; idL.Text = ""
+      for _, v in ipairs(vals) do v.Text = "—" end
+      return
+    end
     local s = TLG.GetStats(p)
-    nameL.Text = "👤 " .. p.DisplayName .. (p == TLG.LP and "  (tú)" or "")
-    infoL.Text = "📊 Lv " .. fmt(s.Level) .. "     🏆 Rebirths " .. fmt(s.Rebirths)
-      .. "\n❤️ " .. fmt(s.Health) .. "/" .. fmt(s.MaxHealth)
-      .. "\n⚡ Power " .. fmt(s.Power) .. "   🥊 Melee " .. fmt(s.Melee) .. "   ⚔️ Weapon " .. fmt(s.Weapon)
-      .. "\n💰 " .. fmt(s.Cash) .. "     💎 " .. fmt(s.Gems)
-      .. "\n☠️ Kills " .. fmt(s.Kills) .. "   💀 Deaths " .. fmt(s.Deaths)
+    nameL.Text = p.DisplayName .. (p == TLG.LP and "  (tú)" or "")
+    userL.Text = "@" .. p.Name
+    idL.Text = "ID: " .. tostring(p.UserId)
+    setAvatar(p)
+    local ratio = (s.MaxHealth > 0) and math.clamp(s.Health / s.MaxHealth, 0, 1) or 0
+    local data = {short(s.Level), short(s.Rebirths), short(s.Power), short(s.Melee), short(s.Weapon),
+      short(s.Health) .. "/" .. short(s.MaxHealth), short(s.Cash), short(s.Gems), short(s.Rank),
+      short(s.Kills), short(s.Deaths), short(s.Essence)}
+    for i, v in ipairs(vals) do v.Text = data[i] end
+    vals[6].TextColor3 = Color3.fromHSV(ratio * 0.33, 0.7, 1)
   end
 
   Sec(PInfo, "JUGADOR SELECCIONADO", "📊")
   local card = Instance.new("Frame", PInfo)
-  card.Size = UDim2.new(1, 0, 0, 150)
-  card.BackgroundColor3 = C.BG2
-  card.BackgroundTransparency = 0.1
+  card.Size = UDim2.new(1, 0, 0, 268)
+  card.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+  card.BackgroundTransparency = 0.05
   card.BorderSizePixel = 0
   card.ZIndex = 5
-  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 10)
+  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
   local cs = Instance.new("UIStroke", card)
-  cs.Color = C.Yel; cs.Thickness = 1; cs.Transparency = 0.6
+  cs.Color = C.Yel; cs.Thickness = 1.5; cs.Transparency = 0.45
 
-  nameL = Instance.new("TextLabel", card)
-  nameL.Size = UDim2.new(1, -100, 0, 22)
-  nameL.Position = UDim2.new(0, 50, 0, 8)
-  nameL.BackgroundTransparency = 1
-  nameL.Font = Enum.Font.GothamBold
-  nameL.TextSize = 15
-  nameL.TextColor3 = C.Yel
-  nameL.Text = "—"
-  nameL.ZIndex = 7
+  avatar = Instance.new("ImageLabel", card)
+  avatar.Size = UDim2.new(0, 66, 0, 66)
+  avatar.Position = UDim2.new(0, 14, 0, 14)
+  avatar.BackgroundColor3 = C.BG3
+  avatar.BorderSizePixel = 0
+  avatar.ZIndex = 7
+  Instance.new("UICorner", avatar).CornerRadius = UDim.new(1, 0)
+  local avs = Instance.new("UIStroke", avatar)
+  avs.Color = C.Yel; avs.Thickness = 2
 
-  infoL = Instance.new("TextLabel", card)
-  infoL.Size = UDim2.new(1, -100, 1, -40)
-  infoL.Position = UDim2.new(0, 50, 0, 34)
-  infoL.BackgroundTransparency = 1
-  infoL.Font = Enum.Font.Gotham
-  infoL.TextSize = 11
-  infoL.TextColor3 = C.Wh
-  infoL.TextYAlignment = Enum.TextYAlignment.Top
-  infoL.Text = ""
-  infoL.ZIndex = 7
+  local function mkText(size, pos, ts, font, col)
+    local t = Instance.new("TextLabel", card)
+    t.Size = size
+    t.Position = pos
+    t.BackgroundTransparency = 1
+    t.Font = font
+    t.TextSize = ts
+    t.TextColor3 = col
+    t.TextXAlignment = Enum.TextXAlignment.Left
+    t.TextTruncate = Enum.TextTruncate.AtEnd
+    t.Text = ""
+    t.ZIndex = 7
+    return t
+  end
+  nameL = mkText(UDim2.new(1, -190, 0, 24), UDim2.new(0, 90, 0, 14), 17, Enum.Font.GothamBold, C.Wh)
+  userL = mkText(UDim2.new(1, -190, 0, 16), UDim2.new(0, 90, 0, 40), 11, Enum.Font.Gotham, C.Gr)
+  idL = mkText(UDim2.new(1, -190, 0, 16), UDim2.new(0, 90, 0, 58), 10, Enum.Font.Gotham, C.Gr)
 
   local function mkArrow(txt, pos, d)
     local a = Instance.new("TextButton", card)
-    a.Size = UDim2.new(0, 36, 0, 100)
+    a.Size = UDim2.new(0, 34, 0, 34)
     a.Position = pos
     a.BackgroundColor3 = C.BG3
     a.BackgroundTransparency = 0.2
@@ -1823,14 +1892,55 @@ local infoOK, infoERR = pcall(function()
     a.AutoButtonColor = false
     a.Text = txt
     a.Font = Enum.Font.GothamBold
-    a.TextSize = 24
+    a.TextSize = 22
     a.TextColor3 = C.Yel
     a.ZIndex = 8
-    Instance.new("UICorner", a).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", a).CornerRadius = UDim.new(1, 0)
+    local st = Instance.new("UIStroke", a)
+    st.Color = C.Yel; st.Thickness = 1; st.Transparency = 0.5
     a.Activated:Connect(function() step(d); pcall(refresh) end)
   end
-  mkArrow("‹", UDim2.new(0, 6, 0.5, -50), -1)
-  mkArrow("›", UDim2.new(1, -42, 0.5, -50), 1)
+  mkArrow("‹", UDim2.new(1, -84, 0, 24), -1)
+  mkArrow("›", UDim2.new(1, -46, 0, 24), 1)
+
+  local div = Instance.new("Frame", card)
+  div.Size = UDim2.new(1, -28, 0, 1)
+  div.Position = UDim2.new(0, 14, 0, 92)
+  div.BackgroundColor3 = C.Yel
+  div.BackgroundTransparency = 0.6
+  div.BorderSizePixel = 0
+  div.ZIndex = 6
+
+  for i, lab in ipairs(labels) do
+    local col, row = (i - 1) % 3, math.floor((i - 1) / 3)
+    local cf = Instance.new("Frame", card)
+    cf.Size = UDim2.new(1/3, -12, 0, 40)
+    cf.Position = UDim2.new(col / 3, 8, 0, 100 + row * 41)
+    cf.BackgroundTransparency = 1
+    cf.ZIndex = 6
+    Instance.new("UICorner", cf).CornerRadius = UDim.new(0, 8)
+    local cst = Instance.new("UIStroke", cf)
+    cst.Color = C.Yel; cst.Thickness = 1; cst.Transparency = 0.85
+    local ll = Instance.new("TextLabel", cf)
+    ll.Size = UDim2.new(1, 0, 0, 14)
+    ll.Position = UDim2.new(0, 0, 0, 3)
+    ll.BackgroundTransparency = 1
+    ll.Font = Enum.Font.Gotham
+    ll.TextSize = 10
+    ll.TextColor3 = C.Gr
+    ll.Text = lab
+    ll.ZIndex = 7
+    local vl = Instance.new("TextLabel", cf)
+    vl.Size = UDim2.new(1, 0, 0, 20)
+    vl.Position = UDim2.new(0, 0, 0, 17)
+    vl.BackgroundTransparency = 1
+    vl.Font = Enum.Font.GothamBold
+    vl.TextSize = 14
+    vl.TextColor3 = C.Wh
+    vl.Text = "—"
+    vl.ZIndex = 7
+    vals[i] = vl
+  end
 
   local function otherTarget()
     local p = TLG.SelectedTarget
@@ -2937,6 +3047,413 @@ do
   end)
 end
 
+-- ═══════════ V9: NPC / AUTO FARM / CONFIG / ESTILO ═══════════
+local V9ok, V9err = pcall(function()
+  local function myRoot()
+    local ch = TLG.LP.Character
+    return ch and ch:FindFirstChild("HumanoidRootPart")
+  end
+
+  -- CONFIG GUARDADA
+  local CFG_FILE = "TLG_GoldHub_Config.json"
+  local CFG = {}
+  pcall(function()
+    if isfile and readfile and isfile(CFG_FILE) then
+      local d = HS:JSONDecode(readfile(CFG_FILE))
+      if type(d) == "table" then CFG = d end
+    end
+  end)
+  local pending = false
+  local function saveSoon()
+    if pending then return end
+    pending = true
+    task.delay(1, function()
+      pending = false
+      pcall(function()
+        if writefile then writefile(CFG_FILE, HS:JSONEncode(CFG)) end
+      end)
+    end)
+  end
+  local function cfgNum(k, def, lo, hi)
+    local v = tonumber(CFG[k])
+    if not v then return def end
+    return math.clamp(v, lo, hi)
+  end
+
+  -- NPCs
+  local NPC = {Hums = {}, List = {}, Names = {}, Last = 0, Filter = nil}
+  TLG.NPC = NPC
+  local function npcTrack(d)
+    if d:IsA("Humanoid") then NPC.Hums[d] = true end
+  end
+  for _, d in ipairs(workspace:GetDescendants()) do npcTrack(d) end
+  workspace.DescendantAdded:Connect(npcTrack)
+  workspace.DescendantRemoving:Connect(function(d) NPC.Hums[d] = nil end)
+
+  function NPC.Scan(force)
+    local now = os.clock()
+    if not force and now - NPC.Last < 0.25 then return NPC.List end
+    NPC.Last = now
+    local out, names, seen = {}, {}, {}
+    for hum in pairs(NPC.Hums) do
+      local m = hum.Parent
+      if m and hum.Health > 0 and m:IsA("Model") and not PLR:GetPlayerFromCharacter(m) then
+        local r = m:FindFirstChild("HumanoidRootPart") or m.PrimaryPart
+          or m:FindFirstChildWhichIsA("BasePart")
+        if r then
+          table.insert(out, {model = m, hum = hum, root = r, name = m.Name})
+          if not seen[m.Name] then seen[m.Name] = true; table.insert(names, m.Name) end
+        end
+      end
+    end
+    table.sort(names)
+    NPC.List, NPC.Names = out, names
+    return out
+  end
+
+  function NPC.Nearest(range, filter, minDist)
+    local mr = myRoot(); if not mr then return nil end
+    local best, bd = nil, range or math.huge
+    for _, e in ipairs(NPC.Scan()) do
+      if (not filter or e.name == filter) and e.root.Parent and e.hum.Health > 0 then
+        local d = (e.root.Position - mr.Position).Magnitude
+        if d < bd and d >= (minDist or 0) then best = e; bd = d end
+      end
+    end
+    return best, bd
+  end
+
+  -- AUTO FARM
+  local Farm = {On = false, Conn = nil, Target = nil, StartedFA = false,
+    Range = cfgNum("farmRange", 3000, 100, 10000),
+    Dist = cfgNum("farmDist", 6, 2, 30),
+    Height = cfgNum("farmHeight", 4, -10, 30)}
+  TLG.Farm = Farm
+  function TLG.FarmStart()
+    if Farm.On then return end
+    Farm.On = true; Farm.Target = nil
+    if not FA.On then TLG.FastAttackStart(); Farm.StartedFA = true end
+    Farm.Conn = RS.Heartbeat:Connect(function()
+      if not Farm.On then return end
+      local ch = TLG.LP.Character
+      local mr = ch and ch:FindFirstChild("HumanoidRootPart")
+      local mh = ch and ch:FindFirstChildOfClass("Humanoid")
+      if not mr or not mh or mh.Health <= 0 then return end
+      local t = Farm.Target
+      if not t or not t.root.Parent or t.hum.Health <= 0
+         or (NPC.Filter and t.name ~= NPC.Filter) then
+        t = NPC.Nearest(Farm.Range, NPC.Filter)
+        Farm.Target = t
+      end
+      if not t then return end
+      local tp = t.root.Position
+      local pos = tp + Vector3.new(0, Farm.Height, Farm.Dist)
+      mr.CFrame = CFrame.lookAt(pos, tp)
+      mr.AssemblyLinearVelocity = Vector3.zero
+    end)
+    TLG.PNotif("🤖 Auto Farm", "✅ Activado", C.Grn)
+  end
+  function TLG.FarmStop()
+    if not Farm.On then return end
+    Farm.On = false; Farm.Target = nil
+    if Farm.Conn then pcall(function() Farm.Conn:Disconnect() end); Farm.Conn = nil end
+    if Farm.StartedFA then Farm.StartedFA = false; pcall(TLG.FastAttackStop) end
+    TLG.PNotif("🤖 Auto Farm", "❌ Desactivado", C.Rd)
+  end
+
+  -- ESP DE NPCs
+  local NESP = {On = false, Conn = nil, Objs = {}, Max = 25,
+    Range = cfgNum("espRange", 1500, 100, 5000)}
+  local function nespClear()
+    for _, o in pairs(NESP.Objs) do
+      pcall(function() o.hl:Destroy() end)
+      pcall(function() o.bb:Destroy() end)
+    end
+    NESP.Objs = {}
+  end
+  function TLG.NPCESPStart()
+    if NESP.On then return end
+    NESP.On = true
+    local last = 0
+    NESP.Conn = RS.Heartbeat:Connect(function()
+      if not NESP.On then return end
+      local now = os.clock()
+      if now - last < 0.3 then return end
+      last = now
+      local mr = myRoot(); if not mr then return end
+      local cand = {}
+      for _, e in ipairs(NPC.Scan()) do
+        local d = (e.root.Position - mr.Position).Magnitude
+        if d <= NESP.Range then table.insert(cand, {e = e, d = d}) end
+      end
+      table.sort(cand, function(a, b) return a.d < b.d end)
+      local keep = {}
+      for i = 1, math.min(#cand, NESP.Max) do
+        local e, d = cand[i].e, cand[i].d
+        keep[e.model] = true
+        local o = NESP.Objs[e.model]
+        if not o or not o.hl.Parent then
+          if o then pcall(function() o.bb:Destroy() end) end
+          local hl = Instance.new("Highlight")
+          hl.Name = "TLG_NPC_HL"
+          hl.Adornee = e.model
+          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+          hl.FillColor = C.Rd; hl.OutlineColor = C.Yel
+          hl.FillTransparency = 0.85; hl.OutlineTransparency = 0
+          hl.Parent = e.model
+          local bb = Instance.new("BillboardGui")
+          bb.Name = "TLG_NPC_BB"
+          bb.Adornee = e.root
+          bb.AlwaysOnTop = true
+          bb.Size = UDim2.new(0, 170, 0, 34)
+          bb.StudsOffset = Vector3.new(0, 4, 0)
+          bb.Parent = e.root
+          local lb = Instance.new("TextLabel", bb)
+          lb.Size = UDim2.new(1, 0, 1, 0)
+          lb.BackgroundTransparency = 1
+          lb.Font = Enum.Font.GothamBold
+          lb.TextSize = 11
+          lb.TextColor3 = C.Yel
+          lb.TextStrokeTransparency = 0.3
+          o = {hl = hl, bb = bb, lb = lb}
+          NESP.Objs[e.model] = o
+        end
+        o.lb.Text = e.name .. "\n❤ " .. math.floor(e.hum.Health) .. "  📏 " .. math.floor(d)
+      end
+      for m, o in pairs(NESP.Objs) do
+        if not keep[m] then
+          pcall(function() o.hl:Destroy() end)
+          pcall(function() o.bb:Destroy() end)
+          NESP.Objs[m] = nil
+        end
+      end
+    end)
+  end
+  function TLG.NPCESPStop()
+    NESP.On = false
+    if NESP.Conn then pcall(function() NESP.Conn:Disconnect() end); NESP.Conn = nil end
+    nespClear()
+  end
+
+  -- HITBOX DE NPCs
+  local NHB = {On = false, Conn = nil, Orig = {}, Size = cfgNum("npcHB", 25, 5, 100)}
+  local function nhbRestore()
+    for part, o in pairs(NHB.Orig) do
+      pcall(function()
+        if part.Parent then
+          part.Size = o.Size; part.Transparency = o.Tr; part.CanCollide = o.Col
+        end
+      end)
+    end
+    NHB.Orig = {}
+  end
+  function TLG.NPCHBStart()
+    if NHB.On then return end
+    NHB.On = true
+    local last = 0
+    NHB.Conn = RS.Heartbeat:Connect(function()
+      if not NHB.On then return end
+      local now = os.clock()
+      if now - last < 0.3 then return end
+      last = now
+      local mr = myRoot(); if not mr then return end
+      for _, e in ipairs(NPC.Scan()) do
+        local r = e.root
+        if r.Name == "HumanoidRootPart" and (r.Position - mr.Position).Magnitude < 1500 then
+          if not NHB.Orig[r] then
+            NHB.Orig[r] = {Size = r.Size, Tr = r.Transparency, Col = r.CanCollide}
+          end
+          pcall(function()
+            r.Size = Vector3.new(NHB.Size, NHB.Size, NHB.Size)
+            r.Transparency = 0.85
+            r.CanCollide = false
+          end)
+        end
+      end
+    end)
+  end
+  function TLG.NPCHBStop()
+    NHB.On = false
+    if NHB.Conn then pcall(function() NHB.Conn:Disconnect() end); NHB.Conn = nil end
+    nhbRestore()
+  end
+
+  -- TEMAS (recolora todo lo que use el acento actual)
+  local curAccent = C.Yel
+  local function applyAccent(newc, a2)
+    local old = curAccent
+    if old == newc then return end
+    for _, root in ipairs({SG, _G.TLG_FAB_GUI}) do
+      if root then
+        for _, d in ipairs(root:GetDescendants()) do
+          pcall(function()
+            if d:IsA("UIStroke") and d.Color == old then d.Color = newc end
+            if (d:IsA("TextLabel") or d:IsA("TextButton")) and d.TextColor3 == old then d.TextColor3 = newc end
+            if d:IsA("GuiObject") and d.BackgroundColor3 == old then d.BackgroundColor3 = newc end
+            if d:IsA("ScrollingFrame") and d.ScrollBarImageColor3 == old then d.ScrollBarImageColor3 = newc end
+          end)
+        end
+      end
+    end
+    C.Yel = newc; curAccent = newc
+    TLG.CustomAccent = newc; TLG.CustomAccent2 = a2
+  end
+
+  -- FUENTE ELEGANTE (serif)
+  local okSerif, SERIF = pcall(function() return Enum.Font.Garamond end)
+  local fontMemo = {}
+  local function applyFont(serif)
+    if not okSerif then return end
+    for _, root in ipairs({SG, _G.TLG_FAB_GUI}) do
+      if root then
+        for _, d in ipairs(root:GetDescendants()) do
+          if d:IsA("TextLabel") or d:IsA("TextButton") then
+            pcall(function()
+              if serif then
+                if not fontMemo[d] and d.Font ~= SERIF then
+                  fontMemo[d] = {d.Font, d.TextSize}
+                  d.Font = SERIF; d.TextSize = d.TextSize + 1
+                end
+              else
+                local m = fontMemo[d]
+                if m then d.Font = m[1]; d.TextSize = m[2]; fontMemo[d] = nil end
+              end
+            end)
+          end
+        end
+      end
+    end
+  end
+
+  -- UI: pestaña FARM
+  Sec(PFm, "🤖 AUTO FARM", "🤖")
+  local statusL = Lbl(PFm, "NPCs: —", C.Yel)
+  statusL.TextTruncate = Enum.TextTruncate.AtEnd
+  Tog(PFm, "Activar Auto Farm", false, function(v)
+    if v then TLG.FarmStart() else TLG.FarmStop() end
+  end)
+  local bFilt
+  bFilt = Btn(PFm, "🎯 Filtro: Todos", C.Cyan, function()
+    NPC.Scan(true)
+    local names = {"Todos"}
+    for _, n in ipairs(NPC.Names) do table.insert(names, n) end
+    local cur, i0 = NPC.Filter or "Todos", 1
+    for i, n in ipairs(names) do if n == cur then i0 = i end end
+    i0 = i0 % #names + 1
+    local sel = names[i0]
+    NPC.Filter = (sel ~= "Todos") and sel or nil
+    Farm.Target = nil
+    bFilt.Text = "🎯 Filtro: " .. sel
+  end)
+  Sli(PFm, "Rango de búsqueda", 100, 10000, Farm.Range, function(v)
+    Farm.Range = v; CFG.farmRange = v; saveSoon()
+  end)
+  Sli(PFm, "Distancia al NPC", 2, 30, Farm.Dist, function(v)
+    Farm.Dist = v; CFG.farmDist = v; saveSoon()
+  end)
+  Sli(PFm, "Altura sobre el NPC", -10, 30, Farm.Height, function(v)
+    Farm.Height = v; CFG.farmHeight = v; saveSoon()
+  end)
+  Lbl(PFm, "Fast Attack se activa solo mientras farmeas.", C.Gr)
+
+  Sec(PFm, "👁️ ESP DE NPCs", "👁️")
+  Tog(PFm, "ESP NPCs", false, function(v)
+    if v then TLG.NPCESPStart() else TLG.NPCESPStop() end
+  end)
+  Sli(PFm, "Rango ESP", 100, 5000, NESP.Range, function(v)
+    NESP.Range = v; CFG.espRange = v; saveSoon()
+  end)
+
+  Sec(PFm, "🔵 HITBOX DE NPCs", "🔵")
+  Tog(PFm, "Hitbox NPCs", false, function(v)
+    if v then TLG.NPCHBStart() else TLG.NPCHBStop() end
+  end)
+  Sli(PFm, "Tamaño", 5, 100, NHB.Size, function(v)
+    NHB.Size = v; CFG.npcHB = v; saveSoon()
+  end)
+
+  Sec(PFm, "📍 TELEPORT A NPCs", "📍")
+  local function npcTP(minDist)
+    local mr = myRoot()
+    if not mr then TLG.PNotif("⚠️", "Sin personaje", C.Rd); return end
+    NPC.Scan(true)
+    local e = NPC.Nearest(math.huge, NPC.Filter, minDist)
+    if not e then TLG.PNotif("📍", "No hay NPCs", C.Rd); return end
+    mr.CFrame = CFrame.new(e.root.Position + Vector3.new(0, 5, 6))
+    TLG.PNotif("📍", "TP → " .. e.name, C.Cyan)
+  end
+  Btn(PFm, "📍 NPC más cercano", C.Wh, function() npcTP(0) end)
+  Btn(PFm, "⏭ Siguiente NPC cercano", C.Wh, function() npcTP(15) end)
+  Btn(PFm, "🔄 Escanear NPCs", C.Yel, function()
+    local l = NPC.Scan(true)
+    TLG.PNotif("🔄", #l .. " NPCs · " .. #NPC.Names .. " tipos", C.Grn)
+  end)
+
+  task.spawn(function()
+    while statusL.Parent do
+      pcall(function()
+        local t = Farm.On and Farm.Target
+        statusL.Text = "NPCs: " .. #NPC.Scan() .. "  ·  Objetivo: " .. (t and t.name or "—")
+          .. "  ·  Filtro: " .. (NPC.Filter or "Todos")
+      end)
+      task.wait(0.7)
+    end
+  end)
+
+  -- UI: pestaña CONFIG
+  Sec(PCf, "🎨 COLOR DEL MENÚ", "🎨")
+  local grid = Instance.new("Frame", PCf)
+  grid.Size = UDim2.new(1, 0, 0, 0)
+  grid.AutomaticSize = Enum.AutomaticSize.Y
+  grid.BackgroundTransparency = 1
+  grid.ZIndex = 5
+  local gl = Instance.new("UIGridLayout", grid)
+  gl.CellSize = UDim2.new(0.5, -4, 0, 34)
+  gl.CellPadding = UDim2.new(0, 6, 0, 6)
+  local tnames = {}
+  for n in pairs(Themes) do table.insert(tnames, n) end
+  table.sort(tnames)
+  for _, n in ipairs(tnames) do
+    local t = Themes[n]
+    Btn(grid, n, t.A, function()
+      applyAccent(t.A, t.A2)
+      CFG.theme = n; saveSoon()
+      TLG.PNotif("🎨", n, t.A)
+    end)
+  end
+
+  Sec(PCf, "🖋 ESTILO", "🖋")
+  Tog(PCf, "Fuente elegante (serif)", CFG.serif ~= false, function(v)
+    CFG.serif = v; saveSoon(); applyFont(v)
+  end)
+
+  Sec(PCf, "💾 CONFIGURACIÓN", "💾")
+  Lbl(PCf, "Se guarda en TLG_GoldHub_Config.json (si tu ejecutor lo permite).", C.Gr)
+  Btn(PCf, "🗑 Borrar configuración guardada", C.Rd, function()
+    CFG = {}
+    pcall(function() if writefile then writefile(CFG_FILE, "{}") end end)
+    TLG.PNotif("🗑", "Configuración borrada", C.Rd)
+  end)
+
+  Sec(PCf, "🚨 SEGURIDAD", "🚨")
+  Btn(PCf, "🚨 PANIC (apagar todo)", C.Rd, function() TLG.Panic() end)
+  Btn(PCf, "✖ Cerrar hub", C.Rd, function()
+    pcall(function() TLG.Panic() end)
+    pcall(function() if _G.TLG_FAB_GUI then _G.TLG_FAB_GUI:Destroy() end end)
+    pcall(function() SG:Destroy() end)
+  end)
+
+  TLG._postBuild = function()
+    local n = CFG.theme
+    if n and Themes[n] then pcall(applyAccent, Themes[n].A, Themes[n].A2) end
+    if CFG.serif ~= false then pcall(applyFont, true) end
+  end
+end)
+if not V9ok then
+  warn("[TLG] V9: " .. tostring(V9err))
+  pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
+end
+
 -- FAB (visible por defecto)
 local FSG = Instance.new("ScreenGui")
 
@@ -3126,7 +3643,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG GOLD V8.7"
+WTx.Text = "TLG GOLD V9.0"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -3173,11 +3690,56 @@ if UIS.KeyboardEnabled then
   end)
 end
 
+if TLG._postBuild then pcall(TLG._postBuild) end
+
+task.spawn(function()
+  pcall(function()
+    local fr = Instance.new("Frame", SG)
+    fr.Name = "TLG_Intro"
+    fr.Size = UDim2.new(1, 0, 1, 0)
+    fr.BackgroundColor3 = Color3.new(0, 0, 0)
+    fr.BackgroundTransparency = 1
+    fr.BorderSizePixel = 0
+    fr.ZIndex = 500
+    local t1 = Instance.new("TextLabel", fr)
+    t1.Size = UDim2.new(1, 0, 0, 50)
+    t1.Position = UDim2.new(0, 0, 0.5, -40)
+    t1.BackgroundTransparency = 1
+    t1.Font = Enum.Font.GothamBold
+    t1.TextSize = 34
+    t1.TextColor3 = C.Yel
+    t1.Text = "💀 TLG GOLD HUB"
+    t1.TextTransparency = 1
+    t1.ZIndex = 501
+    local t2 = Instance.new("TextLabel", fr)
+    t2.Size = UDim2.new(1, 0, 0, 20)
+    t2.Position = UDim2.new(0, 0, 0.5, 14)
+    t2.BackgroundTransparency = 1
+    t2.Font = Enum.Font.Gotham
+    t2.TextSize = 14
+    t2.TextColor3 = C.Gr
+    t2.Text = "Meme Sea • V9.0"
+    t2.TextTransparency = 1
+    t2.ZIndex = 501
+    local ti = TweenInfo.new(0.45)
+    TW:Create(fr, ti, {BackgroundTransparency = 0.4}):Play()
+    TW:Create(t1, ti, {TextTransparency = 0}):Play()
+    TW:Create(t2, ti, {TextTransparency = 0}):Play()
+    task.wait(1.1)
+    local to = TweenInfo.new(0.5)
+    TW:Create(fr, to, {BackgroundTransparency = 1}):Play()
+    TW:Create(t1, to, {TextTransparency = 1}):Play()
+    TW:Create(t2, to, {TextTransparency = 1}):Play()
+    task.wait(0.55)
+    fr:Destroy()
+  end)
+end)
+
 pcall(function()
   TW:Create(W, TweenInfo.new(0.8, Enum.EasingStyle.Back),
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 TLG GOLD V8.7", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 TLG GOLD V9.0", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[TLG GOLD V8.7] 💀 Cargado")
+print("[TLG GOLD V9.0] 💀 Cargado")
