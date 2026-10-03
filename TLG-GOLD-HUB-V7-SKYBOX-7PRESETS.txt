@@ -9,6 +9,7 @@ local CG = game:GetService("CoreGui")
 local HS = game:GetService("HttpService")
 local TPS = game:GetService("TeleportService")
 local LIGHT = game:GetService("Lighting")
+local Lighting = LIGHT
 
 _G.TLG = _G.TLG or {}
 local TLG = _G.TLG
@@ -67,8 +68,6 @@ function TLG.getPing()
   pcall(function() p = math.floor((TLG.LP:GetNetworkPing() or 0) * 1000) end)
   return p
 end
-
-TLG.GetPing = TLG.getPing
 
 local Themes = {
   ["👑 Gold"]   = {A=Color3.fromRGB(255,215,0),  A2=Color3.fromRGB(255,235,100)},
@@ -1087,7 +1086,7 @@ end)
 
 
 local W_S = TLG.IsMobile and UDim2.new(0,400,0,280) or UDim2.new(0,640,0,420)
-local W_P = UDim2.new(0.5,-W_S.X.Offset/2,0.5,-W_S.Y.Offset/2)
+local W_P = UDim2.new(0.5,0,0.5,0)
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -1108,7 +1107,7 @@ local SkyPresets = {
 local function SkyCaptureOriginal()
     pcall(function()
         if Sky.Original.Captured then return end
-        local s=LIGHT:FindFirstChildOfClass("Sky")
+        local s=Lighting:FindFirstChildOfClass("Sky")
         Sky.Original.Captured=true; Sky.Original.HadSky=s~=nil
         if s then
             Sky.Original.Bk=s.SkyboxBk; Sky.Original.Dn=s.SkyboxDn; Sky.Original.Ft=s.SkyboxFt
@@ -1118,8 +1117,8 @@ local function SkyCaptureOriginal()
     end)
 end
 local function SkyGet()
-    local s=LIGHT:FindFirstChild("TLG_Sky")
-    if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=LIGHT end
+    local s=Lighting:FindFirstChild("TLG_Sky")
+    if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
     return s
 end
 local function SkySet(ids)
@@ -1132,9 +1131,9 @@ local function SkySet(ids)
 end
 local function SkyRestoreOriginal()
     pcall(function()
-        local s=LIGHT:FindFirstChild("TLG_Sky")
+        local s=Lighting:FindFirstChild("TLG_Sky")
         if Sky.Original.HadSky then
-            if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=LIGHT end
+            if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
             s.SkyboxBk=Sky.Original.Bk; s.SkyboxDn=Sky.Original.Dn; s.SkyboxFt=Sky.Original.Ft
             s.SkyboxLf=Sky.Original.Lf; s.SkyboxRt=Sky.Original.Rt; s.SkyboxUp=Sky.Original.Up
             s.SkyboxOrientation=Sky.Original.Orientation
@@ -1152,7 +1151,7 @@ local function SkyApply(ids)
     Sky.Conn=RS.Heartbeat:Connect(function()
         if not Sky.On or not Sky.Ids then return end
         pcall(function()
-            local s=LIGHT:FindFirstChild("TLG_Sky")
+            local s=Lighting:FindFirstChild("TLG_Sky")
             if not s then s=SkyGet() end
             if s.SkyboxBk~=Sky.Ids[1] or s.SkyboxDn~=Sky.Ids[2] or s.SkyboxFt~=Sky.Ids[3] or s.SkyboxLf~=Sky.Ids[4] or s.SkyboxRt~=Sky.Ids[5] or s.SkyboxUp~=Sky.Ids[6] then SkySet(Sky.Ids) end
         end)
@@ -1161,6 +1160,7 @@ end
 
 local W = Instance.new("Frame", SG)
 W.Size = W_S
+W.AnchorPoint = Vector2.new(0.5,0.5)
 W.Position = UDim2.new(0.5,0,0.5,0)
 W.BackgroundColor3 = C.BG
 W.BorderSizePixel = 0
@@ -1705,7 +1705,8 @@ end
 -- AIMBOT TAB
 do
   Sec(PAb, "🎯 AIMBOT — HITBOX", "🎯")
-  local AB = Btn(PAb, "🎯 ACTIVAR HITBOX", C.Yel, function()
+  local AB
+  AB = Btn(PAb, "🎯 ACTIVAR HITBOX", C.Yel, function()
     if AIM.On then
       TLG.AIM_Stop(); AB.Text = "🎯 ACTIVAR HITBOX"
     else
@@ -2660,7 +2661,7 @@ do
   }
   for _, s in ipairs(skies) do
     Btn(PVi, s.name, C.Yel, function()
-      skyApply(s.ids)
+      SkyApply(s.ids)
       TLG.PNotif("🌌", s.name, C.Yel)
     end)
   end
