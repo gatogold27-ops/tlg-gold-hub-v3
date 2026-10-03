@@ -2116,7 +2116,8 @@ end
 
 -- FAB (visible por defecto)
 local FSG = Instance.new("ScreenGui")
-FSG.Name = "TLG_FAB_Float"
+
+_G.TLG_FAB_GUI = FSGFSG.Name = "TLG_FAB_Float"
 FSG.ResetOnSpawn = false
 FSG.DisplayOrder = 999
 FSG.IgnoreGuiInset = true
@@ -2135,7 +2136,9 @@ TLG.FAB_Toggle_State = true
 TLG.FAB_Frame_Ref = FM
 TLG.FAB_SetVisible = function(v)
   TLG.FAB_Toggle_State = v == true
-  if FSG and FSG.Parent then FSG.Enabled = TLG.FAB_Toggle_State end
+  if _G.TLG_FAB_GUI and _G.TLG_FAB_GUI.Parent then
+    _G.TLG_FAB_GUI.Enabled = TLG.FAB_Toggle_State
+  end
 end
 
 Instance.new("UICorner", FM).CornerRadius = UDim.new(0,12)
@@ -2289,13 +2292,7 @@ end)
 -- SETTINGS TAB
 do
   Sec(PSe, "💾 CONFIGURACIÓN", "💾")
-  Btn(PSe, "💾 Guardar Config", C.Grn, TLG.SaveConfig)
-  Btn(PSe, "📂 Cargar Config", C.Cyan, TLG.LoadConfig)
 
-  Sec(PSe, "🔄 SESIÓN", "🔄")
-  Tog(PSe, "Auto-Rejoin al kick", false, function(v)
-    TLG.AutoRejoinToggle(v)
-  end)
 
   Sec(PSe, "🚨 EMERGENCIA", "🚨")
   Btn(PSe, "🚨 PANIC — Desactivar todo", C.Rd, TLG.Panic)
