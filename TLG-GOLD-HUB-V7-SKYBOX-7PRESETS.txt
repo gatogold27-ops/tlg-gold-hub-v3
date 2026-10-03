@@ -2216,15 +2216,52 @@ local function CF(i, t, cb)
 end
 
 CF("🚀", "FUGA", function()
-  if TLG.Fuga then TLG.Fuga() end
+  if TLG.Fuga then
+    local ok = TLG.Fuga()
+    if ok then TLG.PNotif("🚀", "Fuga ejecutada", C.Yel) end
+  end
 end)
+
 CF("✈", "FLY", function()
-  if TLG.Fly.On then TLG.FlyE() else TLG.FlyS() end
-  return TLG.Fly.On
+  if TLG.Fly.On then
+    TLG.FlyE()
+    return false
+  else
+    TLG.FlyS()
+    return true
+  end
 end)
-CF("⚡", "FAST ATK", function()
-  if FA.On then TLG.FastAttackStop() else TLG.FastAttackStart() end
-  return FA.On
+
+CF("🌀", "GOD ORB", function()
+  local target = TLG.SelectedTarget
+
+  if not target or target == TLG.LP or not target.Parent then
+    TLG.PNotif("🌀", "Seleccioná un jugador primero", C.Yel)
+    return false
+  end
+
+  local ch = target.Character
+  local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+  local root = ch and ch:FindFirstChild("HumanoidRootPart")
+
+  if not hum or hum.Health <= 0 or not root then
+    TLG.PNotif("🌀", "El jugador seleccionado no está listo", C.Yel)
+    return false
+  end
+
+  if TLG.GO.On then
+    if TLG.GO.T == target then
+      TLG.GOS()
+      TLG.PNotif("🌀", "God Orb detenido", C.Rd)
+      return false
+    else
+      TLG.GOS()
+    end
+  end
+
+  TLG.GOSt(target)
+  TLG.PNotif("🌀", "Orbitando → " .. target.DisplayName, C.Yel)
+  return true
 end)
 
 local fdg, fs, fp = false, nil, nil
