@@ -68,6 +68,8 @@ function TLG.getPing()
   return p
 end
 
+TLG.GetPing = TLG.getPing
+
 local Themes = {
   ["👑 Gold"]   = {A=Color3.fromRGB(255,215,0),  A2=Color3.fromRGB(255,235,100)},
   ["💜 Purple"] = {A=Color3.fromRGB(190,90,255), A2=Color3.fromRGB(230,150,255)},
@@ -1106,7 +1108,7 @@ local SkyPresets = {
 local function SkyCaptureOriginal()
     pcall(function()
         if Sky.Original.Captured then return end
-        local s=Lighting:FindFirstChildOfClass("Sky")
+        local s=LIGHT:FindFirstChildOfClass("Sky")
         Sky.Original.Captured=true; Sky.Original.HadSky=s~=nil
         if s then
             Sky.Original.Bk=s.SkyboxBk; Sky.Original.Dn=s.SkyboxDn; Sky.Original.Ft=s.SkyboxFt
@@ -1116,8 +1118,8 @@ local function SkyCaptureOriginal()
     end)
 end
 local function SkyGet()
-    local s=Lighting:FindFirstChild("TLG_Sky")
-    if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
+    local s=LIGHT:FindFirstChild("TLG_Sky")
+    if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=LIGHT end
     return s
 end
 local function SkySet(ids)
@@ -1130,9 +1132,9 @@ local function SkySet(ids)
 end
 local function SkyRestoreOriginal()
     pcall(function()
-        local s=Lighting:FindFirstChild("TLG_Sky")
+        local s=LIGHT:FindFirstChild("TLG_Sky")
         if Sky.Original.HadSky then
-            if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
+            if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=LIGHT end
             s.SkyboxBk=Sky.Original.Bk; s.SkyboxDn=Sky.Original.Dn; s.SkyboxFt=Sky.Original.Ft
             s.SkyboxLf=Sky.Original.Lf; s.SkyboxRt=Sky.Original.Rt; s.SkyboxUp=Sky.Original.Up
             s.SkyboxOrientation=Sky.Original.Orientation
@@ -1150,7 +1152,7 @@ local function SkyApply(ids)
     Sky.Conn=RS.Heartbeat:Connect(function()
         if not Sky.On or not Sky.Ids then return end
         pcall(function()
-            local s=Lighting:FindFirstChild("TLG_Sky")
+            local s=LIGHT:FindFirstChild("TLG_Sky")
             if not s then s=SkyGet() end
             if s.SkyboxBk~=Sky.Ids[1] or s.SkyboxDn~=Sky.Ids[2] or s.SkyboxFt~=Sky.Ids[3] or s.SkyboxLf~=Sky.Ids[4] or s.SkyboxRt~=Sky.Ids[5] or s.SkyboxUp~=Sky.Ids[6] then SkySet(Sky.Ids) end
         end)
@@ -1303,7 +1305,7 @@ task.spawn(function()
         local n = os.clock()
         if n - lt >= 1 then
             FpsLabel.Text = "FPS: " .. math.floor(fc / (n - lt))
-            PingLabel.Text = "Ping: " .. TLG.GetPing() .. "ms"
+            PingLabel.Text = "Ping: " .. TLG.getPing() .. "ms"
             fc = 0
             lt = n
         end
