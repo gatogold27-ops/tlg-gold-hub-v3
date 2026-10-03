@@ -1043,17 +1043,6 @@ function TLG.FastAttackStart()
       FA.CachedPing = faPing()
       FA.LastPing = now
     end
-    local stun = FA.Stun
-    if not stun or not stun.Parent then
-      local c = TLG.LP.Character
-      if c then
-        FA.Stun = c:FindFirstChild("Stun")
-        stun = FA.Stun
-      end
-    end
-    if stun and stun.Parent then
-      pcall(function() stun.Value = -1 end)
-    end
     if FA.Paused then return end
     local iv = FA.BurstRate * (1 + FA.CachedPing / 2000)
     if now - FA.LastBurst >= iv then
@@ -1093,6 +1082,608 @@ PLR.PlayerRemoving:Connect(function(p)
     TLG.PNotif("➖ "..p.DisplayName, "Salió", C.Rd)
   end
 end)
+
+
+local W_S = TLG.IsMobile and UDim2.new(0,400,0,280) or UDim2.new(0,640,0,420)
+local W_P = UDim2.new(0.5,-W_S.X.Offset/2,0.5,-W_S.Y.Offset/2)
+
+
+-- ═══════════════════════════════════════════════════════════════
+-- SKYBOX TLG
+-- ═══════════════════════════════════════════════════════════════
+local Sky = {On=false, Current="ninguno", Ids=nil, Conn=nil, Original={Captured=false, HadSky=false, Bk=nil, Dn=nil, Ft=nil, Lf=nil, Rt=nil, Up=nil, Orientation=Vector3.zero, StarCount=nil, Celestial=nil}}
+local SkyPresets = {
+    {name="❌ Ninguno", id="ninguno", ids=nil},
+    {name="🏠 Roblox Sample", id="sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
+    {name="🌌 Galaxia", id="galaxia", ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
+    {name="🌠 Espacio Vaporwave", id="vaporwave", ids={"rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834","rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"}},
+    {name="🌅 Sunset", id="sunset", ids={"rbxassetid://323494035","rbxassetid://323494368","rbxassetid://323494130","rbxassetid://323494252","rbxassetid://323494067","rbxassetid://323493360"}},
+    {name="🔵 Blue Space", id="blue_space", ids={"rbxassetid://135483466","rbxassetid://135483484","rbxassetid://135483461","rbxassetid://135483495","rbxassetid://135483499","rbxassetid://135483475"}},
+    {name="🔴 Red Night", id="red_night", ids={"rbxassetid://401664839","rbxassetid://401664862","rbxassetid://401664960","rbxassetid://401664881","rbxassetid://401664901","rbxassetid://401664936"}},
+    {name="🪐 Blue Planet", id="blue_planet", ids={"rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524","rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"}},
+    {name="🔵 Blue Planet 2", id="blue_planet_2", ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}}
+}
+local function SkyCaptureOriginal()
+    pcall(function()
+        if Sky.Original.Captured then return end
+        local s=Lighting:FindFirstChildOfClass("Sky")
+        Sky.Original.Captured=true; Sky.Original.HadSky=s~=nil
+        if s then
+            Sky.Original.Bk=s.SkyboxBk; Sky.Original.Dn=s.SkyboxDn; Sky.Original.Ft=s.SkyboxFt
+            Sky.Original.Lf=s.SkyboxLf; Sky.Original.Rt=s.SkyboxRt; Sky.Original.Up=s.SkyboxUp
+            Sky.Original.Orientation=s.SkyboxOrientation; Sky.Original.StarCount=s.StarCount; Sky.Original.Celestial=s.CelestialBodiesShown
+        end
+    end)
+end
+local function SkyGet()
+    local s=Lighting:FindFirstChild("TLG_Sky")
+    if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
+    return s
+end
+local function SkySet(ids)
+    if not ids then return end
+    local s=SkyGet()
+    s.SkyboxBk=ids[1]; s.SkyboxDn=ids[2]; s.SkyboxFt=ids[3]
+    s.SkyboxLf=ids[4]; s.SkyboxRt=ids[5]; s.SkyboxUp=ids[6]
+    s.SkyboxOrientation=Vector3.new(0,0,0)
+    pcall(function() s.CelestialBodiesShown=true; s.StarCount=3000 end)
+end
+local function SkyRestoreOriginal()
+    pcall(function()
+        local s=Lighting:FindFirstChild("TLG_Sky")
+        if Sky.Original.HadSky then
+            if not s then s=Instance.new("Sky"); s.Name="TLG_Sky"; s.Parent=Lighting end
+            s.SkyboxBk=Sky.Original.Bk; s.SkyboxDn=Sky.Original.Dn; s.SkyboxFt=Sky.Original.Ft
+            s.SkyboxLf=Sky.Original.Lf; s.SkyboxRt=Sky.Original.Rt; s.SkyboxUp=Sky.Original.Up
+            s.SkyboxOrientation=Sky.Original.Orientation
+            if Sky.Original.StarCount then s.StarCount=Sky.Original.StarCount end
+            if Sky.Original.Celestial~=nil then s.CelestialBodiesShown=Sky.Original.Celestial end
+        elseif s then s:Destroy() end
+        Sky.On=false; Sky.Ids=nil; Sky.Current="ninguno"
+    end)
+end
+local function SkyApply(ids)
+    SkyCaptureOriginal()
+    if Sky.Conn then pcall(function() Sky.Conn:Disconnect() end); Sky.Conn=nil end
+    if not ids then SkyRestoreOriginal(); return end
+    Sky.Ids=ids; Sky.On=true; SkySet(ids)
+    Sky.Conn=RS.Heartbeat:Connect(function()
+        if not Sky.On or not Sky.Ids then return end
+        pcall(function()
+            local s=Lighting:FindFirstChild("TLG_Sky")
+            if not s then s=SkyGet() end
+            if s.SkyboxBk~=Sky.Ids[1] or s.SkyboxDn~=Sky.Ids[2] or s.SkyboxFt~=Sky.Ids[3] or s.SkyboxLf~=Sky.Ids[4] or s.SkyboxRt~=Sky.Ids[5] or s.SkyboxUp~=Sky.Ids[6] then SkySet(Sky.Ids) end
+        end)
+    end)
+end
+
+local W = Instance.new("Frame", SG)
+W.Size = W_S
+W.Position = UDim2.new(0.5,0,0.5,0)
+W.BackgroundColor3 = C.BG
+W.BorderSizePixel = 0
+W.ClipsDescendants = true
+W.Active = true
+W.ZIndex = 1
+Instance.new("UICorner", W).CornerRadius = UDim.new(0,12)
+
+local WS = Instance.new("UIStroke", W)
+WS.Thickness = 2
+WS.Color = TLG.A()
+TLG.PGlow(WS, 0.05, 0.35, 1.5)
+
+local Wgrad = Instance.new("UIGradient", W)
+Wgrad.Color = ColorSequence.new(C.BG, C.BG2)
+Wgrad.Rotation = 135
+
+TLG.W = W
+TLG.W_S = W_S
+TLG.W_P = W_P
+
+local function AddPattern(parent, size, color, transp, rotation)
+    local holder = Instance.new("Frame", parent)
+    holder.Size = UDim2.new(1,0,1,0)
+    holder.BackgroundTransparency = 1
+    holder.ZIndex = 0
+    holder.ClipsDescendants = true
+    for i = 0, 10 do
+        for j = 0, 8 do
+            local icon = Instance.new("TextLabel", holder)
+            icon.Size = UDim2.new(0,size,0,size)
+            icon.Position = UDim2.new(0, i*size + (j%2)*size/2, 0, j*size)
+            icon.BackgroundTransparency = 1
+            icon.Text = "💀"
+            icon.TextSize = size * 0.7
+            icon.TextColor3 = color
+            icon.TextTransparency = transp
+            icon.Rotation = rotation
+            icon.ZIndex = 0
+        end
+    end
+end
+AddPattern(W, 42, C.Yel, 0.94, 15)
+
+local TB = Instance.new("Frame", W)
+TB.Size = UDim2.new(1,0,0,42)
+TB.BackgroundColor3 = C.BG2
+TB.BackgroundTransparency = 0.05
+TB.BorderSizePixel = 0
+TB.ZIndex = 5
+Instance.new("UICorner", TB).CornerRadius = UDim.new(0,12)
+
+local HF = Instance.new("Frame", TB)
+HF.Size = UDim2.new(1,0,0,12)
+HF.Position = UDim2.new(0,0,1,-12)
+HF.BackgroundColor3 = C.BG2
+HF.BackgroundTransparency = 0.05
+HF.BorderSizePixel = 0
+HF.ZIndex = 5
+
+AddPattern(TB, 32, C.Yel, 0.85, 0)
+
+local DcIco = Instance.new("TextLabel", TB)
+DcIco.Size = UDim2.new(0,26,0,26)
+DcIco.Position = UDim2.new(0,10,0.5,-13)
+DcIco.BackgroundColor3 = C.BG3
+DcIco.Text = "💀"
+DcIco.TextSize = 15
+DcIco.Font = Enum.Font.GothamBold
+DcIco.TextColor3 = C.Yel
+DcIco.ZIndex = 10
+Instance.new("UICorner", DcIco).CornerRadius = UDim.new(1,0)
+
+local DcS = Instance.new("UIStroke", DcIco)
+DcS.Color = C.Yel
+DcS.Thickness = 1.5
+TLG.PGlow(DcS, 0.1, 0.5, 1.2)
+
+local MainTitle = Instance.new("TextLabel", TB)
+MainTitle.Size = UDim2.new(0,180,0,18)
+MainTitle.Position = UDim2.new(0,42,0,6)
+MainTitle.BackgroundTransparency = 1
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.Text = "TLG GOLD HUB"
+MainTitle.TextSize = 13
+MainTitle.TextColor3 = C.Yel
+MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+MainTitle.ZIndex = 10
+
+local SubTitle = Instance.new("TextLabel", TB)
+SubTitle.Size = UDim2.new(0,180,0,12)
+SubTitle.Position = UDim2.new(0,42,0,24)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.Text = "Meme Sea • V6.8"
+SubTitle.TextSize = 9
+SubTitle.TextColor3 = C.Gr
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.ZIndex = 10
+
+local StatsPanel = Instance.new("Frame", TB)
+StatsPanel.Size = UDim2.new(0,130,0,24)
+StatsPanel.Position = UDim2.new(1,-190,0.5,-12)
+StatsPanel.BackgroundColor3 = C.BG3
+StatsPanel.BackgroundTransparency = 0.3
+StatsPanel.BorderSizePixel = 0
+StatsPanel.ZIndex = 8
+Instance.new("UICorner", StatsPanel).CornerRadius = UDim.new(0,6)
+
+local StatS = Instance.new("UIStroke", StatsPanel)
+StatS.Color = C.Yel
+StatS.Thickness = 1
+StatS.Transparency = 0.6
+
+local FpsLabel = Instance.new("TextLabel", StatsPanel)
+FpsLabel.Size = UDim2.new(0.5,-6,1,0)
+FpsLabel.Position = UDim2.new(0,4,0,0)
+FpsLabel.BackgroundTransparency = 1
+FpsLabel.Font = Enum.Font.GothamBold
+FpsLabel.Text = "FPS: --"
+FpsLabel.TextColor3 = C.Grn
+FpsLabel.TextSize = 10
+FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+FpsLabel.ZIndex = 9
+
+local PingLabel = Instance.new("TextLabel", StatsPanel)
+PingLabel.Size = UDim2.new(0.5,-6,1,0)
+PingLabel.Position = UDim2.new(0.5,2,0,0)
+PingLabel.BackgroundTransparency = 1
+PingLabel.Font = Enum.Font.GothamBold
+PingLabel.Text = "Ping: --"
+PingLabel.TextColor3 = C.Cyan
+PingLabel.TextSize = 10
+PingLabel.TextXAlignment = Enum.TextXAlignment.Right
+PingLabel.ZIndex = 9
+
+task.spawn(function()
+    local fc = 0
+    local lt = os.clock()
+    RS.RenderStepped:Connect(function()
+        fc = fc + 1
+        local n = os.clock()
+        if n - lt >= 1 then
+            FpsLabel.Text = "FPS: " .. math.floor(fc / (n - lt))
+            PingLabel.Text = "Ping: " .. TLG.GetPing() .. "ms"
+            fc = 0
+            lt = n
+        end
+    end)
+end)
+
+local STtl = Instance.new("TextLabel", TB)
+STtl.Size = UDim2.new(0,60,1,0)
+STtl.Position = UDim2.new(1,-64,0,0)
+STtl.BackgroundTransparency = 1
+STtl.Font = Enum.Font.GothamBold
+STtl.Text = "👑"
+STtl.TextSize = 14
+STtl.TextColor3 = C.Yel
+STtl.TextXAlignment = Enum.TextXAlignment.Right
+STtl.ZIndex = 7
+
+TLG.STtl = STtl
+
+local dg, dS, dP = false, nil, nil
+TB.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        dg = true
+        dS = i.Position
+        dP = W.Position
+    end
+end)
+UIS.InputChanged:Connect(function(i)
+    if dg and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+        local d = i.Position - dS
+        W.Position = UDim2.new(dP.X.Scale, dP.X.Offset + d.X, dP.Y.Scale, dP.Y.Offset + d.Y)
+    end
+end)
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+        dg = false
+    end
+end)
+
+local TabBar = Instance.new("Frame", W)
+TabBar.Size = UDim2.new(1,0,0,38)
+TabBar.Position = UDim2.new(0,0,0,42)
+TabBar.BackgroundColor3 = C.BG2
+TabBar.BackgroundTransparency = 0.3
+TabBar.BorderSizePixel = 0
+TabBar.ZIndex = 4
+
+local TScr = Instance.new("ScrollingFrame", TabBar)
+TScr.Size = UDim2.new(1,-10,1,0)
+TScr.Position = UDim2.new(0,5,0,0)
+TScr.BackgroundTransparency = 1
+TScr.BorderSizePixel = 0
+TScr.ScrollBarThickness = 0
+TScr.ScrollBarImageTransparency = 1
+TScr.CanvasSize = UDim2.new(0,0,0,0)
+TScr.ZIndex = 5
+TScr.ScrollingDirection = Enum.ScrollingDirection.X
+pcall(function() TScr.AutomaticCanvasSize = Enum.AutomaticSize.X end)
+
+local TLy = Instance.new("UIListLayout", TScr)
+TLy.FillDirection = Enum.FillDirection.Horizontal
+TLy.VerticalAlignment = Enum.VerticalAlignment.Center
+TLy.HorizontalAlignment = Enum.HorizontalAlignment.Left
+TLy.Padding = UDim.new(0,6)
+
+local Cont = Instance.new("Frame", W)
+Cont.Size = UDim2.new(1,-10,1,-100)
+Cont.Position = UDim2.new(0,5,0,88)
+Cont.BackgroundTransparency = 1
+Cont.ZIndex = 3
+
+TLG.TabBar = TabBar
+TLG.Cont = Cont
+
+local Tabs = {}
+
+local function Tab(name, icon)
+    local b = Instance.new("TextButton", TScr)
+    b.Size = UDim2.new(0,80,0,32)
+    b.BackgroundColor3 = C.BG3
+    b.BackgroundTransparency = 1
+    b.Text = ""
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.ZIndex = 6
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+    local ico = Instance.new("TextLabel", b)
+    ico.Size = UDim2.new(1,0,0,14)
+    ico.Position = UDim2.new(0,0,0,3)
+    ico.BackgroundTransparency = 1
+    ico.Text = icon
+    ico.TextSize = 13
+    ico.ZIndex = 7
+    local lb = Instance.new("TextLabel", b)
+    lb.Size = UDim2.new(1,0,0,12)
+    lb.Position = UDim2.new(0,0,0,18)
+    lb.BackgroundTransparency = 1
+    lb.Font = Enum.Font.GothamSemibold
+    lb.Text = name
+    lb.TextColor3 = C.Gr
+    lb.TextSize = 9
+    lb.ZIndex = 7
+    local ul = Instance.new("Frame", b)
+    ul.Size = UDim2.new(0,0,0,3)
+    ul.Position = UDim2.new(0.5,0,1,-3)
+    ul.AnchorPoint = Vector2.new(0.5,1)
+    ul.BackgroundColor3 = C.Yel
+    ul.BorderSizePixel = 0
+    ul.ZIndex = 8
+    Instance.new("UICorner", ul).CornerRadius = UDim.new(1,0)
+    local pg = Instance.new("ScrollingFrame", Cont)
+    pg.Size = UDim2.new(1,0,1,0)
+    pg.BackgroundTransparency = 1
+    pg.BorderSizePixel = 0
+    pg.ScrollBarThickness = TLG.IsMobile and 8 or 5
+    pg.ScrollBarImageColor3 = C.Yel
+    pg.CanvasSize = UDim2.new(0,0,0,0)
+    pg.ZIndex = 4
+    pcall(function() pg.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
+    pg.Visible = false
+    local pl = Instance.new("UIListLayout", pg)
+    pl.Padding = UDim.new(0,6)
+    local pp = Instance.new("UIPadding", pg)
+    pp.PaddingTop = UDim.new(0,8)
+    pp.PaddingLeft = UDim.new(0,8)
+    pp.PaddingRight = UDim.new(0,8)
+    pp.PaddingBottom = UDim.new(0,8)
+    table.insert(Tabs, {b = b, l = lb, p = pg, u = ul, ico = ico})
+    b.MouseButton1Click:Connect(function()
+        for _, t in ipairs(Tabs) do
+            t.l.TextColor3 = C.Gr
+            t.ico.TextTransparency = 0.5
+            t.p.Visible = false
+            t.b.BackgroundColor3 = C.BG3
+            t.b.BackgroundTransparency = 1
+            TW:Create(t.u, TweenInfo.new(0.2), {Size = UDim2.new(0,0,0,3)}):Play()
+        end
+        lb.TextColor3 = C.Yel
+        ico.TextTransparency = 0
+        pg.Visible = true
+        b.BackgroundColor3 = C.BG3
+        b.BackgroundTransparency = 0.5
+        TW:Create(ul, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
+    end)
+    return pg
+end
+
+local function Sec(p, txt, ico)
+    local s = Instance.new("Frame", p)
+    s.Size = UDim2.new(1,0,0,30)
+    s.BackgroundColor3 = C.BG2
+    s.BackgroundTransparency = 0.3
+    s.BorderSizePixel = 0
+    s.ZIndex = 5
+    Instance.new("UICorner", s).CornerRadius = UDim.new(0,7)
+    local sS = Instance.new("UIStroke", s)
+    sS.Thickness = 1
+    sS.Transparency = 0.7
+    sS.Color = C.Yel
+    local bar = Instance.new("Frame", s)
+    bar.Size = UDim2.new(0,3,0,16)
+    bar.Position = UDim2.new(0,8,0.5,-8)
+    bar.BorderSizePixel = 0
+    bar.ZIndex = 7
+    bar.BackgroundColor3 = C.Yel
+    Instance.new("UICorner", bar).CornerRadius = UDim.new(1,0)
+    local l = Instance.new("TextLabel", s)
+    l.Size = UDim2.new(1,-34,1,0)
+    l.Position = UDim2.new(0,20,0,0)
+    l.BackgroundTransparency = 1
+    l.Font = Enum.Font.GothamBold
+    l.Text = (ico or "") .. "  " .. txt
+    l.TextSize = 11
+    l.TextColor3 = C.Wh
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.ZIndex = 6
+end
+
+local function Lbl(p, txt, col)
+    if typeof(col) ~= "Color3" then col = C.Gr end
+    local l = Instance.new("TextLabel", p)
+    l.Size = UDim2.new(1,0,0,12)
+    l.BackgroundTransparency = 1
+    l.Font = Enum.Font.Gotham
+    l.Text = txt
+    l.TextColor3 = col
+    l.TextSize = 9
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.ZIndex = 5
+    return l
+end
+
+local function Tog(p, txt, def, cb)
+    local sv = def == true
+    local f = Instance.new("Frame", p)
+    f.Size = UDim2.new(1,0,0,32)
+    f.BackgroundColor3 = C.BG2
+    f.BackgroundTransparency = 0.1
+    f.BorderSizePixel = 0
+    f.ZIndex = 5
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0,6)
+    local l = Instance.new("TextLabel", f)
+    l.Size = UDim2.new(1,-60,1,0)
+    l.Position = UDim2.new(0,10,0,0)
+    l.BackgroundTransparency = 1
+    l.Font = Enum.Font.GothamSemibold
+    l.Text = txt
+    l.TextColor3 = C.Wh
+    l.TextSize = 10
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.ZIndex = 7
+    local sw = Instance.new("Frame", f)
+    sw.Size = UDim2.new(0,36,0,18)
+    sw.Position = UDim2.new(1,-48,0.5,-9)
+    sw.BackgroundColor3 = sv and C.Yel or C.GrD
+    sw.BorderSizePixel = 0
+    sw.ZIndex = 6
+    Instance.new("UICorner", sw).CornerRadius = UDim.new(1,0)
+    local kn = Instance.new("Frame", sw)
+    kn.Size = UDim2.new(0,14,0,14)
+    kn.Position = sv and UDim2.new(1,-16,0.5,-7) or UDim2.new(0,2,0.5,-7)
+    kn.BackgroundColor3 = C.Wh
+    kn.BorderSizePixel = 0
+    kn.ZIndex = 7
+    Instance.new("UICorner", kn).CornerRadius = UDim.new(1,0)
+    local st = sv
+    local btn = Instance.new("TextButton", f)
+    btn.Size = UDim2.new(1,0,1,0)
+    btn.BackgroundTransparency = 1
+    btn.Text = ""
+    btn.ZIndex = 10
+    btn.MouseButton1Click:Connect(function()
+        st = not st
+        TW:Create(sw, TweenInfo.new(0.25, Enum.EasingStyle.Back), {BackgroundColor3 = st and C.Yel or C.GrD}):Play()
+        TW:Create(kn, TweenInfo.new(0.25, Enum.EasingStyle.Back), {Position = st and UDim2.new(1,-16,0.5,-7) or UDim2.new(0,2,0.5,-7)}):Play()
+        pcall(cb, st)
+    end)
+end
+
+local function Sli(p, txt, mn, mx, def, cb)
+    local sv = def
+    local f = Instance.new("Frame", p)
+    f.Size = UDim2.new(1,0,0,40)
+    f.BackgroundColor3 = C.BG2
+    f.BackgroundTransparency = 0.1
+    f.BorderSizePixel = 0
+    f.ZIndex = 5
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0,6)
+    local l = Instance.new("TextLabel", f)
+    l.Size = UDim2.new(0.6,-12,0,12)
+    l.Position = UDim2.new(0,10,0,4)
+    l.BackgroundTransparency = 1
+    l.Font = Enum.Font.GothamSemibold
+    l.Text = txt
+    l.TextColor3 = C.Wh
+    l.TextSize = 9
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.ZIndex = 7
+    local vl = Instance.new("TextLabel", f)
+    vl.Size = UDim2.new(0.4,-10,0,12)
+    vl.Position = UDim2.new(0.6,2,0,4)
+    vl.BackgroundTransparency = 1
+    vl.Font = Enum.Font.GothamBold
+    vl.Text = tostring(sv)
+    vl.TextSize = 9
+    vl.TextXAlignment = Enum.TextXAlignment.Right
+    vl.ZIndex = 7
+    local b = Instance.new("Frame", f)
+    b.Size = UDim2.new(1,-20,0,6)
+    b.Position = UDim2.new(0,10,0,24)
+    b.BackgroundColor3 = C.BG
+    b.BorderSizePixel = 0
+    b.ZIndex = 6
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
+    local fi = Instance.new("Frame", b)
+    fi.Size = UDim2.new((sv-mn)/(mx-mn),0,1,0)
+    fi.BorderSizePixel = 0
+    fi.ZIndex = 7
+    fi.BackgroundColor3 = C.Yel
+    Instance.new("UICorner", fi).CornerRadius = UDim.new(1,0)
+    local kn = Instance.new("Frame", b)
+    kn.Size = UDim2.new(0,12,0,12)
+    kn.Position = UDim2.new((sv-mn)/(mx-mn),-6,0.5,-6)
+    kn.BackgroundColor3 = C.Wh
+    kn.BorderSizePixel = 0
+    kn.ZIndex = 8
+    Instance.new("UICorner", kn).CornerRadius = UDim.new(1,0)
+    local tn = Instance.new("TextButton", f)
+    tn.Size = UDim2.new(1,-6,0,40)
+    tn.Position = UDim2.new(0,3,0,0)
+    tn.BackgroundTransparency = 1
+    tn.Text = ""
+    tn.ZIndex = 10
+    local dragging = false
+    local function up(i)
+        local pp = math.clamp((i.Position.X - b.AbsolutePosition.X) / b.AbsoluteSize.X, 0, 1)
+        local v = math.floor(mn + (mx - mn) * pp)
+        fi.Size = UDim2.new(pp,0,1,0)
+        kn.Position = UDim2.new(pp,-6,0.5,-6)
+        vl.Text = tostring(v)
+        pcall(cb, v)
+    end
+    tn.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            up(i)
+        end
+    end)
+    UIS.InputChanged:Connect(function(i)
+        if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+            up(i)
+        end
+    end)
+    UIS.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+end
+
+local function Btn(p, txt, col, cb)
+    local b = Instance.new("TextButton", p)
+    b.Size = UDim2.new(1,0,0,30)
+    b.BackgroundColor3 = C.BG2
+    b.BackgroundTransparency = 0.1
+    b.Font = Enum.Font.GothamBold
+    b.Text = txt
+    b.TextColor3 = col or C.Wh
+    b.TextSize = 10
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.ZIndex = 5
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+    local bS = Instance.new("UIStroke", b)
+    bS.Thickness = 1
+    bS.Transparency = 0.4
+    bS.Color = C.Yel
+    TLG.Ripple(b)
+    b.MouseButton1Click:Connect(function() pcall(cb) end)
+    return b
+end
+
+TLG.Tabs = Tabs
+TLG.Sec = Sec
+TLG.Lbl = Lbl
+TLG.Tog = Tog
+TLG.Sli = Sli
+TLG.Btn = Btn
+
+local PInfo = Tab("Info", "📊")
+local PCb = Tab("Combat", "⚔️")
+local PAb = Tab("Aimbot", "🎯")
+local PFl = Tab("Fly", "✈")
+local PIs = Tab("Islands", "🏝️")
+local PSc = Tab("Scripts", "📜")
+local PTo = Tab("Tools", "🔧")
+local PEs = Tab("ESP", "👁️")
+local PVi = Tab("Visuals", "🎨")
+local POp = Tab("Optimize", "⚡")
+
+task.wait(0.1)
+if Tabs[1] then
+    Tabs[1].l.TextColor3 = C.Yel
+    Tabs[1].ico.TextTransparency = 0
+    Tabs[1].p.Visible = true
+    Tabs[1].b.BackgroundColor3 = C.BG3
+    Tabs[1].b.BackgroundTransparency = 0.5
+    TW:Create(Tabs[1].u, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
+end
+
+TLG.PInfo = PInfo
+TLG.PCb = PCb
+TLG.PAb = PAb
+TLG.PFl = PFl
+TLG.PIs = PIs
+TLG.PSc = PSc
+TLG.PTo = PTo
+TLG.PEs = PEs
+TLG.PVi = PVi
+TLG.POp = POp
 
 
 -- COMBAT TAB
@@ -2117,7 +2708,8 @@ end
 -- FAB (visible por defecto)
 local FSG = Instance.new("ScreenGui")
 
-_G.TLG_FAB_GUI = FSGFSG.Name = "TLG_FAB_Float"
+FSG.Name = "TLG_FAB_Float"
+_G.TLG_FAB_GUI = FSG
 FSG.ResetOnSpawn = false
 FSG.DisplayOrder = 999
 FSG.IgnoreGuiInset = true
@@ -2138,6 +2730,9 @@ TLG.FAB_SetVisible = function(v)
   TLG.FAB_Toggle_State = v == true
   if _G.TLG_FAB_GUI and _G.TLG_FAB_GUI.Parent then
     _G.TLG_FAB_GUI.Enabled = TLG.FAB_Toggle_State
+  end
+  if TLG.FAB_Frame_Ref and TLG.FAB_Frame_Ref.Parent then
+    TLG.FAB_Frame_Ref.Visible = TLG.FAB_Toggle_State
   end
 end
 
@@ -2219,12 +2814,8 @@ local function CF(i, t, cb)
 end
 
 CF("🚀", "FUGA", function()
-  if TLG.Fuga then
-    local ok = TLG.Fuga()
-    if ok then TLG.PNotif("🚀", "Fuga ejecutada", C.Yel) end
-  end
+  if TLG.Fuga then TLG.Fuga() end
 end)
-
 CF("✈", "FLY", function()
   if TLG.Fly.On then
     TLG.FlyE()
@@ -2234,36 +2825,24 @@ CF("✈", "FLY", function()
     return true
   end
 end)
-
 CF("🌀", "GOD ORB", function()
   local target = TLG.SelectedTarget
-
   if not target or target == TLG.LP or not target.Parent then
-    TLG.PNotif("🌀", "Seleccioná un jugador primero", C.Yel)
+    TLG.PNotif("🌀 God Orb", "Seleccioná un jugador primero", C.Yel)
     return false
   end
-
-  local ch = target.Character
-  local hum = ch and ch:FindFirstChildOfClass("Humanoid")
-  local root = ch and ch:FindFirstChild("HumanoidRootPart")
-
-  if not hum or hum.Health <= 0 or not root then
-    TLG.PNotif("🌀", "El jugador seleccionado no está listo", C.Yel)
+  local ch=target.Character
+  local hu=ch and ch:FindFirstChildOfClass("Humanoid")
+  local root=ch and ch:FindFirstChild("HumanoidRootPart")
+  if not hu or hu.Health<=0 or not root then
+    TLG.PNotif("🌀 God Orb", "El objetivo no está listo", C.Yel)
     return false
   end
-
   if TLG.GO.On then
-    if TLG.GO.T == target then
-      TLG.GOS()
-      TLG.PNotif("🌀", "God Orb detenido", C.Rd)
-      return false
-    else
-      TLG.GOS()
-    end
+    TLG.GOS()
+    return false
   end
-
   TLG.GOSt(target)
-  TLG.PNotif("🌀", "Orbitando → " .. target.DisplayName, C.Yel)
   return true
 end)
 
@@ -2289,60 +2868,6 @@ UIS.InputEnded:Connect(function(i)
   end
 end)
 
--- SETTINGS TAB
-do
-  Sec(PSe, "💾 CONFIGURACIÓN", "💾")
-
-
-  Sec(PSe, "🚨 EMERGENCIA", "🚨")
-  Btn(PSe, "🚨 PANIC — Desactivar todo", C.Rd, TLG.Panic)
-
-  Sec(PSe, "💀 FAB FLOTANTE", "💀")
-  Tog(PSe, "Mostrar FAB", true, function(v)
-    TLG.FAB_SetVisible(v)
-    TLG.PNotif("💀 FAB", v and "Visible" or "Oculto",
-      v and C.Grn or C.Rd)
-  end)
-  Lbl(PSe, "Botones rápidos: 🚀 Fuga, ✈ Fly, ⚡ Fast Atk", C.Gr)
-
-  Sec(PSe, "🎨 TEMA", "🎨")
-  local tl = {}
-  for n in pairs(Themes) do table.insert(tl, n) end
-  table.sort(tl)
-  local tbs = {}
-  for _, tn in ipairs(tl) do
-    local b = Instance.new("TextButton", PSe)
-    b.Size = UDim2.new(1,0,0,26)
-    b.BackgroundColor3 = (TLG.CurrentTheme == tn
-      and not TLG.CustomAccent) and Themes[tn].A or C.BG2
-    b.Font = Enum.Font.GothamBold
-    b.Text = tn
-    b.TextColor3 = (TLG.CurrentTheme == tn
-      and not TLG.CustomAccent) and C.BG or C.Wh
-    b.TextSize = 9
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 5
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
-    table.insert(tbs, {b=b, n=tn})
-    TLG.Ripple(b)
-    b.MouseButton1Click:Connect(function()
-      TLG.CustomAccent = nil
-      TLG.CustomAccent2 = nil
-      TLG.CurrentTheme = tn
-      for _, x in ipairs(tbs) do
-        if x.n == tn then
-          x.b.BackgroundColor3 = Themes[tn].A
-          x.b.TextColor3 = C.BG
-        else
-          x.b.BackgroundColor3 = C.BG2
-          x.b.TextColor3 = C.Wh
-        end
-      end
-      TLG.PNotif("🎨", tn, Themes[tn].A)
-    end)
-  end
-end
 
 -- WATERMARK
 local WM = Instance.new("Frame", SG)
