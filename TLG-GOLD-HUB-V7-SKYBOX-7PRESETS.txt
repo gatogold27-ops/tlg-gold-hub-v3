@@ -1,4 +1,4 @@
--- TLG GOLD HUB V7.5 — Meme Sea Edition
+-- TLG HUB — Meme Sea Edition
 -- Ghost Hitbox + Fly Boost + FABs visibles
 
 local TW = game:GetService("TweenService")
@@ -833,9 +833,8 @@ function TLG.Panic()
   pcall(function() TLG.AntiOrbitStop() end)
   pcall(function() TLG.NoclipStop() end)
   pcall(function() TLG.OrbitalMapStop() end)
-  if TLG.FarmStop then pcall(TLG.FarmStop) end
-  if TLG.NPCESPStop then pcall(TLG.NPCESPStop) end
-  if TLG.NPCHBStop then pcall(TLG.NPCHBStop) end
+  if TLG.FruitAutoStop then pcall(TLG.FruitAutoStop) end
+  if TLG.FruitESPStop then pcall(TLG.FruitESPStop) end
   if TLG.FastAttackStop then pcall(TLG.FastAttackStop) end
   TLG.Speed.On = false
   TLG.PNotif("🚨 PANIC", "Todo desactivado", C.Rd)
@@ -1235,7 +1234,7 @@ MainTitle.Size = UDim2.new(0,180,0,18)
 MainTitle.Position = UDim2.new(0,42,0,6)
 MainTitle.BackgroundTransparency = 1
 MainTitle.Font = Enum.Font.GothamBold
-MainTitle.Text = "TLG GOLD HUB"
+MainTitle.Text = "TLG HUB"
 MainTitle.TextSize = 13
 MainTitle.TextColor3 = C.Yel
 MainTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1246,7 +1245,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V9.0"
+SubTitle.Text = "Meme Sea • V9.2"
 SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1720,7 +1719,7 @@ TLG.Btn = Btn
 
 local PInfo = Tab("Info", "📊")
 local PCb = Tab("Combat", "⚔️")
-local PFm = Tab("Farm", "🤖")
+local PFr = Tab("Frutas", "🍎")
 local PAb = Tab("Aimbot", "🎯")
 local PFl = Tab("Fly", "✈")
 local PIs = Tab("Islands", "🏝️")
@@ -1773,11 +1772,11 @@ local infoOK, infoERR = pcall(function()
 
   local bSp, bGo
   local list, idx = {}, 1
-  local nameL, userL, idL, avatar
+  local nameL, userL, idL, avatar, hpFill, hpText
   local vals = {}
   local avatarFor = nil
   local avatarCache = {}
-  local labels = {"Nivel","Rebirths","Power","Melee","Weapon","Vida","Cash","Gems","Rank","Kills","Deaths","Essence"}
+  local labels = {"Nivel","Power","Melee","Weapon","Cash","Gems"}
 
   local function rebuild()
     local cur = TLG.SelectedTarget
@@ -1828,6 +1827,7 @@ local infoOK, infoERR = pcall(function()
     if not p then
       nameL.Text = "Sin jugadores"; userL.Text = ""; idL.Text = ""
       for _, v in ipairs(vals) do v.Text = "—" end
+      hpText.Text = "—"
       return
     end
     local s = TLG.GetStats(p)
@@ -1836,16 +1836,17 @@ local infoOK, infoERR = pcall(function()
     idL.Text = "ID: " .. tostring(p.UserId)
     setAvatar(p)
     local ratio = (s.MaxHealth > 0) and math.clamp(s.Health / s.MaxHealth, 0, 1) or 0
-    local data = {short(s.Level), short(s.Rebirths), short(s.Power), short(s.Melee), short(s.Weapon),
-      short(s.Health) .. "/" .. short(s.MaxHealth), short(s.Cash), short(s.Gems), short(s.Rank),
-      short(s.Kills), short(s.Deaths), short(s.Essence)}
+    local data = {short(s.Level), short(s.Power), short(s.Melee), short(s.Weapon),
+      short(s.Cash), short(s.Gems)}
     for i, v in ipairs(vals) do v.Text = data[i] end
-    vals[6].TextColor3 = Color3.fromHSV(ratio * 0.33, 0.7, 1)
+    hpText.Text = "❤ " .. short(s.Health) .. " / " .. short(s.MaxHealth)
+    TW:Create(hpFill, TweenInfo.new(0.25), {Size = UDim2.new(ratio, 0, 1, 0),
+      BackgroundColor3 = Color3.fromHSV(ratio * 0.33, 0.7, 1)}):Play()
   end
 
   Sec(PInfo, "JUGADOR SELECCIONADO", "📊")
   local card = Instance.new("Frame", PInfo)
-  card.Size = UDim2.new(1, 0, 0, 268)
+  card.Size = UDim2.new(1, 0, 0, 228)
   card.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
   card.BackgroundTransparency = 0.05
   card.BorderSizePixel = 0
@@ -1941,6 +1942,30 @@ local infoOK, infoERR = pcall(function()
     vl.ZIndex = 7
     vals[i] = vl
   end
+
+  local hpBg = Instance.new("Frame", card)
+  hpBg.Size = UDim2.new(1, -28, 0, 26)
+  hpBg.Position = UDim2.new(0, 14, 0, 190)
+  hpBg.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+  hpBg.BorderSizePixel = 0
+  hpBg.ZIndex = 6
+  Instance.new("UICorner", hpBg).CornerRadius = UDim.new(0, 8)
+  local hpS = Instance.new("UIStroke", hpBg)
+  hpS.Color = C.Yel; hpS.Thickness = 1; hpS.Transparency = 0.85
+  hpFill = Instance.new("Frame", hpBg)
+  hpFill.Size = UDim2.new(0, 0, 1, 0)
+  hpFill.BackgroundColor3 = C.Grn
+  hpFill.BorderSizePixel = 0
+  hpFill.ZIndex = 7
+  Instance.new("UICorner", hpFill).CornerRadius = UDim.new(0, 8)
+  hpText = Instance.new("TextLabel", hpBg)
+  hpText.Size = UDim2.new(1, 0, 1, 0)
+  hpText.BackgroundTransparency = 1
+  hpText.Font = Enum.Font.GothamBold
+  hpText.TextSize = 12
+  hpText.TextColor3 = C.Wh
+  hpText.Text = "—"
+  hpText.ZIndex = 8
 
   local function otherTarget()
     local p = TLG.SelectedTarget
@@ -3047,7 +3072,7 @@ do
   end)
 end
 
--- ═══════════ V9: NPC / AUTO FARM / CONFIG / ESTILO ═══════════
+-- ═══════════ V9: CONFIG / ESTILO ═══════════
 local V9ok, V9err = pcall(function()
   local function myRoot()
     local ch = TLG.LP.Character
@@ -3055,7 +3080,7 @@ local V9ok, V9err = pcall(function()
   end
 
   -- CONFIG GUARDADA
-  local CFG_FILE = "TLG_GoldHub_Config.json"
+  local CFG_FILE = "TLG_Hub_Config.json"
   local CFG = {}
   pcall(function()
     if isfile and readfile and isfile(CFG_FILE) then
@@ -3074,209 +3099,8 @@ local V9ok, V9err = pcall(function()
       end)
     end)
   end
-  local function cfgNum(k, def, lo, hi)
-    local v = tonumber(CFG[k])
-    if not v then return def end
-    return math.clamp(v, lo, hi)
-  end
-
-  -- NPCs
-  local NPC = {Hums = {}, List = {}, Names = {}, Last = 0, Filter = nil}
-  TLG.NPC = NPC
-  local function npcTrack(d)
-    if d:IsA("Humanoid") then NPC.Hums[d] = true end
-  end
-  for _, d in ipairs(workspace:GetDescendants()) do npcTrack(d) end
-  workspace.DescendantAdded:Connect(npcTrack)
-  workspace.DescendantRemoving:Connect(function(d) NPC.Hums[d] = nil end)
-
-  function NPC.Scan(force)
-    local now = os.clock()
-    if not force and now - NPC.Last < 0.25 then return NPC.List end
-    NPC.Last = now
-    local out, names, seen = {}, {}, {}
-    for hum in pairs(NPC.Hums) do
-      local m = hum.Parent
-      if m and hum.Health > 0 and m:IsA("Model") and not PLR:GetPlayerFromCharacter(m) then
-        local r = m:FindFirstChild("HumanoidRootPart") or m.PrimaryPart
-          or m:FindFirstChildWhichIsA("BasePart")
-        if r then
-          table.insert(out, {model = m, hum = hum, root = r, name = m.Name})
-          if not seen[m.Name] then seen[m.Name] = true; table.insert(names, m.Name) end
-        end
-      end
-    end
-    table.sort(names)
-    NPC.List, NPC.Names = out, names
-    return out
-  end
-
-  function NPC.Nearest(range, filter, minDist)
-    local mr = myRoot(); if not mr then return nil end
-    local best, bd = nil, range or math.huge
-    for _, e in ipairs(NPC.Scan()) do
-      if (not filter or e.name == filter) and e.root.Parent and e.hum.Health > 0 then
-        local d = (e.root.Position - mr.Position).Magnitude
-        if d < bd and d >= (minDist or 0) then best = e; bd = d end
-      end
-    end
-    return best, bd
-  end
-
-  -- AUTO FARM
-  local Farm = {On = false, Conn = nil, Target = nil, StartedFA = false,
-    Range = cfgNum("farmRange", 3000, 100, 10000),
-    Dist = cfgNum("farmDist", 6, 2, 30),
-    Height = cfgNum("farmHeight", 4, -10, 30)}
-  TLG.Farm = Farm
-  function TLG.FarmStart()
-    if Farm.On then return end
-    Farm.On = true; Farm.Target = nil
-    if not FA.On then TLG.FastAttackStart(); Farm.StartedFA = true end
-    Farm.Conn = RS.Heartbeat:Connect(function()
-      if not Farm.On then return end
-      local ch = TLG.LP.Character
-      local mr = ch and ch:FindFirstChild("HumanoidRootPart")
-      local mh = ch and ch:FindFirstChildOfClass("Humanoid")
-      if not mr or not mh or mh.Health <= 0 then return end
-      local t = Farm.Target
-      if not t or not t.root.Parent or t.hum.Health <= 0
-         or (NPC.Filter and t.name ~= NPC.Filter) then
-        t = NPC.Nearest(Farm.Range, NPC.Filter)
-        Farm.Target = t
-      end
-      if not t then return end
-      local tp = t.root.Position
-      local pos = tp + Vector3.new(0, Farm.Height, Farm.Dist)
-      mr.CFrame = CFrame.lookAt(pos, tp)
-      mr.AssemblyLinearVelocity = Vector3.zero
-    end)
-    TLG.PNotif("🤖 Auto Farm", "✅ Activado", C.Grn)
-  end
-  function TLG.FarmStop()
-    if not Farm.On then return end
-    Farm.On = false; Farm.Target = nil
-    if Farm.Conn then pcall(function() Farm.Conn:Disconnect() end); Farm.Conn = nil end
-    if Farm.StartedFA then Farm.StartedFA = false; pcall(TLG.FastAttackStop) end
-    TLG.PNotif("🤖 Auto Farm", "❌ Desactivado", C.Rd)
-  end
-
-  -- ESP DE NPCs
-  local NESP = {On = false, Conn = nil, Objs = {}, Max = 25,
-    Range = cfgNum("espRange", 1500, 100, 5000)}
-  local function nespClear()
-    for _, o in pairs(NESP.Objs) do
-      pcall(function() o.hl:Destroy() end)
-      pcall(function() o.bb:Destroy() end)
-    end
-    NESP.Objs = {}
-  end
-  function TLG.NPCESPStart()
-    if NESP.On then return end
-    NESP.On = true
-    local last = 0
-    NESP.Conn = RS.Heartbeat:Connect(function()
-      if not NESP.On then return end
-      local now = os.clock()
-      if now - last < 0.3 then return end
-      last = now
-      local mr = myRoot(); if not mr then return end
-      local cand = {}
-      for _, e in ipairs(NPC.Scan()) do
-        local d = (e.root.Position - mr.Position).Magnitude
-        if d <= NESP.Range then table.insert(cand, {e = e, d = d}) end
-      end
-      table.sort(cand, function(a, b) return a.d < b.d end)
-      local keep = {}
-      for i = 1, math.min(#cand, NESP.Max) do
-        local e, d = cand[i].e, cand[i].d
-        keep[e.model] = true
-        local o = NESP.Objs[e.model]
-        if not o or not o.hl.Parent then
-          if o then pcall(function() o.bb:Destroy() end) end
-          local hl = Instance.new("Highlight")
-          hl.Name = "TLG_NPC_HL"
-          hl.Adornee = e.model
-          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-          hl.FillColor = C.Rd; hl.OutlineColor = C.Yel
-          hl.FillTransparency = 0.85; hl.OutlineTransparency = 0
-          hl.Parent = e.model
-          local bb = Instance.new("BillboardGui")
-          bb.Name = "TLG_NPC_BB"
-          bb.Adornee = e.root
-          bb.AlwaysOnTop = true
-          bb.Size = UDim2.new(0, 170, 0, 34)
-          bb.StudsOffset = Vector3.new(0, 4, 0)
-          bb.Parent = e.root
-          local lb = Instance.new("TextLabel", bb)
-          lb.Size = UDim2.new(1, 0, 1, 0)
-          lb.BackgroundTransparency = 1
-          lb.Font = Enum.Font.GothamBold
-          lb.TextSize = 11
-          lb.TextColor3 = C.Yel
-          lb.TextStrokeTransparency = 0.3
-          o = {hl = hl, bb = bb, lb = lb}
-          NESP.Objs[e.model] = o
-        end
-        o.lb.Text = e.name .. "\n❤ " .. math.floor(e.hum.Health) .. "  📏 " .. math.floor(d)
-      end
-      for m, o in pairs(NESP.Objs) do
-        if not keep[m] then
-          pcall(function() o.hl:Destroy() end)
-          pcall(function() o.bb:Destroy() end)
-          NESP.Objs[m] = nil
-        end
-      end
-    end)
-  end
-  function TLG.NPCESPStop()
-    NESP.On = false
-    if NESP.Conn then pcall(function() NESP.Conn:Disconnect() end); NESP.Conn = nil end
-    nespClear()
-  end
-
-  -- HITBOX DE NPCs
-  local NHB = {On = false, Conn = nil, Orig = {}, Size = cfgNum("npcHB", 25, 5, 100)}
-  local function nhbRestore()
-    for part, o in pairs(NHB.Orig) do
-      pcall(function()
-        if part.Parent then
-          part.Size = o.Size; part.Transparency = o.Tr; part.CanCollide = o.Col
-        end
-      end)
-    end
-    NHB.Orig = {}
-  end
-  function TLG.NPCHBStart()
-    if NHB.On then return end
-    NHB.On = true
-    local last = 0
-    NHB.Conn = RS.Heartbeat:Connect(function()
-      if not NHB.On then return end
-      local now = os.clock()
-      if now - last < 0.3 then return end
-      last = now
-      local mr = myRoot(); if not mr then return end
-      for _, e in ipairs(NPC.Scan()) do
-        local r = e.root
-        if r.Name == "HumanoidRootPart" and (r.Position - mr.Position).Magnitude < 1500 then
-          if not NHB.Orig[r] then
-            NHB.Orig[r] = {Size = r.Size, Tr = r.Transparency, Col = r.CanCollide}
-          end
-          pcall(function()
-            r.Size = Vector3.new(NHB.Size, NHB.Size, NHB.Size)
-            r.Transparency = 0.85
-            r.CanCollide = false
-          end)
-        end
-      end
-    end)
-  end
-  function TLG.NPCHBStop()
-    NHB.On = false
-    if NHB.Conn then pcall(function() NHB.Conn:Disconnect() end); NHB.Conn = nil end
-    nhbRestore()
-  end
+  TLG.CFG = CFG
+  TLG.saveSoon = saveSoon
 
   -- TEMAS (recolora todo lo que use el acento actual)
   local curAccent = C.Yel
@@ -3325,81 +3149,6 @@ local V9ok, V9err = pcall(function()
     end
   end
 
-  -- UI: pestaña FARM
-  Sec(PFm, "🤖 AUTO FARM", "🤖")
-  local statusL = Lbl(PFm, "NPCs: —", C.Yel)
-  statusL.TextTruncate = Enum.TextTruncate.AtEnd
-  Tog(PFm, "Activar Auto Farm", false, function(v)
-    if v then TLG.FarmStart() else TLG.FarmStop() end
-  end)
-  local bFilt
-  bFilt = Btn(PFm, "🎯 Filtro: Todos", C.Cyan, function()
-    NPC.Scan(true)
-    local names = {"Todos"}
-    for _, n in ipairs(NPC.Names) do table.insert(names, n) end
-    local cur, i0 = NPC.Filter or "Todos", 1
-    for i, n in ipairs(names) do if n == cur then i0 = i end end
-    i0 = i0 % #names + 1
-    local sel = names[i0]
-    NPC.Filter = (sel ~= "Todos") and sel or nil
-    Farm.Target = nil
-    bFilt.Text = "🎯 Filtro: " .. sel
-  end)
-  Sli(PFm, "Rango de búsqueda", 100, 10000, Farm.Range, function(v)
-    Farm.Range = v; CFG.farmRange = v; saveSoon()
-  end)
-  Sli(PFm, "Distancia al NPC", 2, 30, Farm.Dist, function(v)
-    Farm.Dist = v; CFG.farmDist = v; saveSoon()
-  end)
-  Sli(PFm, "Altura sobre el NPC", -10, 30, Farm.Height, function(v)
-    Farm.Height = v; CFG.farmHeight = v; saveSoon()
-  end)
-  Lbl(PFm, "Fast Attack se activa solo mientras farmeas.", C.Gr)
-
-  Sec(PFm, "👁️ ESP DE NPCs", "👁️")
-  Tog(PFm, "ESP NPCs", false, function(v)
-    if v then TLG.NPCESPStart() else TLG.NPCESPStop() end
-  end)
-  Sli(PFm, "Rango ESP", 100, 5000, NESP.Range, function(v)
-    NESP.Range = v; CFG.espRange = v; saveSoon()
-  end)
-
-  Sec(PFm, "🔵 HITBOX DE NPCs", "🔵")
-  Tog(PFm, "Hitbox NPCs", false, function(v)
-    if v then TLG.NPCHBStart() else TLG.NPCHBStop() end
-  end)
-  Sli(PFm, "Tamaño", 5, 100, NHB.Size, function(v)
-    NHB.Size = v; CFG.npcHB = v; saveSoon()
-  end)
-
-  Sec(PFm, "📍 TELEPORT A NPCs", "📍")
-  local function npcTP(minDist)
-    local mr = myRoot()
-    if not mr then TLG.PNotif("⚠️", "Sin personaje", C.Rd); return end
-    NPC.Scan(true)
-    local e = NPC.Nearest(math.huge, NPC.Filter, minDist)
-    if not e then TLG.PNotif("📍", "No hay NPCs", C.Rd); return end
-    mr.CFrame = CFrame.new(e.root.Position + Vector3.new(0, 5, 6))
-    TLG.PNotif("📍", "TP → " .. e.name, C.Cyan)
-  end
-  Btn(PFm, "📍 NPC más cercano", C.Wh, function() npcTP(0) end)
-  Btn(PFm, "⏭ Siguiente NPC cercano", C.Wh, function() npcTP(15) end)
-  Btn(PFm, "🔄 Escanear NPCs", C.Yel, function()
-    local l = NPC.Scan(true)
-    TLG.PNotif("🔄", #l .. " NPCs · " .. #NPC.Names .. " tipos", C.Grn)
-  end)
-
-  task.spawn(function()
-    while statusL.Parent do
-      pcall(function()
-        local t = Farm.On and Farm.Target
-        statusL.Text = "NPCs: " .. #NPC.Scan() .. "  ·  Objetivo: " .. (t and t.name or "—")
-          .. "  ·  Filtro: " .. (NPC.Filter or "Todos")
-      end)
-      task.wait(0.7)
-    end
-  end)
-
   -- UI: pestaña CONFIG
   Sec(PCf, "🎨 COLOR DEL MENÚ", "🎨")
   local grid = Instance.new("Frame", PCf)
@@ -3428,9 +3177,9 @@ local V9ok, V9err = pcall(function()
   end)
 
   Sec(PCf, "💾 CONFIGURACIÓN", "💾")
-  Lbl(PCf, "Se guarda en TLG_GoldHub_Config.json (si tu ejecutor lo permite).", C.Gr)
+  Lbl(PCf, "Se guarda en TLG_Hub_Config.json (si tu ejecutor lo permite).", C.Gr)
   Btn(PCf, "🗑 Borrar configuración guardada", C.Rd, function()
-    CFG = {}
+    for k in pairs(CFG) do CFG[k] = nil end
     pcall(function() if writefile then writefile(CFG_FILE, "{}") end end)
     TLG.PNotif("🗑", "Configuración borrada", C.Rd)
   end)
@@ -3452,6 +3201,394 @@ end)
 if not V9ok then
   warn("[TLG] V9: " .. tostring(V9err))
   pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
+end
+
+-- ═══════════ FRUTAS (modo prueba) ═══════════
+local FRok, FRerr = pcall(function()
+  local CFG = TLG.CFG or {}
+  local function save() if TLG.saveSoon then TLG.saveSoon() end end
+  local function myRoot()
+    local ch = TLG.LP.Character
+    return ch and ch:FindFirstChild("HumanoidRootPart")
+  end
+
+  local Fr = {Keys = {}, Items = {}, Range = 5000, AutoOn = false, ESPOn = false,
+    Tried = {}, Origin = nil, Away = false, ReturnBack = true, Count = 0, Log = {}}
+  TLG.Fruit = Fr
+
+  local function parseKeys(s)
+    local keys = {}
+    for w in tostring(s):gmatch("[^,%s]+") do table.insert(keys, w:lower()) end
+    return keys
+  end
+  Fr.Keys = parseKeys(CFG.fruitKeys or "fruit, fruta")
+
+  local function matches(name)
+    local n = name:lower()
+    for _, k in ipairs(Fr.Keys) do
+      if n:find(k, 1, true) then return true end
+    end
+    return false
+  end
+
+  local function isMine(inst)
+    if inst:IsDescendantOf(TLG.LP) then return true end
+    for _, p in ipairs(PLR:GetPlayers()) do
+      local ch = p.Character
+      if ch and inst:IsDescendantOf(ch) then return true end
+    end
+    return false
+  end
+
+  local function track(d)
+    if (d:IsA("Model") or d:IsA("Tool") or d:IsA("BasePart")) and matches(d.Name) then
+      Fr.Items[d] = true
+    end
+  end
+  local function rescan()
+    Fr.Items = {}
+    for _, d in ipairs(workspace:GetDescendants()) do track(d) end
+  end
+  rescan()
+  workspace.DescendantAdded:Connect(track)
+  workspace.DescendantRemoving:Connect(function(d) Fr.Items[d] = nil end)
+
+  local function partOf(inst)
+    if inst:IsA("BasePart") then return inst end
+    if inst:IsA("Tool") then
+      return inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart", true)
+    end
+    if inst:IsA("Model") then
+      return inst.PrimaryPart or inst:FindFirstChildWhichIsA("BasePart", true)
+    end
+    return nil
+  end
+
+  local function list()
+    local out = {}
+    local mr = myRoot()
+    for inst in pairs(Fr.Items) do
+      if inst.Parent and not isMine(inst) then
+        local anc, nested = inst.Parent, false
+        while anc and anc ~= workspace do
+          if Fr.Items[anc] then nested = true; break end
+          anc = anc.Parent
+        end
+        if not nested then
+          local pt = partOf(inst)
+          if pt then
+            table.insert(out, {inst = inst, part = pt,
+              dist = mr and (pt.Position - mr.Position).Magnitude or 0})
+          end
+        end
+      end
+    end
+    table.sort(out, function(a, b) return a.dist < b.dist end)
+    return out
+  end
+
+  local function interact(e)
+    local mr = myRoot(); if not mr then return 0 end
+    local n = 0
+    pcall(function() mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 3, 0)) end)
+    task.wait(0.15)
+    for _, d in ipairs(e.inst:GetDescendants()) do
+      if d:IsA("ProximityPrompt") then
+        pcall(function() d.HoldDuration = 0 end)
+        if fireproximityprompt then pcall(fireproximityprompt, d); n = n + 1 end
+      elseif d:IsA("ClickDetector") and fireclickdetector then
+        pcall(fireclickdetector, d); n = n + 1
+      end
+    end
+    if firetouchinterest then
+      pcall(function()
+        firetouchinterest(mr, e.part, 0)
+        firetouchinterest(mr, e.part, 1)
+      end)
+      n = n + 1
+    end
+    return n
+  end
+
+  function TLG.FruitAutoStart()
+    if Fr.AutoOn then return end
+    Fr.AutoOn = true
+    local mr0 = myRoot()
+    Fr.Origin = mr0 and mr0.CFrame
+    Fr.Away = false
+    task.spawn(function()
+      while Fr.AutoOn do
+        pcall(function()
+          local mr = myRoot(); if not mr then return end
+          local target
+          for _, e in ipairs(list()) do
+            local t = Fr.Tried[e.inst]
+            if e.dist <= Fr.Range and (not t or os.clock() - t > 6) then target = e; break end
+          end
+          if not target then
+            if Fr.ReturnBack and Fr.Origin and Fr.Away then
+              mr.CFrame = Fr.Origin; Fr.Away = false
+            end
+            return
+          end
+          Fr.Away = true
+          Fr.Tried[target.inst] = os.clock()
+          local name = target.inst.Name
+          local n = interact(target)
+          task.wait(0.4)
+          if not target.inst.Parent then
+            Fr.Count = Fr.Count + 1
+            table.insert(Fr.Log, os.date("%H:%M:%S") .. "  " .. name)
+            TLG.PNotif("🍎 Fruta", "Recogida: " .. name, C.Grn)
+          else
+            TLG.PNotif("🍎", name .. " sigue ahí (intentos: " .. n .. ")", C.Yel)
+          end
+        end)
+        task.wait(0.5)
+      end
+    end)
+    TLG.PNotif("🍎 Auto Frutas", "✅ Activado", C.Grn)
+  end
+  function TLG.FruitAutoStop()
+    if not Fr.AutoOn then return end
+    Fr.AutoOn = false
+    local mr = myRoot()
+    if Fr.ReturnBack and Fr.Origin and Fr.Away and mr then mr.CFrame = Fr.Origin end
+    Fr.Away = false
+    TLG.PNotif("🍎 Auto Frutas", "❌ Desactivado", C.Rd)
+  end
+
+  -- ESP de frutas
+  local ESPo, espConn = {}, nil
+  function TLG.FruitESPStart()
+    if Fr.ESPOn then return end
+    Fr.ESPOn = true
+    local last = 0
+    espConn = RS.Heartbeat:Connect(function()
+      if not Fr.ESPOn then return end
+      local now = os.clock()
+      if now - last < 0.5 then return end
+      last = now
+      local keep = {}
+      local l = list()
+      for i = 1, math.min(#l, 20) do
+        local e = l[i]
+        keep[e.inst] = true
+        local o = ESPo[e.inst]
+        if not o or not o.hl.Parent then
+          if o then pcall(function() o.bb:Destroy() end) end
+          local hl = Instance.new("Highlight")
+          hl.Name = "TLG_FR_HL"
+          hl.Adornee = e.inst:IsA("Tool") and e.part or e.inst
+          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+          hl.FillColor = C.Yel; hl.OutlineColor = C.Wh
+          hl.FillTransparency = 0.6; hl.OutlineTransparency = 0
+          hl.Parent = e.part
+          local bb = Instance.new("BillboardGui")
+          bb.Name = "TLG_FR_BB"
+          bb.Adornee = e.part
+          bb.AlwaysOnTop = true
+          bb.Size = UDim2.new(0, 160, 0, 30)
+          bb.StudsOffset = Vector3.new(0, 3, 0)
+          bb.Parent = e.part
+          local lb = Instance.new("TextLabel", bb)
+          lb.Size = UDim2.new(1, 0, 1, 0)
+          lb.BackgroundTransparency = 1
+          lb.Font = Enum.Font.GothamBold
+          lb.TextSize = 11
+          lb.TextColor3 = C.Yel
+          lb.TextStrokeTransparency = 0.3
+          o = {hl = hl, bb = bb, lb = lb}
+          ESPo[e.inst] = o
+        end
+        o.lb.Text = "🍎 " .. e.inst.Name .. "\n" .. math.floor(e.dist) .. " studs"
+      end
+      for inst, o in pairs(ESPo) do
+        if not keep[inst] then
+          pcall(function() o.hl:Destroy() end)
+          pcall(function() o.bb:Destroy() end)
+          ESPo[inst] = nil
+        end
+      end
+    end)
+  end
+  function TLG.FruitESPStop()
+    Fr.ESPOn = false
+    if espConn then pcall(function() espConn:Disconnect() end); espConn = nil end
+    for _, o in pairs(ESPo) do
+      pcall(function() o.hl:Destroy() end)
+      pcall(function() o.bb:Destroy() end)
+    end
+    ESPo = {}
+  end
+
+  -- Reporte para las pruebas
+  local function buildReport()
+    local L = {}
+    local function add(s) table.insert(L, s) end
+    add("== REPORTE TLG HUB · FRUTAS ==")
+    add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
+    local l = list()
+    add("Candidatos en el mapa: " .. #l)
+    for i = 1, math.min(#l, 25) do
+      local e = l[i]
+      local pr, cd, ti = 0, 0, 0
+      for _, d in ipairs(e.inst:GetDescendants()) do
+        if d:IsA("ProximityPrompt") then pr = pr + 1
+        elseif d:IsA("ClickDetector") then cd = cd + 1
+        elseif d:IsA("TouchTransmitter") then ti = ti + 1 end
+      end
+      add(i .. ". " .. e.inst.Name .. " [" .. e.inst.ClassName .. "] dist=" .. math.floor(e.dist)
+        .. " prompts=" .. pr .. " clicks=" .. cd .. " touch=" .. ti)
+      add("   " .. e.inst:GetFullName())
+    end
+    add("Mochila / personaje:")
+    pcall(function()
+      for _, t in ipairs(TLG.LP.Backpack:GetChildren()) do add("  [Mochila] " .. t.ClassName .. " · " .. t.Name) end
+      local ch = TLG.LP.Character
+      if ch then
+        for _, t in ipairs(ch:GetChildren()) do
+          if t:IsA("Tool") then add("  [En mano] " .. t.Name) end
+        end
+      end
+    end)
+    add("Remotes relacionados (ReplicatedStorage):")
+    local rk = {"fruit","fruta","store","guard","inventory","inventario","eat","collect","pick","drop","bag"}
+    local n = 0
+    pcall(function()
+      for _, d in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
+          local low = d.Name:lower()
+          for _, k in ipairs(rk) do
+            if low:find(k, 1, true) then
+              n = n + 1
+              if n <= 60 then add("  " .. d.ClassName .. " · " .. d:GetFullName()) end
+              break
+            end
+          end
+        end
+      end
+    end)
+    add("  (total: " .. n .. ")")
+    add("Datos del jugador con 'fruit/fruta':")
+    pcall(function()
+      for _, d in ipairs(TLG.LP:GetDescendants()) do
+        local low = d.Name:lower()
+        if low:find("fruit", 1, true) or low:find("fruta", 1, true) then
+          local v = ""
+          if d:IsA("ValueBase") then v = " = " .. tostring(d.Value) end
+          add("  " .. d.ClassName .. " · " .. d:GetFullName() .. v)
+        end
+      end
+    end)
+    return table.concat(L, "\n")
+  end
+
+  -- UI
+  Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
+  local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
+  Tog(PFr, "Auto recoger frutas", false, function(v)
+    if v then TLG.FruitAutoStart() else TLG.FruitAutoStop() end
+  end)
+  Tog(PFr, "ESP de frutas", false, function(v)
+    if v then TLG.FruitESPStart() else TLG.FruitESPStop() end
+  end)
+  Tog(PFr, "Volver a mi posición al terminar", true, function(v) Fr.ReturnBack = v end)
+  Sli(PFr, "Rango de búsqueda", 100, 10000, 5000, function(v) Fr.Range = v end)
+
+  Lbl(PFr, "Palabras clave del nombre (separadas por coma):", C.Gr)
+  local row = Instance.new("Frame", PFr)
+  row.Size = UDim2.new(1, 0, 0, 36)
+  row.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+  row.BorderSizePixel = 0
+  row.ZIndex = 5
+  Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
+  local rs = Instance.new("UIStroke", row)
+  rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.6
+  local tb = Instance.new("TextBox", row)
+  tb.Size = UDim2.new(1, -20, 1, 0)
+  tb.Position = UDim2.new(0, 10, 0, 0)
+  tb.BackgroundTransparency = 1
+  tb.Font = Enum.Font.Gotham
+  tb.TextSize = 12
+  tb.TextColor3 = C.Wh
+  tb.PlaceholderText = "fruit, fruta"
+  tb.PlaceholderColor3 = C.Gr
+  tb.ClearTextOnFocus = false
+  tb.TextXAlignment = Enum.TextXAlignment.Left
+  tb.Text = table.concat(Fr.Keys, ", ")
+  tb.ZIndex = 7
+  tb.FocusLost:Connect(function()
+    local k = parseKeys(tb.Text)
+    if #k == 0 then return end
+    Fr.Keys = k
+    CFG.fruitKeys = table.concat(k, ", "); save()
+    rescan(); Fr.Tried = {}
+    TLG.PNotif("🍎", "Buscando: " .. table.concat(k, ", "), C.Yel)
+  end)
+
+  local rb = Instance.new("TextBox", PFr)
+  rb.Size = UDim2.new(1, 0, 0, 170)
+  rb.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+  rb.BorderSizePixel = 0
+  rb.Font = Enum.Font.Code
+  rb.TextSize = 10
+  rb.TextColor3 = C.Wh
+  rb.MultiLine = true
+  rb.TextWrapped = true
+  rb.TextXAlignment = Enum.TextXAlignment.Left
+  rb.TextYAlignment = Enum.TextYAlignment.Top
+  rb.ClearTextOnFocus = false
+  rb.Text = "El reporte aparece aquí al tocar «Escanear y generar reporte»."
+  rb.ZIndex = 6
+  Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 10)
+  local rbs = Instance.new("UIStroke", rb)
+  rbs.Color = C.Yel; rbs.Thickness = 1; rbs.Transparency = 0.7
+
+  Btn(PFr, "🔍 Escanear y generar reporte", C.Yel, function()
+    rescan()
+    local rep = buildReport()
+    rb.Text = rep
+    if setclipboard then
+      setclipboard(rep)
+      TLG.PNotif("🍎", "Reporte copiado al portapapeles", C.Grn)
+    else
+      TLG.PNotif("🍎", "Reporte listo (copialo del cuadro)", C.Yel)
+    end
+    for line in rep:gmatch("[^\n]+") do print("[TLG] " .. line) end
+  end)
+  Btn(PFr, "📍 TP a la fruta más cercana", C.Wh, function()
+    local mr = myRoot()
+    local e = list()[1]
+    if not mr or not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
+    mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 4, 0))
+    TLG.PNotif("🍎", "TP → " .. e.inst.Name, C.Cyan)
+  end)
+  Btn(PFr, "✋ Recoger la más cercana (1 intento)", C.Wh, function()
+    local e = list()[1]
+    if not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
+    local n = interact(e)
+    TLG.PNotif("🍎", e.inst.Name .. " · acciones: " .. n, C.Yel)
+  end)
+  Btn(PFr, "📋 Copiar historial de recogidas", C.Wh, function()
+    local txt = table.concat(Fr.Log, "\n")
+    if txt == "" then TLG.PNotif("🍎", "Aún no hay recogidas", C.Yel); return end
+    if setclipboard then setclipboard(txt) end
+    TLG.PNotif("🍎", #Fr.Log .. " recogidas copiadas", C.Grn)
+  end)
+
+  task.spawn(function()
+    while infoL.Parent do
+      pcall(function()
+        infoL.Text = "Frutas en el mapa: " .. #list() .. "  ·  Recogidas: " .. Fr.Count
+      end)
+      task.wait(1)
+    end
+  end)
+end)
+if not FRok then
+  warn("[TLG] Frutas: " .. tostring(FRerr))
+  pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
 end
 
 -- FAB (visible por defecto)
@@ -3643,7 +3780,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG GOLD V9.0"
+WTx.Text = "TLG HUB V9.2"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -3708,7 +3845,7 @@ task.spawn(function()
     t1.Font = Enum.Font.GothamBold
     t1.TextSize = 34
     t1.TextColor3 = C.Yel
-    t1.Text = "💀 TLG GOLD HUB"
+    t1.Text = "💀 TLG HUB"
     t1.TextTransparency = 1
     t1.ZIndex = 501
     local t2 = Instance.new("TextLabel", fr)
@@ -3718,7 +3855,7 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "Meme Sea • V9.0"
+    t2.Text = "Meme Sea • V9.2"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
@@ -3740,6 +3877,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 TLG GOLD V9.0", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 TLG HUB V9.2", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[TLG GOLD V9.0] 💀 Cargado")
+print("[TLG HUB V9.2] 💀 Cargado")
