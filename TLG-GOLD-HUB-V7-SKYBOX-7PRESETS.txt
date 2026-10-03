@@ -1086,7 +1086,7 @@ end)
 
 
 local W_S = TLG.IsMobile and UDim2.new(0,400,0,280) or UDim2.new(0,640,0,420)
-local W_P = UDim2.new(0.5,0,0.5,0)
+local W_P = UDim2.new(0.5,0,1,-12)
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -1148,8 +1148,8 @@ end
 
 local W = Instance.new("Frame", SG)
 W.Size = W_S
-W.AnchorPoint = Vector2.new(0.5,0.5)
-W.Position = UDim2.new(0.5,0,0.5,0)
+W.AnchorPoint = Vector2.new(0.5,1)
+W.Position = UDim2.new(0.5,0,1,W_S.Y.Offset + 20)
 W.BackgroundColor3 = C.BG
 W.BorderSizePixel = 0
 W.ClipsDescendants = true
@@ -1243,7 +1243,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V8.6"
+SubTitle.Text = "Meme Sea • V8.7"
 SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1331,9 +1331,18 @@ UIS.InputChanged:Connect(function(i)
         local cam = workspace.CurrentCamera
         local vp = cam and cam.ViewportSize or Vector2.new(1920, 1080)
         local p0 = DragS.pos
-        local nx = math.clamp(p0.X.Offset + d.X, -vp.X * p0.X.Scale, vp.X * (1 - p0.X.Scale))
-        local ny = math.clamp(p0.Y.Offset + d.Y, -vp.Y * p0.Y.Scale, vp.Y * (1 - p0.Y.Scale))
-        W.Position = UDim2.new(p0.X.Scale, nx, p0.Y.Scale, ny)
+        local ap = W.AnchorPoint
+        local w, h = W.AbsoluteSize.X, W.AbsoluteSize.Y
+        local x = p0.X.Scale * vp.X + p0.X.Offset + d.X
+        local y = p0.Y.Scale * vp.Y + p0.Y.Offset + d.Y
+        local loX, hiX = ap.X * w, vp.X - (1 - ap.X) * w
+        local loY, hiY = ap.Y * h, vp.Y - (1 - ap.Y) * h
+        if hiX < loX then hiX = loX end
+        if hiY < loY then hiY = loY end
+        x = math.clamp(x, loX, hiX)
+        y = math.clamp(y, loY, hiY)
+        W.Position = UDim2.new(p0.X.Scale, x - p0.X.Scale * vp.X,
+                               p0.Y.Scale, y - p0.Y.Scale * vp.Y)
     end
 end)
 UIS.InputEnded:Connect(function(i)
@@ -3117,7 +3126,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG GOLD V8.6"
+WTx.Text = "TLG GOLD V8.7"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -3169,6 +3178,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 TLG GOLD V8.6", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 TLG GOLD V8.7", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[TLG GOLD V8.6] 💀 Cargado")
+print("[TLG GOLD V8.7] 💀 Cargado")
