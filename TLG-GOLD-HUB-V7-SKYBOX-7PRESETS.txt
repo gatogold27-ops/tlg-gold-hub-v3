@@ -2160,6 +2160,23 @@ end
 
 AIM.MAX_RANGE = 10000
 AIM.Range = math.clamp(tonumber(AIM.Range) or 10000, 50, AIM.MAX_RANGE)
+
+
+do
+    Sec(PAi, "🎯 AIMBOT / HITBOX", "🎯")
+
+    Tog(PAi, "🎯 AIMBOT 10K — TODO", false, function(enabled)
+        AIM.On = enabled == true
+
+        if not AIM.On then
+            AIM.Target = nil
+            TLG.SelectedTarget = nil
+        end
+    end)
+
+    Lbl(PAi, "Rango máximo: 10,000 studs")
+end
+
 -- FLY TAB
 do
   Sec(PFl, "✈ FLY", "✈")
