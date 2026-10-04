@@ -2049,132 +2049,24 @@ end
 
 -- AIMBOT TAB
 do
-  Sec(PAb, "🎯 AIMBOT — HITBOX", "🎯")
+  Sec(PAb, "🎯 AIMBOT / HITBOX 10K", "🎯")
+
   local AB
-  AB = Btn(PAb, "🎯 ACTIVAR HITBOX", C.Yel, function()
+  AB = Btn(PAb, "🎯 ACTIVAR AIMBOT 10K", C.Yel, function()
     if AIM.On then
-      TLG.AIM_Stop(); AB.Text = "🎯 ACTIVAR HITBOX"
+      TLG.AIM_Stop()
+      AB.Text = "🎯 ACTIVAR AIMBOT 10K"
     else
-      TLG.AIM_Start(); AB.Text = "🛑 DESACTIVAR HITBOX"
+      AIM.MaxTargetRange = 10000
+      TLG.AIM_Start()
+      AB.Text = "🛑 DESACTIVAR AIMBOT 10K"
     end
   end)
   AB.Size = UDim2.new(1,0,0,54)
   AB.TextSize = 14
 
-  Sec(PAb, "📏 PRESETS DE TAMAÑO", "📏")
-  local presetRow = Instance.new("Frame", PAb)
-  presetRow.Size = UDim2.new(1,0,0,42)
-  presetRow.BackgroundTransparency = 1
-  presetRow.ZIndex = 5
-  local prl = Instance.new("UIListLayout", presetRow)
-  prl.FillDirection = Enum.FillDirection.Horizontal
-  prl.Padding = UDim.new(0,6)
-  prl.HorizontalAlignment = Enum.HorizontalAlignment.Center
-  prl.VerticalAlignment = Enum.VerticalAlignment.Center
-
-  local function mkPreset(name, emoji, size, color)
-    local b = Instance.new("TextButton", presetRow)
-    b.Size = UDim2.new(0, 130, 0, 40)
-    b.BackgroundColor3 = C.BG2
-    b.BackgroundTransparency = 0.1
-    b.Text = ""
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 6
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-    local bs = Instance.new("UIStroke", b)
-    bs.Color = color; bs.Thickness = 1.5
-    bs.Transparency = 0.4
-    local ic = Instance.new("TextLabel", b)
-    ic.Size = UDim2.new(0,26,1,0)
-    ic.Position = UDim2.new(0,4,0,0)
-    ic.BackgroundTransparency = 1
-    ic.Text = emoji; ic.TextSize = 15
-    ic.ZIndex = 7
-    local lb = Instance.new("TextLabel", b)
-    lb.Size = UDim2.new(1,-32,1,0)
-    lb.Position = UDim2.new(0,30,0,0)
-    lb.BackgroundTransparency = 1
-    lb.Font = Enum.Font.GothamBold
-    lb.Text = name
-    lb.TextSize = 10
-    lb.TextColor3 = color
-    lb.TextXAlignment = Enum.TextXAlignment.Left
-    lb.ZIndex = 7
-    b.Activated:Connect(function()
-      AIM.HeadSize = size
-      if AIM.On then
-        for _, p in ipairs(PLR:GetPlayers()) do
-          if p ~= TLG.LP then pcall(aimExpandHead, p) end
-        end
-      end
-      TLG.PNotif("📏 Tamaño", name.." ("..size..")", color)
-      bs.Transparency = 0
-      task.delay(0.4, function()
-        if bs.Parent then
-          TW:Create(bs, TweenInfo.new(0.4),
-            {Transparency = 0.4}):Play()
-        end
-      end)
-    end)
-    TLG.Ripple(b)
-  end
-
-  mkPreset("Discreto", "🟢", 400, C.Grn)
-  mkPreset("Balance", "🟡", 800, C.Yel)
-  mkPreset("Agresivo", "🔴", 1500, C.Rd)
-
-  Sec(PAb, "🎚️ AJUSTE FINO", "🎚️")
-  Sli(PAb, "Hitbox física", 50, 2048, 800, function(v)
-    AIM.HeadSize = v
-    if AIM.On then
-      for _, p in ipairs(PLR:GetPlayers()) do
-        if p ~= TLG.LP then pcall(aimExpandHead, p) end
-      end
-    end
-  end)
-
-  Sli(PAb, "Rango Aimbot", 100, 20000, 20000, function(v)
-    AIM.MaxTargetRange = v
-  end)
-  Lbl(PAb, "Rango lógico máximo: 20,000 studs.", C.Yel)
-
-  Sec(PAb, "👁️ VISIBILIDAD HITBOX", "👁️")
-  Tog(PAb, "Ver hitbox (debug)", false, function(v)
-    AIM.ShowHitbox = v
-    if AIM.On then
-      for _, p in ipairs(PLR:GetPlayers()) do
-        if p ~= TLG.LP then pcall(aimExpandHead, p) end
-      end
-    end
-  end)
-  Lbl(PAb, "• ON  → ves la hitbox translúcida", C.Cyan)
-  Lbl(PAb, "• OFF → invisible (recomendado)", C.Gr)
-
-  Sec(PAb, "ℹ️ INFO", "💡")
-  Lbl(PAb, "• 400  → discreto", C.Grn)
-  Lbl(PAb, "• 800  → balance recomendado", C.Yel)
-  Lbl(PAb, "• 1500 → agresivo", C.Rd)
-  Lbl(PAb, "• 20K → rango lógico de adquisición", C.Yel)
-end
-
-AIM.MAX_RANGE = 10000
-AIM.Range = math.clamp(tonumber(AIM.Range) or 10000, 50, AIM.MAX_RANGE)
-
-
-do
-    Sec(PAi, "🎯 AIMBOT / HITBOX", "🎯")
-
-    Tog(PAi, "🎯 AIMBOT 10K — TODO", false, function(enabled)
-        AIM.On = enabled == true
-
-        if not AIM.On then
-            AIM.Target = nil
-            TLG.SelectedTarget = nil
-        end
-    end)
-
-    Lbl(PAi, "Rango máximo: 10,000 studs")
+  Lbl(PAb, "Rango lógico: 10,000 studs.", C.Yel)
+  Lbl(PAb, "Un solo botón controla todo el Aimbot.", C.Cyan)
 end
 
 -- FLY TAB
@@ -2709,11 +2601,20 @@ do
   end)
 end
 
+
+  Tog(PTo, "⚡ Visual Skill Speed", false, function(v)
+    if v then
+      TLG.VisualSkillSpeedStart()
+    else
+      TLG.VisualSkillSpeedStop()
+    end
+  end)
+
 -- ESP
 local ESP = {
   On=false, Names=true, Distance=true, Health=true,
   Box=false, Tracer=false, Fill=true, FillTransparency=0.78,
-  MaxDistance=5000, Objects={}
+  MaxDistance=math.huge, Objects={}
 }
 TLG.ESP = ESP
 
@@ -2783,7 +2684,7 @@ local function espCreate(p)
   bb.AlwaysOnTop = true
   bb.Size = UDim2.new(0, 180, 0, 55)
   bb.StudsOffset = Vector3.new(0, 3, 0)
-  bb.MaxDistance = ESP.MaxDistance
+  bb.MaxDistance = math.huge
   bb.Parent = head
 
   local label = Instance.new("TextLabel")
@@ -2849,7 +2750,7 @@ local function espUpdate(p)
     and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
   local dist = mh and math.floor((mh.Position - root.Position).Magnitude)
     or 0
-  if dist > ESP.MaxDistance then
+  if ESP.MaxDistance ~= math.huge and dist > ESP.MaxDistance then
     pk.Billboard.Enabled = false
     pk.Highlight.Enabled = false
     pk.Box.Visible = false
@@ -2959,7 +2860,8 @@ TLG.ESPToggleTracer = function(v)
 end
 TLG.ESPToggleFill = function(v) ESP.Fill = v == true end
 TLG.ESPSetDistance = function(v)
-  ESP.MaxDistance = math.clamp(tonumber(v) or 5000, 100, 10000)
+  local n = tonumber(v)
+  ESP.MaxDistance = (not n or n <= 0) and math.huge or n
 end
 
 do
@@ -3166,7 +3068,185 @@ local V9ok, V9err = pcall(function()
     end
   end
 
-  -- UI: pestaña CONFIG
+  
+--==================================================
+-- VISUAL SKILL SPEED V9.7
+-- Visual/local animation speed only.
+-- No Tool:Activate(), no auto-clicking, no attack automation.
+--==================================================
+
+local VSS = {
+    On = false,
+    Ping = 50,
+    Multiplier = 1.15,
+    AttackMultiplier = 1.35,
+    SkillMultiplier = 1.30,
+    WalkMultiplier = 1.08,
+    IdleMultiplier = 1.00,
+    Original = {},
+    Conn = nil,
+    CharConns = {},
+    LastPing = 0
+}
+TLG.VisualSkillSpeed = VSS
+
+local function vssDisconnect()
+    for _, c in ipairs(VSS.CharConns) do
+        pcall(function() c:Disconnect() end)
+    end
+    table.clear(VSS.CharConns)
+end
+
+local function vssPing()
+    local ok, value = pcall(function()
+        if TLG.LP and TLG.LP.GetNetworkPing then
+            return math.floor(TLG.LP:GetNetworkPing() * 1000 + 0.5)
+        end
+        return nil
+    end)
+    if ok and value and value > 0 then
+        VSS.Ping = value
+    end
+    return VSS.Ping
+end
+
+local function vssText(track)
+    local parts = {}
+    pcall(function()
+        if track.Name then parts[#parts+1] = string.lower(track.Name) end
+    end)
+    pcall(function()
+        if track.Animation and track.Animation.Name then
+            parts[#parts+1] = string.lower(track.Animation.Name)
+        end
+    end)
+    return table.concat(parts, " ")
+end
+
+local function vssSpeed(track)
+    local text = vssText(track)
+
+    if text:find("attack", 1, true)
+        or text:find("slash", 1, true)
+        or text:find("swing", 1, true)
+        or text:find("sword", 1, true) then
+        return VSS.AttackMultiplier
+    end
+
+    if text:find("skill", 1, true)
+        or text:find("ability", 1, true)
+        or text:find("power", 1, true)
+        or text:find("cast", 1, true) then
+        return VSS.SkillMultiplier
+    end
+
+    if text:find("walk", 1, true)
+        or text:find("run", 1, true) then
+        return VSS.WalkMultiplier
+    end
+
+    if text:find("idle", 1, true) then
+        return VSS.IdleMultiplier
+    end
+
+    return VSS.Multiplier
+end
+
+local function vssApply(track)
+    if not VSS.On or not track then return end
+
+    local speed = vssSpeed(track)
+    local ok, old = pcall(function()
+        return track.Speed
+    end)
+
+    if ok and old and VSS.Original[track] == nil then
+        VSS.Original[track] = old
+    end
+
+    pcall(function()
+        track:AdjustSpeed(speed)
+    end)
+end
+
+function TLG.VisualSkillSpeedStop()
+    VSS.On = false
+
+    for track, old in pairs(VSS.Original) do
+        pcall(function()
+            if track and track.Parent then
+                track:AdjustSpeed(old)
+            end
+        end)
+    end
+
+    table.clear(VSS.Original)
+    vssDisconnect()
+
+    if VSS.Conn then
+        pcall(function() VSS.Conn:Disconnect() end)
+        VSS.Conn = nil
+    end
+end
+
+function TLG.VisualSkillSpeedStart()
+    if VSS.On then return end
+
+    VSS.On = true
+    vssPing()
+
+    local function hookCharacter(char)
+        vssDisconnect()
+
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+
+        table.insert(VSS.CharConns, hum.AnimationPlayed:Connect(function(track)
+            if VSS.On then
+                vssApply(track)
+            end
+        end))
+
+        -- Apply to tracks already playing.
+        pcall(function()
+            for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                vssApply(track)
+            end
+        end)
+    end
+
+    if TLG.LP.Character then
+        hookCharacter(TLG.LP.Character)
+    end
+
+    table.insert(VSS.CharConns, TLG.LP.CharacterAdded:Connect(function(char)
+        task.wait(0.25)
+        if VSS.On then hookCharacter(char) end
+    end))
+
+    VSS.Conn = RS.Heartbeat:Connect(function()
+        if not VSS.On then return end
+
+        local now = os.clock()
+        if now - VSS.LastPing >= 1 then
+            VSS.LastPing = now
+            vssPing()
+        end
+
+        local char = TLG.LP.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+
+        pcall(function()
+            for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                vssApply(track)
+            end
+        end)
+    end)
+end
+
+
+-- UI: pestaña CONFIG
   Sec(PCf, "🎨 COLOR DEL MENÚ", "🎨")
   local grid = Instance.new("Frame", PCf)
   grid.Size = UDim2.new(1, 0, 0, 0)
