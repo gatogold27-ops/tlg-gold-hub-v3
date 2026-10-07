@@ -2949,20 +2949,6 @@ do
     end)
   end
 
-  Sec(PVi, "📷 CAMERA FOV", "📷")
-  local cf = {Enabled=false, Value=70}
-  Tog(PVi, "Camera FOV", false, function(v)
-    cf.Enabled = v
-    local cam = workspace.CurrentCamera
-    if cam then cam.FieldOfView = v and cf.Value or 70 end
-  end)
-  Sli(PVi, "FOV", 40, 120, 70, function(v)
-    cf.Value = v
-    if cf.Enabled then
-      local cam = workspace.CurrentCamera
-      if cam then cam.FieldOfView = v end
-    end
-  end)
 end
 
 -- OPTIMIZE
