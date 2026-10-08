@@ -30,6 +30,23 @@ local function getParent()
       if syn and syn.protect_gui then
         local g = Instance.new("ScreenGui")
 
+        syn.protect_gui(g); g.Parent = CG; p = g
+      end
+    end)
+  end
+  if not p then
+    local ok = pcall(function()
+      local f = Instance.new("Folder")
+      f.Parent = CG; f:Destroy(); return CG
+    end)
+    if ok then p = CG end
+  end
+  if not p then p = TLG.LP:WaitForChild("PlayerGui") end
+  return p
+end
+TLG.getParent = getParent
+TLG.SP = getParent()
+
 --==================================================
 -- TLG HUB KEY SYSTEM
 --==================================================
@@ -38,10 +55,10 @@ local function getParent()
 --==================================================
 
 local TLGKeySystem = {
-    Enabled = false,
+    Enabled = true,
     Verified = false,
     ValidKeys = {
-        ["TLG-2026"] = true, -- demo/local key
+        ["TLG-2026"] = true, -- cambia/agrega tus keys aquí
     }
 }
 
@@ -62,7 +79,7 @@ local function ShowTLGKeyGate()
         return true
     end
 
-    local parent = g
+    local parent = TLG.SP
     if not parent then return false end
 
     local old = parent:FindFirstChild("TLG_KeySystem")
@@ -164,23 +181,6 @@ end
 if not ShowTLGKeyGate() then
     return
 end
-
-        syn.protect_gui(g); g.Parent = CG; p = g
-      end
-    end)
-  end
-  if not p then
-    local ok = pcall(function()
-      local f = Instance.new("Folder")
-      f.Parent = CG; f:Destroy(); return CG
-    end)
-    if ok then p = CG end
-  end
-  if not p then p = TLG.LP:WaitForChild("PlayerGui") end
-  return p
-end
-TLG.getParent = getParent
-TLG.SP = getParent()
 
 local names = {"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7",
   "TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
