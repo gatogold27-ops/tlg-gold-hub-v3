@@ -29,6 +29,142 @@ local function getParent()
     pcall(function()
       if syn and syn.protect_gui then
         local g = Instance.new("ScreenGui")
+
+--==================================================
+-- TLG HUB KEY SYSTEM
+--==================================================
+-- Client-side gate only. For real protection, validate keys
+-- against a server you control rather than embedding secrets.
+--==================================================
+
+local TLGKeySystem = {
+    Enabled = true,
+    Verified = false,
+    ValidKeys = {
+        ["TLG-2026"] = true, -- demo/local key
+    }
+}
+
+TLG.KeySystem = TLGKeySystem
+
+local function VerifyTLGKey(key)
+    key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", "")
+    if TLGKeySystem.ValidKeys[key] then
+        TLGKeySystem.Verified = true
+        return true
+    end
+    return false
+end
+
+local function ShowTLGKeyGate()
+    if not TLGKeySystem.Enabled then
+        TLGKeySystem.Verified = true
+        return true
+    end
+
+    local parent = g
+    if not parent then return false end
+
+    local old = parent:FindFirstChild("TLG_KeySystem")
+    if old then old:Destroy() end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "TLG_KeySystem"
+    gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.Parent = parent
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.fromOffset(320, 190)
+    frame.Position = UDim2.fromScale(0.5, 0.5)
+    frame.AnchorPoint = Vector2.new(0.5, 0.5)
+    frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    frame.BorderSizePixel = 0
+    frame.Parent = gui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = frame
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -24, 0, 40)
+    title.Position = UDim2.fromOffset(12, 10)
+    title.BackgroundTransparency = 1
+    title.Text = "🔐 TLG HUB — KEY SYSTEM"
+    title.TextSize = 18
+    title.Font = Enum.Font.GothamBold
+    title.TextColor3 = Color3.fromRGB(255, 215, 0)
+    title.Parent = frame
+
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(1, -24, 0, 42)
+    box.Position = UDim2.fromOffset(12, 58)
+    box.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+    box.PlaceholderText = "Introduce tu key..."
+    box.Text = ""
+    box.TextSize = 15
+    box.Font = Enum.Font.Gotham
+    box.TextColor3 = Color3.fromRGB(245, 245, 245)
+    box.Parent = frame
+
+    local bc = Instance.new("UICorner")
+    bc.CornerRadius = UDim.new(0, 8)
+    bc.Parent = box
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, -24, 0, 40)
+    button.Position = UDim2.fromOffset(12, 110)
+    button.BackgroundColor3 = Color3.fromRGB(255, 200, 80)
+    button.Text = "VERIFY KEY"
+    button.TextSize = 15
+    button.Font = Enum.Font.GothamBold
+    button.TextColor3 = Color3.fromRGB(20, 20, 20)
+    button.Parent = frame
+
+    local ub = Instance.new("UICorner")
+    ub.CornerRadius = UDim.new(0, 8)
+    ub.Parent = button
+
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(1, -24, 0, 25)
+    status.Position = UDim2.fromOffset(12, 153)
+    status.BackgroundTransparency = 1
+    status.Text = "🔒 Esperando key..."
+    status.TextSize = 13
+    status.Font = Enum.Font.Gotham
+    status.TextColor3 = Color3.fromRGB(190, 190, 190)
+    status.Parent = frame
+
+    local verified = false
+
+    local function tryVerify()
+        if VerifyTLGKey(box.Text) then
+            verified = true
+            status.Text = "✅ Key válida"
+            task.wait(0.25)
+            gui:Destroy()
+        else
+            status.Text = "❌ Key incorrecta"
+            box.Text = ""
+        end
+    end
+
+    button.MouseButton1Click:Connect(tryVerify)
+    box.FocusLost:Connect(function(enterPressed)
+        if enterPressed then tryVerify() end
+    end)
+
+    while gui.Parent and not verified do
+        task.wait()
+    end
+
+    return verified
+end
+
+if not ShowTLGKeyGate() then
+    return
+end
+
         syn.protect_gui(g); g.Parent = CG; p = g
       end
     end)
@@ -2041,22 +2177,73 @@ do
   Lbl(PCb, "Para el aimbot, andá al tab 🎯 Aimbot.", C.Yel)
 
   Sec(PCb, "📷 CAMERA FOV", "📷")
-  local CombatFOV = {Enabled=false, Value=70}
-  Tog(PCb, "Camera FOV", false, function(v)
-    CombatFOV.Enabled = v == true
+
+  local CombatFOV = {
+    Enabled = false,
+    Value = 70,
+    BindName = "TLG_CombatFOV"
+  }
+
+  local function ApplyCombatFOV()
+    if not CombatFOV.Enabled then return end
+
+    local cam = workspace.CurrentCamera
+    if not cam then return end
+
+    pcall(function()
+      cam.FieldOfView = math.clamp(CombatFOV.Value, 40, 120)
+    end)
+  end
+
+  local function StopCombatFOV()
+    CombatFOV.Enabled = false
+
+    pcall(function()
+      RS:UnbindFromRenderStep(CombatFOV.BindName)
+    end)
+
     local cam = workspace.CurrentCamera
     if cam then
-      cam.FieldOfView = CombatFOV.Enabled and CombatFOV.Value or 70
+      pcall(function()
+        cam.FieldOfView = 70
+      end)
+    end
+  end
+
+  local function StartCombatFOV()
+    CombatFOV.Enabled = true
+
+    pcall(function()
+      RS:UnbindFromRenderStep(CombatFOV.BindName)
+    end)
+
+    -- Apply after Roblox's camera update so the game camera does not
+    -- immediately overwrite the selected FOV.
+    pcall(function()
+      RS:BindToRenderStep(
+        CombatFOV.BindName,
+        Enum.RenderPriority.Camera.Value + 1,
+        ApplyCombatFOV
+      )
+    end)
+
+    ApplyCombatFOV()
+  end
+
+  Tog(PCb, "Camera FOV", false, function(v)
+    if v then
+      StartCombatFOV()
+    else
+      StopCombatFOV()
     end
   end)
+
   Sli(PCb, "FOV", 40, 120, 70, function(v)
-    CombatFOV.Value = v
-    if CombatFOV.Enabled then
-      local cam = workspace.CurrentCamera
-      if cam then cam.FieldOfView = v end
-    end
+    CombatFOV.Value = math.clamp(tonumber(v) or 70, 40, 120)
+    ApplyCombatFOV()
   end)
-  Lbl(PCb, "Asistente visual para ampliar o reducir el campo de visión.", C.Cyan)
+
+  Lbl(PCb, "Asistente visual: el FOV se mantiene activo después de la cámara del juego.", C.Cyan)
 end
 
 -- AIMBOT TAB
