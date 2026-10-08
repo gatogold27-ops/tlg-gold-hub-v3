@@ -339,17 +339,11 @@ local function aimLoop()
   local t = aimFindTarget()
   AIM.Target = t
   if not t then return end
-  local mc = TLG.LP.Character
-  if not mc then return end
-  local mh = mc:FindFirstChild("HumanoidRootPart")
-  local tc = t.Character
-  local th = tc and tc:FindFirstChild("TLG_Hitbox")
-  if mh and th then
-    pcall(function()
-      mh.CFrame = CFrame.new(mh.Position,
-        Vector3.new(th.Position.X, mh.Position.Y, th.Position.Z))
-    end)
-  end
+  -- Do not rotate/move the local character here.
+  -- The previous Heartbeat CFrame write fought Orbital Map and caused
+  -- movement/orbit jitter. The hitbox remains available without forcing
+  -- the player's HumanoidRootPart to face the target.
+  return
 end
 
 function TLG.AIM_Start()
@@ -2045,6 +2039,24 @@ do
   end)
   Lbl(PCb, "Hitbox global manual (no es el aimbot).", C.Gr)
   Lbl(PCb, "Para el aimbot, andá al tab 🎯 Aimbot.", C.Yel)
+
+  Sec(PCb, "📷 CAMERA FOV", "📷")
+  local CombatFOV = {Enabled=false, Value=70}
+  Tog(PCb, "Camera FOV", false, function(v)
+    CombatFOV.Enabled = v == true
+    local cam = workspace.CurrentCamera
+    if cam then
+      cam.FieldOfView = CombatFOV.Enabled and CombatFOV.Value or 70
+    end
+  end)
+  Sli(PCb, "FOV", 40, 120, 70, function(v)
+    CombatFOV.Value = v
+    if CombatFOV.Enabled then
+      local cam = workspace.CurrentCamera
+      if cam then cam.FieldOfView = v end
+    end
+  end)
+  Lbl(PCb, "Asistente visual para ampliar o reducir el campo de visión.", C.Cyan)
 end
 
 -- AIMBOT TAB
@@ -2428,18 +2440,38 @@ local function omRoot()
 end
 function TLG.OrbitalMapStart()
   if OM.On then return end
-  local r = omRoot(); if not r then return end
-  OM.On = true; OM.Angle = 0
+  local r = omRoot()
+  if not r then return end
+
+  OM.On = true
+  OM.Angle = 0
+
   local center = r.Position
   OM.Connection = RS.RenderStepped:Connect(function(dt)
     if not OM.On then return end
+
     local cur = omRoot()
-    if not cur or not cur.Parent then TLG.OrbitalMapStop(); return end
-    OM.Angle = OM.Angle + math.rad(OM.Speed) * dt
+    if not cur or not cur.Parent then
+      TLG.OrbitalMapStop()
+      return
+    end
+
+    -- Skip movement writes while the humanoid is being removed/replaced.
+    local hum = cur.Parent:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then
+      TLG.OrbitalMapStop()
+      return
+    end
+
+    OM.Angle = (OM.Angle + math.rad(OM.Speed) * dt) % (math.pi * 2)
+
     local x = math.cos(OM.Angle) * OM.Distance
     local z = math.sin(OM.Angle) * OM.Distance
-    local t = center + Vector3.new(x, OM.Height, z)
-    cur.CFrame = CFrame.lookAt(t, center)
+    local targetPos = center + Vector3.new(x, OM.Height, z)
+
+    pcall(function()
+      cur.CFrame = CFrame.lookAt(targetPos, center)
+    end)
   end)
 end
 function TLG.OrbitalMapStop()
@@ -2498,6 +2530,8 @@ do
     function(v) TLG.FugaSetHeight(v) end)
 
   Sec(PTo, "🌀 ORBITAL MAP", "🌀")
+  Lbl(PTo, "Movimiento estable: no fuerza el giro del aimbot.", C.Gr)
+
   Tog(PTo, "Orbital Mapa", false, function(v)
     if v then TLG.OrbitalMapStart() else TLG.OrbitalMapStop() end
   end)
