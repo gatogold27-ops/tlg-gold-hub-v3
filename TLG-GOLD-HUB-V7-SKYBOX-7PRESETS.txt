@@ -38,7 +38,7 @@ local function getParent()
 --==================================================
 
 local TLGKeySystem = {
-    Enabled = true,
+    Enabled = false,
     Verified = false,
     ValidKeys = {
         ["TLG-2026"] = true, -- demo/local key
