@@ -1027,7 +1027,7 @@ function TLG.AutoPromptStop()
   end
 end
 
--- ⚡ FAST ATTACK (INPUT V9) + AUTO-PAUSA en habilidades
+-- ⚡ MS (INPUT V9) + AUTO-PAUSA en habilidades
 local FA = {
   On = false, Conn = nil, CharConn = nil, AnimConn = nil,
   Stun = nil, BurstCount = 3, BurstInterval = 0.025,
@@ -1184,7 +1184,7 @@ function TLG.FastAttackStart()
       task.spawn(faBurst)
     end
   end)
-  TLG.PNotif("⚡ Fast Attack", "✅ Auto-burst", C.Grn)
+  TLG.PNotif("⚡ MS", "✅ Auto-burst", C.Grn)
 end
 
 function TLG.FastAttackStop()
@@ -1200,7 +1200,7 @@ function TLG.FastAttackStop()
   if FA.AnimConn then
     pcall(function() FA.AnimConn:Disconnect() end); FA.AnimConn = nil
   end
-  TLG.PNotif("⚡ Fast Attack", "❌ Desactivado", C.Rd)
+  TLG.PNotif("⚡ MS", "❌ Desactivado", C.Rd)
 end
 
 -- JOIN/LEAVE
@@ -2695,8 +2695,8 @@ do
   Sli(PTo, "Velocidad", 16, 1000, TLG.Speed.Val,
     function(v) TLG.Speed.Val = v end)
 
-  Sec(PTo, "⚡ FAST ATTACK (AUTO-BURST)", "⚡")
-  Tog(PTo, "Activar Fast Attack", false, function(v)
+  Sec(PTo, "⚡ MS (AUTO-BURST)", "⚡")
+  Tog(PTo, "Activar MS", false, function(v)
     if v then TLG.FastAttackStart() else TLG.FastAttackStop() end
   end)
   Sli(PTo, "Ráfaga cada (ms)", 50, 500, 150, function(v)
@@ -3906,14 +3906,27 @@ FSG.IgnoreGuiInset = true
 pcall(function() FSG.Parent = TLG.SP end)
 if not FSG.Parent then pcall(function() FSG.Parent = CG end) end
 
+-- FAB GROUP 1 - MOVIMIENTO (God Orb, Fuga, Fly, Orbit Map)
 local FM = Instance.new("Frame", FSG)
-FM.Size = UDim2.new(0,240,0,72)
-FM.Position = UDim2.new(0,10,1,-82)
+FM.Name = "FAB_Group1"
+FM.Size = UDim2.new(0,260,0,72)
+FM.Position = UDim2.new(0,10,1,-155)
 FM.BackgroundColor3 = C.BG
 FM.BackgroundTransparency = 0.2
 FM.BorderSizePixel = 0
 FM.ZIndex = 10
 FM.Visible = true
+
+-- FAB GROUP 2 - PROTECCION (Anti Stun, Buff Tools, Anti Void, Anti Orbit)
+local FM2 = Instance.new("Frame", FSG)
+FM2.Name = "FAB_Group2"
+FM2.Size = UDim2.new(0,260,0,72)
+FM2.Position = UDim2.new(0,10,1,-75)
+FM2.BackgroundColor3 = C.BG
+FM2.BackgroundTransparency = 0.2
+FM2.BorderSizePixel = 0
+FM2.ZIndex = 10
+FM2.Visible = true
 TLG.FAB_Toggle_State = true
 TLG.FAB_Frame_Ref = FM
 TLG.FAB_SetVisible = function(v)
@@ -3927,7 +3940,12 @@ TLG.FAB_SetVisible = function(v)
 end
 
 Instance.new("UICorner", FM).CornerRadius = UDim.new(0,12)
+Instance.new("UICorner", FM2).CornerRadius = UDim.new(0,12)
 local FStr = Instance.new("UIStroke", FM)
+local FStr2 = Instance.new("UIStroke", FM2)
+FStr2.Thickness = 2
+FStr2.Color = C.Yel
+FStr2.Transparency = 0.2
 FStr.Thickness = 2
 FStr.Color = C.Yel
 FStr.Transparency = 0.2
@@ -3954,8 +3972,30 @@ FLy.Padding = UDim.new(0,4)
 FLy.HorizontalAlignment = Enum.HorizontalAlignment.Center
 FLy.VerticalAlignment = Enum.VerticalAlignment.Center
 
-local function CF(i, t, cb)
-  local b = Instance.new("TextButton", FHo)
+local FH2 = Instance.new("TextLabel", FM2)
+FH2.Size = UDim2.new(1,0,0,14)
+FH2.Position = UDim2.new(0,0,0,2)
+FH2.BackgroundTransparency = 1
+FH2.Font = Enum.Font.GothamBold
+FH2.Text = "🛡️ PROTECCION"
+FH2.TextColor3 = C.Yel
+FH2.TextSize = 8
+FH2.ZIndex = 12
+
+local FHo2 = Instance.new("Frame", FM2)
+FHo2.Size = UDim2.new(1,-10,1,-20)
+FHo2.Position = UDim2.new(0,5,0,18)
+FHo2.BackgroundTransparency = 1
+FHo2.ZIndex = 11
+local FLy2 = Instance.new("UIListLayout", FHo2)
+FLy2.FillDirection = Enum.FillDirection.Horizontal
+FLy2.Padding = UDim.new(0,4)
+FLy2.HorizontalAlignment = Enum.HorizontalAlignment.Center
+FLy2.VerticalAlignment = Enum.VerticalAlignment.Center
+
+local function CF(i, t, cb, parent)
+  local targetParent = parent or FHo
+  local b = Instance.new("TextButton", targetParent)
   b.Size = UDim2.new(0,55,0,46)
   b.BackgroundColor3 = C.BG2
   b.Text = ""
@@ -4036,7 +4076,56 @@ CF("🌀", "GOD ORB", function()
   return true
 end)
 
+CF("🪐", "ORBIT", function()
+  if TLG.Orb and TLG.Orb.On then
+    TLG.OrbStop()
+    return false
+  else
+    if TLG.OrbStart then TLG.OrbStart() end
+    return true
+  end
+end)
+
+-- FAB GROUP 2 - Anti Stun, Buff Tools, Anti Void, Anti Orbit
+CF("💫", "ANTI STUN", function()
+  TLG.Bf = TLG.Bf or {AS=false}
+  TLG.Bf.AS = not TLG.Bf.AS
+  TLG.PNotif("💫 Anti Stun", TLG.Bf.AS and "ON" or "OFF", C.Yel)
+  return TLG.Bf.AS
+end, FHo2)
+
+CF("🔧", "BUFF TOOL", function()
+  TLG.Bf = TLG.Bf or {Act=false}
+  TLG.Bf.Act = not TLG.Bf.Act
+  if not TLG.Bf.Act then TLG.Bf.Act = true end
+  TLG.PNotif("🔧 Buff Tools", "ON", C.Yel)
+  return true
+end, FHo2)
+
+CF("🕳️", "ANTI VOID", function()
+  TLG.AV = TLG.AV or {On=false}
+  if TLG.AV.On then
+    if TLG.AVStop then TLG.AVStop() end
+    return false
+  else
+    if TLG.AVStart then TLG.AVStart() end
+    return true
+  end
+end, FHo2)
+
+CF("🚫", "ANTI ORB", function()
+  if TLG.Orb and TLG.Orb.On then
+    TLG.OrbStop()
+    TLG.PNotif("🚫 Anti Orbit", "Orbit detenido", C.Yel)
+    return false
+  else
+    TLG.PNotif("🚫 Anti Orbit", "No hay orbit activo", C.Gr)
+    return false
+  end
+end, FHo2)
+
 local fdg, fs, fp = false, nil, nil
+local fdg2, fs2, fp2 = false, nil, nil
 FH.InputBegan:Connect(function(i)
   if i.UserInputType == Enum.UserInputType.MouseButton1
     or i.UserInputType == Enum.UserInputType.Touch then
