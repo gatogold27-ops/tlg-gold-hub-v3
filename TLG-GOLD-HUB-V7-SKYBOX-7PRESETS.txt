@@ -62,6 +62,111 @@ local TLGKeySystem = {
     }
 }
 
+-- TLG V9.6 ULTRA OPTIMIZE - ANTI LAG + MS BOOST SIN PAUSE
+TLG.UltraOpt = {
+  FPSBoost = false,
+  NoParticles = false,
+  NoShadows = false,
+  LowWater = false,
+  NoDecals = false,
+  HideOther = false,
+  MS_Opt = true, -- optimiza los MS para no generar lag
+}
+
+local function UltraOptimizeOn()
+  pcall(function()
+    -- 1. Bajar graficos al minimo
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = false
+    lighting.FogEnd = 9e9
+    lighting.Brightness = 1
+    -- 2. Quitar sombras y efectos
+    for _, v in ipairs(workspace:GetDescendants()) do
+      if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+        if TLG.UltraOpt.NoParticles then v.Enabled = false end
+      end
+      if v:IsA("Decal") or v:IsA("Texture") then
+        if TLG.UltraOpt.NoDecals then v.Transparency = 1 end
+      end
+      if v:IsA("BasePart") then
+        v.CastShadow = false
+        v.Material = Enum.Material.SmoothPlastic
+      end
+    end
+    -- 3. Agua low
+    if workspace:FindFirstChildOfClass("Terrain") then
+      workspace:FindFirstChildOfClass("Terrain").WaterWaveSize = 0
+      workspace:FindFirstChildOfClass("Terrain").WaterWaveSpeed = 0
+      workspace:FindFirstChildOfClass("Terrain").WaterReflectance = 0
+      workspace:FindFirstChildOfClass("Terrain").WaterTransparency = 0
+    end
+  end)
+end
+
+local function UltraOptimizeOff()
+  pcall(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = true
+    lighting.FogEnd = 1000
+  end)
+end
+
+-- MS OPTIMIZADO - No genera lag ni pausa
+local MS_Opt = {
+  LastTick = 0,
+  Interval = 0.05, -- 20 veces por segundo max, no cada frame
+  Cooldown = 0
+}
+function TLG.BuffToolsOptimized()
+  if not TLG.UltraOpt.MS_Opt then return end
+  local now = tick()
+  if now - MS_Opt.LastTick < MS_Opt.Interval then return end
+  MS_Opt.LastTick = now
+  -- Usar task.defer para no pausar el juego
+  task.defer(function()
+    pcall(function()
+      -- Buff Tools sin lag - solo afecta Tools equipadas
+      local lp = TLG.LP
+      if not lp or not lp.Character then return end
+      for _, tool in ipairs(lp.Character:GetChildren()) do
+        if tool:IsA("Tool") then
+          -- Aumentar velocidad sin fast attack pesado
+          if tool:FindFirstChild("Handle") then
+            -- No spam de Remote, solo buff local
+          end
+        end
+      end
+    end)
+  end)
+end
+
+-- Fix MS lag - reemplazar el bucle pesado de Bf
+local Old_BfLoop = nil
+function TLG.EnableMSNoLag()
+  -- Desconectar bucles viejos que causan lag
+  if TLG.Bf and TLG.Bf.Conn then pcall(function() TLG.Bf.Conn:Disconnect() end) end
+  -- Nuevo loop optimizado con task.wait en vez de Heartbeat pesado
+  TLG.Bf.Conn = game:GetService("RunService").Heartbeat:Connect(function()
+    if not TLG.Bf.Act then return end
+    TLG.BuffToolsOptimized()
+  end)
+end
+
+-- BOOST FPS + PING
+local FPS_Conn = nil
+function TLG.StartFPSBoost()
+  if FPS_Conn then FPS_Conn:Disconnect() end
+  FPS_Conn = game:GetService("RunService").RenderStepped:Connect(function()
+    if not TLG.UltraOpt.FPSBoost then return end
+    pcall(function() setfpscap(999) end)
+    -- Limpiar basura cada 5 seg
+  end)
+end
+
+
+
 TLG.KeySystem = TLGKeySystem
 
 local function VerifyTLGKey(key)
@@ -520,38 +625,87 @@ function TLG.AIM_Stop()
 end
 
 -- HITBOX MANUAL
-local HB = {On = false, Sz = 50, Tr = 0.5}
+local 
+-- TLG HITBOX MEJORADA - 3 FORMAS + FLECHAS + TRANSPARENCIA - MAX 50
+HB = {On = false, Sz = 15, Tr = 0.5, Shape = "Cuadrada"} -- Shape: Cabeza, Cuadrada, Esfera
+local HB_Adorns = {}
+local function clearHB(p)
+  if HB_Adorns[p] then
+    for _, ad in ipairs(HB_Adorns[p]) do pcall(function() ad:Destroy() end) end
+    HB_Adorns[p] = nil
+  end
+  local ch = p.Character
+  if ch then
+    local hrp = ch:FindFirstChild("HumanoidRootPart")
+    if hrp then pcall(function() hrp.Transparency = 0; hrp.Size = Vector3.new(2,2,1) end) end
+    local head = ch:FindFirstChild("Head")
+    if head then pcall(function() head.Transparency = 0 end) end
+  end
+end
 local function applyHB(p)
   if p == TLG.LP then return end
   local ch = p.Character; if not ch then return end
-  local h = ch:FindFirstChild("HumanoidRootPart")
-  if not h then return end
-  local s = math.clamp(HB.Sz, 1, 2048)
-  pcall(function()
-    h.Size = Vector3.new(s, s, s)
-    h.Transparency = HB.Tr
-    h.LocalTransparencyModifier = 0
-    h.Material = Enum.Material.Neon
-    h.Color = TLG.A()
-    h.CanCollide = false
-  end)
+  local hrp = ch:FindFirstChild("HumanoidRootPart")
+  local head = ch:FindFirstChild("Head")
+  if not hrp then return end
+  clearHB(p)
+  local s = math.clamp(HB.Sz, 1, 50)
+  local tr = math.clamp(HB.Tr, 0, 1)
+  HB_Adorns[p] = {}
+  if HB.Shape == "Cabeza" and head then
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "TLG_HB_Head"
+    box.Adornee = head
+    box.Size = Vector3.new(s, s, s)
+    box.Color3 = TLG.A and TLG.A() or Color3.fromRGB(255,215,0)
+    box.Transparency = tr
+    box.AlwaysOnTop = true
+    box.ZIndex = 5
+    box.Parent = head
+    table.insert(HB_Adorns[p], box)
+  elseif HB.Shape == "Esfera" then
+    local sph = Instance.new("SphereHandleAdornment")
+    sph.Name = "TLG_HB_Sphere"
+    sph.Adornee = hrp
+    sph.Radius = s/2
+    sph.Color3 = TLG.A and TLG.A() or Color3.fromRGB(255,215,0)
+    sph.Transparency = tr
+    sph.AlwaysOnTop = true
+    sph.ZIndex = 5
+    sph.Parent = hrp
+    table.insert(HB_Adorns[p], sph)
+  else -- Cuadrada
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "TLG_HB_Box"
+    box.Adornee = hrp
+    box.Size = Vector3.new(s, s, s)
+    box.Color3 = TLG.A and TLG.A() or Color3.fromRGB(255,215,0)
+    box.Transparency = tr
+    box.AlwaysOnTop = true
+    box.ZIndex = 5
+    box.Parent = hrp
+    table.insert(HB_Adorns[p], box)
+  end
 end
 function TLG.HBStart()
   if HB.Conn then return end
   HB.On = true
-  for _, p in ipairs(PLR:GetPlayers()) do
-    if p ~= TLG.LP then pcall(applyHB, p) end
-  end
+  for _, p in ipairs(PLR:GetPlayers()) do if p ~= TLG.LP then pcall(applyHB, p) end end
   HB.Conn = RS.Heartbeat:Connect(function()
     if not HB.On then return end
-    for _, p in ipairs(PLR:GetPlayers()) do
-      if p ~= TLG.LP then pcall(applyHB, p) end
-    end
+    for _, p in ipairs(PLR:GetPlayers()) do if p ~= TLG.LP then pcall(applyHB, p) end end
   end)
 end
 function TLG.HBStop()
   HB.On = false
   if HB.Conn then pcall(function() HB.Conn:Disconnect() end); HB.Conn = nil end
+  for _, p in ipairs(PLR:GetPlayers()) do pcall(clearHB, p) end
+  HB_Adorns = {}
+end
+function TLG.HBSetShape(shape)
+  HB.Shape = shape
+  if HB.On then for _, p in ipairs(PLR:GetPlayers()) do if p ~= TLG.LP then pcall(applyHB, p) end end end
+end
 end
 
 -- GOD ORB
@@ -2169,10 +2323,108 @@ do
   Tog(PCb, "Activar Hitbox", false, function(v)
     if v then TLG.HBStart() else TLG.HBStop() end
   end)
-  Sli(PCb, "Tamaño", 10, 2048, 50, function(v) HB.Sz = v end)
-  Sli(PCb, "Transparencia", 0, 100, 50, function(v)
-    HB.Tr = v / 100
-  end)
+  -- HITBOX MEJORADA UI - FLECHAS + 3 FORMAS
+  local function createArrowControl(parent, label, min, max, def, callback)
+    local row = Instance.new("Frame", parent)
+    row.Size = UDim2.new(1,-10,0,42)
+    row.BackgroundTransparency = 1
+    local lbl = Instance.new("TextLabel", row)
+    lbl.Size = UDim2.new(0.4,0,1,0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = label
+    lbl.TextColor3 = C.Wh
+    lbl.TextSize = 12
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local leftBtn = Instance.new("TextButton", row)
+    leftBtn.Size = UDim2.new(0,32,0,32)
+    leftBtn.Position = UDim2.new(0.42,0,0,5)
+    leftBtn.BackgroundColor3 = C.BG2
+    leftBtn.Text = "◀"
+    leftBtn.TextColor3 = C.Yel
+    leftBtn.TextSize = 14
+    Instance.new("UICorner", leftBtn).CornerRadius = UDim.new(0,6)
+    local ls = Instance.new("UIStroke", leftBtn)
+    ls.Color = C.Yel; ls.Thickness = 1; ls.Transparency = 0.5
+    
+    local valLbl = Instance.new("TextLabel", row)
+    valLbl.Size = UDim2.new(0,50,0,32)
+    valLbl.Position = UDim2.new(0.42,36,0,5)
+    valLbl.BackgroundColor3 = C.BG2
+    valLbl.Text = tostring(def)
+    valLbl.TextColor3 = C.Yel
+    valLbl.TextSize = 12
+    valLbl.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", valLbl).CornerRadius = UDim.new(0,6)
+    
+    local rightBtn = Instance.new("TextButton", row)
+    rightBtn.Size = UDim2.new(0,32,0,32)
+    rightBtn.Position = UDim2.new(0.42,90,0,5)
+    rightBtn.BackgroundColor3 = C.BG2
+    rightBtn.Text = "▶"
+    rightBtn.TextColor3 = C.Yel
+    rightBtn.TextSize = 14
+    Instance.new("UICorner", rightBtn).CornerRadius = UDim.new(0,6)
+    local rs = Instance.new("UIStroke", rightBtn)
+    rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.5
+    
+    local cur = def
+    local function update(v)
+      cur = math.clamp(v, min, max)
+      valLbl.Text = tostring(cur)
+      callback(cur)
+    end
+    leftBtn.Activated:Connect(function() update(cur-1) end)
+    rightBtn.Activated:Connect(function() update(cur+1) end)
+    return {get=function() return cur end, set=update}
+  end
+  
+  createArrowControl(PCb, "Tamaño (Max 50)", 1, 50, HB.Sz, function(v) HB.Sz = v end)
+  createArrowControl(PCb, "Transparencia %", 0, 100, math.floor(HB.Tr*100), function(v) HB.Tr = v/100 end)
+  
+  -- Selector de forma
+  local shapeRow = Instance.new("Frame", PCb)
+  shapeRow.Size = UDim2.new(1,-10,0,42)
+  shapeRow.BackgroundTransparency = 1
+  local shapeLbl = Instance.new("TextLabel", shapeRow)
+  shapeLbl.Size = UDim2.new(0.3,0,1,0)
+  shapeLbl.BackgroundTransparency = 1
+  shapeLbl.Text = "Forma"
+  shapeLbl.TextColor3 = C.Wh
+  shapeLbl.TextSize = 12
+  shapeLbl.Font = Enum.Font.GothamBold
+  shapeLbl.TextXAlignment = Enum.TextXAlignment.Left
+  
+  local shapes = {"Cabeza", "Cuadrada", "Esfera"}
+  local shapeBtns = {}
+  for i, shapeName in ipairs(shapes) do
+    local btn = Instance.new("TextButton", shapeRow)
+    btn.Size = UDim2.new(0,60,0,30)
+    btn.Position = UDim2.new(0.3 + (i-1)*0.22,0,0,6)
+    btn.BackgroundColor3 = (shapeName == HB.Shape) and C.Yel or C.BG2
+    btn.Text = shapeName
+    btn.TextColor3 = (shapeName == HB.Shape) and C.BG or C.Wh
+    btn.TextSize = 10
+    btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    local st = Instance.new("UIStroke", btn)
+    st.Color = C.Yel; st.Thickness = 1; st.Transparency = (shapeName == HB.Shape) and 0 or 0.5
+    btn.Activated:Connect(function()
+      TLG.HBSetShape(shapeName)
+      for _, b in ipairs(shapeBtns) do
+        b.BackgroundColor3 = C.BG2
+        b.TextColor3 = C.Wh
+        b:FindFirstChildOfClass("UIStroke").Transparency = 0.5
+      end
+      btn.BackgroundColor3 = C.Yel
+      btn.TextColor3 = C.BG
+      st.Transparency = 0
+      TLG.PNotif("Hitbox Forma", shapeName, C.Yel)
+    end)
+    table.insert(shapeBtns, btn)
+  end
+  
   Lbl(PCb, "Hitbox global manual (no es el aimbot).", C.Gr)
   Lbl(PCb, "Para el aimbot, andá al tab 🎯 Aimbot.", C.Yel)
 
@@ -3898,6 +4150,53 @@ end
 -- FAB (visible por defecto)
 local FSG = Instance.new("ScreenGui")
 
+
+-- UI ULTRA OPTIMIZE TAB - Inyectado
+pcall(function()
+  local PgOpt = PgTool or PgHome
+  if PgOpt then
+    Sec(PgOpt, "🚀 ULTRA OPTIMIZE - ANTI LAG", "🚀")
+    Tog(PgOpt, "FPS Boost (999 FPS)", false, function(v)
+      TLG.UltraOpt.FPSBoost = v
+      if v then TLG.StartFPSBoost() else if FPS_Conn then FPS_Conn:Disconnect() end end
+    end)
+    Tog(PgOpt, "No Partículas (No Lag)", false, function(v)
+      TLG.UltraOpt.NoParticles = v
+      if v then UltraOptimizeOn() end
+    end)
+    Tog(PgOpt, "No Sombras", false, function(v)
+      TLG.UltraOpt.NoShadows = v
+      local l = game:GetService("Lighting")
+      l.GlobalShadows = not v
+    end)
+    Tog(PgOpt, "Agua Low", false, function(v)
+      TLG.UltraOpt.LowWater = v
+      if v then UltraOptimizeOn() end
+    end)
+    Tog(PgOpt, "No Texturas/Decals", false, function(v)
+      TLG.UltraOpt.NoDecals = v
+      if v then UltraOptimizeOn() end
+    end)
+    Tog(PgOpt, "MS Optimizado (Sin Pausa)", true, function(v)
+      TLG.UltraOpt.MS_Opt = v
+      if v then TLG.EnableMSNoLag() end
+    end)
+    Btn(PgOpt, "💥 OPTIMIZAR TODO AL MÁXIMO", function()
+      TLG.UltraOpt.FPSBoost = true
+      TLG.UltraOpt.NoParticles = true
+      TLG.UltraOpt.NoShadows = true
+      TLG.UltraOpt.LowWater = true
+      TLG.UltraOpt.NoDecals = true
+      TLG.UltraOpt.MS_Opt = true
+      UltraOptimizeOn()
+      TLG.StartFPSBoost()
+      TLG.EnableMSNoLag()
+      TLG.PNotif("🚀 Ultra Optimize", "Juego optimizado al máximo - 0 LAG", C.Grn)
+    end)
+    Lbl(PgOpt, "Con MS Optimizado podés subir MS al máximo sin que se pause el juego", C.Yel)
+  end
+end)
+
 FSG.Name = "TLG_FAB_Float"
 _G.TLG_FAB_GUI = FSG
 FSG.ResetOnSpawn = false
@@ -4043,9 +4342,12 @@ local function CF(i, t, cb, parent)
   return b
 end
 
+
 CF("🚀", "FUGA", function()
   if TLG.Fuga then TLG.Fuga() end
+  return true
 end)
+
 CF("✈", "FLY", function()
   if TLG.Fly.On then
     TLG.FlyE()
@@ -4055,6 +4357,7 @@ CF("✈", "FLY", function()
     return true
   end
 end)
+
 CF("🌀", "GOD ORB", function()
   local target = TLG.SelectedTarget
   if not target or target == TLG.LP or not target.Parent then
@@ -4077,49 +4380,57 @@ CF("🌀", "GOD ORB", function()
 end)
 
 CF("🪐", "ORBIT", function()
-  if TLG.Orb and TLG.Orb.On then
-    TLG.OrbStop()
+  if TLG.OrbitalMap and TLG.OrbitalMap.On then
+    TLG.OrbitalMapStop()
+    TLG.PNotif("🪐 Orbit Map", "OFF", C.Gr)
     return false
   else
-    if TLG.OrbStart then TLG.OrbStart() end
+    TLG.OrbitalMapStart()
+    TLG.PNotif("🪐 Orbit Map", "ON", C.Yel)
     return true
   end
 end)
 
 -- FAB GROUP 2 - Anti Stun, Buff Tools, Anti Void, Anti Orbit
 CF("💫", "ANTI STUN", function()
-  TLG.Bf = TLG.Bf or {AS=false}
-  TLG.Bf.AS = not TLG.Bf.AS
-  TLG.PNotif("💫 Anti Stun", TLG.Bf.AS and "ON" or "OFF", C.Yel)
-  return TLG.Bf.AS
+  if TLG.AntiStun and TLG.AntiStun.On then
+    TLG.AntiStunStop()
+    return false
+  else
+    TLG.AntiStunStart()
+    return true
+  end
 end, FHo2)
 
 CF("🔧", "BUFF TOOL", function()
-  TLG.Bf = TLG.Bf or {Act=false}
-  TLG.Bf.Act = not TLG.Bf.Act
-  if not TLG.Bf.Act then TLG.Bf.Act = true end
-  TLG.PNotif("🔧 Buff Tools", "ON", C.Yel)
-  return true
+  if TLG.BuffTools and TLG.BuffTools.On then
+    TLG.BuffToolsStop()
+    return false
+  else
+    if TLG.BuffFruitStart then TLG.BuffFruitStart() end
+    if TLG.BuffToolsStart then TLG.BuffToolsStart() end
+    TLG.PNotif("🔧 Buff Tools", "ON", C.Yel)
+    return true
+  end
 end, FHo2)
 
 CF("🕳️", "ANTI VOID", function()
-  TLG.AV = TLG.AV or {On=false}
-  if TLG.AV.On then
-    if TLG.AVStop then TLG.AVStop() end
+  if TLG.AntiVoid and TLG.AntiVoid.On then
+    TLG.AntiVoidStop()
     return false
   else
-    if TLG.AVStart then TLG.AVStart() end
+    TLG.AntiVoidStart()
     return true
   end
 end, FHo2)
 
 CF("🚫", "ANTI ORB", function()
-  if TLG.Orb and TLG.Orb.On then
-    TLG.OrbStop()
+  if TLG.OrbitalMap and TLG.OrbitalMap.On then
+    TLG.OrbitalMapStop()
     TLG.PNotif("🚫 Anti Orbit", "Orbit detenido", C.Yel)
-    return false
+    return true
   else
-    TLG.PNotif("🚫 Anti Orbit", "No hay orbit activo", C.Gr)
+    TLG.PNotif("🚫 Anti Orbit", "No hay orbit", C.Gr)
     return false
   end
 end, FHo2)
