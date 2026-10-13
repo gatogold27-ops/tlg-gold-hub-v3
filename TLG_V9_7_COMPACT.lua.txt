@@ -409,8 +409,7 @@ end
 AIM.Target = nil
 TLG.PNotif("\u{1F3AF} Hitbox", "\u{274C} Desactivado", C.Rd)
 end
-local
-HB = {On = false, Sz = 15, Tr = 0.5, Shape = "Cuadrada"}
+local HB = {On = false, Sz = 15, Tr = 0.5, Shape = "Cuadrada"}
 local HB_Adorns = {}
 local function clearHB(p)
 if HB_Adorns[p] then
