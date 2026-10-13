@@ -84,6 +84,9 @@ end
 function TLG.StopFPSBoost()
 if FPS_Conn then FPS_Conn:Disconnect() FPS_Conn=nil end
 end
+TLG.BuffTools = {On=false}
+function TLG.BuffToolsStart() TLG.BuffTools.On = true end
+function TLG.BuffToolsStop() TLG.BuffTools.On = false end
 local MS_Tick = 0
 function TLG.BuffToolsOptimized()
 if not TLG.UltraOpt.MS_Opt then return end
@@ -92,113 +95,6 @@ if now - MS_Tick < 0.05 then return end
 MS_Tick = now
 task.defer(function()
 end)
-end
-local TLGKeySystem = {
-Enabled = true,
-Verified = false,
-ValidKeys = {
-["TLG-2026"] = true,
-}
-}
-TLG.KeySystem = TLGKeySystem
-local function VerifyTLGKey(key)
-key = tostring(key or ""):gsub("^%s+", ""):gsub("%s+$", "")
-if TLGKeySystem.ValidKeys[key] then
-TLGKeySystem.Verified = true
-return true
-end
-return false
-end
-local function ShowTLGKeyGate()
-if not TLGKeySystem.Enabled then
-TLGKeySystem.Verified = true
-return true
-end
-local parent = TLG.SP
-if not parent then return false end
-local old = parent:FindFirstChild("TLG_KeySystem")
-if old then old:Destroy() end
-local gui = Instance.new("ScreenGui")
-gui.Name = "TLG_KeySystem"
-gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = parent
-local frame = Instance.new("Frame")
-frame.Size = UDim2.fromOffset(320, 190)
-frame.Position = UDim2.fromScale(0.5, 0.5)
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-frame.BorderSizePixel = 0
-frame.Parent = gui
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = frame
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -24, 0, 40)
-title.Position = UDim2.fromOffset(12, 10)
-title.BackgroundTransparency = 1
-title.Text = "🔐 TLG HUB — KEY SYSTEM"
-title.TextSize = 18
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(255, 215, 0)
-title.Parent = frame
-local box = Instance.new("TextBox")
-box.Size = UDim2.new(1, -24, 0, 42)
-box.Position = UDim2.fromOffset(12, 58)
-box.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
-box.PlaceholderText = "Introduce tu key..."
-box.Text = ""
-box.TextSize = 15
-box.Font = Enum.Font.Gotham
-box.TextColor3 = Color3.fromRGB(245, 245, 245)
-box.Parent = frame
-local bc = Instance.new("UICorner")
-bc.CornerRadius = UDim.new(0, 8)
-bc.Parent = box
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(1, -24, 0, 40)
-button.Position = UDim2.fromOffset(12, 110)
-button.BackgroundColor3 = Color3.fromRGB(255, 200, 80)
-button.Text = "VERIFY KEY"
-button.TextSize = 15
-button.Font = Enum.Font.GothamBold
-button.TextColor3 = Color3.fromRGB(20, 20, 20)
-button.Parent = frame
-local ub = Instance.new("UICorner")
-ub.CornerRadius = UDim.new(0, 8)
-ub.Parent = button
-local status = Instance.new("TextLabel")
-status.Size = UDim2.new(1, -24, 0, 25)
-status.Position = UDim2.fromOffset(12, 153)
-status.BackgroundTransparency = 1
-status.Text = "🔒 Esperando key..."
-status.TextSize = 13
-status.Font = Enum.Font.Gotham
-status.TextColor3 = Color3.fromRGB(190, 190, 190)
-status.Parent = frame
-local verified = false
-local function tryVerify()
-if VerifyTLGKey(box.Text) then
-verified = true
-status.Text = "✅ Key válida"
-task.wait(0.25)
-gui:Destroy()
-else
-status.Text = "❌ Key incorrecta"
-box.Text = ""
-end
-end
-button.MouseButton1Click:Connect(tryVerify)
-box.FocusLost:Connect(function(enterPressed)
-if enterPressed then tryVerify() end
-end)
-while gui.Parent and not verified do
-task.wait()
-end
-return verified
-end
-if not ShowTLGKeyGate() then
-return
 end
 local names = {"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7",
 "TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
@@ -593,7 +489,6 @@ function TLG.HBSetShape(shape)
 HB.Shape = shape
 if HB.On then for _, p in ipairs(PLR:GetPlayers()) do if p ~= TLG.LP then pcall(applyHB, p) end end end
 end
-end
 TLG.GO = {T = nil, C = nil, On = false, Ang = 0}
 function TLG.GOS()
 TLG.GO.T = nil; TLG.GO.On = false
@@ -844,7 +739,7 @@ if hrp and hum and hum.Health > 0 then
 local offset = hrp.Position - pos
 local r = offset.Magnitude
 if r >= AntiOrbit.RadiusMin and r <= AntiOrbit.RadiusMax then
-nearbyCount += 1
+nearbyCount = nearbyCount + 1
 local tangent = Vector3.new(-offset.Z, 0, offset.X)
 if tangent.Magnitude > 0.01 then
 local alignment = math.abs(
@@ -885,6 +780,7 @@ antiOrbitReset()
 TLG.PNotif("🛡️ Anti Orbit", "❌ Desactivado", C.Rd)
 end
 local AntiVoid = {On=false, Conn=nil, Y=-100}
+TLG.AntiVoid = AntiVoid
 function TLG.AntiVoidStart()
 if AntiVoid.On then return end
 AntiVoid.On = true
@@ -929,6 +825,7 @@ pcall(function() AntiFling.Conn:Disconnect() end); AntiFling.Conn = nil
 end
 end
 local AntiStun = {On=false, Conn=nil}
+TLG.AntiStun = AntiStun
 local function antiStunForce()
 if not AntiStun.On then return end
 local ch = TLG.LP and TLG.LP.Character; if not ch then return end
@@ -1365,7 +1262,7 @@ FpsLabel.Size = UDim2.new(0.5,-6,1,0)
 FpsLabel.Position = UDim2.new(0,4,0,0)
 FpsLabel.BackgroundTransparency = 1
 FpsLabel.Font = Enum.Font.GothamBold
-FpsLabel.Text = "FPS:
+FpsLabel.Text = "FPS: --"
 FpsLabel.TextColor3 = C.Grn
 FpsLabel.TextSize = 10
 FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -1375,7 +1272,7 @@ PingLabel.Size = UDim2.new(0.5,-6,1,0)
 PingLabel.Position = UDim2.new(0.5,2,0,0)
 PingLabel.BackgroundTransparency = 1
 PingLabel.Font = Enum.Font.GothamBold
-PingLabel.Text = "Ping:
+PingLabel.Text = "Ping: --"
 PingLabel.TextColor3 = C.Cyan
 PingLabel.TextSize = 10
 PingLabel.TextXAlignment = Enum.TextXAlignment.Right
@@ -1801,6 +1698,8 @@ local PTo = Tab("Tools", "🔧")
 local PEs = Tab("ESP", "👁️")
 local PVi = Tab("Visuals", "🎨")
 local POp = Tab("Optimize", "⚡")
+local PCf = Tab("Config", "⚙️")
+local PFr = Tab("Frutas", "🍎")
 task.wait(0.1)
 if Tabs[1] then
 Tabs[1].l.TextColor3 = C.Yel
@@ -1820,6 +1719,8 @@ TLG.PTo = PTo
 TLG.PEs = PEs
 TLG.PVi = PVi
 TLG.POp = POp
+TLG.PCf = PCf
+TLG.PFr = PFr
 local infoOK, infoERR = pcall(function()
 local function fmt(n)
 n = math.floor(tonumber(n) or 0)
@@ -2588,6 +2489,7 @@ if hu then pcall(function() hu.HipHeight = 2 end) end
 end
 local OM = {On=false, Distance=250, Height=80, Speed=35,
 Angle=0, Connection=nil}
+TLG.OrbitalMap = OM
 local function omRoot()
 local ch = TLG.LP and TLG.LP.Character
 return ch and ch:FindFirstChild("HumanoidRootPart")
@@ -3402,698 +3304,4 @@ local ch = p.Character
 if ch and inst:IsDescendantOf(ch) then return true end
 end
 return false
-end
-local function track(d)
-if (d:IsA("Model") or d:IsA("Tool") or d:IsA("BasePart")) and matches(d.Name) then
-Fr.Items[d] = true
-end
-end
-local function rescan()
-Fr.Items = {}
-for _, d in ipairs(workspace:GetDescendants()) do track(d) end
-end
-rescan()
-workspace.DescendantAdded:Connect(track)
-workspace.DescendantRemoving:Connect(function(d) Fr.Items[d] = nil end)
-local function partOf(inst)
-if inst:IsA("BasePart") then return inst end
-if inst:IsA("Tool") then
-return inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart", true)
-end
-if inst:IsA("Model") then
-return inst.PrimaryPart or inst:FindFirstChildWhichIsA("BasePart", true)
-end
-return nil
-end
-local function list()
-local out = {}
-local mr = myRoot()
-for inst in pairs(Fr.Items) do
-if inst.Parent and not isMine(inst) then
-local anc, nested = inst.Parent, false
-while anc and anc ~= workspace do
-if Fr.Items[anc] then nested = true; break end
-anc = anc.Parent
-end
-if not nested then
-local pt = partOf(inst)
-if pt then
-table.insert(out, {inst = inst, part = pt,
-dist = mr and (pt.Position - mr.Position).Magnitude or 0})
-end
-end
-end
-end
-table.sort(out, function(a, b) return a.dist < b.dist end)
-return out
-end
-local function interact(e)
-local mr = myRoot(); if not mr then return 0 end
-local n = 0
-pcall(function() mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 3, 0)) end)
-task.wait(0.15)
-for _, d in ipairs(e.inst:GetDescendants()) do
-if d:IsA("ProximityPrompt") then
-pcall(function() d.HoldDuration = 0 end)
-if fireproximityprompt then pcall(fireproximityprompt, d); n = n + 1 end
-elseif d:IsA("ClickDetector") and fireclickdetector then
-pcall(fireclickdetector, d); n = n + 1
-end
-end
-if firetouchinterest then
-pcall(function()
-firetouchinterest(mr, e.part, 0)
-firetouchinterest(mr, e.part, 1)
-end)
-n = n + 1
-end
-return n
-end
-function TLG.FruitAutoStart()
-if Fr.AutoOn then return end
-Fr.AutoOn = true
-local mr0 = myRoot()
-Fr.Origin = mr0 and mr0.CFrame
-Fr.Away = false
-task.spawn(function()
-while Fr.AutoOn do
-pcall(function()
-local mr = myRoot(); if not mr then return end
-local target
-for _, e in ipairs(list()) do
-local t = Fr.Tried[e.inst]
-if e.dist <= Fr.Range and (not t or os.clock() - t > 6) then target = e; break end
-end
-if not target then
-if Fr.ReturnBack and Fr.Origin and Fr.Away then
-mr.CFrame = Fr.Origin; Fr.Away = false
-end
-return
-end
-Fr.Away = true
-Fr.Tried[target.inst] = os.clock()
-local name = target.inst.Name
-local n = interact(target)
-task.wait(0.4)
-if not target.inst.Parent then
-Fr.Count = Fr.Count + 1
-table.insert(Fr.Log, os.date("%H:%M:%S") .. " " .. name)
-TLG.PNotif("🍎 Fruta", "Recogida: " .. name, C.Grn)
-else
-TLG.PNotif("🍎", name .. " sigue ahí (intentos: " .. n .. ")", C.Yel)
-end
-end)
-task.wait(0.5)
-end
-end)
-TLG.PNotif("🍎 Auto Frutas", "✅ Activado", C.Grn)
-end
-function TLG.FruitAutoStop()
-if not Fr.AutoOn then return end
-Fr.AutoOn = false
-local mr = myRoot()
-if Fr.ReturnBack and Fr.Origin and Fr.Away and mr then mr.CFrame = Fr.Origin end
-Fr.Away = false
-TLG.PNotif("🍎 Auto Frutas", "❌ Desactivado", C.Rd)
-end
-local ESPo, espConn = {}, nil
-function TLG.FruitESPStart()
-if Fr.ESPOn then return end
-Fr.ESPOn = true
-local last = 0
-espConn = RS.Heartbeat:Connect(function()
-if not Fr.ESPOn then return end
-local now = os.clock()
-if now - last < 0.5 then return end
-last = now
-local keep = {}
-local l = list()
-for i = 1, math.min(#l, 20) do
-local e = l[i]
-keep[e.inst] = true
-local o = ESPo[e.inst]
-if not o or not o.hl.Parent then
-if o then pcall(function() o.bb:Destroy() end) end
-local hl = Instance.new("Highlight")
-hl.Name = "TLG_FR_HL"
-hl.Adornee = e.inst:IsA("Tool") and e.part or e.inst
-hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-hl.FillColor = C.Yel; hl.OutlineColor = C.Wh
-hl.FillTransparency = 0.6; hl.OutlineTransparency = 0
-hl.Parent = e.part
-local bb = Instance.new("BillboardGui")
-bb.Name = "TLG_FR_BB"
-bb.Adornee = e.part
-bb.AlwaysOnTop = true
-bb.Size = UDim2.new(0, 160, 0, 30)
-bb.StudsOffset = Vector3.new(0, 3, 0)
-bb.Parent = e.part
-local lb = Instance.new("TextLabel", bb)
-lb.Size = UDim2.new(1, 0, 1, 0)
-lb.BackgroundTransparency = 1
-lb.Font = Enum.Font.GothamBold
-lb.TextSize = 11
-lb.TextColor3 = C.Yel
-lb.TextStrokeTransparency = 0.3
-o = {hl = hl, bb = bb, lb = lb}
-ESPo[e.inst] = o
-end
-o.lb.Text = "🍎 " .. e.inst.Name .. "\n" .. math.floor(e.dist) .. " studs"
-end
-for inst, o in pairs(ESPo) do
-if not keep[inst] then
-pcall(function() o.hl:Destroy() end)
-pcall(function() o.bb:Destroy() end)
-ESPo[inst] = nil
-end
-end
-end)
-end
-function TLG.FruitESPStop()
-Fr.ESPOn = false
-if espConn then pcall(function() espConn:Disconnect() end); espConn = nil end
-for _, o in pairs(ESPo) do
-pcall(function() o.hl:Destroy() end)
-pcall(function() o.bb:Destroy() end)
-end
-ESPo = {}
-end
-local function buildReport()
-local L = {}
-local function add(s) table.insert(L, s) end
-add("== REPORTE TLG HUB · FRUTAS ==")
-add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
-local l = list()
-add("Candidatos en el mapa: " .. #l)
-for i = 1, math.min(#l, 25) do
-local e = l[i]
-local pr, cd, ti = 0, 0, 0
-for _, d in ipairs(e.inst:GetDescendants()) do
-if d:IsA("ProximityPrompt") then pr = pr + 1
-elseif d:IsA("ClickDetector") then cd = cd + 1
-elseif d:IsA("TouchTransmitter") then ti = ti + 1 end
-end
-add(i .. ". " .. e.inst.Name .. " [" .. e.inst.ClassName .. "] dist=" .. math.floor(e.dist)
-.. " prompts=" .. pr .. " clicks=" .. cd .. " touch=" .. ti)
-add(" " .. e.inst:GetFullName())
-end
-add("Mochila / personaje:")
-pcall(function()
-for _, t in ipairs(TLG.LP.Backpack:GetChildren()) do add(" [Mochila] " .. t.ClassName .. " · " .. t.Name) end
-local ch = TLG.LP.Character
-if ch then
-for _, t in ipairs(ch:GetChildren()) do
-if t:IsA("Tool") then add(" [En mano] " .. t.Name) end
-end
-end
-end)
-add("Remotes relacionados (ReplicatedStorage):")
-local rk = {"fruit","fruta","store","guard","inventory","inventario","eat","collect","pick","drop","bag"}
-local n = 0
-pcall(function()
-for _, d in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
-if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
-local low = d.Name:lower()
-for _, k in ipairs(rk) do
-if low:find(k, 1, true) then
-n = n + 1
-if n <= 60 then add(" " .. d.ClassName .. " · " .. d:GetFullName()) end
-break
-end
-end
-end
-end
-end)
-add(" (total: " .. n .. ")")
-add("Datos del jugador con 'fruit/fruta':")
-pcall(function()
-for _, d in ipairs(TLG.LP:GetDescendants()) do
-local low = d.Name:lower()
-if low:find("fruit", 1, true) or low:find("fruta", 1, true) then
-local v = ""
-if d:IsA("ValueBase") then v = " = " .. tostring(d.Value) end
-add(" " .. d.ClassName .. " · " .. d:GetFullName() .. v)
-end
-end
-end)
-return table.concat(L, "\n")
-end
-Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
-local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
-Tog(PFr, "Auto recoger frutas", false, function(v)
-if v then TLG.FruitAutoStart() else TLG.FruitAutoStop() end
-end)
-Tog(PFr, "ESP de frutas", false, function(v)
-if v then TLG.FruitESPStart() else TLG.FruitESPStop() end
-end)
-Tog(PFr, "Volver a mi posición al terminar", true, function(v) Fr.ReturnBack = v end)
-Sli(PFr, "Rango de búsqueda", 100, 10000, 5000, function(v) Fr.Range = v end)
-Lbl(PFr, "Palabras clave del nombre (separadas por coma):", C.Gr)
-local row = Instance.new("Frame", PFr)
-row.Size = UDim2.new(1, 0, 0, 36)
-row.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-row.BorderSizePixel = 0
-row.ZIndex = 5
-Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
-local rs = Instance.new("UIStroke", row)
-rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.6
-local tb = Instance.new("TextBox", row)
-tb.Size = UDim2.new(1, -20, 1, 0)
-tb.Position = UDim2.new(0, 10, 0, 0)
-tb.BackgroundTransparency = 1
-tb.Font = Enum.Font.Gotham
-tb.TextSize = 12
-tb.TextColor3 = C.Wh
-tb.PlaceholderText = "fruit, fruta"
-tb.PlaceholderColor3 = C.Gr
-tb.ClearTextOnFocus = false
-tb.TextXAlignment = Enum.TextXAlignment.Left
-tb.Text = table.concat(Fr.Keys, ", ")
-tb.ZIndex = 7
-tb.FocusLost:Connect(function()
-local k = parseKeys(tb.Text)
-if #k == 0 then return end
-Fr.Keys = k
-CFG.fruitKeys = table.concat(k, ", "); save()
-rescan(); Fr.Tried = {}
-TLG.PNotif("🍎", "Buscando: " .. table.concat(k, ", "), C.Yel)
-end)
-local rb = Instance.new("TextBox", PFr)
-rb.Size = UDim2.new(1, 0, 0, 170)
-rb.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-rb.BorderSizePixel = 0
-rb.Font = Enum.Font.Code
-rb.TextSize = 10
-rb.TextColor3 = C.Wh
-rb.MultiLine = true
-rb.TextWrapped = true
-rb.TextXAlignment = Enum.TextXAlignment.Left
-rb.TextYAlignment = Enum.TextYAlignment.Top
-rb.ClearTextOnFocus = false
-rb.Text = "El reporte aparece aquí al tocar «Escanear y generar reporte»."
-rb.ZIndex = 6
-Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 10)
-local rbs = Instance.new("UIStroke", rb)
-rbs.Color = C.Yel; rbs.Thickness = 1; rbs.Transparency = 0.7
-Btn(PFr, "🔍 Escanear y generar reporte", C.Yel, function()
-rescan()
-local rep = buildReport()
-rb.Text = rep
-if setclipboard then
-setclipboard(rep)
-TLG.PNotif("🍎", "Reporte copiado al portapapeles", C.Grn)
-else
-TLG.PNotif("🍎", "Reporte listo (copialo del cuadro)", C.Yel)
-end
-for line in rep:gmatch("[^\n]+") do print("[TLG] " .. line) end
-end)
-Btn(PFr, "📍 TP a la fruta más cercana", C.Wh, function()
-local mr = myRoot()
-local e = list()[1]
-if not mr or not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 4, 0))
-TLG.PNotif("🍎", "TP → " .. e.inst.Name, C.Cyan)
-end)
-Btn(PFr, "✋ Recoger la más cercana (1 intento)", C.Wh, function()
-local e = list()[1]
-if not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-local n = interact(e)
-TLG.PNotif("🍎", e.inst.Name .. " · acciones: " .. n, C.Yel)
-end)
-Btn(PFr, "📋 Copiar historial de recogidas", C.Wh, function()
-local txt = table.concat(Fr.Log, "\n")
-if txt == "" then TLG.PNotif("🍎", "Aún no hay recogidas", C.Yel); return end
-if setclipboard then setclipboard(txt) end
-TLG.PNotif("🍎", #Fr.Log .. " recogidas copiadas", C.Grn)
-end)
-task.spawn(function()
-while infoL.Parent do
-pcall(function()
-infoL.Text = "Frutas en el mapa: " .. #list() .. " · Recogidas: " .. Fr.Count
-end)
-task.wait(1)
-end
-end)
-end)
-if not FRok then
-warn("[TLG] Frutas: " .. tostring(FRerr))
-pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
-end
-local FSG = Instance.new("ScreenGui")
-FSG.Name = "TLG_FAB_Float"
-_G.TLG_FAB_GUI = FSG
-FSG.ResetOnSpawn = false
-FSG.DisplayOrder = 999
-FSG.IgnoreGuiInset = true
-pcall(function() FSG.Parent = TLG.SP end)
-if not FSG.Parent then pcall(function() FSG.Parent = CG end) end
-local FM = Instance.new("Frame", FSG)
-FM.Name = "FAB_Group1"
-FM.Size = UDim2.new(0,260,0,72)
-FM.Position = UDim2.new(0,10,1,-155)
-FM.BackgroundColor3 = C.BG
-FM.BackgroundTransparency = 0.2
-FM.BorderSizePixel = 0
-FM.ZIndex = 10
-FM.Visible = true
-local FM2 = Instance.new("Frame", FSG)
-FM2.Name = "FAB_Group2"
-FM2.Size = UDim2.new(0,260,0,72)
-FM2.Position = UDim2.new(0,10,1,-75)
-FM2.BackgroundColor3 = C.BG
-FM2.BackgroundTransparency = 0.2
-FM2.BorderSizePixel = 0
-FM2.ZIndex = 10
-FM2.Visible = true
-TLG.FAB_Toggle_State = true
-TLG.FAB_Frame_Ref = FM
-TLG.FAB_SetVisible = function(v)
-TLG.FAB_Toggle_State = v == true
-if _G.TLG_FAB_GUI and _G.TLG_FAB_GUI.Parent then
-_G.TLG_FAB_GUI.Enabled = TLG.FAB_Toggle_State
-end
-if TLG.FAB_Frame_Ref and TLG.FAB_Frame_Ref.Parent then
-TLG.FAB_Frame_Ref.Visible = TLG.FAB_Toggle_State
-end
-end
-Instance.new("UICorner", FM).CornerRadius = UDim.new(0,12)
-Instance.new("UICorner", FM2).CornerRadius = UDim.new(0,12)
-local FStr = Instance.new("UIStroke", FM)
-local FStr2 = Instance.new("UIStroke", FM2)
-FStr2.Thickness = 2
-FStr2.Color = C.Yel
-FStr2.Transparency = 0.2
-FStr.Thickness = 2
-FStr.Color = C.Yel
-FStr.Transparency = 0.2
-TLG.PGlow(FStr, 0.1, 0.5, 1.5)
-local FH = Instance.new("TextLabel", FM)
-FH.Size = UDim2.new(1,0,0,14)
-FH.Position = UDim2.new(0,0,0,2)
-FH.BackgroundTransparency = 1
-FH.Font = Enum.Font.GothamBold
-FH.Text = "💀 ACCIONES RÁPIDAS"
-FH.TextColor3 = C.Yel
-FH.TextSize = 8
-FH.ZIndex = 12
-local FHo = Instance.new("Frame", FM)
-FHo.Size = UDim2.new(1,-10,1,-20)
-FHo.Position = UDim2.new(0,5,0,18)
-FHo.BackgroundTransparency = 1
-FHo.ZIndex = 11
-local FLy = Instance.new("UIListLayout", FHo)
-FLy.FillDirection = Enum.FillDirection.Horizontal
-FLy.Padding = UDim.new(0,4)
-FLy.HorizontalAlignment = Enum.HorizontalAlignment.Center
-FLy.VerticalAlignment = Enum.VerticalAlignment.Center
-local FH2 = Instance.new("TextLabel", FM2)
-FH2.Size = UDim2.new(1,0,0,14)
-FH2.Position = UDim2.new(0,0,0,2)
-FH2.BackgroundTransparency = 1
-FH2.Font = Enum.Font.GothamBold
-FH2.Text = "🛡️ PROTECCION"
-FH2.TextColor3 = C.Yel
-FH2.TextSize = 8
-FH2.ZIndex = 12
-local FHo2 = Instance.new("Frame", FM2)
-FHo2.Size = UDim2.new(1,-10,1,-20)
-FHo2.Position = UDim2.new(0,5,0,18)
-FHo2.BackgroundTransparency = 1
-FHo2.ZIndex = 11
-local FLy2 = Instance.new("UIListLayout", FHo2)
-FLy2.FillDirection = Enum.FillDirection.Horizontal
-FLy2.Padding = UDim.new(0,4)
-FLy2.HorizontalAlignment = Enum.HorizontalAlignment.Center
-FLy2.VerticalAlignment = Enum.VerticalAlignment.Center
-local function CF(i, t, cb, parent)
-local targetParent = parent or FHo
-local b = Instance.new("TextButton", targetParent)
-b.Size = UDim2.new(0,55,0,46)
-b.BackgroundColor3 = C.BG2
-b.Text = ""
-b.BorderSizePixel = 0
-b.AutoButtonColor = false
-b.ZIndex = 12
-b.ClipsDescendants = true
-Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-local bS = Instance.new("UIStroke", b)
-bS.Thickness = 2; bS.Color = C.Yel; bS.Transparency = 0.4
-local iL = Instance.new("TextLabel", b)
-iL.Size = UDim2.new(1,0,0,22)
-iL.Position = UDim2.new(0,0,0,4)
-iL.BackgroundTransparency = 1
-iL.Text = i; iL.TextSize = 18
-iL.TextColor3 = C.Wh
-iL.Font = Enum.Font.GothamBold
-iL.ZIndex = 13
-local nL = Instance.new("TextLabel", b)
-nL.Size = UDim2.new(1,0,0,10)
-nL.Position = UDim2.new(0,0,1,-14)
-nL.BackgroundTransparency = 1
-nL.Text = t; nL.TextColor3 = C.Wh
-nL.TextSize = 7
-nL.Font = Enum.Font.GothamBold
-nL.ZIndex = 13
-local function SA(s)
-if s then
-b.BackgroundColor3 = C.Yel
-iL.TextColor3 = C.BG
-nL.TextColor3 = C.BG
-bS.Color = C.Wh; bS.Transparency = 0
-else
-b.BackgroundColor3 = C.BG2
-iL.TextColor3 = C.Wh
-nL.TextColor3 = C.Wh
-bS.Color = C.Yel; bS.Transparency = 0.4
-end
-end
-b.Activated:Connect(function()
-local ns = cb()
-if ns ~= nil then SA(ns) end
-end)
-SA(false)
-return b
-end
-CF("🚀", "FUGA", function()
-if TLG.Fuga then TLG.Fuga() end
-return true
-end)
-CF("✈", "FLY", function()
-if TLG.Fly.On then
-TLG.FlyE()
-return false
-else
-TLG.FlyS()
-return true
-end
-end)
-CF("🌀", "GOD ORB", function()
-local target = TLG.SelectedTarget
-if not target or target == TLG.LP or not target.Parent then
-TLG.PNotif("🌀 God Orb", "Seleccioná un jugador primero", C.Yel)
-return false
-end
-local ch=target.Character
-local hu=ch and ch:FindFirstChildOfClass("Humanoid")
-local root=ch and ch:FindFirstChild("HumanoidRootPart")
-if not hu or hu.Health<=0 or not root then
-TLG.PNotif("🌀 God Orb", "El objetivo no está listo", C.Yel)
-return false
-end
-if TLG.GO.On then
-TLG.GOS()
-return false
-end
-TLG.GOSt(target)
-return true
-end)
-CF("🪐", "ORBIT", function()
-if TLG.OrbitalMap and TLG.OrbitalMap.On then
-TLG.OrbitalMapStop()
-TLG.PNotif("🪐 Orbit Map", "OFF", C.Gr)
-return false
-else
-TLG.OrbitalMapStart()
-TLG.PNotif("🪐 Orbit Map", "ON", C.Yel)
-return true
-end
-end)
-CF("💫", "ANTI STUN", function()
-if TLG.AntiStun and TLG.AntiStun.On then
-TLG.AntiStunStop()
-return false
-else
-TLG.AntiStunStart()
-return true
-end
-end, FHo2)
-CF("🔧", "BUFF TOOL", function()
-if TLG.BuffTools and TLG.BuffTools.On then
-TLG.BuffToolsStop()
-return false
-else
-if TLG.BuffFruitStart then TLG.BuffFruitStart() end
-if TLG.BuffToolsStart then TLG.BuffToolsStart() end
-TLG.PNotif("🔧 Buff Tools", "ON", C.Yel)
-return true
-end
-end, FHo2)
-CF("🕳️", "ANTI VOID", function()
-if TLG.AntiVoid and TLG.AntiVoid.On then
-TLG.AntiVoidStop()
-return false
-else
-TLG.AntiVoidStart()
-return true
-end
-end, FHo2)
-CF("🚫", "ANTI ORB", function()
-if TLG.OrbitalMap and TLG.OrbitalMap.On then
-TLG.OrbitalMapStop()
-TLG.PNotif("🚫 Anti Orbit", "Orbit detenido", C.Yel)
-return true
-else
-TLG.PNotif("🚫 Anti Orbit", "No hay orbit", C.Gr)
-return false
-end
-end, FHo2)
-local fdg, fs, fp = false, nil, nil
-local fdg2, fs2, fp2 = false, nil, nil
-FH.InputBegan:Connect(function(i)
-if i.UserInputType == Enum.UserInputType.MouseButton1
-or i.UserInputType == Enum.UserInputType.Touch then
-fdg = true; fs = i.Position; fp = FM.Position
-end
-end)
-UIS.InputChanged:Connect(function(i)
-if fdg and (i.UserInputType == Enum.UserInputType.MouseMovement
-or i.UserInputType == Enum.UserInputType.Touch) then
-local d = i.Position - fs
-FM.Position = UDim2.new(fp.X.Scale, fp.X.Offset + d.X,
-fp.Y.Scale, fp.Y.Offset + d.Y)
-end
-end)
-UIS.InputEnded:Connect(function(i)
-if i.UserInputType == Enum.UserInputType.MouseButton1
-or i.UserInputType == Enum.UserInputType.Touch then
-fdg = false
-end
-end)
-local WM = Instance.new("Frame", SG)
-WM.Name = "TLG_Watermark"
-WM.Size = UDim2.new(0,180,0,28)
-WM.Position = UDim2.new(0,10,0,10)
-WM.BackgroundColor3 = C.BG2
-WM.BackgroundTransparency = 0.2
-WM.BorderSizePixel = 0
-WM.ZIndex = 50
-Instance.new("UICorner", WM).CornerRadius = UDim.new(0,8)
-local WMS = Instance.new("UIStroke", WM)
-WMS.Color = C.Yel; WMS.Thickness = 2; WMS.Transparency = 0.2
-TLG.PGlow(WMS, 0.1, 0.6, 1.5)
-local WIc = Instance.new("TextLabel", WM)
-WIc.Size = UDim2.new(0,22,1,0)
-WIc.Position = UDim2.new(0,4,0,0)
-WIc.BackgroundTransparency = 1
-WIc.Text = "💀"; WIc.TextSize = 13
-WIc.Font = Enum.Font.GothamBold
-WIc.TextColor3 = C.Yel; WIc.ZIndex = 51
-local WTx = Instance.new("TextLabel", WM)
-WTx.Size = UDim2.new(1,-56,1,0)
-WTx.Position = UDim2.new(0,28,0,0)
-WTx.BackgroundTransparency = 1
-WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG HUB V9.2"
-WTx.TextSize = 9; WTx.TextColor3 = C.Wh
-WTx.TextXAlignment = Enum.TextXAlignment.Left
-WTx.ZIndex = 51
-local WTm = Instance.new("TextLabel", WM)
-WTm.Size = UDim2.new(0,46,1,0)
-WTm.Position = UDim2.new(1,-50,0,0)
-WTm.BackgroundTransparency = 1
-WTm.Font = Enum.Font.GothamBold
-WTm.TextSize = 9; WTm.TextColor3 = C.Yel
-WTm.TextXAlignment = Enum.TextXAlignment.Right
-WTm.ZIndex = 51
-task.spawn(function()
-while WTm.Parent do
-WTm.Text = os.date("%H:%M")
-task.wait(30)
-end
-end)
-local min = false
-local function setMin(st)
-min = st
-if min then
-TW:Create(W, TweenInfo.new(0.3, Enum.EasingStyle.Quart),
-{Size = UDim2.new(W_S.X.Scale, W_S.X.Offset, 0, 42)}):Play()
-TabBar.Visible = false; Cont.Visible = false; BH.Visible = false
-STtl.Text = "👑 ▶"
-else
-TW:Create(W, TweenInfo.new(0.4, Enum.EasingStyle.Quart),
-{Size = W_S}):Play()
-TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
-STtl.Text = "👑"
-end
-end
-local CB = Instance.new("TextButton", DcIco)
-CB.Size = UDim2.new(1,0,1,0)
-CB.BackgroundTransparency = 1
-CB.Text = ""; CB.ZIndex = 10
-CB.Activated:Connect(function() setMin(not min) end)
-if UIS.KeyboardEnabled then
-UIS.InputBegan:Connect(function(i, gp)
-if gp then return end
-if i.KeyCode == Enum.KeyCode.RightShift then setMin(not min) end
-end)
-end
-if TLG._postBuild then pcall(TLG._postBuild) end
-task.spawn(function()
-pcall(function()
-local fr = Instance.new("Frame", SG)
-fr.Name = "TLG_Intro"
-fr.Size = UDim2.new(1, 0, 1, 0)
-fr.BackgroundColor3 = Color3.new(0, 0, 0)
-fr.BackgroundTransparency = 1
-fr.BorderSizePixel = 0
-fr.ZIndex = 500
-local t1 = Instance.new("TextLabel", fr)
-t1.Size = UDim2.new(1, 0, 0, 50)
-t1.Position = UDim2.new(0, 0, 0.5, -40)
-t1.BackgroundTransparency = 1
-t1.Font = Enum.Font.GothamBold
-t1.TextSize = 34
-t1.TextColor3 = C.Yel
-t1.Text = "💀 TLG HUB"
-t1.TextTransparency = 1
-t1.ZIndex = 501
-local t2 = Instance.new("TextLabel", fr)
-t2.Size = UDim2.new(1, 0, 0, 20)
-t2.Position = UDim2.new(0, 0, 0.5, 14)
-t2.BackgroundTransparency = 1
-t2.Font = Enum.Font.Gotham
-t2.TextSize = 14
-t2.TextColor3 = C.Gr
-t2.Text = "Meme Sea • V9.2"
-t2.TextTransparency = 1
-t2.ZIndex = 501
-local ti = TweenInfo.new(0.45)
-TW:Create(fr, ti, {BackgroundTransparency = 0.4}):Play()
-TW:Create(t1, ti, {TextTransparency = 0}):Play()
-TW:Create(t2, ti, {TextTransparency = 0}):Play()
-task.wait(1.1)
-local to = TweenInfo.new(0.5)
-TW:Create(fr, to, {BackgroundTransparency = 1}):Play()
-TW:Create(t1, to, {TextTransparency = 1}):Play()
-TW:Create(t2, to, {TextTransparency = 1}):Play()
-task.wait(0.55)
-fr:Destroy()
-end)
-end)
-pcall(function()
-TW:Create(W, TweenInfo.new(0.8, Enum.EasingStyle.Back),
-{Size = W_S, Position = W_P}):Play()
-end)
-task.wait(0.9)
-TLG.PNotif("👑 TLG HUB V9.2", "💀 Ghost Hitbox + Fly Boost", C.Yel)
-print("[TLG HUB V9.2] 💀 Cargado")
+e
