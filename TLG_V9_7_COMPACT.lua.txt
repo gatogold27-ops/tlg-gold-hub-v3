@@ -117,17 +117,17 @@ pcall(function() p = math.floor((TLG.LP:GetNetworkPing() or 0) * 1000) end)
 return p
 end
 local Themes = {
-["👑 Gold"] = {A=Color3.fromRGB(255,215,0), A2=Color3.fromRGB(255,235,100)},
-["💜 Purple"] = {A=Color3.fromRGB(190,90,255), A2=Color3.fromRGB(230,150,255)},
-["💙 Cyan"] = {A=Color3.fromRGB(0,240,255), A2=Color3.fromRGB(120,255,255)},
-["❤️ Red"] = {A=Color3.fromRGB(255,70,90), A2=Color3.fromRGB(255,160,160)},
-["💚 Green"] = {A=Color3.fromRGB(80,255,130), A2=Color3.fromRGB(160,255,180)},
-["💗 Pink"] = {A=Color3.fromRGB(255,110,210),A2=Color3.fromRGB(255,180,235)},
-["🧡 Orange"] = {A=Color3.fromRGB(255,160,60), A2=Color3.fromRGB(255,210,130)},
-["🤍 White"] = {A=Color3.fromRGB(250,250,255),A2=Color3.fromRGB(255,255,255)}
+["\u{1F451} Gold"] = {A=Color3.fromRGB(255,215,0), A2=Color3.fromRGB(255,235,100)},
+["\u{1F49C} Purple"] = {A=Color3.fromRGB(190,90,255), A2=Color3.fromRGB(230,150,255)},
+["\u{1F499} Cyan"] = {A=Color3.fromRGB(0,240,255), A2=Color3.fromRGB(120,255,255)},
+["\u{2764}\u{FE0F} Red"] = {A=Color3.fromRGB(255,70,90), A2=Color3.fromRGB(255,160,160)},
+["\u{1F49A} Green"] = {A=Color3.fromRGB(80,255,130), A2=Color3.fromRGB(160,255,180)},
+["\u{1F497} Pink"] = {A=Color3.fromRGB(255,110,210),A2=Color3.fromRGB(255,180,235)},
+["\u{1F9E1} Orange"] = {A=Color3.fromRGB(255,160,60), A2=Color3.fromRGB(255,210,130)},
+["\u{1F90D} White"] = {A=Color3.fromRGB(250,250,255),A2=Color3.fromRGB(255,255,255)}
 }
 TLG.Themes = Themes
-TLG.CurrentTheme = "👑 Gold"
+TLG.CurrentTheme = "\u{1F451} Gold"
 TLG.CustomAccent = nil
 TLG.CustomAccent2 = nil
 function TLG.A() return TLG.CustomAccent or Themes[TLG.CurrentTheme].A end
@@ -389,7 +389,7 @@ end)
 end
 end
 AIM.Conn = RS.Heartbeat:Connect(aimLoop)
-TLG.PNotif("🎯 Hitbox", "✅ "..AIM.HeadSize, C.Grn)
+TLG.PNotif("\u{1F3AF} Hitbox", "\u{2705} "..AIM.HeadSize, C.Grn)
 end
 function TLG.AIM_Stop()
 if not AIM.On then return end
@@ -407,7 +407,7 @@ for _, p in ipairs(PLR:GetPlayers()) do
 if p ~= TLG.LP then pcall(aimRemoveHitbox, p) end
 end
 AIM.Target = nil
-TLG.PNotif("🎯 Hitbox", "❌ Desactivado", C.Rd)
+TLG.PNotif("\u{1F3AF} Hitbox", "\u{274C} Desactivado", C.Rd)
 end
 local
 HB = {On = false, Sz = 15, Tr = 0.5, Shape = "Cuadrada"}
@@ -768,7 +768,7 @@ end
 AntiOrbit.LastPos = pos
 AntiOrbit.LastVel = vel
 end)
-TLG.PNotif("🛡️ Anti Orbit", "✅ Activado", C.Grn)
+TLG.PNotif("\u{1F6E1}\u{FE0F} Anti Orbit", "\u{2705} Activado", C.Grn)
 end
 function TLG.AntiOrbitStop()
 AntiOrbit.On = false
@@ -777,7 +777,7 @@ pcall(function() AntiOrbit.Conn:Disconnect() end)
 AntiOrbit.Conn = nil
 end
 antiOrbitReset()
-TLG.PNotif("🛡️ Anti Orbit", "❌ Desactivado", C.Rd)
+TLG.PNotif("\u{1F6E1}\u{FE0F} Anti Orbit", "\u{274C} Desactivado", C.Rd)
 end
 local AntiVoid = {On=false, Conn=nil, Y=-100}
 TLG.AntiVoid = AntiVoid
@@ -790,7 +790,7 @@ local h = TLG.LP.Character
 and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
 if h and h.Position.Y < AntiVoid.Y then
 h.CFrame = CFrame.new(h.Position.X, 200, h.Position.Z)
-TLG.PNotif("🛡️ Anti-Void", "Rescatado", C.Cyan)
+TLG.PNotif("\u{1F6E1}\u{FE0F} Anti-Void", "Rescatado", C.Cyan)
 end
 end)
 end
@@ -870,13 +870,13 @@ if TLG.FruitAutoStop then pcall(TLG.FruitAutoStop) end
 if TLG.FruitESPStop then pcall(TLG.FruitESPStop) end
 if TLG.FastAttackStop then pcall(TLG.FastAttackStop) end
 TLG.Speed.On = false
-TLG.PNotif("🚨 PANIC", "Todo desactivado", C.Rd)
+TLG.PNotif("\u{1F6A8} PANIC", "Todo desactivado", C.Rd)
 end
 local AutoRejoin = {On=false}
 function TLG.QueueOnTeleport() end
 function TLG.AutoRejoinToggle(v)
 AutoRejoin.On = v == true
-if v then TLG.PNotif("🔄 Auto-Rejoin", "Activado", C.Grn) end
+if v then TLG.PNotif("\u{1F504} Auto-Rejoin", "Activado", C.Grn) end
 end
 TPS.TeleportInitFailed:Connect(function()
 if AutoRejoin.On then
@@ -1072,7 +1072,7 @@ faTool()
 task.spawn(faBurst)
 end
 end)
-TLG.PNotif("⚡ MS", "✅ Auto-burst", C.Grn)
+TLG.PNotif("\u{26A1} MS", "\u{2705} Auto-burst", C.Grn)
 end
 function TLG.FastAttackStop()
 if not FA.On then return end
@@ -1087,17 +1087,17 @@ end
 if FA.AnimConn then
 pcall(function() FA.AnimConn:Disconnect() end); FA.AnimConn = nil
 end
-TLG.PNotif("⚡ MS", "❌ Desactivado", C.Rd)
+TLG.PNotif("\u{26A1} MS", "\u{274C} Desactivado", C.Rd)
 end
 PLR.PlayerAdded:Connect(function(p)
 if p ~= TLG.LP then
 task.wait(0.3)
-TLG.PNotif("➕ "..p.DisplayName, "Se unió", C.Grn)
+TLG.PNotif("\u{2795} "..p.DisplayName, "Se uni\u{F3}", C.Grn)
 end
 end)
 PLR.PlayerRemoving:Connect(function(p)
 if p ~= TLG.LP then
-TLG.PNotif("➖ "..p.DisplayName, "Salió", C.Rd)
+TLG.PNotif("\u{2796} "..p.DisplayName, "Sali\u{F3}", C.Rd)
 end
 end)
 local W_S = TLG.IsMobile and UDim2.new(0,400,0,280) or UDim2.new(0,640,0,420)
@@ -1186,7 +1186,7 @@ local icon = Instance.new("TextLabel", holder)
 icon.Size = UDim2.new(0,size,0,size)
 icon.Position = UDim2.new(0, i*size + (j%2)*size/2, 0, j*size)
 icon.BackgroundTransparency = 1
-icon.Text = "💀"
+icon.Text = "\u{1F480}"
 icon.TextSize = size * 0.7
 icon.TextColor3 = color
 icon.TextTransparency = transp
@@ -1215,7 +1215,7 @@ local DcIco = Instance.new("TextLabel", TB)
 DcIco.Size = UDim2.new(0,26,0,26)
 DcIco.Position = UDim2.new(0,10,0.5,-13)
 DcIco.BackgroundColor3 = C.BG3
-DcIco.Text = "💀"
+DcIco.Text = "\u{1F480}"
 DcIco.TextSize = 15
 DcIco.Font = Enum.Font.GothamBold
 DcIco.TextColor3 = C.Yel
@@ -1240,7 +1240,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V9.2"
+SubTitle.Text = "Meme Sea \u{2022} V9.2"
 SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1296,7 +1296,7 @@ STtl.Size = UDim2.new(0,60,1,0)
 STtl.Position = UDim2.new(1,-64,0,0)
 STtl.BackgroundTransparency = 1
 STtl.Font = Enum.Font.GothamBold
-STtl.Text = "👑"
+STtl.Text = "\u{1F451}"
 STtl.TextSize = 14
 STtl.TextColor3 = C.Yel
 STtl.TextXAlignment = Enum.TextXAlignment.Right
@@ -1514,7 +1514,7 @@ if not ok then
 warn("[TLG] " .. tostring(err))
 if os.clock() - lastErr > 1.5 then
 lastErr = os.clock()
-pcall(function() TLG.PNotif("⚠️ Error", tostring(err):sub(1, 70), C.Rd) end)
+pcall(function() TLG.PNotif("\u{26A0}\u{FE0F} Error", tostring(err):sub(1, 70), C.Rd) end)
 end
 end
 end
@@ -1688,18 +1688,17 @@ TLG.Lbl = Lbl
 TLG.Tog = Tog
 TLG.Sli = Sli
 TLG.Btn = Btn
-local PInfo = Tab("Info", "📊")
-local PCb = Tab("Combat", "⚔️")
-local PAb = Tab("Aimbot", "🎯")
-local PFl = Tab("Fly", "✈")
-local PIs = Tab("Islands", "🏝️")
-local PSc = Tab("Scripts", "📜")
-local PTo = Tab("Tools", "🔧")
-local PEs = Tab("ESP", "👁️")
-local PVi = Tab("Visuals", "🎨")
-local POp = Tab("Optimize", "⚡")
-local PCf = Tab("Config", "⚙️")
-local PFr = Tab("Frutas", "🍎")
+local PInfo = Tab("Info", "\u{1F4CA}")
+local PCb = Tab("Combat", "\u{2694}\u{FE0F}")
+local PAb = Tab("Aimbot", "\u{1F3AF}")
+local PFl = Tab("Fly", "\u{2708}")
+local PIs = Tab("Islands", "\u{1F3DD}\u{FE0F}")
+local PSc = Tab("Scripts", "\u{1F4DC}")
+local PTo = Tab("Tools", "\u{1F527}")
+local PEs = Tab("ESP", "\u{1F441}\u{FE0F}")
+local PVi = Tab("Visuals", "\u{1F3A8}")
+local POp = Tab("Optimize", "\u{26A1}")
+local PCf = Tab("Config", "\u{2699}\u{FE0F}")
 task.wait(0.1)
 if Tabs[1] then
 Tabs[1].l.TextColor3 = C.Yel
@@ -1720,7 +1719,6 @@ TLG.PEs = PEs
 TLG.PVi = PVi
 TLG.POp = POp
 TLG.PCf = PCf
-TLG.PFr = PFr
 local infoOK, infoERR = pcall(function()
 local function fmt(n)
 n = math.floor(tonumber(n) or 0)
@@ -1784,16 +1782,16 @@ end
 local function refresh()
 local p = TLG.SelectedTarget
 if not p or not p.Parent then rebuild(); p = TLG.SelectedTarget end
-if bSp then bSp.Text = TLG.Sp.T and "🛑 Dejar de espectear" or "👁️ Spectear" end
-if bGo then bGo.Text = TLG.GO.On and "🛑 Detener God Orb" or "🌀 God Orb" end
+if bSp then bSp.Text = TLG.Sp.T and "\u{1F6D1} Dejar de espectear" or "\u{1F441}\u{FE0F} Spectear" end
+if bGo then bGo.Text = TLG.GO.On and "\u{1F6D1} Detener God Orb" or "\u{1F300} God Orb" end
 if not p then
 nameL.Text = "Sin jugadores"; userL.Text = ""; idL.Text = ""
-for _, v in ipairs(vals) do v.Text = "—" end
-hpText.Text = "—"
+for _, v in ipairs(vals) do v.Text = "\u{2014}" end
+hpText.Text = "\u{2014}"
 return
 end
 local s = TLG.GetStats(p)
-nameL.Text = p.DisplayName .. (p == TLG.LP and " (tú)" or "")
+nameL.Text = p.DisplayName .. (p == TLG.LP and " (t\u{FA})" or "")
 userL.Text = "@" .. p.Name
 idL.Text = "ID: " .. tostring(p.UserId)
 setAvatar(p)
@@ -1801,11 +1799,11 @@ local ratio = (s.MaxHealth > 0) and math.clamp(s.Health / s.MaxHealth, 0, 1) or 
 local data = {short(s.Level), short(s.Power), short(s.Melee), short(s.Weapon),
 short(s.Cash), short(s.Gems)}
 for i, v in ipairs(vals) do v.Text = data[i] end
-hpText.Text = "❤ " .. short(s.Health) .. " / " .. short(s.MaxHealth)
+hpText.Text = "\u{2764} " .. short(s.Health) .. " / " .. short(s.MaxHealth)
 TW:Create(hpFill, TweenInfo.new(0.25), {Size = UDim2.new(ratio, 0, 1, 0),
 BackgroundColor3 = Color3.fromHSV(ratio * 0.33, 0.7, 1)}):Play()
 end
-Sec(PInfo, "JUGADOR SELECCIONADO", "📊")
+Sec(PInfo, "JUGADOR SELECCIONADO", "\u{1F4CA}")
 local card = Instance.new("Frame", PInfo)
 card.Size = UDim2.new(1, 0, 0, 228)
 card.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -1859,8 +1857,8 @@ local st = Instance.new("UIStroke", a)
 st.Color = C.Yel; st.Thickness = 1; st.Transparency = 0.5
 a.Activated:Connect(function() step(d); pcall(refresh) end)
 end
-mkArrow("‹", UDim2.new(1, -84, 0, 24), -1)
-mkArrow("›", UDim2.new(1, -46, 0, 24), 1)
+mkArrow("\u{2039}", UDim2.new(1, -84, 0, 24), -1)
+mkArrow("\u{203A}", UDim2.new(1, -46, 0, 24), 1)
 local div = Instance.new("Frame", card)
 div.Size = UDim2.new(1, -28, 0, 1)
 div.Position = UDim2.new(0, 14, 0, 92)
@@ -1894,7 +1892,7 @@ vl.BackgroundTransparency = 1
 vl.Font = Enum.Font.GothamBold
 vl.TextSize = 14
 vl.TextColor3 = C.Wh
-vl.Text = "—"
+vl.Text = "\u{2014}"
 vl.ZIndex = 7
 vals[i] = vl
 end
@@ -1919,48 +1917,48 @@ hpText.BackgroundTransparency = 1
 hpText.Font = Enum.Font.GothamBold
 hpText.TextSize = 12
 hpText.TextColor3 = C.Wh
-hpText.Text = "—"
+hpText.Text = "\u{2014}"
 hpText.ZIndex = 8
 local function otherTarget()
 local p = TLG.SelectedTarget
 if not p or not p.Parent then
-TLG.PNotif("⚠️", "Sin jugador seleccionado", C.Rd); return nil
+TLG.PNotif("\u{26A0}\u{FE0F}", "Sin jugador seleccionado", C.Rd); return nil
 end
 if p == TLG.LP then
-TLG.PNotif("⚠️", "Elegí a otro jugador", C.Yel); return nil
+TLG.PNotif("\u{26A0}\u{FE0F}", "Eleg\u{ED} a otro jugador", C.Yel); return nil
 end
 return p
 end
-Sec(PInfo, "ACCIONES", "⚡")
-bSp = Btn(PInfo, "👁️ Spectear", C.Cyan, function()
+Sec(PInfo, "ACCIONES", "\u{26A1}")
+bSp = Btn(PInfo, "\u{1F441}\u{FE0F} Spectear", C.Cyan, function()
 if TLG.Sp.T then TLG.SpS(); pcall(refresh); return end
 local p = otherTarget(); if not p then return end
 TLG.SpSt(p); pcall(refresh)
 end)
-bGo = Btn(PInfo, "🌀 God Orb", C.Yel, function()
+bGo = Btn(PInfo, "\u{1F300} God Orb", C.Yel, function()
 if TLG.GO.On then TLG.GOS(); pcall(refresh); return end
 local p = otherTarget(); if not p then return end
 TLG.GOSt(p); pcall(refresh)
 end)
-Btn(PInfo, "📍 Teleport al jugador", C.Wh, function()
+Btn(PInfo, "\u{1F4CD} Teleport al jugador", C.Wh, function()
 local p = otherTarget(); if not p then return end
 local tr = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
 local mr = TLG.LP.Character and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
-if not tr or not mr then TLG.PNotif("⚠️", "Sin personaje", C.Rd); return end
+if not tr or not mr then TLG.PNotif("\u{26A0}\u{FE0F}", "Sin personaje", C.Rd); return end
 mr.CFrame = tr.CFrame * CFrame.new(0, 0, 5)
-TLG.PNotif("📍", "TP → " .. p.DisplayName, C.Cyan)
+TLG.PNotif("\u{1F4CD}", "TP \u{2192} " .. p.DisplayName, C.Cyan)
 end)
-Btn(PInfo, "📋 Copiar nombre de usuario", C.Wh, function()
+Btn(PInfo, "\u{1F4CB} Copiar nombre de usuario", C.Wh, function()
 local p = TLG.SelectedTarget
 if not p then return end
 if setclipboard then
 setclipboard(p.Name)
-TLG.PNotif("📋", "Copiado: " .. p.Name, C.Grn)
+TLG.PNotif("\u{1F4CB}", "Copiado: " .. p.Name, C.Grn)
 else
-TLG.PNotif("📋", p.Name, C.Yel)
+TLG.PNotif("\u{1F4CB}", p.Name, C.Yel)
 end
 end)
-Btn(PInfo, "🙋 Ver mis stats", C.Grn, function()
+Btn(PInfo, "\u{1F64B} Ver mis stats", C.Grn, function()
 TLG.SelectedTarget = TLG.LP
 rebuild(); pcall(refresh)
 end)
@@ -1983,11 +1981,11 @@ el.TextWrapped = true
 el.TextColor3 = C.Rd
 el.TextXAlignment = Enum.TextXAlignment.Left
 el.TextYAlignment = Enum.TextYAlignment.Top
-el.Text = "⚠️ Error en la pestaña Info: " .. tostring(infoERR)
+el.Text = "\u{26A0}\u{FE0F} Error en la pesta\u{F1}a Info: " .. tostring(infoERR)
 el.ZIndex = 5
 end
 do
-Sec(PCb, "🔵 HITBOX MANUAL", "🔵")
+Sec(PCb, "\u{1F535} HITBOX MANUAL", "\u{1F535}")
 Tog(PCb, "Activar Hitbox", false, function(v)
 if v then TLG.HBStart() else TLG.HBStop() end
 end)
@@ -2007,7 +2005,7 @@ local leftBtn = Instance.new("TextButton", row)
 leftBtn.Size = UDim2.new(0,32,0,32)
 leftBtn.Position = UDim2.new(0.42,0,0,5)
 leftBtn.BackgroundColor3 = C.BG2
-leftBtn.Text = "◀"
+leftBtn.Text = "\u{25C0}"
 leftBtn.TextColor3 = C.Yel
 leftBtn.TextSize = 14
 Instance.new("UICorner", leftBtn).CornerRadius = UDim.new(0,6)
@@ -2026,7 +2024,7 @@ local rightBtn = Instance.new("TextButton", row)
 rightBtn.Size = UDim2.new(0,32,0,32)
 rightBtn.Position = UDim2.new(0.42,90,0,5)
 rightBtn.BackgroundColor3 = C.BG2
-rightBtn.Text = "▶"
+rightBtn.Text = "\u{25B6}"
 rightBtn.TextColor3 = C.Yel
 rightBtn.TextSize = 14
 Instance.new("UICorner", rightBtn).CornerRadius = UDim.new(0,6)
@@ -2042,7 +2040,7 @@ leftBtn.Activated:Connect(function() update(cur-1) end)
 rightBtn.Activated:Connect(function() update(cur+1) end)
 return {get=function() return cur end, set=update}
 end
-createArrowControl(PCb, "Tamaño (Max 50)", 1, 50, HB.Sz, function(v) HB.Sz = v end)
+createArrowControl(PCb, "Tama\u{F1}o (Max 50)", 1, 50, HB.Sz, function(v) HB.Sz = v end)
 createArrowControl(PCb, "Transparencia %", 0, 100, math.floor(HB.Tr*100), function(v) HB.Tr = v/100 end)
 local shapeRow = Instance.new("Frame", PCb)
 shapeRow.Size = UDim2.new(1,-10,0,42)
@@ -2084,8 +2082,8 @@ end)
 table.insert(shapeBtns, btn)
 end
 Lbl(PCb, "Hitbox global manual (no es el aimbot).", C.Gr)
-Lbl(PCb, "Para el aimbot, andá al tab 🎯 Aimbot.", C.Yel)
-Sec(PCb, "📷 CAMERA FOV", "📷")
+Lbl(PCb, "Para el aimbot, and\u{E1} al tab \u{1F3AF} Aimbot.", C.Yel)
+Sec(PCb, "\u{1F4F7} CAMERA FOV", "\u{1F4F7}")
 local CombatFOV = {
 Enabled = false,
 Value = 70,
@@ -2136,28 +2134,28 @@ Sli(PCb, "FOV", 40, 120, 70, function(v)
 CombatFOV.Value = math.clamp(tonumber(v) or 70, 40, 120)
 ApplyCombatFOV()
 end)
-Lbl(PCb, "Asistente visual: el FOV se mantiene activo después de la cámara del juego.", C.Cyan)
+Lbl(PCb, "Asistente visual: el FOV se mantiene activo despu\u{E9}s de la c\u{E1}mara del juego.", C.Cyan)
 end
 do
-Sec(PAb, "🎯 AIMBOT / HITBOX 10K", "🎯")
+Sec(PAb, "\u{1F3AF} AIMBOT / HITBOX 10K", "\u{1F3AF}")
 local AB
-AB = Btn(PAb, "🎯 ACTIVAR AIMBOT 10K", C.Yel, function()
+AB = Btn(PAb, "\u{1F3AF} ACTIVAR AIMBOT 10K", C.Yel, function()
 if AIM.On then
 TLG.AIM_Stop()
-AB.Text = "🎯 ACTIVAR AIMBOT 10K"
+AB.Text = "\u{1F3AF} ACTIVAR AIMBOT 10K"
 else
 AIM.MaxTargetRange = 10000
 TLG.AIM_Start()
-AB.Text = "🛑 DESACTIVAR AIMBOT 10K"
+AB.Text = "\u{1F6D1} DESACTIVAR AIMBOT 10K"
 end
 end)
 AB.Size = UDim2.new(1,0,0,54)
 AB.TextSize = 14
-Lbl(PAb, "Rango lógico: 10,000 studs.", C.Yel)
-Lbl(PAb, "Un solo botón controla todo el Aimbot.", C.Cyan)
+Lbl(PAb, "Rango l\u{F3}gico: 10,000 studs.", C.Yel)
+Lbl(PAb, "Un solo bot\u{F3}n controla todo el Aimbot.", C.Cyan)
 end
 do
-Sec(PFl, "✈ FLY", "✈")
+Sec(PFl, "\u{2708} FLY", "\u{2708}")
 Tog(PFl, "Activar Fly", false, function(v)
 if v then TLG.FlyS() else TLG.FlyE() end
 end)
@@ -2172,20 +2170,20 @@ TLG.Fly.Noclip = v == true
 end)
 Lbl(PFl, "Space = subir | Ctrl/C = bajar", C.Cyan)
 Lbl(PFl, "Shift = Boost (x3 por default)", C.Yel)
-Sec(PFl, "🏃 SPEED", "🏃")
+Sec(PFl, "\u{1F3C3} SPEED", "\u{1F3C3}")
 Tog(PFl, "Activar Speed", false, function(v) TLG.Speed.On = v end)
 Sli(PFl, "Velocidad", 16, 1000, 300, function(v)
 TLG.Speed.Val = v
 end)
-Sec(PFl, "🚀 FUGA", "🚀")
-Btn(PFl, "🚀 Ejecutar Fuga", C.Wh, function()
+Sec(PFl, "\u{1F680} FUGA", "\u{1F680}")
+Btn(PFl, "\u{1F680} Ejecutar Fuga", C.Wh, function()
 if TLG.Fuga and TLG.Fuga() then
-TLG.PNotif("🚀", "Fuga ejecutada", C.Yel)
+TLG.PNotif("\u{1F680}", "Fuga ejecutada", C.Yel)
 end
 end)
 end
 do
-Sec(PIs, "🏝️ TELETRANSPORTE", "🏝️")
+Sec(PIs, "\u{1F3DD}\u{FE0F} TELETRANSPORTE", "\u{1F3DD}\u{FE0F}")
 Lbl(PIs, "Busca el modelo de la isla en el mapa.", C.Gr)
 local islas = {
 {name="Floppa Island", al={"Floppa Island","FloppaIsland","Floppa"}},
@@ -2231,38 +2229,38 @@ return nil, nil
 end
 local function tpTo(e)
 local ch = TLG.LP.Character
-if not ch then TLG.PNotif("🏝️", "Sin personaje", C.Rd); return end
+if not ch then TLG.PNotif("\u{1F3DD}\u{FE0F}", "Sin personaje", C.Rd); return end
 local h = ch:FindFirstChild("HumanoidRootPart")
-if not h then TLG.PNotif("🏝️", "Sin HRP", C.Rd); return end
+if not h then TLG.PNotif("\u{1F3DD}\u{FE0F}", "Sin HRP", C.Rd); return end
 local p, name = findIsland(e.al)
 if p then
 h.CFrame = CFrame.new(p.Position + Vector3.new(0, 60, 0))
-TLG.PNotif("🏝️", "TP → "..(name or e.name), C.Cyan)
+TLG.PNotif("\u{1F3DD}\u{FE0F}", "TP \u{2192} "..(name or e.name), C.Cyan)
 else
-TLG.PNotif("🏝️", "No encontrada: "..e.name, C.Rd)
+TLG.PNotif("\u{1F3DD}\u{FE0F}", "No encontrada: "..e.name, C.Rd)
 end
 end
 table.sort(islas, function(a, b) return a.name < b.name end)
 for _, e in ipairs(islas) do
-Btn(PIs, "🏝️ "..e.name, C.Wh, function() tpTo(e) end)
+Btn(PIs, "\u{1F3DD}\u{FE0F} "..e.name, C.Wh, function() tpTo(e) end)
 end
-Btn(PIs, "🔄 Escanear islas", C.Yel, function()
+Btn(PIs, "\u{1F504} Escanear islas", C.Yel, function()
 local n = 0
 for _, e in ipairs(islas) do
 if findIsland(e.al) then n = n + 1 end
 end
-TLG.PNotif("🏝️", "Encontradas "..n.."/"..#islas,
+TLG.PNotif("\u{1F3DD}\u{FE0F}", "Encontradas "..n.."/"..#islas,
 n > 0 and C.Grn or C.Rd)
 end)
 end
 do
-Sec(PSc, "🔄 SERVER", "🔄")
-Btn(PSc, "🔁 Rejoin", C.Cyan, function()
+Sec(PSc, "\u{1F504} SERVER", "\u{1F504}")
+Btn(PSc, "\u{1F501} Rejoin", C.Cyan, function()
 TLG.QueueOnTeleport()
 task.wait(0.5)
 pcall(function() TPS:Teleport(game.PlaceId, TLG.LP) end)
 end)
-Btn(PSc, "🔄 Cambiar Server", C.Yel, function()
+Btn(PSc, "\u{1F504} Cambiar Server", C.Yel, function()
 TLG.QueueOnTeleport()
 task.spawn(function()
 local ok, res = pcall(function()
@@ -2538,12 +2536,12 @@ function TLG.OrbitalMapSetSpeed(v)
 OM.Speed = math.clamp(tonumber(v) or 35, 1, 20000)
 end
 do
-Sec(PTo, "💀 FABS", "💀")
+Sec(PTo, "\u{1F480} FABS", "\u{1F480}")
 Tog(PTo, "Activar / Desactivar FABS", true, function(v)
 TLG.FAB_SetVisible(v)
 end)
-Lbl(PTo, "Muestra u oculta los botones rápidos flotantes.", C.Gr)
-Sec(PTo, "🔧 MOVIMIENTO", "🔧")
+Lbl(PTo, "Muestra u oculta los botones r\u{E1}pidos flotantes.", C.Gr)
+Sec(PTo, "\u{1F527} MOVIMIENTO", "\u{1F527}")
 Tog(PTo, "Fly", false, function(v)
 if v then TLG.FlyS() else TLG.FlyE() end
 end)
@@ -2552,26 +2550,26 @@ function(v) TLG.Fly.Spd = v end)
 Tog(PTo, "Speed", false, function(v) TLG.Speed.On = v end)
 Sli(PTo, "Velocidad", 16, 1000, TLG.Speed.Val,
 function(v) TLG.Speed.Val = v end)
-Sec(PTo, "⚡ MS (AUTO-BURST)", "⚡")
+Sec(PTo, "\u{26A1} MS (AUTO-BURST)", "\u{26A1}")
 Tog(PTo, "Activar MS", false, function(v)
 if v then TLG.FastAttackStart() else TLG.FastAttackStop() end
 end)
-Sli(PTo, "Ráfaga cada (ms)", 50, 500, 150, function(v)
+Sli(PTo, "R\u{E1}faga cada (ms)", 50, 500, 150, function(v)
 FA.BurstRate = v / 1000
 end)
-Sli(PTo, "Activaciones por ráfaga", 1, 10, 3, function(v)
+Sli(PTo, "Activaciones por r\u{E1}faga", 1, 10, 3, function(v)
 FA.BurstCount = v
 end)
-Lbl(PTo, "• 3 activaciones por ráfaga", C.Cyan)
-Lbl(PTo, "• Stun = -1 + anim acelerada", C.Grn)
-Lbl(PTo, "• Pausa auto en habilidades (Z X C V...)", C.Yel)
-Sec(PTo, "🚀 FUGA", "🚀")
-Btn(PTo, "🚀 Ejecutar Fuga", C.Yel, function()
-if TLG.Fuga() then TLG.PNotif("🚀", "Fuga ejecutada", C.Yel) end
+Lbl(PTo, "\u{2022} 3 activaciones por r\u{E1}faga", C.Cyan)
+Lbl(PTo, "\u{2022} Stun = -1 + anim acelerada", C.Grn)
+Lbl(PTo, "\u{2022} Pausa auto en habilidades (Z X C V...)", C.Yel)
+Sec(PTo, "\u{1F680} FUGA", "\u{1F680}")
+Btn(PTo, "\u{1F680} Ejecutar Fuga", C.Yel, function()
+if TLG.Fuga() then TLG.PNotif("\u{1F680}", "Fuga ejecutada", C.Yel) end
 end)
 Sli(PTo, "Altura de Fuga", 100, 20000, 5000,
 function(v) TLG.FugaSetHeight(v) end)
-Sec(PTo, "🌀 ORBITAL MAP", "🌀")
+Sec(PTo, "\u{1F300} ORBITAL MAP", "\u{1F300}")
 Lbl(PTo, "Movimiento estable: no fuerza el giro del aimbot.", C.Gr)
 Tog(PTo, "Orbital Mapa", false, function(v)
 if v then TLG.OrbitalMapStart() else TLG.OrbitalMapStop() end
@@ -2582,7 +2580,7 @@ Sli(PTo, "Altura", -500, 1000, 80,
 function(v) TLG.OrbitalMapSetHeight(v) end)
 Sli(PTo, "Velocidad", 1, 20000, 35,
 function(v) TLG.OrbitalMapSetSpeed(v) end)
-Sec(PTo, "👻 NOCLIP / JUMP", "👻")
+Sec(PTo, "\u{1F47B} NOCLIP / JUMP", "\u{1F47B}")
 Tog(PTo, "Noclip", false, function(v)
 if v then TLG.NoclipStart() else TLG.NoclipStop() end
 end)
@@ -2592,7 +2590,7 @@ end)
 Tog(PTo, "Click TP (Ctrl+Click)", false, function(v)
 if v then TLG.ClickTPStart() else TLG.ClickTPStop() end
 end)
-Sec(PTo, "🛡️ PROTECCIÓN", "🛡️")
+Sec(PTo, "\u{1F6E1}\u{FE0F} PROTECCI\u{D3}N", "\u{1F6E1}\u{FE0F}")
 Tog(PTo, "Anti-Void", false, function(v)
 if v then TLG.AntiVoidStart() else TLG.AntiVoidStop() end
 end)
@@ -2608,7 +2606,7 @@ end)
 Sli(PTo, "Radio Anti Orbit", 10, 250, 80, function(v)
 AntiOrbit.RadiusMax = v
 end)
-Tog(PTo, "Estabilización local", true, function(v)
+Tog(PTo, "Estabilizaci\u{F3}n local", true, function(v)
 AntiOrbit.Stabilize = v == true
 end)
 Tog(PTo, "Anti-Stun", false, function(v)
@@ -2620,56 +2618,56 @@ end)
 Tog(PTo, "No Fall Damage", false, function(v)
 if v then TLG.NoFallStart() else TLG.NoFallStop() end
 end)
-Sec(PTo, "🎁 AUTO-COLLECT", "🎁")
+Sec(PTo, "\u{1F381} AUTO-COLLECT", "\u{1F381}")
 Tog(PTo, "Auto-Collect Prompts", false, function(v)
 if v then TLG.AutoPromptStart() else TLG.AutoPromptStop() end
 end)
 Sli(PTo, "Rango Collect", 5, 100, 25,
 function(v) AutoPrompt.Range = v end)
 Lbl(PTo, "Recoge prompts cercanos (Meme Sea).", C.Gr)
-Sec(PTo, "💡 VISIÓN", "💡")
+Sec(PTo, "\u{1F4A1} VISI\u{D3}N", "\u{1F4A1}")
 Tog(PTo, "Fullbright", false, function(v)
 if v then TLG.FullbrightStart() else TLG.FullbrightStop() end
 end)
-Btn(PTo, "🌫 Quitar Niebla", C.Cyan, removeFog)
-Sec(PTo, "📏 HIP HEIGHT", "📏")
+Btn(PTo, "\u{1F32B} Quitar Niebla", C.Cyan, removeFog)
+Sec(PTo, "\u{1F4CF} HIP HEIGHT", "\u{1F4CF}")
 Tog(PTo, "Activar HipHeight", false, function(v)
 if v then TLG.HipHeightStart() else TLG.HipHeightStop() end
 end)
 Sli(PTo, "Altura cadera", 0, 50, 2,
 function(v) TLG.HipHeightSet(v) end)
-Sec(PTo, "⚙️ UTILIDADES", "⚙️")
-Btn(PTo, "🔄 Reset Character", C.Rd, function()
+Sec(PTo, "\u{2699}\u{FE0F} UTILIDADES", "\u{2699}\u{FE0F}")
+Btn(PTo, "\u{1F504} Reset Character", C.Rd, function()
 local ch = TLG.LP.Character
 if ch then
 local hu = ch:FindFirstChildOfClass("Humanoid")
 if hu then hu.Health = 0 end
 end
-TLG.PNotif("🔄", "Reset", C.Rd)
+TLG.PNotif("\u{1F504}", "Reset", C.Rd)
 end)
-Btn(PTo, "🪑 Sit / Unsit", C.Wh, function()
+Btn(PTo, "\u{1FA91} Sit / Unsit", C.Wh, function()
 local hu = TLG.LP.Character
 and TLG.LP.Character:FindFirstChildOfClass("Humanoid")
 if hu then
 hu.Sit = not hu.Sit
-TLG.PNotif("🪑", hu.Sit and "Sentado" or "De pie", C.Yel)
+TLG.PNotif("\u{1FA91}", hu.Sit and "Sentado" or "De pie", C.Yel)
 end
 end)
-Btn(PTo, "📍 TP a Spawn", C.Cyan, function()
+Btn(PTo, "\u{1F4CD} TP a Spawn", C.Cyan, function()
 local h = TLG.LP.Character
 and TLG.LP.Character:FindFirstChild("HumanoidRootPart")
 if h then
 local s = workspace:FindFirstChildWhichIsA("SpawnLocation", true)
 if s then
 h.CFrame = s.CFrame + Vector3.new(0, 5, 0)
-TLG.PNotif("📍", "TP a Spawn", C.Cyan)
+TLG.PNotif("\u{1F4CD}", "TP a Spawn", C.Cyan)
 else
-TLG.PNotif("📍", "Spawn no encontrado", C.Rd)
+TLG.PNotif("\u{1F4CD}", "Spawn no encontrado", C.Rd)
 end
 end
 end)
 end
-Tog(PTo, "⚡ Visual Skill Speed", false, function(v)
+Tog(PTo, "\u{26A1} Visual Skill Speed", false, function(v)
 if v then
 TLG.VisualSkillSpeedStart()
 else
@@ -2819,12 +2817,12 @@ if ESP.Names then
 table.insert(lines, p.DisplayName.." @"..p.Name)
 end
 if ESP.Distance then
-table.insert(lines, "📏 "..dist.." studs")
+table.insert(lines, "\u{1F4CF} "..dist.." studs")
 end
 if ESP.Health then
 local hp = math.floor(hum.Health)
 local mx = math.max(1, math.floor(hum.MaxHealth))
-table.insert(lines, "❤ "..hp.."/"..mx)
+table.insert(lines, "\u{2764} "..hp.."/"..mx)
 end
 pk.Label.Text = table.concat(lines, "\n")
 if ESP.Box then
@@ -2913,7 +2911,7 @@ local n = tonumber(v)
 ESP.MaxDistance = (not n or n <= 0) and math.huge or n
 end
 do
-Sec(PEs, "👁️ PLAYER ESP", "👁️")
+Sec(PEs, "\u{1F441}\u{FE0F} PLAYER ESP", "\u{1F441}\u{FE0F}")
 Tog(PEs, "Activar ESP", false, function(v)
 if v then TLG.ESPStart() else TLG.ESPStop() end
 end)
@@ -2929,29 +2927,29 @@ Sli(PEs, "Transparencia relleno", 0, 100, 78,
 function(v) ESP.FillTransparency = v / 100 end)
 end
 do
-Sec(PVi, "🎨 LIGHTING", "🎨")
+Sec(PVi, "\u{1F3A8} LIGHTING", "\u{1F3A8}")
 local presets = {
-{"❌ Ninguno", function()
+{"\u{274C} Ninguno", function()
 LIGHT.Brightness=1
 LIGHT.Ambient=Color3.fromRGB(70,70,70)
 LIGHT.OutdoorAmbient=Color3.fromRGB(128,128,128)
 LIGHT.ClockTime=14 end},
-{"🌅 Atardecer", function()
+{"\u{1F305} Atardecer", function()
 LIGHT.Brightness=2
 LIGHT.Ambient=Color3.fromRGB(200,150,100)
 LIGHT.OutdoorAmbient=Color3.fromRGB(255,150,100)
 LIGHT.ClockTime=18 end},
-{"🌙 Noche", function()
+{"\u{1F319} Noche", function()
 LIGHT.Brightness=0.5
 LIGHT.Ambient=Color3.fromRGB(30,30,50)
 LIGHT.OutdoorAmbient=Color3.fromRGB(50,50,100)
 LIGHT.ClockTime=0 end},
-{"🔥 Infierno", function()
+{"\u{1F525} Infierno", function()
 LIGHT.Brightness=2
 LIGHT.Ambient=Color3.fromRGB(150,50,20)
 LIGHT.OutdoorAmbient=Color3.fromRGB(255,100,50)
 LIGHT.ClockTime=16 end},
-{"❄️ Hielo", function()
+{"\u{2744}\u{FE0F} Hielo", function()
 LIGHT.Brightness=2.5
 LIGHT.Ambient=Color3.fromRGB(150,180,220)
 LIGHT.OutdoorAmbient=Color3.fromRGB(200,220,255)
@@ -2960,24 +2958,24 @@ LIGHT.ClockTime=12 end}
 for _, p in ipairs(presets) do
 Btn(PVi, p[1], C.Yel, p[2])
 end
-Sec(PVi, "🌌 SKYBOX", "🌌")
+Sec(PVi, "\u{1F30C} SKYBOX", "\u{1F30C}")
 local skies = {
-{name="❌ Ninguno", ids=nil},
-{name="🏠 Sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
-{name="🌌 Galaxia", ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
-{name="🌠 Vaporwave", ids={"rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834","rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"}},
-{name="🌅 Sunset", ids={"rbxassetid://323494035","rbxassetid://323494368","rbxassetid://323494130","rbxassetid://323494252","rbxassetid://323494067","rbxassetid://323493360"}},
-{name="🔵 Blue Space", ids={"rbxassetid://135483466","rbxassetid://135483484","rbxassetid://135483461","rbxassetid://135483495","rbxassetid://135483499","rbxassetid://135483475"}},
-{name="🪐 Blue Planet", ids={"rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524","rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"}}
+{name="\u{274C} Ninguno", ids=nil},
+{name="\u{1F3E0} Sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
+{name="\u{1F30C} Galaxia", ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
+{name="\u{1F320} Vaporwave", ids={"rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834","rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"}},
+{name="\u{1F305} Sunset", ids={"rbxassetid://323494035","rbxassetid://323494368","rbxassetid://323494130","rbxassetid://323494252","rbxassetid://323494067","rbxassetid://323493360"}},
+{name="\u{1F535} Blue Space", ids={"rbxassetid://135483466","rbxassetid://135483484","rbxassetid://135483461","rbxassetid://135483495","rbxassetid://135483499","rbxassetid://135483475"}},
+{name="\u{1FA90} Blue Planet", ids={"rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524","rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"}}
 }
 for _, s in ipairs(skies) do
 Btn(PVi, s.name, C.Yel, function()
 SkyApply(s.ids)
-TLG.PNotif("🌌", s.name, C.Yel)
+TLG.PNotif("\u{1F30C}", s.name, C.Yel)
 if s.ids then
 task.spawn(function()
 local sk = Lighting:FindFirstChild("TLG_Sky")
-if not sk then TLG.PNotif("🌌", "No se creó el Sky", C.Rd); return end
+if not sk then TLG.PNotif("\u{1F30C}", "No se cre\u{F3} el Sky", C.Rd); return end
 local bad = 0
 pcall(function()
 game:GetService("ContentProvider"):PreloadAsync({sk}, function(_, st)
@@ -2985,9 +2983,9 @@ if st ~= Enum.AssetFetchStatus.Success then bad = bad + 1 end
 end)
 end)
 if bad > 0 then
-TLG.PNotif("🌌 Sky", bad .. " texturas no cargaron", C.Rd)
+TLG.PNotif("\u{1F30C} Sky", bad .. " texturas no cargaron", C.Rd)
 else
-TLG.PNotif("🌌 Sky", "Texturas cargadas OK", C.Grn)
+TLG.PNotif("\u{1F30C} Sky", "Texturas cargadas OK", C.Grn)
 end
 end)
 end
@@ -2995,7 +2993,7 @@ end)
 end
 end
 do
-Sec(POp, "⚡ FPS", "⚡")
+Sec(POp, "\u{26A1} FPS", "\u{26A1}")
 local orig = {}
 Tog(POp, "Quitar Texturas", false, function(v)
 if v then
@@ -3226,7 +3224,7 @@ end
 end)
 end)
 end
-Sec(PCf, "🎨 COLOR DEL MENÚ", "🎨")
+Sec(PCf, "\u{1F3A8} COLOR DEL MEN\u{DA}", "\u{1F3A8}")
 local grid = Instance.new("Frame", PCf)
 grid.Size = UDim2.new(1, 0, 0, 0)
 grid.AutomaticSize = Enum.AutomaticSize.Y
@@ -3243,65 +3241,19 @@ local t = Themes[n]
 Btn(grid, n, t.A, function()
 applyAccent(t.A, t.A2)
 CFG.theme = n; saveSoon()
-TLG.PNotif("🎨", n, t.A)
+TLG.PNotif("\u{1F3A8}", n, t.A)
 end)
 end
-Sec(PCf, "🖋 ESTILO", "🖋")
+Sec(PCf, "\u{1F58B} ESTILO", "\u{1F58B}")
 Tog(PCf, "Fuente elegante (serif)", CFG.serif ~= false, function(v)
 CFG.serif = v; saveSoon(); applyFont(v)
 end)
-Sec(PCf, "💾 CONFIGURACIÓN", "💾")
+Sec(PCf, "\u{1F4BE} CONFIGURACI\u{D3}N", "\u{1F4BE}")
 Lbl(PCf, "Se guarda en TLG_Hub_Config.json (si tu ejecutor lo permite).", C.Gr)
-Btn(PCf, "🗑 Borrar configuración guardada", C.Rd, function()
+Btn(PCf, "\u{1F5D1} Borrar configuraci\u{F3}n guardada", C.Rd, function()
 for k in pairs(CFG) do CFG[k] = nil end
 pcall(function() if writefile then writefile(CFG_FILE, "{}") end end)
-TLG.PNotif("🗑", "Configuración borrada", C.Rd)
+TLG.PNotif("\u{1F5D1}", "Configuraci\u{F3}n borrada", C.Rd)
 end)
-Sec(PCf, "🚨 SEGURIDAD", "🚨")
-Btn(PCf, "🚨 PANIC (apagar todo)", C.Rd, function() TLG.Panic() end)
-Btn(PCf, "✖ Cerrar hub", C.Rd, function()
-pcall(function() TLG.Panic() end)
-pcall(function() if _G.TLG_FAB_GUI then _G.TLG_FAB_GUI:Destroy() end end)
-pcall(function() SG:Destroy() end)
-end)
-TLG._postBuild = function()
-local n = CFG.theme
-if n and Themes[n] then pcall(applyAccent, Themes[n].A, Themes[n].A2) end
-if CFG.serif ~= false then pcall(applyFont, true) end
-end
-end)
-if not V9ok then
-warn("[TLG] V9: " .. tostring(V9err))
-pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
-end
-local FRok, FRerr = pcall(function()
-local CFG = TLG.CFG or {}
-local function save() if TLG.saveSoon then TLG.saveSoon() end end
-local function myRoot()
-local ch = TLG.LP.Character
-return ch and ch:FindFirstChild("HumanoidRootPart")
-end
-local Fr = {Keys = {}, Items = {}, Range = 5000, AutoOn = false, ESPOn = false,
-Tried = {}, Origin = nil, Away = false, ReturnBack = true, Count = 0, Log = {}}
-TLG.Fruit = Fr
-local function parseKeys(s)
-local keys = {}
-for w in tostring(s):gmatch("[^,%s]+") do table.insert(keys, w:lower()) end
-return keys
-end
-Fr.Keys = parseKeys(CFG.fruitKeys or "fruit, fruta")
-local function matches(name)
-local n = name:lower()
-for _, k in ipairs(Fr.Keys) do
-if n:find(k, 1, true) then return true end
-end
-return false
-end
-local function isMine(inst)
-if inst:IsDescendantOf(TLG.LP) then return true end
-for _, p in ipairs(PLR:GetPlayers()) do
-local ch = p.Character
-if ch and inst:IsDescendantOf(ch) then return true end
-end
-return false
-e
+Sec(PCf, "\u{1F6A8} SEGURIDAD", "\u{1F6A8}")
+Btn(PCf, "\u{1F6A8} PANIC (apagar todo)
