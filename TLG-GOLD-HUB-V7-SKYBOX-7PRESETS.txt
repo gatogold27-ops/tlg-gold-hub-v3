@@ -183,7 +183,7 @@ if not ShowTLGKeyGate() then
 end
 
 local names = {"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7",
-  "TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
+  "TLG_GoldV8","ZTB_HUB_Menu","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
   "ZTB_Intro","ZTB_Watermark","TLG_FugaFAB"}
 for _, n in ipairs(names) do
   pcall(function() local o = TLG.SP:FindFirstChild(n); if o then o:Destroy() end end)
@@ -191,7 +191,7 @@ for _, n in ipairs(names) do
 end
 
 local SG = Instance.new("ScreenGui")
-SG.Name = "TLG_GoldV8"
+SG.Name = "ZTB_HUB_Menu"
 SG.ResetOnSpawn = false
 SG.IgnoreGuiInset = true
 SG.DisplayOrder = 200
@@ -520,7 +520,7 @@ function TLG.AIM_Stop()
 end
 
 -- HITBOX MANUAL
-local HB = {On = false, Sz = 50, Tr = 0.5, Conn = nil, Original = {}}
+local HB = {On = false, Sz = 10, Tr = 0.5, Conn = nil, Original = {}} -- tamaño inicial 10, máximo 50
 local function applyHB(p)
   if p == TLG.LP then return end
   local ch = p.Character; if not ch then return end
@@ -1283,14 +1283,14 @@ local function getWindowSize()
   local viewport = cam and cam.ViewportSize or Vector2.new(800, 600)
   if TLG.IsMobile then
     -- Keep the UI inside narrow Android screens.
-    return UDim2.new(0, math.max(280, math.min(400, viewport.X - 20)), 0,
-      math.max(250, math.min(420, viewport.Y - 90)))
+    return UDim2.new(0, math.max(300, math.min(520, viewport.X - 24)), 0,
+      math.max(340, math.min(560, viewport.Y - 70)))
   end
-  return UDim2.new(0, math.min(640, viewport.X - 30), 0,
-    math.min(420, viewport.Y - 60))
+  return UDim2.new(0, math.min(900, viewport.X - 40), 0,
+    math.min(580, viewport.Y - 40))
 end
 local W_S = getWindowSize()
-local W_P = UDim2.new(0.5,0,1,-12)
+local W_P = UDim2.new(0.5,0,0.5,0)
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -1356,8 +1356,8 @@ end
 
 local W = Instance.new("Frame", SG)
 W.Size = W_S
-W.AnchorPoint = Vector2.new(0.5,1)
-W.Position = UDim2.new(0.5,0,1,W_S.Y.Offset + 20)
+W.AnchorPoint = Vector2.new(0.5,0.5)
+W.Position = UDim2.new(0.5,0,1,W_S.Y.Offset)
 W.BackgroundColor3 = C.BG
 W.BorderSizePixel = 0
 W.ClipsDescendants = true
@@ -4322,7 +4322,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "ZTB HUB V9.4.6"
+WTx.Text = "ZTB HUB V9.4.7"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -4397,7 +4397,7 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "Meme Sea • V9.4.6"
+    t2.Text = "Meme Sea • V9.4.7"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
@@ -4419,6 +4419,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 ZTB HUB V9.4.6", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 ZTB HUB V9.4.7", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[ZTB HUB V9.4.6] 💀 Cargado")
+print("[ZTB HUB V9.4.7] 💀 Cargado")
