@@ -184,7 +184,7 @@ end
 
 local names = {"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7",
   "TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
-  "TLG_Intro","TLG_Watermark","TLG_FugaFAB"}
+  "ZTB_Intro","ZTB_Watermark","TLG_FugaFAB"}
 for _, n in ipairs(names) do
   pcall(function() local o = TLG.SP:FindFirstChild(n); if o then o:Destroy() end end)
   pcall(function() local o = CG:FindFirstChild(n); if o then o:Destroy() end end)
@@ -223,12 +223,12 @@ function TLG.A() return TLG.CustomAccent or Themes[TLG.CurrentTheme].A end
 function TLG.A2() return TLG.CustomAccent2 or Themes[TLG.CurrentTheme].A2 end
 
 local C = {
-  BG=Color3.fromRGB(8,8,8), BG2=Color3.fromRGB(16,16,16),
-  BG3=Color3.fromRGB(24,24,24), BG4=Color3.fromRGB(34,34,34),
+  BG=Color3.fromRGB(12,7,8), BG2=Color3.fromRGB(24,12,13),
+  BG3=Color3.fromRGB(39,20,19), BG4=Color3.fromRGB(52,27,23),
   Wh=Color3.fromRGB(255,255,255), Gr=Color3.fromRGB(150,140,110),
   GrD=Color3.fromRGB(70,60,40), Grn=Color3.fromRGB(100,255,140),
   Rd=Color3.fromRGB(255,80,100), Cyan=Color3.fromRGB(0,240,255),
-  Yel=Color3.fromRGB(255,215,0)
+  Yel=Color3.fromRGB(230,135,65)
 }
 TLG.C = C
 
@@ -1367,11 +1367,11 @@ Instance.new("UICorner", W).CornerRadius = UDim.new(0,12)
 
 local WS = Instance.new("UIStroke", W)
 WS.Thickness = 2
-WS.Color = TLG.A()
-TLG.PGlow(WS, 0.05, 0.35, 1.5)
+WS.Color = Color3.fromRGB(205,112,55)
+TLG.PGlow(WS, 0.08, 0.28, 1.5)
 
 local Wgrad = Instance.new("UIGradient", W)
-Wgrad.Color = ColorSequence.new(C.BG, C.BG2)
+Wgrad.Color = ColorSequence.new(Color3.fromRGB(10,6,7), Color3.fromRGB(42,20,18))
 Wgrad.Rotation = 135
 
 TLG.W = W
@@ -1402,7 +1402,7 @@ end
 AddPattern(W, 42, C.Yel, 0.94, 15)
 
 local TB = Instance.new("Frame", W)
-TB.Size = UDim2.new(1,0,0,42)
+TB.Size = UDim2.new(1,0,0,54)
 TB.BackgroundColor3 = C.BG2
 TB.BackgroundTransparency = 0.05
 TB.BorderSizePixel = 0
@@ -1436,30 +1436,31 @@ DcS.Thickness = 1.5
 TLG.PGlow(DcS, 0.1, 0.5, 1.2)
 
 local MainTitle = Instance.new("TextLabel", TB)
-MainTitle.Size = UDim2.new(0,180,0,18)
-MainTitle.Position = UDim2.new(0,42,0,6)
+MainTitle.Size = UDim2.new(0.52,0,0,23)
+MainTitle.Position = UDim2.new(0.24,0,0,3)
+MainTitle.AnchorPoint = Vector2.new(0,0)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Font = Enum.Font.GothamBold
+MainTitle.Font = Enum.Font.Garamond
 MainTitle.Text = "ZTB HUB"
-MainTitle.TextSize = 13
+MainTitle.TextSize = 20
 MainTitle.TextColor3 = C.Yel
-MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+MainTitle.TextXAlignment = Enum.TextXAlignment.Center
 MainTitle.ZIndex = 10
 
 local SubTitle = Instance.new("TextLabel", TB)
-SubTitle.Size = UDim2.new(0,180,0,12)
-SubTitle.Position = UDim2.new(0,42,0,24)
+SubTitle.Size = UDim2.new(0.52,0,0,14)
+SubTitle.Position = UDim2.new(0.24,0,0,29)
 SubTitle.BackgroundTransparency = 1
-SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V9.4.4"
-SubTitle.TextSize = 9
+SubTitle.Font = Enum.Font.Garamond
+SubTitle.Text = "✦ MEME SEA  •  ZTB EDITION ✦"
+SubTitle.TextSize = 11
 SubTitle.TextColor3 = C.Gr
-SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.TextXAlignment = Enum.TextXAlignment.Center
 SubTitle.ZIndex = 10
 
 local StatsPanel = Instance.new("Frame", TB)
-StatsPanel.Size = UDim2.new(0,130,0,24)
-StatsPanel.Position = UDim2.new(1,-190,0.5,-12)
+StatsPanel.Size = UDim2.new(0,112,0,20)
+StatsPanel.Position = UDim2.new(1,-154,0,3)
 StatsPanel.BackgroundColor3 = C.BG3
 StatsPanel.BackgroundTransparency = 0.3
 StatsPanel.BorderSizePixel = 0
@@ -1478,7 +1479,7 @@ FpsLabel.BackgroundTransparency = 1
 FpsLabel.Font = Enum.Font.GothamBold
 FpsLabel.Text = "FPS: --"
 FpsLabel.TextColor3 = C.Grn
-FpsLabel.TextSize = 10
+FpsLabel.TextSize = 9
 FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
 FpsLabel.ZIndex = 9
 
@@ -1489,7 +1490,7 @@ PingLabel.BackgroundTransparency = 1
 PingLabel.Font = Enum.Font.GothamBold
 PingLabel.Text = "Ping: --"
 PingLabel.TextColor3 = C.Cyan
-PingLabel.TextSize = 10
+PingLabel.TextSize = 9
 PingLabel.TextXAlignment = Enum.TextXAlignment.Right
 PingLabel.ZIndex = 9
 
@@ -1520,6 +1521,28 @@ STtl.TextXAlignment = Enum.TextXAlignment.Right
 STtl.ZIndex = 7
 
 TLG.STtl = STtl
+
+-- Rediseño: botón de cierre visible en la esquina superior derecha.
+local CloseBtn = Instance.new("TextButton", TB)
+CloseBtn.Name = "ZTB_CloseButton"
+CloseBtn.Size = UDim2.new(0,28,0,28)
+CloseBtn.Position = UDim2.new(1,-34,0.5,-14)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(48,18,20)
+CloseBtn.BackgroundTransparency = 0.05
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Text = "×"
+CloseBtn.Font = Enum.Font.Garamond
+CloseBtn.TextSize = 27
+CloseBtn.TextColor3 = Color3.fromRGB(255,190,135)
+CloseBtn.ZIndex = 20
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0,7)
+local CloseStroke = Instance.new("UIStroke", CloseBtn)
+CloseStroke.Color = Color3.fromRGB(205,112,55)
+CloseStroke.Transparency = 0.25
+CloseBtn.Activated:Connect(function()
+    pcall(function() W.Visible = false end)
+    pcall(function() WM.Visible = false end)
+end)
 
 local DragS = {active=false, start=nil, pos=nil}
 local function makeDrag(handle)
@@ -1563,7 +1586,7 @@ makeDrag(TB)
 
 local TabBar = Instance.new("Frame", W)
 TabBar.Size = UDim2.new(1,0,0,38)
-TabBar.Position = UDim2.new(0,0,0,42)
+TabBar.Position = UDim2.new(0,0,0,54)
 TabBar.BackgroundColor3 = C.BG2
 TabBar.BackgroundTransparency = 0.3
 TabBar.BorderSizePixel = 0
@@ -1588,8 +1611,8 @@ TLy.HorizontalAlignment = Enum.HorizontalAlignment.Left
 TLy.Padding = UDim.new(0,6)
 
 local Cont = Instance.new("Frame", W)
-Cont.Size = UDim2.new(1,-10,1,-116)
-Cont.Position = UDim2.new(0,5,0,88)
+Cont.Size = UDim2.new(1,-10,1,-128)
+Cont.Position = UDim2.new(0,5,0,100)
 Cont.BackgroundTransparency = 1
 Cont.ZIndex = 3
 
@@ -1597,7 +1620,7 @@ TLG.TabBar = TabBar
 TLG.Cont = Cont
 
 local BH = Instance.new("Frame", W)
-BH.Name = "TLG_BottomHandle"
+BH.Name = "ZTB_BottomHandle"
 BH.Size = UDim2.new(1,-10,0,20)
 BH.Position = UDim2.new(0,5,1,-24)
 BH.BackgroundColor3 = C.BG2
@@ -1621,7 +1644,7 @@ local Tabs = {}
 
 local function Tab(name, icon)
     local b = Instance.new("TextButton", TScr)
-    b.Size = UDim2.new(0,80,0,32)
+    b.Size = UDim2.new(0,88,0,34)
     b.BackgroundColor3 = C.BG3
     b.BackgroundTransparency = 1
     b.Text = ""
@@ -1643,7 +1666,7 @@ local function Tab(name, icon)
     lb.Font = Enum.Font.GothamSemibold
     lb.Text = name
     lb.TextColor3 = C.Gr
-    lb.TextSize = 9
+    lb.TextSize = 10
     lb.ZIndex = 7
     local ul = Instance.new("Frame", b)
     ul.Size = UDim2.new(0,0,0,3)
@@ -1809,87 +1832,57 @@ local function Tog(p, txt, def, cb)
 end
 
 local function Sli(p, txt, mn, mx, def, cb)
-    local sv = def
+    -- Control sin slider: flechas para evitar fallos de arrastre en móvil.
+    local value = math.clamp(math.floor(tonumber(def) or mn), mn, mx)
+    local step = math.max(1, math.floor((mx - mn) / 20))
     local f = Instance.new("Frame", p)
-    f.Size = UDim2.new(1,0,0,40)
-    f.BackgroundColor3 = Color3.fromRGB(10,10,10)
-    f.BackgroundTransparency = 0.1
+    f.Size = UDim2.new(1,0,0,38)
+    f.BackgroundColor3 = Color3.fromRGB(22,13,15)
+    f.BackgroundTransparency = 0.05
     f.BorderSizePixel = 0
     f.ZIndex = 5
-    Instance.new("UICorner", f).CornerRadius = UDim.new(0,10)
-    local fsS = Instance.new("UIStroke", f)
-    fsS.Color = C.Yel; fsS.Thickness = 1; fsS.Transparency = 0.75
-    local l = Instance.new("TextLabel", f)
-    l.Size = UDim2.new(0.6,-12,0,12)
-    l.Position = UDim2.new(0,10,0,4)
-    l.BackgroundTransparency = 1
-    l.Font = Enum.Font.GothamSemibold
-    l.Text = txt
-    l.TextColor3 = C.Wh
-    l.TextSize = 9
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.ZIndex = 7
-    local vl = Instance.new("TextLabel", f)
-    vl.Size = UDim2.new(0.4,-10,0,12)
-    vl.Position = UDim2.new(0.6,2,0,4)
-    vl.BackgroundTransparency = 1
-    vl.Font = Enum.Font.GothamBold
-    vl.Text = tostring(sv)
-    vl.TextSize = 10
-    vl.TextColor3 = C.Yel
-    vl.TextXAlignment = Enum.TextXAlignment.Right
-    vl.ZIndex = 7
-    local b = Instance.new("Frame", f)
-    b.Size = UDim2.new(1,-20,0,6)
-    b.Position = UDim2.new(0,10,0,24)
-    b.BackgroundColor3 = C.BG
-    b.BorderSizePixel = 0
-    b.ZIndex = 6
-    Instance.new("UICorner", b).CornerRadius = UDim.new(1,0)
-    local fi = Instance.new("Frame", b)
-    fi.Size = UDim2.new((sv-mn)/(mx-mn),0,1,0)
-    fi.BorderSizePixel = 0
-    fi.ZIndex = 7
-    fi.BackgroundColor3 = C.Yel
-    Instance.new("UICorner", fi).CornerRadius = UDim.new(1,0)
-    local kn = Instance.new("Frame", b)
-    kn.Size = UDim2.new(0,12,0,12)
-    kn.Position = UDim2.new((sv-mn)/(mx-mn),-6,0.5,-6)
-    kn.BackgroundColor3 = C.Wh
-    kn.BorderSizePixel = 0
-    kn.ZIndex = 8
-    Instance.new("UICorner", kn).CornerRadius = UDim.new(1,0)
-    local tn = Instance.new("TextButton", f)
-    tn.Size = UDim2.new(1,-6,0,40)
-    tn.Position = UDim2.new(0,3,0,0)
-    tn.BackgroundTransparency = 1
-    tn.Text = ""
-    tn.ZIndex = 10
-    local dragging = false
-    local function up(i)
-        local pp = math.clamp((i.Position.X - b.AbsolutePosition.X) / b.AbsoluteSize.X, 0, 1)
-        local v = math.floor(mn + (mx - mn) * pp)
-        fi.Size = UDim2.new(pp,0,1,0)
-        kn.Position = UDim2.new(pp,-6,0.5,-6)
-        vl.Text = tostring(v)
-        safeCB(cb, v)
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0,8)
+    local stroke = Instance.new("UIStroke", f)
+    stroke.Color = Color3.fromRGB(180,95,45); stroke.Thickness = 1; stroke.Transparency = 0.45
+    local label = Instance.new("TextLabel", f)
+    label.Size = UDim2.new(0.48,-8,1,0)
+    label.Position = UDim2.new(0,10,0,0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = txt
+    label.TextColor3 = C.Wh
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 7
+    local val = Instance.new("TextLabel", f)
+    val.Size = UDim2.new(0.22,0,1,0)
+    val.Position = UDim2.new(0.49,0,0,0)
+    val.BackgroundTransparency = 1
+    val.Font = Enum.Font.GothamBold
+    val.TextColor3 = Color3.fromRGB(255,170,90)
+    val.TextSize = 10
+    val.ZIndex = 7
+    local function refresh()
+        val.Text = tostring(value)
+        safeCB(cb, value)
     end
-    tn.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            up(i)
-        end
-    end)
-    UIS.InputChanged:Connect(function(i)
-        if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-            up(i)
-        end
-    end)
-    UIS.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
-    end)
+    local function arrow(symbol, x, delta)
+        local b = Instance.new("TextButton", f)
+        b.Size = UDim2.new(0,28,0,26)
+        b.Position = UDim2.new(x,-14,0.5,-13)
+        b.BackgroundColor3 = Color3.fromRGB(45,24,23)
+        b.Text = symbol; b.TextColor3 = Color3.fromRGB(255,180,100)
+        b.TextSize = 16; b.Font = Enum.Font.GothamBold
+        b.BorderSizePixel = 0; b.ZIndex = 8
+        Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
+        b.Activated:Connect(function()
+            value = math.clamp(value + delta * step, mn, mx)
+            refresh()
+        end)
+    end
+    arrow("◀", 0.78, -1)
+    arrow("▶", 0.92, 1)
+    refresh()
 end
 
 local function Btn(p, txt, col, cb)
@@ -2245,7 +2238,6 @@ do
   Tog(PCb, "Activar Hitbox", false, function(v)
     if v then TLG.HBStart() else TLG.HBStop() end
   end)
-  Sli(PCb, "Tamaño", 1, 50, 50, function(v) HB.Sz = math.clamp(v, 1, 50) end)
   local function addArrowAdjust(labelText, initial, minValue, maxValue, step, formatter, callback)
     local value = initial
     local row = Instance.new("Frame", PCb)
@@ -2300,9 +2292,6 @@ do
   end
   addArrowAdjust("Ajustar tamaño", HB.Sz, 1, 50, 1, function(v) return tostring(v) end,
     function(v) HB.Sz = math.clamp(v, 1, 50) end)
-  Sli(PCb, "Transparencia", 0, 100, 50, function(v)
-    HB.Tr = math.clamp(v, 0, 100) / 100
-  end)
   addArrowAdjust("Ajustar transparencia", 50, 0, 100, 5, function(v) return tostring(v) .. "%" end,
     function(v) HB.Tr = math.clamp(v, 0, 100) / 100 end)
   Lbl(PCb, "Hitbox manual: tamaño máximo 50. Las flechas ajustan tamaño y transparencia.", C.Gr)
@@ -4310,7 +4299,7 @@ end)
 
 -- WATERMARK
 local WM = Instance.new("Frame", SG)
-WM.Name = "TLG_Watermark"
+WM.Name = "ZTB_Watermark"
 WM.Size = UDim2.new(0,180,0,28)
 WM.Position = UDim2.new(0,10,0,10)
 WM.BackgroundColor3 = C.BG2
@@ -4333,7 +4322,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "ZTB HUB V9.4.3"
+WTx.Text = "ZTB HUB V9.4.6"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -4385,7 +4374,7 @@ if TLG._postBuild then pcall(TLG._postBuild) end
 task.spawn(function()
   pcall(function()
     local fr = Instance.new("Frame", SG)
-    fr.Name = "TLG_Intro"
+    fr.Name = "ZTB_Intro"
     fr.Size = UDim2.new(1, 0, 1, 0)
     fr.BackgroundColor3 = Color3.new(0, 0, 0)
     fr.BackgroundTransparency = 1
@@ -4408,7 +4397,7 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "Meme Sea • V9.4.4"
+    t2.Text = "Meme Sea • V9.4.6"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
@@ -4430,6 +4419,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 ZTB HUB V9.4.4", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 ZTB HUB V9.4.6", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[ZTB HUB V9.4.4] 💀 Cargado")
+print("[ZTB HUB V9.4.6] 💀 Cargado")
