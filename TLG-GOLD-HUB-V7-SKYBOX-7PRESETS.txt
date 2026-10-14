@@ -100,7 +100,7 @@ local function ShowTLGKeyGate()
     frame.Parent = gui
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
+    corner.CornerRadius = UDim.new(0, 7)
     corner.Parent = frame
 
     local title = Instance.new("TextLabel")
@@ -2048,7 +2048,7 @@ local infoOK, infoERR = pcall(function()
   card.BackgroundTransparency = 0.05
   card.BorderSizePixel = 0
   card.ZIndex = 5
-  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
+  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
   local cs = Instance.new("UIStroke", card)
   cs.Color = C.Yel; cs.Thickness = 1.5; cs.Transparency = 0.45
 
@@ -4341,20 +4341,20 @@ task.spawn(function()
   end
 end)
 
--- MINIMIZAR: barra compacta inspirada en la referencia del usuario
+-- MINIMIZAR: microbarra compacta para no tapar la pantalla
 local min = false
 local MiniBar = Instance.new("Frame", SG)
 MiniBar.Name = "ZTB_MinimizedBar"
 MiniBar.AnchorPoint = Vector2.new(0.5, 0)
 MiniBar.Position = UDim2.new(0.5, 0, 0, 92)
-MiniBar.Size = UDim2.new(0.72, 0, 0, 48)
+MiniBar.Size = UDim2.new(0, 156, 0, 26)
 MiniBar.BackgroundColor3 = Color3.fromRGB(20, 9, 10)
 MiniBar.BackgroundTransparency = 0.04
 MiniBar.BorderSizePixel = 0
 MiniBar.Visible = false
 MiniBar.ZIndex = 100
 MiniBar.ClipsDescendants = true
-Instance.new("UICorner", MiniBar).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MiniBar).CornerRadius = UDim.new(0, 7)
 local MiniStroke = Instance.new("UIStroke", MiniBar)
 MiniStroke.Color = Color3.fromRGB(210, 112, 48)
 MiniStroke.Thickness = 1
@@ -4367,56 +4367,56 @@ MiniPattern.Size = UDim2.new(1, 0, 1, 0)
 MiniPattern.BackgroundTransparency = 1
 MiniPattern.Text = "💀  ✦  💀  ✦  💀  ✦  💀  ✦  💀  ✦  💀"
 MiniPattern.TextColor3 = Color3.fromRGB(160, 80, 42)
-MiniPattern.TextTransparency = 0.72
-MiniPattern.TextSize = 16
+MiniPattern.TextTransparency = 0.88
+MiniPattern.TextSize = 9
 MiniPattern.Font = Enum.Font.GothamBold
 MiniPattern.ZIndex = 100
 local MiniDiscord = Instance.new("TextButton", MiniBar)
 MiniDiscord.Name = "ZTB_MiniDiscord"
-MiniDiscord.Size = UDim2.new(0, 32, 0, 32)
-MiniDiscord.Position = UDim2.new(0, 8, 0.5, -16)
+MiniDiscord.Size = UDim2.new(0, 18, 0, 18)
+MiniDiscord.Position = UDim2.new(0, 4, 0.5, -9)
 MiniDiscord.BackgroundColor3 = Color3.fromRGB(37, 25, 30)
 MiniDiscord.BackgroundTransparency = 0.08
 MiniDiscord.BorderSizePixel = 0
 MiniDiscord.Text = "☁"
-MiniDiscord.TextSize = 19
+MiniDiscord.TextSize = 11
 MiniDiscord.Font = Enum.Font.GothamBold
 MiniDiscord.TextColor3 = Color3.fromRGB(255, 226, 200)
 MiniDiscord.ZIndex = 102
 Instance.new("UICorner", MiniDiscord).CornerRadius = UDim.new(1, 0)
 local MiniTitle = Instance.new("TextLabel", MiniBar)
-MiniTitle.Size = UDim2.new(1, -92, 0, 22)
-MiniTitle.Position = UDim2.new(0, 42, 0, 2)
+MiniTitle.Size = UDim2.new(1, -54, 0, 14)
+MiniTitle.Position = UDim2.new(0, 22, 0, 1)
 MiniTitle.BackgroundTransparency = 1
 MiniTitle.Text = "ZTB HUB"
 MiniTitle.Font = Enum.Font.Garamond
-MiniTitle.TextSize = 19
+MiniTitle.TextSize = 12
 MiniTitle.TextColor3 = Color3.fromRGB(255, 190, 130)
 MiniTitle.TextXAlignment = Enum.TextXAlignment.Center
 MiniTitle.ZIndex = 102
 local MiniSub = Instance.new("TextLabel", MiniBar)
-MiniSub.Size = UDim2.new(1, -92, 0, 14)
-MiniSub.Position = UDim2.new(0, 42, 0, 26)
+MiniSub.Size = UDim2.new(1, -54, 0, 9)
+MiniSub.Position = UDim2.new(0, 22, 0, 15)
 MiniSub.BackgroundTransparency = 1
 MiniSub.Text = "👹 MEME SEA  •  ZTB EDITION 👹"
 MiniSub.Font = Enum.Font.Garamond
-MiniSub.TextSize = 9
+MiniSub.TextSize = 6
 MiniSub.TextColor3 = Color3.fromRGB(220, 143, 96)
 MiniSub.TextXAlignment = Enum.TextXAlignment.Center
 MiniSub.ZIndex = 102
 local MiniPlay = Instance.new("TextButton", MiniBar)
 MiniPlay.Name = "ZTB_RestoreButton"
-MiniPlay.Size = UDim2.new(0, 30, 0, 30)
-MiniPlay.Position = UDim2.new(1, -38, 0.5, -15)
+MiniPlay.Size = UDim2.new(0, 18, 0, 18)
+MiniPlay.Position = UDim2.new(1, -22, 0.5, -9)
 MiniPlay.BackgroundColor3 = Color3.fromRGB(48, 20, 20)
 MiniPlay.BackgroundTransparency = 0.05
 MiniPlay.BorderSizePixel = 0
 MiniPlay.Text = "▶"
-MiniPlay.TextSize = 16
+MiniPlay.TextSize = 10
 MiniPlay.Font = Enum.Font.GothamBold
 MiniPlay.TextColor3 = Color3.fromRGB(255, 215, 175)
 MiniPlay.ZIndex = 103
-Instance.new("UICorner", MiniPlay).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", MiniPlay).CornerRadius = UDim.new(0, 7)
 local MiniPlayStroke = Instance.new("UIStroke", MiniPlay)
 MiniPlayStroke.Color = Color3.fromRGB(210, 112, 48)
 MiniPlayStroke.Thickness = 1
