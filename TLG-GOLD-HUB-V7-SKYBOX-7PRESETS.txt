@@ -4341,112 +4341,210 @@ task.spawn(function()
   end
 end)
 
--- MINIMIZAR: microbarra compacta para no tapar la pantalla
+-- MINIMIZAR: barra flotante grande, arrastrable y con animación de abrir/cerrar
 local min = false
-local MiniBar = Instance.new("Frame", SG)
-MiniBar.Name = "ZTB_MinimizedBar"
-MiniBar.AnchorPoint = Vector2.new(0.5, 0)
-MiniBar.Position = UDim2.new(0.5, 0, 0, 92)
-MiniBar.Size = UDim2.new(0, 156, 0, 26)
-MiniBar.BackgroundColor3 = Color3.fromRGB(20, 9, 10)
-MiniBar.BackgroundTransparency = 0.04
-MiniBar.BorderSizePixel = 0
-MiniBar.Visible = false
-MiniBar.ZIndex = 100
-MiniBar.ClipsDescendants = true
-Instance.new("UICorner", MiniBar).CornerRadius = UDim.new(0, 7)
-local MiniStroke = Instance.new("UIStroke", MiniBar)
-MiniStroke.Color = Color3.fromRGB(210, 112, 48)
-MiniStroke.Thickness = 1
-MiniStroke.Transparency = 0.05
-local MiniGrad = Instance.new("UIGradient", MiniBar)
-MiniGrad.Color = ColorSequence.new(Color3.fromRGB(10, 6, 8), Color3.fromRGB(48, 22, 18))
-MiniGrad.Rotation = 0
-local MiniPattern = Instance.new("TextLabel", MiniBar)
-MiniPattern.Size = UDim2.new(1, 0, 1, 0)
-MiniPattern.BackgroundTransparency = 1
-MiniPattern.Text = "💀  ✦  💀  ✦  💀  ✦  💀  ✦  💀  ✦  💀"
-MiniPattern.TextColor3 = Color3.fromRGB(160, 80, 42)
-MiniPattern.TextTransparency = 0.88
-MiniPattern.TextSize = 9
-MiniPattern.Font = Enum.Font.GothamBold
-MiniPattern.ZIndex = 100
-local MiniDiscord = Instance.new("TextButton", MiniBar)
-MiniDiscord.Name = "ZTB_MiniDiscord"
-MiniDiscord.Size = UDim2.new(0, 18, 0, 18)
-MiniDiscord.Position = UDim2.new(0, 4, 0.5, -9)
-MiniDiscord.BackgroundColor3 = Color3.fromRGB(37, 25, 30)
-MiniDiscord.BackgroundTransparency = 0.08
-MiniDiscord.BorderSizePixel = 0
-MiniDiscord.Text = "☁"
-MiniDiscord.TextSize = 11
-MiniDiscord.Font = Enum.Font.GothamBold
-MiniDiscord.TextColor3 = Color3.fromRGB(255, 226, 200)
-MiniDiscord.ZIndex = 102
-Instance.new("UICorner", MiniDiscord).CornerRadius = UDim.new(1, 0)
-local MiniTitle = Instance.new("TextLabel", MiniBar)
-MiniTitle.Size = UDim2.new(1, -54, 0, 14)
-MiniTitle.Position = UDim2.new(0, 22, 0, 1)
-MiniTitle.BackgroundTransparency = 1
-MiniTitle.Text = "ZTB HUB"
-MiniTitle.Font = Enum.Font.Garamond
-MiniTitle.TextSize = 12
-MiniTitle.TextColor3 = Color3.fromRGB(255, 190, 130)
-MiniTitle.TextXAlignment = Enum.TextXAlignment.Center
-MiniTitle.ZIndex = 102
-local MiniSub = Instance.new("TextLabel", MiniBar)
-MiniSub.Size = UDim2.new(1, -54, 0, 9)
-MiniSub.Position = UDim2.new(0, 22, 0, 15)
-MiniSub.BackgroundTransparency = 1
-MiniSub.Text = "👹 MEME SEA  •  ZTB EDITION 👹"
-MiniSub.Font = Enum.Font.Garamond
-MiniSub.TextSize = 6
-MiniSub.TextColor3 = Color3.fromRGB(220, 143, 96)
-MiniSub.TextXAlignment = Enum.TextXAlignment.Center
-MiniSub.ZIndex = 102
-local MiniPlay = Instance.new("TextButton", MiniBar)
-MiniPlay.Name = "ZTB_RestoreButton"
-MiniPlay.Size = UDim2.new(0, 18, 0, 18)
-MiniPlay.Position = UDim2.new(1, -22, 0.5, -9)
-MiniPlay.BackgroundColor3 = Color3.fromRGB(48, 20, 20)
-MiniPlay.BackgroundTransparency = 0.05
-MiniPlay.BorderSizePixel = 0
-MiniPlay.Text = "▶"
-MiniPlay.TextSize = 10
-MiniPlay.Font = Enum.Font.GothamBold
-MiniPlay.TextColor3 = Color3.fromRGB(255, 215, 175)
-MiniPlay.ZIndex = 103
-Instance.new("UICorner", MiniPlay).CornerRadius = UDim.new(0, 7)
-local MiniPlayStroke = Instance.new("UIStroke", MiniPlay)
-MiniPlayStroke.Color = Color3.fromRGB(210, 112, 48)
-MiniPlayStroke.Thickness = 1
-local function setMin(st)
-  min = st
-  if min then
-    W.Visible = false
-    MiniBar.Visible = true
-    WM.Visible = false
-  else
-    MiniBar.Visible = false
-    W.Visible = true
-    W.Size = W_S
-    TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
-    WM.Visible = true
-    STtl.Text = "👑"
+local setMin
+do
+  local BAR_W, BAR_H = 280, 58
+  local lastWPos = W_P
+  local token = 0
+  local EASE = Enum.EasingStyle
+  local DIR = Enum.EasingDirection
+
+  local function tw(o, t, style, dir, props)
+    local tween = TW:Create(o, TweenInfo.new(t, style, dir), props)
+    tween:Play()
+    return tween
+  end
+
+  local MiniBar = Instance.new("Frame", SG)
+  MiniBar.Name = "ZTB_MinimizedBar"
+  MiniBar.AnchorPoint = Vector2.new(0.5, 0.5)
+  MiniBar.Position = UDim2.new(0.5, 0, 0, 120)
+  MiniBar.Size = UDim2.fromOffset(BAR_W, BAR_H)
+  MiniBar.BackgroundColor3 = Color3.fromRGB(20, 9, 10)
+  MiniBar.BackgroundTransparency = 0.04
+  MiniBar.BorderSizePixel = 0
+  MiniBar.Visible = false
+  MiniBar.ZIndex = 100
+  MiniBar.ClipsDescendants = true
+  Instance.new("UICorner", MiniBar).CornerRadius = UDim.new(0, 14)
+  local MiniStroke = Instance.new("UIStroke", MiniBar)
+  MiniStroke.Color = Color3.fromRGB(210, 112, 48)
+  MiniStroke.Thickness = 2
+  MiniStroke.Transparency = 0.1
+  TLG.PGlow(MiniStroke, 0.05, 0.5, 1.3)
+  local MiniGrad = Instance.new("UIGradient", MiniBar)
+  MiniGrad.Color = ColorSequence.new(Color3.fromRGB(10, 6, 8), Color3.fromRGB(52, 24, 19))
+  MiniGrad.Rotation = 0
+
+  local MiniPattern = Instance.new("TextLabel", MiniBar)
+  MiniPattern.Size = UDim2.new(1, 0, 1, 0)
+  MiniPattern.BackgroundTransparency = 1
+  MiniPattern.Text = "💀  ✦  💀  ✦  💀  ✦  💀  ✦  💀  ✦  💀"
+  MiniPattern.TextColor3 = Color3.fromRGB(160, 80, 42)
+  MiniPattern.TextTransparency = 0.86
+  MiniPattern.TextSize = 16
+  MiniPattern.Font = Enum.Font.GothamBold
+  MiniPattern.ZIndex = 100
+
+  local MiniIcon = Instance.new("TextLabel", MiniBar)
+  MiniIcon.Name = "ZTB_MiniDiscord"
+  MiniIcon.Size = UDim2.fromOffset(38, 38)
+  MiniIcon.Position = UDim2.new(0, 10, 0.5, -19)
+  MiniIcon.BackgroundColor3 = Color3.fromRGB(37, 25, 30)
+  MiniIcon.BackgroundTransparency = 0.08
+  MiniIcon.BorderSizePixel = 0
+  MiniIcon.Text = "☁"
+  MiniIcon.TextSize = 22
+  MiniIcon.Font = Enum.Font.GothamBold
+  MiniIcon.TextColor3 = Color3.fromRGB(255, 226, 200)
+  MiniIcon.ZIndex = 102
+  Instance.new("UICorner", MiniIcon).CornerRadius = UDim.new(1, 0)
+  local MiniIconStroke = Instance.new("UIStroke", MiniIcon)
+  MiniIconStroke.Color = Color3.fromRGB(210, 112, 48)
+  MiniIconStroke.Thickness = 1.5
+  MiniIconStroke.Transparency = 0.3
+
+  local MiniTitle = Instance.new("TextLabel", MiniBar)
+  MiniTitle.Size = UDim2.new(1, -112, 0, 28)
+  MiniTitle.Position = UDim2.new(0, 56, 0, 6)
+  MiniTitle.BackgroundTransparency = 1
+  MiniTitle.Text = "ZTB HUB"
+  MiniTitle.Font = Enum.Font.Garamond
+  MiniTitle.TextSize = 26
+  MiniTitle.TextColor3 = Color3.fromRGB(255, 190, 130)
+  MiniTitle.TextXAlignment = Enum.TextXAlignment.Center
+  MiniTitle.ZIndex = 102
+
+  local MiniSub = Instance.new("TextLabel", MiniBar)
+  MiniSub.Size = UDim2.new(1, -112, 0, 16)
+  MiniSub.Position = UDim2.new(0, 56, 0, 34)
+  MiniSub.BackgroundTransparency = 1
+  MiniSub.Text = "👹 MEME SEA  •  ZTB EDITION 👹"
+  MiniSub.Font = Enum.Font.Garamond
+  MiniSub.TextSize = 12
+  MiniSub.TextColor3 = Color3.fromRGB(220, 143, 96)
+  MiniSub.TextXAlignment = Enum.TextXAlignment.Center
+  MiniSub.ZIndex = 102
+
+  local MiniPlay = Instance.new("TextLabel", MiniBar)
+  MiniPlay.Name = "ZTB_RestoreButton"
+  MiniPlay.Size = UDim2.fromOffset(38, 38)
+  MiniPlay.AnchorPoint = Vector2.new(0.5, 0.5)
+  MiniPlay.Position = UDim2.new(1, -29, 0.5, 0)
+  MiniPlay.BackgroundColor3 = Color3.fromRGB(48, 20, 20)
+  MiniPlay.BackgroundTransparency = 0.05
+  MiniPlay.BorderSizePixel = 0
+  MiniPlay.Text = "▶"
+  MiniPlay.TextSize = 20
+  MiniPlay.Font = Enum.Font.GothamBold
+  MiniPlay.TextColor3 = Color3.fromRGB(255, 215, 175)
+  MiniPlay.ZIndex = 103
+  Instance.new("UICorner", MiniPlay).CornerRadius = UDim.new(0, 11)
+  local MiniPlayStroke = Instance.new("UIStroke", MiniPlay)
+  MiniPlayStroke.Color = Color3.fromRGB(210, 112, 48)
+  MiniPlayStroke.Thickness = 1.5
+
+  -- Botón invisible que cubre toda la barra: sirve para arrastrar y para tocar (abrir)
+  local Hit = Instance.new("TextButton", MiniBar)
+  Hit.Name = "ZTB_MiniHit"
+  Hit.Size = UDim2.new(1, 0, 1, 0)
+  Hit.BackgroundTransparency = 1
+  Hit.Text = ""
+  Hit.AutoButtonColor = false
+  Hit.ZIndex = 110
+
+  local function isPointer(i)
+    return i.UserInputType == Enum.UserInputType.MouseButton1
+      or i.UserInputType == Enum.UserInputType.Touch
+  end
+
+  local dragging, moved, dragInput = false, false, nil
+  local startMouse, startCenter = Vector2.zero, Vector2.zero
+
+  Hit.InputBegan:Connect(function(i)
+    if dragging or not isPointer(i) then return end
+    dragging, moved, dragInput = true, false, i
+    startMouse = Vector2.new(i.Position.X, i.Position.Y)
+    startCenter = (MiniBar.AbsolutePosition - SG.AbsolutePosition)
+      + Vector2.new(BAR_W / 2, BAR_H / 2)
+    tw(MiniBar, 0.12, EASE.Quad, DIR.Out, {BackgroundTransparency = 0.15})
+  end)
+
+  UIS.InputChanged:Connect(function(i)
+    if not dragging then return end
+    local same = (i == dragInput)
+      or (dragInput.UserInputType == Enum.UserInputType.MouseButton1
+          and i.UserInputType == Enum.UserInputType.MouseMovement)
+    if not same then return end
+    local d = Vector2.new(i.Position.X, i.Position.Y) - startMouse
+    if not moved and d.Magnitude > 8 then moved = true end
+    if moved then
+      local vp = SG.AbsoluteSize
+      local x = math.clamp(startCenter.X + d.X, BAR_W / 2, math.max(BAR_W / 2, vp.X - BAR_W / 2))
+      local y = math.clamp(startCenter.Y + d.Y, BAR_H / 2, math.max(BAR_H / 2, vp.Y - BAR_H / 2))
+      MiniBar.Position = UDim2.fromOffset(x, y)
+    end
+  end)
+
+  UIS.InputEnded:Connect(function(i)
+    if not dragging then return end
+    local same = (i == dragInput)
+      or (dragInput.UserInputType == Enum.UserInputType.MouseButton1
+          and i.UserInputType == Enum.UserInputType.MouseButton1)
+    if not same then return end
+    dragging = false
+    tw(MiniBar, 0.15, EASE.Quad, DIR.Out, {BackgroundTransparency = 0.04})
+    if not moved then setMin(false) end
+  end)
+
+  setMin = function(st)
+    st = st == true
+    if st == min then return end
+    min = st
+    token += 1
+    local my = token
+    if st then
+      -- CERRAR: la ventana se encoge hacia la barra y la barra se despliega
+      lastWPos = W.Position
+      WM.Visible = false
+      tw(W, 0.28, EASE.Quad, DIR.In,
+        {Size = UDim2.fromOffset(BAR_W, BAR_H), Position = MiniBar.Position})
+      task.delay(0.27, function()
+        if token ~= my then return end
+        W.Visible = false
+        W.Size = W_S
+        MiniPlay.Rotation = 0
+        MiniBar.Size = UDim2.fromOffset(0, BAR_H)
+        MiniBar.Visible = true
+        tw(MiniBar, 0.45, EASE.Back, DIR.Out, {Size = UDim2.fromOffset(BAR_W, BAR_H)})
+      end)
+    else
+      -- ABRIR: la barra se pliega y la ventana crece desde ella
+      tw(MiniPlay, 0.2, EASE.Quad, DIR.Out, {Rotation = 90})
+      tw(MiniBar, 0.22, EASE.Quad, DIR.In, {Size = UDim2.fromOffset(0, BAR_H)})
+      task.delay(0.2, function()
+        if token ~= my then return end
+        MiniBar.Visible = false
+        W.Size = UDim2.fromOffset(BAR_W, BAR_H)
+        W.Position = MiniBar.Position
+        W.Visible = true
+        TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
+        WM.Visible = true
+        STtl.Text = "👑"
+        tw(W, 0.42, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
+      end)
+    end
   end
 end
+
 local CB = Instance.new("TextButton", DcIco)
 CB.Size = UDim2.new(1,0,1,0)
 CB.BackgroundTransparency = 1
 CB.Text = ""; CB.ZIndex = 10
 CB.Activated:Connect(function() setMin(not min) end)
-MiniPlay.Activated:Connect(function() setMin(false) end)
-MiniDiscord.Activated:Connect(function() setMin(false) end)
-MiniBar.InputBegan:Connect(function(i)
-  if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-    setMin(false)
-  end
-end)
+
 if UIS.KeyboardEnabled then
   UIS.InputBegan:Connect(function(i, gp)
     if gp then return end
