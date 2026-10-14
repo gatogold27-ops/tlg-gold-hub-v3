@@ -1,4 +1,4 @@
--- TLG HUB — Meme Sea Edition
+-- ZTB HUB — Meme Sea Edition
 -- Ghost Hitbox + Fly Boost + FABs visibles
 
 local TW = game:GetService("TweenService")
@@ -48,7 +48,7 @@ TLG.getParent = getParent
 TLG.SP = getParent()
 
 --==================================================
--- TLG HUB KEY SYSTEM
+-- ZTB HUB KEY SYSTEM
 --==================================================
 -- Client-side gate only. For real protection, validate keys
 -- against a server you control rather than embedding secrets.
@@ -107,7 +107,7 @@ local function ShowTLGKeyGate()
     title.Size = UDim2.new(1, -24, 0, 40)
     title.Position = UDim2.fromOffset(12, 10)
     title.BackgroundTransparency = 1
-    title.Text = "🔐 TLG HUB — KEY SYSTEM"
+    title.Text = "🔐 ZTB HUB — KEY SYSTEM"
     title.TextSize = 18
     title.Font = Enum.Font.GothamBold
     title.TextColor3 = Color3.fromRGB(255, 215, 0)
@@ -526,7 +526,7 @@ local function applyHB(p)
   local ch = p.Character; if not ch then return end
   local h = ch:FindFirstChild("HumanoidRootPart")
   if not h then return end
-  local s = math.clamp(HB.Sz, 1, 2048)
+  local s = math.clamp(HB.Sz, 1, 50)
   pcall(function()
     if HB.Original[h] == nil then
       HB.Original[h] = {
@@ -1440,7 +1440,7 @@ MainTitle.Size = UDim2.new(0,180,0,18)
 MainTitle.Position = UDim2.new(0,42,0,6)
 MainTitle.BackgroundTransparency = 1
 MainTitle.Font = Enum.Font.GothamBold
-MainTitle.Text = "TLG HUB"
+MainTitle.Text = "ZTB HUB"
 MainTitle.TextSize = 13
 MainTitle.TextColor3 = C.Yel
 MainTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -1451,7 +1451,7 @@ SubTitle.Size = UDim2.new(0,180,0,12)
 SubTitle.Position = UDim2.new(0,42,0,24)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.Gotham
-SubTitle.Text = "Meme Sea • V9.4.2"
+SubTitle.Text = "Meme Sea • V9.4.4"
 SubTitle.TextSize = 9
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -2245,11 +2245,67 @@ do
   Tog(PCb, "Activar Hitbox", false, function(v)
     if v then TLG.HBStart() else TLG.HBStop() end
   end)
-  Sli(PCb, "Tamaño", 10, 2048, 50, function(v) HB.Sz = v end)
+  Sli(PCb, "Tamaño", 1, 50, 50, function(v) HB.Sz = math.clamp(v, 1, 50) end)
+  local function addArrowAdjust(labelText, initial, minValue, maxValue, step, formatter, callback)
+    local value = initial
+    local row = Instance.new("Frame", PCb)
+    row.Size = UDim2.new(1, 0, 0, 34)
+    row.BackgroundColor3 = Color3.fromRGB(10,10,10)
+    row.BackgroundTransparency = 0.1
+    row.BorderSizePixel = 0
+    row.ZIndex = 5
+    Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
+    local label = Instance.new("TextLabel", row)
+    label.Size = UDim2.new(0.42, -6, 1, 0)
+    label.Position = UDim2.new(0, 8, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = labelText
+    label.TextColor3 = C.Wh
+    label.TextSize = 10
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 6
+    local display = Instance.new("TextLabel", row)
+    display.Size = UDim2.new(0.28, 0, 1, 0)
+    display.Position = UDim2.new(0.42, 0, 0, 0)
+    display.BackgroundTransparency = 1
+    display.Font = Enum.Font.GothamBold
+    display.TextColor3 = C.Yel
+    display.TextSize = 10
+    display.ZIndex = 6
+    local function refresh()
+      display.Text = formatter(value)
+      callback(value)
+    end
+    local function arrow(text, xScale, delta)
+      local b = Instance.new("TextButton", row)
+      b.Size = UDim2.new(0, 30, 0, 26)
+      b.Position = UDim2.new(xScale, -15, 0.5, -13)
+      b.BackgroundColor3 = C.BG3
+      b.Text = text
+      b.TextColor3 = C.Yel
+      b.TextSize = 17
+      b.Font = Enum.Font.GothamBold
+      b.BorderSizePixel = 0
+      b.ZIndex = 7
+      Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+      b.Activated:Connect(function()
+        value = math.clamp(value + delta * step, minValue, maxValue)
+        refresh()
+      end)
+    end
+    arrow("◀", 0.76, -1)
+    arrow("▶", 0.92, 1)
+    refresh()
+  end
+  addArrowAdjust("Ajustar tamaño", HB.Sz, 1, 50, 1, function(v) return tostring(v) end,
+    function(v) HB.Sz = math.clamp(v, 1, 50) end)
   Sli(PCb, "Transparencia", 0, 100, 50, function(v)
-    HB.Tr = v / 100
+    HB.Tr = math.clamp(v, 0, 100) / 100
   end)
-  Lbl(PCb, "Hitbox global manual (no es el aimbot).", C.Gr)
+  addArrowAdjust("Ajustar transparencia", 50, 0, 100, 5, function(v) return tostring(v) .. "%" end,
+    function(v) HB.Tr = math.clamp(v, 0, 100) / 100 end)
+  Lbl(PCb, "Hitbox manual: tamaño máximo 50. Las flechas ajustan tamaño y transparencia.", C.Gr)
   Lbl(PCb, "Para el aimbot, andá al tab 🎯 Aimbot.", C.Yel)
 
   Sec(PCb, "📷 CAMERA FOV", "📷")
@@ -3302,7 +3358,7 @@ local V9ok, V9err = pcall(function()
   end
 
   -- CONFIG GUARDADA
-  local CFG_FILE = "TLG_Hub_Config.json"
+  local CFG_FILE = "ZTB_Hub_Config.json"
   local CFG = {}
   pcall(function()
     if isfile and readfile and isfile(CFG_FILE) then
@@ -3577,7 +3633,7 @@ end
   end)
 
   Sec(PCf, "💾 CONFIGURACIÓN", "💾")
-  Lbl(PCf, "Se guarda en TLG_Hub_Config.json (si tu ejecutor lo permite).", C.Gr)
+  Lbl(PCf, "Se guarda en ZTB_Hub_Config.json (si tu ejecutor lo permite).", C.Gr)
   Btn(PCf, "🗑 Borrar configuración guardada", C.Rd, function()
     for k in pairs(CFG) do CFG[k] = nil end
     pcall(function() if writefile then writefile(CFG_FILE, "{}") end end)
@@ -3826,7 +3882,7 @@ local FRok, FRerr = pcall(function()
   local function buildReport()
     local L = {}
     local function add(s) table.insert(L, s) end
-    add("== REPORTE TLG HUB · FRUTAS ==")
+    add("== REPORTE ZTB HUB · FRUTAS ==")
     add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
     local l = list()
     add("Candidatos en el mapa: " .. #l)
@@ -4277,7 +4333,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "TLG HUB V9.2"
+WTx.Text = "ZTB HUB V9.4.3"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -4342,7 +4398,7 @@ task.spawn(function()
     t1.Font = Enum.Font.GothamBold
     t1.TextSize = 34
     t1.TextColor3 = C.Yel
-    t1.Text = "💀 TLG HUB"
+    t1.Text = "💀 ZTB HUB"
     t1.TextTransparency = 1
     t1.ZIndex = 501
     local t2 = Instance.new("TextLabel", fr)
@@ -4352,7 +4408,7 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "Meme Sea • V9.4.2"
+    t2.Text = "Meme Sea • V9.4.4"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
@@ -4374,6 +4430,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 TLG HUB V9.4.2", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 ZTB HUB V9.4.4", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[TLG HUB V9.4.2] 💀 Cargado")
+print("[ZTB HUB V9.4.4] 💀 Cargado")
