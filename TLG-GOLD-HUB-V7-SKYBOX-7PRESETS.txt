@@ -3327,7 +3327,160 @@ do
     end
   end)
 
+  -- 🚀 ANTI-LAG SUPER POTENTE (reversible: al apagarlo restaura todo)
+  Sec(POp, "🚀 ANTI-LAG", "🚀")
+  local AL = {
+    On = false, Conn = nil, Token = 0,
+    Parts = setmetatable({}, {__mode = "k"}),
+    Decals = setmetatable({}, {__mode = "k"}),
+    Fx = setmetatable({}, {__mode = "k"}),
+    Cloth = setmetatable({}, {__mode = "k"}),
+    Post = {}, Light = nil, Terr = nil, Quality = nil,
+  }
+  local function alApply(o)
+    if o:IsA("BasePart") then
+      if not AL.Parts[o] then AL.Parts[o] = {o.Material, o.Reflectance, o.CastShadow} end
+      o.Material = Enum.Material.SmoothPlastic
+      o.Reflectance = 0
+      o.CastShadow = false
+    elseif o:IsA("Decal") or o:IsA("Texture") then
+      if AL.Decals[o] == nil then AL.Decals[o] = o.Transparency end
+      o.Transparency = 1
+    elseif o:IsA("ParticleEmitter") or o:IsA("Trail") or o:IsA("Smoke")
+      or o:IsA("Fire") or o:IsA("Sparkles") then
+      if AL.Fx[o] == nil then AL.Fx[o] = o.Enabled end
+      o.Enabled = false
+    elseif o:IsA("Shirt") or o:IsA("Pants") or o:IsA("ShirtGraphic") then
+      if o.Parent then
+        AL.Cloth[o] = o.Parent
+        o.Parent = nil
+      end
+    end
+  end
+  local function alStart()
+    if AL.On then return end
+    AL.On = true
+    AL.Token = AL.Token + 1
+    local my = AL.Token
+    -- Iluminación
+    pcall(function()
+      AL.Light = {LIGHT.GlobalShadows, LIGHT.FogEnd, LIGHT.Brightness}
+      LIGHT.GlobalShadows = false
+      LIGHT.FogEnd = 9e9
+      LIGHT.Brightness = 1
+    end)
+    AL.Post = {}
+    for _, e in ipairs(LIGHT:GetChildren()) do
+      if e:IsA("PostEffect") or e:IsA("BlurEffect") or e:IsA("SunRaysEffect")
+        or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") then
+        pcall(function() AL.Post[e] = e.Enabled; e.Enabled = false end)
+      end
+    end
+    -- Terreno (agua y pasto)
+    local terr = workspace:FindFirstChildOfClass("Terrain")
+    if terr then
+      pcall(function()
+        AL.Terr = {Terrain = terr, WaveSize = terr.WaterWaveSize,
+          WaveSpeed = terr.WaterWaveSpeed, Refl = terr.WaterReflectance,
+          Trans = terr.WaterTransparency}
+        if gethiddenproperty then
+          pcall(function() AL.Terr.Deco = gethiddenproperty(terr, "Decoration") end)
+        end
+        terr.WaterWaveSize = 0
+        terr.WaterWaveSpeed = 0
+        terr.WaterReflectance = 0
+        terr.WaterTransparency = 0
+        if sethiddenproperty then
+          pcall(function() sethiddenproperty(terr, "Decoration", false) end)
+        end
+      end)
+    end
+    -- Calidad gráfica mínima
+    pcall(function()
+      local r = settings().Rendering
+      AL.Quality = r.QualityLevel
+      r.QualityLevel = Enum.QualityLevel.Level01
+    end)
+    -- Mapa actual (por tandas para no congelar el juego)
+    task.spawn(function()
+      local n = 0
+      for _, d in ipairs(workspace:GetDescendants()) do
+        if not AL.On or AL.Token ~= my then return end
+        pcall(alApply, d)
+        n = n + 1
+        if n % 1500 == 0 then task.wait() end
+      end
+    end)
+    -- Objetos nuevos
+    AL.Conn = workspace.DescendantAdded:Connect(function(d)
+      task.defer(function()
+        if AL.On then pcall(alApply, d) end
+      end)
+    end)
+    TLG.PNotif("🚀 Anti-Lag", "✅ Activado", C.Grn)
+  end
+  local function alStop(silent)
+    if not AL.On then return end
+    AL.On = false
+    AL.Token = AL.Token + 1
+    if AL.Conn then pcall(function() AL.Conn:Disconnect() end); AL.Conn = nil end
+    for p, o in pairs(AL.Parts) do
+      if p.Parent then pcall(function()
+        p.Material = o[1]; p.Reflectance = o[2]; p.CastShadow = o[3]
+      end) end
+    end
+    for d, t in pairs(AL.Decals) do
+      if d.Parent then pcall(function() d.Transparency = t end) end
+    end
+    for f, en in pairs(AL.Fx) do
+      if f.Parent then pcall(function() f.Enabled = en end) end
+    end
+    for c, par in pairs(AL.Cloth) do
+      if par and par.Parent then pcall(function() c.Parent = par end) end
+    end
+    AL.Parts = setmetatable({}, {__mode = "k"})
+    AL.Decals = setmetatable({}, {__mode = "k"})
+    AL.Fx = setmetatable({}, {__mode = "k"})
+    AL.Cloth = setmetatable({}, {__mode = "k"})
+    for e, en in pairs(AL.Post) do
+      if e.Parent then pcall(function() e.Enabled = en end) end
+    end
+    AL.Post = {}
+    if AL.Light then
+      pcall(function()
+        -- si "Quitar Sombras" sigue activo, no le devolvemos las sombras
+        if shadowsOriginal == nil then LIGHT.GlobalShadows = AL.Light[1] end
+        LIGHT.FogEnd = AL.Light[2]
+        LIGHT.Brightness = AL.Light[3]
+      end)
+      AL.Light = nil
+    end
+    local t = AL.Terr
+    if t and t.Terrain and t.Terrain.Parent then
+      pcall(function()
+        t.Terrain.WaterWaveSize = t.WaveSize
+        t.Terrain.WaterWaveSpeed = t.WaveSpeed
+        t.Terrain.WaterReflectance = t.Refl
+        t.Terrain.WaterTransparency = t.Trans
+        if sethiddenproperty and t.Deco ~= nil then
+          pcall(function() sethiddenproperty(t.Terrain, "Decoration", t.Deco) end)
+        end
+      end)
+    end
+    AL.Terr = nil
+    if AL.Quality then
+      pcall(function() settings().Rendering.QualityLevel = AL.Quality end)
+      AL.Quality = nil
+    end
+    if not silent then TLG.PNotif("🚀 Anti-Lag", "❌ Desactivado", C.Rd) end
+  end
+  Tog(POp, "🚀 Anti-Lag Super Potente", false, function(v)
+    if v then alStart() else alStop() end
+  end)
+  Lbl(POp, "Quita materiales, sombras, efectos, partículas y baja la calidad. Al apagarlo se restaura todo.", C.Gr)
+
   TLG.RestoreOptimize = function()
+    pcall(alStop, true)
     for d, transparency in pairs(orig) do
       if d and d.Parent then pcall(function() d.Transparency = transparency end) end
     end
