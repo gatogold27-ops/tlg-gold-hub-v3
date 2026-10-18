@@ -1442,7 +1442,7 @@ MainTitle.Position = UDim2.new(0.24,0,0,3)
 MainTitle.AnchorPoint = Vector2.new(0,0)
 MainTitle.BackgroundTransparency = 1
 MainTitle.Font = Enum.Font.Garamond
-MainTitle.Text = "ZTB HUB"
+MainTitle.Text = "ZTB SKULL EDITION"
 MainTitle.TextSize = 20
 MainTitle.TextColor3 = C.Yel
 MainTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -1956,6 +1956,144 @@ local PTo = Tab("Tools", "🔧")
 local PEs = Tab("ESP", "👁️")
 local PVi = Tab("Visuals", "🎨")
 local POp = Tab("Optimize", "⚡")
+
+-- ZTB SKULL EDITION: RADIAL CORE (360 grados)
+-- Usa las paginas ya existentes: no duplica funciones ni callbacks.
+local Radial = Instance.new("Frame", W)
+Radial.Name = "ZTB_RadialCore"
+Radial.Size = UDim2.new(1,0,1,-54)
+Radial.Position = UDim2.new(0,0,0,54)
+Radial.BackgroundColor3 = Color3.fromRGB(7,6,8)
+Radial.BackgroundTransparency = 0.08
+Radial.BorderSizePixel = 0
+Radial.ZIndex = 100
+Radial.Visible = true
+local radialStroke = Instance.new("UIStroke", Radial)
+radialStroke.Color = C.Yel; radialStroke.Thickness = 1.5; radialStroke.Transparency = 0.25
+Instance.new("UICorner", Radial).CornerRadius = UDim.new(0,12)
+
+local radialTitle = Instance.new("TextLabel", Radial)
+radialTitle.Size = UDim2.new(1,-20,0,24)
+radialTitle.Position = UDim2.new(0,10,0,5)
+radialTitle.BackgroundTransparency = 1
+radialTitle.Text = "☠  ZTB SKULL EDITION  •  RADIAL CORE"
+radialTitle.Font = Enum.Font.GothamBlack
+radialTitle.TextSize = TLG.IsMobile and 11 or 14
+radialTitle.TextColor3 = C.Yel
+radialTitle.ZIndex = 102
+
+local radialWheel = Instance.new("Frame", Radial)
+radialWheel.Name = "ZTB_RadialWheel"
+radialWheel.Size = UDim2.new(0, math.min(TLG.IsMobile and 286 or 360, math.max(220, W_S.X.Offset-30)), 0, math.min(TLG.IsMobile and 286 or 360, math.max(220, W_S.X.Offset-30)))
+radialWheel.AnchorPoint = Vector2.new(0.5,0.5)
+radialWheel.Position = UDim2.new(0.5,0,0.53,0)
+radialWheel.BackgroundColor3 = Color3.fromRGB(13,10,11)
+radialWheel.BackgroundTransparency = 0.08
+radialWheel.BorderSizePixel = 0
+radialWheel.ZIndex = 101
+Instance.new("UICorner", radialWheel).CornerRadius = UDim.new(1,0)
+local wheelStroke = Instance.new("UIStroke", radialWheel)
+wheelStroke.Color = C.Yel; wheelStroke.Thickness = 2; wheelStroke.Transparency = 0.12
+local wheelInner = Instance.new("Frame", radialWheel)
+wheelInner.Size = UDim2.new(0.48,0,0.48,0)
+wheelInner.AnchorPoint = Vector2.new(0.5,0.5)
+wheelInner.Position = UDim2.new(0.5,0,0.5,0)
+wheelInner.BackgroundColor3 = Color3.fromRGB(25,15,12)
+wheelInner.BorderSizePixel = 0
+wheelInner.ZIndex = 103
+Instance.new("UICorner", wheelInner).CornerRadius = UDim.new(1,0)
+local innerStroke = Instance.new("UIStroke", wheelInner)
+innerStroke.Color = C.Yel; innerStroke.Thickness = 2
+local coreButton = Instance.new("TextButton", wheelInner)
+coreButton.Name = "ZTB_RadialCenter"
+coreButton.Size = UDim2.new(1,0,1,0)
+coreButton.BackgroundTransparency = 1
+coreButton.Text = "☠\nZTB"
+coreButton.TextColor3 = C.Yel
+coreButton.TextSize = TLG.IsMobile and 20 or 27
+coreButton.Font = Enum.Font.GothamBlack
+coreButton.ZIndex = 104
+coreButton.Activated:Connect(function() Radial.Visible = false end)
+
+local radialItems = {
+ {"HOME","⌂",0,{1}},
+ {"COMBATE","⚔",45,{2,3}},
+ {"VISUALES","◉",90,{8,9}},
+ {"UTILIDADES","⚙",135,{4,10}},
+ {"EXTRAS","✦",180,{6}},
+ {"JUGADOR","♙",225,{1,5}},
+ {"MASCOTAS","🐾",270,{7}},
+ {"HERRAMIENTAS","⚒",315,{5,7}},
+}
+local function selectExistingTab(index)
+    local chosen = Tabs[index]
+    if not chosen then return end
+    for _, t in ipairs(Tabs) do
+        t.l.TextColor3 = C.Gr
+        t.ico.TextTransparency = 0.25
+        t.p.Visible = false
+        t.b.BackgroundTransparency = 1
+        t.u.Size = UDim2.new(0,3,0,0)
+    end
+    chosen.l.TextColor3 = C.Yel
+    chosen.ico.TextTransparency = 0
+    chosen.p.Visible = true
+    chosen.b.BackgroundTransparency = 0.18
+    chosen.b.BackgroundColor3 = C.BG3
+    chosen.u.Size = UDim2.new(0,3,0.62,0)
+end
+local radialButtons = {}
+local radius = TLG.IsMobile and 0.365 or 0.37
+for _, item in ipairs(radialItems) do
+    local name, glyph, deg, tabIndexes = item[1], item[2], item[3], item[4]
+    local a = math.rad(deg - 90)
+    local b = Instance.new("TextButton", radialWheel)
+    b.Name = "ZTB_Radial_" .. name
+    b.AnchorPoint = Vector2.new(0.5,0.5)
+    b.Position = UDim2.new(0.5 + math.cos(a)*radius,0,0.5 + math.sin(a)*radius,0)
+    b.Size = UDim2.new(0, TLG.IsMobile and 76 or 94, 0, TLG.IsMobile and 48 or 58)
+    b.BackgroundColor3 = Color3.fromRGB(31,22,18)
+    b.BackgroundTransparency = 0.04
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.Text = glyph .. "\n" .. name
+    b.TextColor3 = C.Yel
+    b.TextSize = TLG.IsMobile and 9 or 11
+    b.Font = Enum.Font.GothamBold
+    b.TextWrapped = true
+    b.ZIndex = 105
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+    local bs = Instance.new("UIStroke", b)
+    bs.Color = C.Yel; bs.Thickness = 1; bs.Transparency = 0.28
+    b.Activated:Connect(function()
+        Radial.Visible = false
+        local first = tabIndexes[1]
+        selectExistingTab(first)
+        -- Categorias con varias paginas muestran la primera pagina asignada.
+        -- La navegacion lateral original permanece disponible para las demas.
+    end)
+    table.insert(radialButtons,b)
+end
+
+-- Boton de calavera en la cabecera para volver al radial desde cualquier categoria.
+local radialReturn = Instance.new("TextButton", TB)
+radialReturn.Name = "ZTB_OpenRadial"
+radialReturn.Size = UDim2.new(0,28,0,28)
+radialReturn.Position = UDim2.new(1,-68,0.5,-14)
+radialReturn.BackgroundColor3 = Color3.fromRGB(35,22,13)
+radialReturn.BorderSizePixel = 0
+radialReturn.Text = "☠"
+radialReturn.TextColor3 = C.Yel
+radialReturn.TextSize = 17
+radialReturn.Font = Enum.Font.GothamBlack
+radialReturn.ZIndex = 20
+Instance.new("UICorner", radialReturn).CornerRadius = UDim.new(0,8)
+local radialReturnStroke = Instance.new("UIStroke", radialReturn)
+radialReturnStroke.Color = C.Yel; radialReturnStroke.Thickness = 1
+radialReturn.Activated:Connect(function()
+    for _, t in ipairs(Tabs) do t.p.Visible = false end
+    Radial.Visible = true
+end)
 
 
 task.wait(0.1)
@@ -4634,6 +4772,8 @@ do
       if content and content.Parent then content.Visible = true end
       if bottom and bottom.Parent then bottom.Visible = true end
       if mark and mark.Parent then mark.Visible = true end
+      local radial = menu:FindFirstChild("ZTB_RadialCore")
+      if radial and radial:IsA("Frame") then radial.Visible = true end
       if STtl and STtl.Parent then STtl.Text = "💀" end
       tw(menu, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
     end
