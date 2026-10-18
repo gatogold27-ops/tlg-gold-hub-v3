@@ -4,7 +4,7 @@
     IMPORTANTE: este archivo conserva código original; no se ha verificado en Delta.
     Los errores de APIs no disponibles en un executor pueden seguir ocurriendo.
 ]]
--- ZTB SKULL EDITION — Meme Sea
+-- ZTB HUB STYLE — Meme Sea
 -- ZTB HUB STYLE black/gold UI skin over the existing full build.
 -- Existing gameplay modules are preserved from the supplied recovery script; runtime not verified in Roblox/Delta.
 
@@ -213,6 +213,7 @@ function TLG.getPing()
 end
 
 local Themes = {
+  ["👑 Oro Neón"] = {A=Color3.fromRGB(255,200,0), A2=Color3.fromRGB(255,248,120)},
   ["👑 Gold"]   = {A=Color3.fromRGB(255,215,0),  A2=Color3.fromRGB(255,235,100)},
   ["💜 Purple"] = {A=Color3.fromRGB(190,90,255), A2=Color3.fromRGB(230,150,255)},
   ["💙 Cyan"]   = {A=Color3.fromRGB(0,240,255),  A2=Color3.fromRGB(120,255,255)},
@@ -223,7 +224,7 @@ local Themes = {
   ["🤍 White"]  = {A=Color3.fromRGB(250,250,255),A2=Color3.fromRGB(255,255,255)}
 }
 TLG.Themes = Themes
-TLG.CurrentTheme = "👑 Gold"
+TLG.CurrentTheme = "👑 Oro Neón"
 TLG.CustomAccent = nil
 TLG.CustomAccent2 = nil
 function TLG.A() return TLG.CustomAccent or Themes[TLG.CurrentTheme].A end
@@ -3515,8 +3516,58 @@ do
   end)
   Lbl(POp, "Quita materiales, sombras, efectos, partículas y baja la calidad. Al apagarlo se restaura todo.", C.Gr)
 
+  -- OPTIMIZACIÓN EXTRA: efectos visuales reversibles, sin borrar objetos.
+  Sec(POp, "✨ EFECTOS Y FPS", "✨")
+  local fxOriginal = setmetatable({}, {__mode = "k"})
+  local fxConn = nil
+  local fxEnabled = false
+  local function setFx(obj, state)
+    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
+      or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+      if fxOriginal[obj] == nil then fxOriginal[obj] = obj.Enabled end
+      obj.Enabled = state
+    end
+  end
+  local function restoreFx()
+    fxEnabled = false
+    if fxConn then pcall(function() fxConn:Disconnect() end); fxConn = nil end
+    for obj, oldState in pairs(fxOriginal) do
+      if obj and obj.Parent then pcall(function() obj.Enabled = oldState end) end
+    end
+    fxOriginal = setmetatable({}, {__mode = "k"})
+  end
+  Tog(POp, "✨ Reducir partículas y efectos", false, function(v)
+    if v then
+      if fxEnabled then return end
+      fxEnabled = true
+      for _, obj in ipairs(workspace:GetDescendants()) do pcall(setFx, obj, false) end
+      fxConn = workspace.DescendantAdded:Connect(function(obj)
+        if fxEnabled then task.defer(function() pcall(setFx, obj, false) end) end
+      end)
+      TLG.PNotif("✨ Optimizar", "Efectos reducidos", C.Grn)
+    else
+      restoreFx()
+      TLG.PNotif("✨ Optimizar", "Efectos restaurados", C.Yel)
+    end
+  end)
+  Tog(POp, "🌫️ Reducir niebla", false, function(v)
+    if v then
+      if TLG._FogOriginal == nil then TLG._FogOriginal = LIGHT.FogEnd end
+      LIGHT.FogEnd = 1000000
+    elseif TLG._FogOriginal ~= nil then
+      pcall(function() LIGHT.FogEnd = TLG._FogOriginal end)
+      TLG._FogOriginal = nil
+    end
+  end)
+  Lbl(POp, "Los efectos se restauran al apagar cada opción. No elimina objetos del mapa.", C.Gr)
+
   TLG.RestoreOptimize = function()
     pcall(alStop, true)
+    pcall(restoreFx)
+    if TLG._FogOriginal ~= nil then
+      pcall(function() LIGHT.FogEnd = TLG._FogOriginal end)
+      TLG._FogOriginal = nil
+    end
     for d, transparency in pairs(orig) do
       if d and d.Parent then pcall(function() d.Transparency = transparency end) end
     end
@@ -4675,6 +4726,18 @@ task.spawn(function()
     fr.BackgroundTransparency = 1
     fr.BorderSizePixel = 0
     fr.ZIndex = 500
+    local introStroke = Instance.new("UIStroke")
+    introStroke.Color = Color3.fromRGB(255, 200, 0)
+    introStroke.Thickness = 2
+    introStroke.Transparency = 0.12
+    introStroke.Parent = fr
+    local introGlow = Instance.new("UIGradient")
+    introGlow.Color = ColorSequence.new({
+      ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 170, 0)),
+      ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 145)),
+      ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 190, 0))
+    })
+    introGlow.Parent = introStroke
     local t1 = Instance.new("TextLabel", fr)
     t1.Size = UDim2.new(1, 0, 0, 50)
     t1.Position = UDim2.new(0, 0, 0.5, -40)
@@ -4699,6 +4762,8 @@ task.spawn(function()
     TW:Create(fr, ti, {BackgroundTransparency = 0.4}):Play()
     TW:Create(t1, ti, {TextTransparency = 0}):Play()
     TW:Create(t2, ti, {TextTransparency = 0}):Play()
+    TW:Create(introStroke, TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 2, true),
+      {Transparency = 0.62, Thickness = 4}):Play()
     task.wait(1.1)
     local to = TweenInfo.new(0.5)
     TW:Create(fr, to, {BackgroundTransparency = 1}):Play()
@@ -4716,4 +4781,4 @@ end)
 task.wait(0.9)
 TLG.PNotif("💀 ZTB SKULL EDITION", "ZTB HUB STYLE • Meme Sea listo", C.Yel)
 
-print("[ZTB SKULL EDITION] 💀 Cargado")
+print("[ZTB HUB STYLE] 💀 Cargado")
