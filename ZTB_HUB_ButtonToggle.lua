@@ -1540,8 +1540,12 @@ local CloseStroke = Instance.new("UIStroke", CloseBtn)
 CloseStroke.Color = Color3.fromRGB(205,112,55)
 CloseStroke.Transparency = 0.25
 CloseBtn.Activated:Connect(function()
-    pcall(function() W.Visible = false end)
-    pcall(function() WM.Visible = false end)
+    if TLG.ZTB_SetMin then
+        TLG.ZTB_SetMin(true)
+    else
+        pcall(function() W.Visible = false end)
+        pcall(function() WM.Visible = false end)
+    end
 end)
 
 local DragS = {active=false, start=nil, pos=nil}
@@ -4214,7 +4218,7 @@ if not FRok then
   pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
 end
 
--- FAB (visible por defecto)
+-- FAB desactivados por defecto para que no estorben la pantalla.
 local FSG = Instance.new("ScreenGui")
 
 FSG.Name = "TLG_FAB_Float"
@@ -4222,6 +4226,7 @@ _G.TLG_FAB_GUI = FSG
 FSG.ResetOnSpawn = false
 FSG.DisplayOrder = 999
 FSG.IgnoreGuiInset = true
+FSG.Enabled = false
 pcall(function() FSG.Parent = TLG.SP end)
 if not FSG.Parent then pcall(function() FSG.Parent = CG end) end
 
@@ -4234,7 +4239,7 @@ FM.BackgroundColor3 = C.BG
 FM.BackgroundTransparency = 0.2
 FM.BorderSizePixel = 0
 FM.ZIndex = 10
-FM.Visible = true
+FM.Visible = false
 
 -- FAB GROUP 2 - PROTECCION (Anti Stun, Buff Tools, Anti Void, Anti Orbit)
 local FM2 = Instance.new("Frame", FSG)
@@ -4245,8 +4250,8 @@ FM2.BackgroundColor3 = C.BG
 FM2.BackgroundTransparency = 0.2
 FM2.BorderSizePixel = 0
 FM2.ZIndex = 10
-FM2.Visible = true
-TLG.FAB_Toggle_State = true
+FM2.Visible = false
+TLG.FAB_Toggle_State = false
 TLG.FAB_Frame_Ref = FM
 TLG.FAB_SetVisible = function(v)
   TLG.FAB_Toggle_State = v == true
@@ -4548,7 +4553,7 @@ do
   ToggleButton.TextSize = 31
   ToggleButton.TextColor3 = Color3.fromRGB(255, 218, 120)
   ToggleButton.TextStrokeTransparency = 0.75
-  ToggleButton.Visible = false
+  ToggleButton.Visible = true
   ToggleButton.ZIndex = 200
   Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 15)
   local ButtonStroke = Instance.new("UIStroke", ToggleButton)
@@ -4605,18 +4610,11 @@ do
     if st then
       lastWPos = W.Position
       WM.Visible = false
-      tw(W, 0.2, EASE.Quad, DIR.In, {Size = UDim2.fromOffset(1, 1)})
-      task.delay(0.2, function()
-        if token ~= my then return end
-        W.Visible = false
-        W.Size = W_S
-        TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
-        ToggleButton.Visible = true
-        ToggleButton.Size = UDim2.fromOffset(1, 1)
-        tw(ToggleButton, 0.22, EASE.Back, DIR.Out, {Size = UDim2.fromOffset(BTN_SIZE, BTN_SIZE)})
-      end)
+      ToggleButton.Visible = true
+      W.Visible = false
+      W.Size = W_S
     else
-      ToggleButton.Visible = false
+      ToggleButton.Visible = true
       W.Size = UDim2.fromOffset(1, 1)
       W.Position = lastWPos
       W.Visible = true
@@ -4626,6 +4624,7 @@ do
       tw(W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
     end
   end
+  TLG.ZTB_SetMin = setMin
 
 end
 
