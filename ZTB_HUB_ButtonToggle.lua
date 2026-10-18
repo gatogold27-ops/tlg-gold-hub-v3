@@ -4619,9 +4619,13 @@ do
       W.Size = UDim2.fromOffset(1, 1)
       W.Position = lastWPos
       W.Visible = true
-      TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
-      WM.Visible = true
-      STtl.Text = "👑"
+      -- Restaurar los elementos del menu usando los nombres reales.
+      -- TabBar no estaba declarado; la barra lateral se llama SideBar.
+      if SideBar and SideBar.Parent then SideBar.Visible = true end
+      if Cont and Cont.Parent then Cont.Visible = true end
+      if BH and BH.Parent then BH.Visible = true end
+      if WM and WM.Parent then WM.Visible = true end
+      if STtl and STtl.Parent then STtl.Text = "💀" end
       tw(W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
     end
   end
