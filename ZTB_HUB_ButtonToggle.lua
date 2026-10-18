@@ -4796,11 +4796,13 @@ do
       menu.Size = UDim2.fromOffset(1, 1)
       menu.Position = lastWPos
       menu.Visible = true
-      if sidebar and sidebar.Parent then sidebar.Visible = true end
-      if content and content.Parent then content.Visible = true end
+      local radial = menu:FindFirstChild("ZTB_RadialCore")
+      local radialIsOpen = radial and radial:IsA("Frame") and radial.Visible
+      -- Restaurar solo la vista activa: radial O dashboard, nunca ambos.
+      if sidebar and sidebar.Parent then sidebar.Visible = not radialIsOpen end
+      if content and content.Parent then content.Visible = not radialIsOpen end
       if bottom and bottom.Parent then bottom.Visible = true end
       if mark and mark.Parent then mark.Visible = true end
-      local radial = menu:FindFirstChild("ZTB_RadialCore")
       if radial and radial:IsA("Frame") then radial.Visible = true end
       if STtl and STtl.Parent then STtl.Text = "💀" end
       tw(menu, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
