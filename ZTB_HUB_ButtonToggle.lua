@@ -4011,7 +4011,7 @@ WTm.Text = os.date("%H:%M")
 task.wait(30)
 end
 end)
-do
+;(function()
 local GAMPI_B64 = table.concat({
 "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJior",
 "LS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCws",
@@ -4246,9 +4246,9 @@ end)
 end
 if pets % 10 == 0 then TLG.PNotif("🐶 Gampi", pets .. " caricias, ¡te quiere mucho!", Color3.fromRGB(255, 190, 120)) end
 end)
-end
+end)()
 local Orbit = {Open = false, Sel = 1, Orbs = {}, Ang = -90}
-do
+;(function()
 local GOLD  = Color3.fromRGB(232, 170, 60)
 local GOLD2 = Color3.fromRGB(255, 217, 120)
 local DARK  = Color3.fromRGB(14, 11, 13)
@@ -4557,7 +4557,7 @@ end
 TLG.ZTB_OrbitShow = Orbit.Show
 TLG.ZTB_OrbitSelect = Orbit.Select
 Orbit.Select(1)
-end
+end)()
 local min = true
 local setMin
 do
