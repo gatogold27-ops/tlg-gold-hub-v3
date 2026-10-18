@@ -1,11 +1,11 @@
 --[[
-    ZTB SKULL EDITION - YOUNG0X INSPIRED FULL BUILD
+    ZTB HUB STYLE - MEME SEA FULL BUILD
     Recuperación del script anterior para conservar sus pestañas y módulos.
     IMPORTANTE: este archivo conserva código original; no se ha verificado en Delta.
     Los errores de APIs no disponibles en un executor pueden seguir ocurriendo.
 ]]
 -- ZTB SKULL EDITION — Meme Sea
--- Young0x-inspired black/gold UI skin over the existing full build.
+-- ZTB HUB STYLE black/gold UI skin over the existing full build.
 -- Existing gameplay modules are preserved from the supplied recovery script; runtime not verified in Roblox/Delta.
 
 local TW = game:GetService("TweenService")
@@ -1459,7 +1459,7 @@ SubTitle.Size = UDim2.new(0.52,0,0,14)
 SubTitle.Position = UDim2.new(0.24,0,0,29)
 SubTitle.BackgroundTransparency = 1
 SubTitle.Font = Enum.Font.GothamBold
-SubTitle.Text = "YOUNG0X STYLE  •  MEME SEA"
+SubTitle.Text = "ZTB HUB STYLE  •  MEME SEA"
 SubTitle.TextSize = 11
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -4714,6 +4714,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("💀 ZTB SKULL EDITION", "Young0x Edition • menú listo", C.Yel)
+TLG.PNotif("💀 ZTB SKULL EDITION", "ZTB HUB STYLE • Meme Sea listo", C.Yel)
 
 print("[ZTB SKULL EDITION] 💀 Cargado")
