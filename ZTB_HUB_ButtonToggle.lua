@@ -1,5 +1,5 @@
--- ZTB HUB — Meme Sea Edition
--- Ghost Hitbox + Fly Boost + FABs visibles
+-- ZTB SKULL EDITION — Meme Sea
+-- Dark skull UI + compact floating toggle + Ghost Hitbox + Fly Boost
 
 local TW = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
@@ -2832,7 +2832,7 @@ end
 -- TOOLS TAB
 do
   Sec(PTo, "💀 FABS", "💀")
-  Tog(PTo, "Activar / Desactivar FABS", true, function(v)
+  Tog(PTo, "Activar / Desactivar FABS", false, function(v)
     TLG.FAB_SetVisible(v)
   end)
   Lbl(PTo, "Muestra u oculta los botones rápidos flotantes.", C.Gr)
@@ -4505,7 +4505,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "ZTB HUB V9.4.11"
+WTx.Text = "ZTB SKULL EDITION"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -4525,10 +4525,10 @@ task.spawn(function()
 end)
 
 -- BOTON FLOTANTE ZTB: abre/cierra el menu (sin barra minimizada)
-local min = false
+local min = true
 local setMin
 do
-  local BTN_SIZE = 54
+  local BTN_SIZE = 42
   local EASE = Enum.EasingStyle
   local DIR = Enum.EasingDirection
   local lastWPos = W_P
@@ -4543,22 +4543,22 @@ do
   local ToggleButton = Instance.new("TextButton", SG)
   ToggleButton.Name = "ZTB_MenuToggleButton"
   ToggleButton.Size = UDim2.fromOffset(BTN_SIZE, BTN_SIZE)
-  ToggleButton.Position = UDim2.new(0, 22, 0.5, -BTN_SIZE / 2)
+  ToggleButton.Position = UDim2.new(0, 14, 0.5, -BTN_SIZE / 2)
   ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 12, 14)
   ToggleButton.BackgroundTransparency = 0.08
   ToggleButton.BorderSizePixel = 0
   ToggleButton.AutoButtonColor = false
-  ToggleButton.Text = "Z"
+  ToggleButton.Text = "💀"
   ToggleButton.Font = Enum.Font.GothamBlack
-  ToggleButton.TextSize = 31
+  ToggleButton.TextSize = 22
   ToggleButton.TextColor3 = Color3.fromRGB(255, 218, 120)
-  ToggleButton.TextStrokeTransparency = 0.75
+  ToggleButton.TextStrokeTransparency = 0.85
   ToggleButton.Visible = true
   ToggleButton.ZIndex = 200
-  Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 15)
+  Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 11)
   local ButtonStroke = Instance.new("UIStroke", ToggleButton)
   ButtonStroke.Color = Color3.fromRGB(224, 166, 55)
-  ButtonStroke.Thickness = 1.6
+  ButtonStroke.Thickness = 1.2
   ButtonStroke.Transparency = 0.08
 
   local function isPointer(i)
@@ -4598,7 +4598,8 @@ do
         and i.UserInputType == Enum.UserInputType.MouseButton1)
     if not same then return end
     dragging = false
-    if not moved then setMin(not min) end
+    -- No cambiar el estado aquí: Activated gestiona el toque/clic.
+    -- Hacerlo en ambos eventos provocaba dos toggles y el menú parecía no abrir.
   end)
 
   setMin = function(st)
@@ -4626,6 +4627,17 @@ do
   end
   TLG.ZTB_SetMin = setMin
 
+  -- Estado inicial: menú oculto, botón flotante visible.
+  W.Visible = false
+  WM.Visible = false
+  ToggleButton.Visible = true
+  min = true
+
+  -- Activated funciona mejor en pantalla táctil que depender solo de InputEnded.
+  ToggleButton.Activated:Connect(function()
+    if dragging and moved then return end
+    setMin(not min)
+  end)
 end
 
 local CB = Instance.new("TextButton", DcIco)
@@ -4659,7 +4671,7 @@ task.spawn(function()
     t1.Font = Enum.Font.GothamBold
     t1.TextSize = 34
     t1.TextColor3 = C.Yel
-    t1.Text = "💀 ZTB HUB"
+    t1.Text = "💀 ZTB SKULL EDITION"
     t1.TextTransparency = 1
     t1.ZIndex = 501
     local t2 = Instance.new("TextLabel", fr)
@@ -4669,7 +4681,7 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "Meme Sea • V9.4.11"
+    t2.Text = "MEME SEA • DARK GOLD UI"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
@@ -4691,6 +4703,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 ZTB HUB V9.4.11", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("💀 ZTB SKULL EDITION", "Menú listo • botón flotante compacto", C.Yel)
 
-print("[ZTB HUB V9.4.11] 💀 Cargado")
+print("[ZTB SKULL EDITION] 💀 Cargado")
