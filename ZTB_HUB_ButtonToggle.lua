@@ -189,6 +189,23 @@ for _, n in ipairs(names) do
   pcall(function() local o = TLG.SP:FindFirstChild(n); if o then o:Destroy() end end)
   pcall(function() local o = CG:FindFirstChild(n); if o then o:Destroy() end end)
 end
+-- HARD CLEANUP: remove previous ZTB builds even when an older version used
+-- a different ScreenGui name. This prevents two full menus stacking.
+local function clearOldZTB(root)
+  pcall(function()
+    for _, obj in ipairs(root:GetChildren()) do
+      if obj:IsA("ScreenGui") then
+        local hasMain = obj:FindFirstChild("ZTB_MainWindow", true) ~= nil
+        local hasRadial = obj:FindFirstChild("ZTB_RadialCore", true) ~= nil
+        local n = string.lower(obj.Name)
+        local looksLikeZTB = string.find(n, "ztb", 1, true) or string.find(n, "tlg", 1, true)
+        if hasMain or hasRadial or looksLikeZTB then obj:Destroy() end
+      end
+    end
+  end)
+end
+clearOldZTB(TLG.SP)
+clearOldZTB(CG)
 
 local SG = Instance.new("ScreenGui")
 SG.Name = "ZTB_HUB_Menu"
