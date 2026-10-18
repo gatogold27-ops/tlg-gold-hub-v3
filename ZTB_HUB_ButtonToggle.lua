@@ -4759,373 +4759,469 @@ TLG.PNotif("👑 ZTB HUB V9.4.7", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
 print("[ZTB HUB V9.4.7] 💀 Cargado")
 
--- ============================================
--- NUEVO MENU VISUAL INTEGRADO SOBRE EL HUB ORIGINAL
--- ============================================
-task.spawn(function()
-  task.wait(1)
-  local SG = TLG.SG
-  if not SG then return end
-  
-  -- Ocultar ventana vieja W si existe para mostrar solo la nueva visual
-  pcall(function()
-    for _,v in ipairs(SG:GetChildren()) do
-      if v.Name == "W" or v.Name:find("TLG_Gold") then
-        -- v.Visible = false
-      end
-    end
-  end)
+-- ===== INYECCIÓN NUEVO MENU V3 INFO (FOTO 2) =====
+-- ZTB HUB — EDITION INFO - DISEÑO EXACTO DE LA FOTO 2
+-- Basado en tu script original de 152KB + nuevo visual
 
-  local C2 = {Yel = Color3.fromRGB(255,215,0), Gr = Color3.fromRGB(180,180,180), Bg = Color3.fromRGB(35,41,54), Bg2 = Color3.fromRGB(28,32,44), Card = Color3.fromRGB(20,22,30)}
-  local function mkCorner(p,r) local c=Instance.new("UICorner") c.CornerRadius=UDim.new(0,r) c.Parent=p return c end
-  local function mkStroke(p,col,th) local s=Instance.new("UIStroke") s.Color=col s.Thickness=th or 1 s.Parent=p return s end
-  local function tw2(o,t,e,d,pr) return game:GetService("TweenService"):Create(o,TweenInfo.new(t,e or Enum.EasingStyle.Quad,d or Enum.EasingDirection.Out),pr) end
+local TW = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local PLR = game:GetService("Players")
+local RS = game:GetService("RunService")
+local CG = game:GetService("CoreGui")
+local HS = game:GetService("HttpService")
 
-  -- PANEL DERECHO ZTB HUB
-  local Main = Instance.new("Frame", SG)
-  Main.Name = "ZTB_HUB_NewPanel"
-  Main.Size = UDim2.fromOffset(360, 580)
-  Main.Position = UDim2.fromScale(0.99, 0.02)
-  Main.AnchorPoint = Vector2.new(1,0)
-  Main.BackgroundColor3 = C2.Bg
-  Main.BorderSizePixel = 0
-  Main.ZIndex = 210
-  mkCorner(Main, 14)
-  mkStroke(Main, Color3.fromRGB(255,215,0), 1.5).Transparency = 0.6
-  Main.Active = true
-  Main.Draggable = true
+_G.TLG = _G.TLG or {}
+-- TLG ya existe
+local TLG = _G.TLG
+TLG.LP = PLR.LocalPlayer
+TLG.Cam = workspace.CurrentCamera
+TLG.IsMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
+TLG.SelectedTarget = nil
 
-  local Header = Instance.new("Frame", Main)
-  Header.Size = UDim2.new(1,0,0,54)
-  Header.BackgroundColor3 = C2.Bg2
-  Header.BorderSizePixel=0
-  Header.ZIndex=211
-  mkCorner(Header,14)
-
-  local Title = Instance.new("TextLabel", Header)
-  Title.Size = UDim2.new(1,-90,1,0)
-  Title.Position = UDim2.fromOffset(54,0)
-  Title.BackgroundTransparency=1
-  Title.Text = "ZTB HUB"
-  Title.Font = Enum.Font.GothamBold
-  Title.TextSize = 20
-  Title.TextColor3 = Color3.fromRGB(255,255,255)
-  Title.TextXAlignment = Enum.TextXAlignment.Left
-  Title.ZIndex=212
-
-  local Sub = Instance.new("TextLabel", Header)
-  Sub.Size = UDim2.new(1,-90,0,14)
-  Sub.Position = UDim2.fromOffset(54,32)
-  Sub.BackgroundTransparency=1
-  Sub.Text = "✦ OPTIMIZE ✦"
-  Sub.Font = Enum.Font.Gotham
-  Sub.TextSize = 11
-  Sub.TextColor3 = Color3.fromRGB(120,255,120)
-  Sub.TextXAlignment = Enum.TextXAlignment.Left
-  Sub.ZIndex=212
-
-  local FPSBadge = Instance.new("TextLabel", Header)
-  FPSBadge.Size = UDim2.fromOffset(132,22)
-  FPSBadge.Position = UDim2.new(1,-142,0,8)
-  FPSBadge.BackgroundColor3 = Color3.fromRGB(18,28,18)
-  FPSBadge.Text = "FPS: 60  Ping: 48ms"
-  FPSBadge.Font = Enum.Font.Code
-  FPSBadge.TextSize=11
-  FPSBadge.TextColor3 = Color3.fromRGB(120,255,120)
-  FPSBadge.ZIndex=212
-  mkCorner(FPSBadge,8)
-
-  local Close = Instance.new("TextButton", Header)
-  Close.Size = UDim2.fromOffset(30,30)
-  Close.Position = UDim2.new(1,-36,0,12)
-  Close.BackgroundColor3 = Color3.fromRGB(60,20,20)
-  Close.Text="✕"
-  Close.TextColor3=Color3.new(1,1,1)
-  Close.Font=Enum.Font.GothamBold
-  Close.TextSize=14
-  Close.ZIndex=213
-  mkCorner(Close,8)
-  Close.MouseButton1Click:Connect(function() Main:Destroy() Radial:Destroy() end)
-
-  local Content = Instance.new("ScrollingFrame", Main)
-  Content.Size = UDim2.new(1,-12,1,-62)
-  Content.Position = UDim2.fromOffset(6,56)
-  Content.BackgroundTransparency=1
-  Content.BorderSizePixel=0
-  Content.CanvasSize = UDim2.new(0,0,0,900)
-  Content.ScrollBarThickness=2
-  Content.ZIndex=211
-  local List = Instance.new("UIListLayout", Content)
-  List.Padding = UDim.new(0,10)
-
-  local function SectionLabel(text)
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(1,-6,0,30)
-    f.BackgroundColor3 = C2.Card
-    f.BorderSizePixel=0
-    f.ZIndex=212
-    mkCorner(f,8)
-    local l = Instance.new("TextLabel", f)
-    l.Size = UDim2.new(1,-12,1,0)
-    l.Position=UDim2.fromOffset(10,0)
-    l.BackgroundTransparency=1
-    l.Text = text
-    l.Font=Enum.Font.GothamBold
-    l.TextSize=12
-    l.TextColor3=Color3.fromRGB(220,220,220)
-    l.TextXAlignment=Enum.TextXAlignment.Left
-    l.ZIndex=213
-    return f
-  end
-
-  local function StatCard()
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(1,-6,0,62)
-    f.BackgroundColor3 = Color3.fromRGB(16,18,26)
-    f.BorderSizePixel=0
-    f.ZIndex=212
-    mkCorner(f,10)
-    mkStroke(f, Color3.fromRGB(255,215,0),1).Transparency=0.7
-    local g = Instance.new("UIGridLayout", f)
-    g.CellSize=UDim2.fromOffset(100,50)
-    g.CellPadding=UDim2.fromOffset(8,0)
-    g.FillDirectionMaxCells=3
-    g.HorizontalAlignment=Enum.HorizontalAlignment.Center
-    g.VerticalAlignment=Enum.VerticalAlignment.Center
-    for _,d in ipairs({{"FPS","60"},{"PING","48"},{"RAM (MB)","812"}}) do
-      local c = Instance.new("Frame")
-      c.BackgroundTransparency=1
-      c.Parent=f
-      c.ZIndex=213
-      local t1 = Instance.new("TextLabel", c)
-      t1.Size=UDim2.new(1,0,0,16)
-      t1.BackgroundTransparency=1
-      t1.Text=d[1]
-      t1.Font=Enum.Font.Gotham
-      t1.TextSize=10
-      t1.TextColor3=Color3.fromRGB(150,150,150)
-      t1.ZIndex=214
-      local t2 = Instance.new("TextLabel", c)
-      t2.Size=UDim2.new(1,0,1,0)
-      t2.Position=UDim2.fromOffset(0,8)
-      t2.BackgroundTransparency=1
-      t2.Text=d[2]
-      t2.Name=d[1]
-      t2.Font=Enum.Font.GothamBold
-      t2.TextSize=22
-      t2.TextColor3=Color3.fromRGB(120,255,120)
-      t2.ZIndex=214
-    end
-    return f
-  end
-
-  local function ToggleCard(text, defaultOn, callback)
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(1,-6,0,44)
-    f.BackgroundColor3 = Color3.fromRGB(16,18,26)
-    f.BorderSizePixel=0
-    f.ZIndex=212
-    mkCorner(f,10)
-    local l = Instance.new("TextLabel", f)
-    l.Size=UDim2.new(1,-78,1,0)
-    l.Position=UDim2.fromOffset(12,0)
-    l.BackgroundTransparency=1
-    l.Text=text
-    l.Font=Enum.Font.Gotham
-    l.TextSize=12
-    l.TextColor3=Color3.fromRGB(220,220,220)
-    l.TextXAlignment=Enum.TextXAlignment.Left
-    l.ZIndex=213
-    local toggleBG = Instance.new("Frame", f)
-    toggleBG.Size=UDim2.fromOffset(48,26)
-    toggleBG.Position=UDim2.new(1,-58,0.5,-13)
-    toggleBG.BackgroundColor3 = defaultOn and Color3.fromRGB(255,180,60) or Color3.fromRGB(60,60,70)
-    toggleBG.BorderSizePixel=0
-    toggleBG.ZIndex=213
-    mkCorner(toggleBG,13)
-    local knob = Instance.new("Frame", toggleBG)
-    knob.Size=UDim2.fromOffset(20,20)
-    knob.Position = defaultOn and UDim2.new(1,-22,0.5,-10) or UDim2.fromOffset(3,3)
-    knob.BackgroundColor3=Color3.new(1,1,1)
-    knob.BorderSizePixel=0
-    knob.ZIndex=214
-    mkCorner(knob,10)
-    f:SetAttribute("On", defaultOn)
-    local btn = Instance.new("TextButton", f)
-    btn.Size=UDim2.new(1,0,1,0)
-    btn.BackgroundTransparency=1
-    btn.Text=""
-    btn.ZIndex=215
-    btn.MouseButton1Click:Connect(function()
-      local on = not f:GetAttribute("On")
-      f:SetAttribute("On", on)
-      tw2(toggleBG,0.2,Enum.EasingStyle.Quad,Enum.EasingDirection.Out,{BackgroundColor3 = on and Color3.fromRGB(255,180,60) or Color3.fromRGB(60,60,70)}):Play()
-      tw2(knob,0.2,Enum.EasingStyle.Quad,Enum.EasingDirection.Out,{Position = on and UDim2.new(1,-22,0.5,-10) or UDim2.fromOffset(3,3)}):Play()
-      if callback then pcall(callback, on) end
-    end)
-    return f
-  end
-
-  Content:AddChild(SectionLabel("📈 MONITOR EN VIVO"))
-  local stats = StatCard()
-  stats.Parent = Content
-
-  Content:AddChild(SectionLabel("🔋 MODO AHORRO"))
-  local function ButtonCard2(text, cb)
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(1,-6,0,40)
-    f.BackgroundColor3 = Color3.fromRGB(16,18,26)
-    f.ZIndex=212
-    mkCorner(f,10)
-    local b = Instance.new("TextButton", f)
-    b.Size=UDim2.new(1,-12,1,0)
-    b.Position=UDim2.fromOffset(6,0)
-    b.BackgroundTransparency=1
-    b.Text=text
-    b.Font=Enum.Font.GothamBold
-    b.TextSize=12
-    b.TextColor3=Color3.fromRGB(255,200,80)
-    b.ZIndex=213
-    b.MouseButton1Click:Connect(function() if cb then cb() end end)
-    return f
-  end
-
-  Content:AddChild(ButtonCard2("🔋 Activar modo ahorro (pantalla negra)", function()
-    local black = SG:FindFirstChild("BlackScreen")
-    if black then black:Destroy() else
-      local b = Instance.new("Frame", SG)
-      b.Name="BlackScreen"
-      b.Size=UDim2.new(1,0,1,0)
-      b.BackgroundColor3=Color3.new(0,0,0)
-      b.ZIndex=300
-      local btn = Instance.new("TextButton", b)
-      btn.Size=UDim2.fromOffset(200,40)
-      btn.Position=UDim2.fromScale(0.5,0.5)
-      btn.AnchorPoint=Vector2.new(0.5,0.5)
-      btn.Text="TOCAR PARA SALIR"
-      btn.ZIndex=301
-      btn.MouseButton1Click:Connect(function() b:Destroy() end)
-      mkCorner(btn,8)
-    end
-  end))
-
-  Content:AddChild(ToggleCard("🔇 Silenciar el juego", false, function(on)
-    pcall(function() game:GetService("SoundService").Volume = on and 0 or 1 end)
-  end))
-  Content:AddChild(SectionLabel("👥 JUGADORES"))
-  Content:AddChild(ToggleCard("👻 Ocultar otros jugadores", false, function(on)
-    TLG.HideOthers = on
-    for _,plr in ipairs(game.Players:GetPlayers()) do
-      if plr ~= TLG.LP and plr.Character then
-        for _,v in ipairs(plr.Character:GetDescendants()) do
-          if v:IsA("BasePart") then v.LocalTransparencyModifier = on and 1 or 0 end
-        end
-      end
-    end
-  end))
-
-  -- Toggles de funciones originales del HUB
-  Content:AddChild(SectionLabel("💀 FUNCIONES ORIGINALES"))
-  Content:AddChild(ToggleCard("👻 Ghost Hitbox", true, function(on) TLG.GhostEnabled = on end))
-  Content:AddChild(ToggleCard("🚀 Fly Boost", false, function(on) 
-    if on then if TLG.StartFly then TLG.StartFly() end else if TLG.StopFly then TLG.StopFly() end end
-  end))
-  Content:AddChild(ToggleCard("⚔️ Auto Farm / FABs", true, function(on) TLG.FABVisible = on end))
-  Content:AddChild(ButtonCard2("⚡ OPTIMIZE - Limpiar lag", function()
-    if TLG.Optimize then TLG.Optimize() end
+local function getParent()
+  local p
+  pcall(function() if gethui then p = gethui() end end)
+  if not p then
     pcall(function()
-      for _,v in ipairs(workspace:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Trail") then v.Enabled=false end
+      if syn and syn.protect_gui then
+        local g = Instance.new("ScreenGui")
+        syn.protect_gui(g); g.Parent = CG; p = g
       end
-      game:GetService("Lighting").GlobalShadows=false
     end)
-  end))
-
-  -- Radial
-  local Radial = Instance.new("Frame", SG)
-  Radial.Name="RadialNew"
-  Radial.Size=UDim2.fromOffset(340,340)
-  Radial.Position=UDim2.fromScale(0.18,0.5)
-  Radial.AnchorPoint=Vector2.new(0.5,0.5)
-  Radial.BackgroundTransparency=1
-  Radial.ZIndex=210
-  Radial.Active=true
-  Radial.Draggable=true
-
-  local Circle = Instance.new("Frame", Radial)
-  Circle.Size=UDim2.fromOffset(220,220)
-  Circle.Position=UDim2.fromScale(0.5,0.5)
-  Circle.AnchorPoint=Vector2.new(0.5,0.5)
-  Circle.BackgroundColor3=Color3.fromRGB(20,28,40)
-  Circle.BackgroundTransparency=0.15
-  Circle.ZIndex=211
-  mkCorner(Circle,110)
-
-  local Center = Instance.new("TextButton", Circle)
-  Center.Size=UDim2.fromOffset(88,88)
-  Center.Position=UDim2.fromScale(0.5,0.5)
-  Center.AnchorPoint=Vector2.new(0.5,0.5)
-  Center.BackgroundColor3=Color3.fromRGB(10,10,12)
-  Center.Text=""
-  Center.ZIndex=212
-  mkCorner(Center,44)
-
-  local Skull = Instance.new("TextLabel", Center)
-  Skull.Size=UDim2.new(1,0,1,-18)
-  Skull.BackgroundTransparency=1
-  Skull.Text="💀"
-  Skull.TextSize=42
-  Skull.ZIndex=213
-
-  local OptLabel = Instance.new("TextLabel", Circle)
-  OptLabel.Size=UDim2.fromOffset(88,16)
-  OptLabel.Position=UDim2.new(0.5,-44,0.5,52)
-  OptLabel.BackgroundTransparency=1
-  OptLabel.Text="OPTIMIZE"
-  OptLabel.Font=Enum.Font.GothamBold
-  OptLabel.TextSize=11
-  OptLabel.TextColor3=Color3.fromRGB(120,255,120)
-  OptLabel.ZIndex=213
-
-  Center.MouseButton1Click:Connect(function()
-    if TLG.Optimize then TLG.Optimize() end
-    tw2(Center,0.1,Enum.EasingStyle.Back,Enum.EasingDirection.Out,{Size=UDim2.fromOffset(96,96)}):Play()
-    task.wait(0.1)
-    tw2(Center,0.1,Enum.EasingStyle.Back,Enum.EasingDirection.Out,{Size=UDim2.fromOffset(88,88)}):Play()
-  end)
-
-  local icons = {"⚙️","👤","⚔️","🎯","🚀","🏝️","💻","🛠️","👁️","✨","⚡"}
-  for i,emoji in ipairs(icons) do
-    local ang = (i-1)*(360/#icons) - 90
-    local rad = math.rad(ang)
-    local dist = 132
-    local btn = Instance.new("TextButton", Radial)
-    btn.Size=UDim2.fromOffset(42,42)
-    btn.AnchorPoint=Vector2.new(0.5,0.5)
-    btn.BackgroundColor3=Color3.fromRGB(25,28,35)
-    btn.Text=emoji
-    btn.TextSize=18
-    btn.ZIndex=212
-    mkCorner(btn,21)
-    btn.Position = UDim2.new(0.5, math.cos(rad)*dist, 0.5, math.sin(rad)*dist)
   end
+  if not p then pcall(function() local f=Instance.new("Folder") f.Parent=CG; f:Destroy(); return CG end) end
+  if not p then p = TLG.LP:WaitForChild("PlayerGui") end
+  return p
+end
+TLG.SP = getParent()
 
-  -- Stats en vivo
-  task.spawn(function()
-    while SG.Parent and Main.Parent do
-      task.wait(1)
-      pcall(function()
-        local ping = math.floor((TLG.LP:GetNetworkPing() or 0)*1000)
-        local ram = math.floor(collectgarbage("count")/1024)
-        local fps = 60
-        local fpsLabel = stats:FindFirstChild("FPS")
-        local pingLabel = stats:FindFirstChild("PING")
-        local ramLabel = stats:FindFirstChild("RAM (MB)")
-        if fpsLabel then fpsLabel.Text=tostring(fps) end
-        if pingLabel then pingLabel.Text=tostring(ping) end
-        if ramLabel then ramLabel.Text=tostring(ram) end
-        FPSBadge.Text = "FPS: "..fps.."  Ping: "..ping.."ms"
-      end)
-    end
-  end)
+for _, n in ipairs({"ZTB_HUB_Menu","TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","ZTB_HUB_Visual","ZTB_HUB_NewPanel","RadialNew","ZTB_HUB_V3"}) do
+  pcall(function() local o = TLG.SP:FindFirstChild(n); if o then o:Destroy() end end)
+  pcall(function() local o = CG:FindFirstChild(n); if o then o:Destroy() end end)
+end
+
+local SG = Instance.new("ScreenGui")
+SG.Name = "ZTB_HUB_V3_FINAL"
+SG.ResetOnSpawn = false
+SG.IgnoreGuiInset = true
+SG.DisplayOrder = 210
+SG.Parent = TLG.SP
+TLG.SG = SG
+
+local C = {Yel=Color3.fromRGB(255,215,0), Bg=Color3.fromRGB(24,22,18), Bg2=Color3.fromRGB(35,32,26), Card=Color3.fromRGB(18,16,14)}
+local function mkCorner(p,r) local c=Instance.new("UICorner") c.CornerRadius=UDim.new(0,r) c.Parent=p return c end
+local function mkStroke(p,col,th) local s=Instance.new("UIStroke") s.Color=col s.Thickness=th or 1 s.Parent=p return s end
+local function tw(o,t,e,d,pr) return TW:Create(o,TweenInfo.new(t,e or Enum.EasingStyle.Quad,d or Enum.EasingDirection.Out),pr) end
+
+-- ===== TOP BAR ZTB SKILL EDITION (como foto) =====
+local TopBar = Instance.new("Frame", SG)
+TopBar.Size = UDim2.fromOffset(220,30)
+TopBar.Position = UDim2.fromOffset(20,12)
+TopBar.BackgroundColor3 = Color3.fromRGB(28,24,18)
+TopBar.BorderSizePixel=0
+TopBar.ZIndex=215
+mkCorner(TopBar,8)
+mkStroke(TopBar, C.Yel,1).Transparency=0.5
+local TopTxt = Instance.new("TextLabel", TopBar)
+TopTxt.Size = UDim2.new(1,-40,1,0)
+TopTxt.Position=UDim2.fromOffset(30,0)
+TopTxt.BackgroundTransparency=1
+TopTxt.Text="💀 ZTB SKILL EDITION"
+TopTxt.Font=Enum.Font.GothamBold
+TopTxt.TextSize=11
+TopTxt.TextColor3=Color3.fromRGB(255,230,120)
+TopTxt.TextXAlignment=Enum.TextXAlignment.Left
+TopTxt.ZIndex=216
+local TimeLbl = Instance.new("TextLabel", TopBar)
+TimeLbl.Size=UDim2.fromOffset(40,30)
+TimeLbl.Position=UDim2.new(1,-44,0,0)
+TimeLbl.BackgroundTransparency=1
+TimeLbl.Text="10:53"
+TimeLbl.Font=Enum.Font.Code
+TimeLbl.TextSize=10
+TimeLbl.TextColor3=Color3.fromRGB(180,180,180)
+TimeLbl.ZIndex=216
+
+-- ===== PANEL DERECHO ZTB HUB INFO =====
+local Main = Instance.new("Frame", SG)
+Main.Size = UDim2.fromOffset(380, 580)
+Main.Position = UDim2.fromScale(0.99, 0.02)
+Main.AnchorPoint = Vector2.new(1,0)
+Main.BackgroundColor3 = Color3.fromRGB(22,20,18)
+Main.BorderSizePixel=0
+Main.ZIndex=210
+Main.Active=true
+Main.Draggable=true
+mkCorner(Main,14)
+mkStroke(Main, C.Yel,1.5).Transparency=0.4
+
+local Header = Instance.new("Frame", Main)
+Header.Size=UDim2.new(1,0,0,52)
+Header.BackgroundColor3=Color3.fromRGB(32,28,22)
+Header.ZIndex=211
+mkCorner(Header,14)
+
+local SkullIco = Instance.new("Frame", Header)
+SkullIco.Size=UDim2.fromOffset(32,32)
+SkullIco.Position=UDim2.fromOffset(12,10)
+SkullIco.BackgroundColor3=Color3.fromRGB(20,18,16)
+SkullIco.ZIndex=212
+mkCorner(SkullIco,16)
+mkStroke(SkullIco, C.Yel,1)
+local SkullTxt = Instance.new("TextLabel", SkullIco)
+SkullTxt.Size=UDim2.new(1,0,1,0)
+SkullTxt.BackgroundTransparency=1
+SkullTxt.Text="💀"
+SkullTxt.TextSize=16
+SkullTxt.ZIndex=213
+
+local Title = Instance.new("TextLabel", Header)
+Title.Size=UDim2.new(0.6,0,0,22)
+Title.Position=UDim2.fromOffset(54,8)
+Title.BackgroundTransparency=1
+Title.Text="ZTB HUB"
+Title.Font=Enum.Font.GothamBold
+Title.TextSize=18
+Title.TextColor3=Color3.fromRGB(255,220,100)
+Title.TextXAlignment=Enum.TextXAlignment.Left
+Title.ZIndex=212
+
+local Sub = Instance.new("TextLabel", Header)
+Sub.Size=UDim2.new(0.4,0,0,12)
+Sub.Position=UDim2.fromOffset(54,30)
+Sub.BackgroundTransparency=1
+Sub.Text="◆ INFO ◆"
+Sub.Font=Enum.Font.Gotham
+Sub.TextSize=10
+Sub.TextColor3=Color3.fromRGB(150,150,150)
+Sub.TextXAlignment=Enum.TextXAlignment.Left
+Sub.ZIndex=212
+
+local FPSLbl = Instance.new("TextLabel", Header)
+FPSLbl.Size=UDim2.fromOffset(50,14)
+FPSLbl.Position=UDim2.new(1,-140,0,6)
+FPSLbl.BackgroundTransparency=1
+FPSLbl.Text="FPS: 17"
+FPSLbl.Font=Enum.Font.Code
+FPSLbl.TextSize=10
+FPSLbl.TextColor3=Color3.fromRGB(200,200,200)
+FPSLbl.ZIndex=212
+
+local PingLbl = Instance.new("TextLabel", Header)
+PingLbl.Size=UDim2.fromOffset(70,14)
+PingLbl.Position=UDim2.new(1,-80,0,6)
+PingLbl.BackgroundTransparency=1
+PingLbl.Text="Ping: 13ms"
+PingLbl.Font=Enum.Font.Code
+PingLbl.TextSize=10
+PingLbl.TextColor3=Color3.fromRGB(100,200,255)
+PingLbl.ZIndex=212
+
+local Close = Instance.new("TextButton", Header)
+Close.Size=UDim2.fromOffset(28,28)
+Close.Position=UDim2.new(1,-32,0,12)
+Close.BackgroundColor3=Color3.fromRGB(50,20,20)
+Close.Text="✕"
+Close.TextColor3=Color3.new(1,1,1)
+Close.ZIndex=214
+mkCorner(Close,6)
+Close.MouseButton1Click:Connect(function() SG:Destroy() end)
+
+local Content = Instance.new("ScrollingFrame", Main)
+Content.Size=UDim2.new(1,-10,1,-60)
+Content.Position=UDim2.fromOffset(5,54)
+Content.BackgroundTransparency=1
+Content.BorderSizePixel=0
+Content.CanvasSize=UDim2.new(0,0,0,600)
+Content.ScrollBarThickness=1
+Content.ZIndex=211
+local List = Instance.new("UIListLayout", Content)
+List.Padding=UDim.new(0,10)
+
+local function Section(t)
+  local f=Instance.new("Frame")
+  f.Size=UDim2.new(1,-6,0,28)
+  f.BackgroundColor3=Color3.fromRGB(28,24,20)
+  f.ZIndex=212
+  mkCorner(f,6)
+  local l=Instance.new("TextLabel", f)
+  l.Size=UDim2.new(1,-10,1,0)
+  l.Position=UDim2.fromOffset(10,0)
+  l.BackgroundTransparency=1
+  l.Text="📊 "..t
+  l.Font=Enum.Font.GothamBold
+  l.TextSize=11
+  l.TextColor3=Color3.fromRGB(220,210,180)
+  l.TextXAlignment=Enum.TextXAlignment.Left
+  l.ZIndex=213
+  return f
+end
+
+Content:AddChild(Section("JUGADOR SELECCIONADO"))
+
+-- Card jugador
+local Card = Instance.new("Frame", Content)
+Card.Size=UDim2.new(1,-6,0,210)
+Card.BackgroundColor3=Color3.fromRGB(16,14,12)
+Card.ZIndex=212
+mkCorner(Card,12)
+mkStroke(Card, C.Yel,1).Transparency=0.6
+
+local Avatar = Instance.new("Frame", Card)
+Avatar.Size=UDim2.fromOffset(86,86)
+Avatar.Position=UDim2.fromOffset(16,18)
+Avatar.BackgroundColor3=Color3.fromRGB(30,28,24)
+Avatar.ZIndex=213
+mkCorner(Avatar,43)
+mkStroke(Avatar, C.Yel,2)
+
+local AvatarTxt = Instance.new("TextLabel", Avatar)
+AvatarTxt.Size=UDim2.new(1,0,1,0)
+AvatarTxt.BackgroundTransparency=1
+AvatarTxt.Text="👤"
+AvatarTxt.TextSize=32
+AvatarTxt.ZIndex=214
+
+local NameLbl = Instance.new("TextLabel", Card)
+NameLbl.Size=UDim2.new(1,-130,0,22)
+NameLbl.Position=UDim2.fromOffset(116,22)
+NameLbl.BackgroundTransparency=1
+NameLbl.Text="BT_jose"
+NameLbl.Name="PlayerName"
+NameLbl.Font=Enum.Font.GothamBold
+NameLbl.TextSize=18
+NameLbl.TextColor3=Color3.fromRGB(255,255,255)
+NameLbl.TextXAlignment=Enum.TextXAlignment.Left
+NameLbl.ZIndex=213
+
+local HandleLbl = Instance.new("TextLabel", Card)
+HandleLbl.Size=UDim2.new(1,-130,0,14)
+HandleLbl.Position=UDim2.fromOffset(116,44)
+HandleLbl.BackgroundTransparency=1
+HandleLbl.Text="@Ttdhdbdhdrbd581"
+HandleLbl.Name="Handle"
+HandleLbl.Font=Enum.Font.Gotham
+HandleLbl.TextSize=11
+HandleLbl.TextColor3=Color3.fromRGB(130,130,130)
+HandleLbl.TextXAlignment=Enum.TextXAlignment.Left
+HandleLbl.ZIndex=213
+
+local IdLbl = Instance.new("TextLabel", Card)
+IdLbl.Size=UDim2.new(1,-130,0,12)
+IdLbl.Position=UDim2.fromOffset(116,58)
+IdLbl.BackgroundTransparency=1
+IdLbl.Text="ID: 4804910906"
+IdLbl.Name="IDLabel"
+IdLbl.Font=Enum.Font.Code
+IdLbl.TextSize=10
+IdLbl.TextColor3=Color3.fromRGB(100,100,100)
+IdLbl.TextXAlignment=Enum.TextXAlignment.Left
+IdLbl.ZIndex=213
+
+local LeftBtn = Instance.new("TextButton", Card)
+LeftBtn.Size=UDim2.fromOffset(32,32)
+LeftBtn.Position=UDim2.new(1,-78,0,32)
+LeftBtn.BackgroundColor3=Color3.fromRGB(30,26,22)
+LeftBtn.Text="‹"
+LeftBtn.Font=Enum.Font.GothamBold
+LeftBtn.TextSize=18
+LeftBtn.TextColor3=Color3.fromRGB(120,120,120)
+LeftBtn.ZIndex=213
+mkCorner(LeftBtn,16)
+
+local RightBtn = Instance.new("TextButton", Card)
+RightBtn.Size=UDim2.fromOffset(32,32)
+RightBtn.Position=UDim2.new(1,-38,0,32)
+RightBtn.BackgroundColor3=Color3.fromRGB(30,26,22)
+RightBtn.Text="›"
+RightBtn.Font=Enum.Font.GothamBold
+RightBtn.TextSize=18
+RightBtn.TextColor3=C.Yel
+RightBtn.ZIndex=213
+mkCorner(RightBtn,16)
+
+-- Stats grid
+local Stats = Instance.new("Frame", Card)
+Stats.Size=UDim2.new(1,-20,0,86)
+Stats.Position=UDim2.fromOffset(10,102)
+Stats.BackgroundTransparency=1
+Stats.ZIndex=213
+local Grid = Instance.new("UIGridLayout", Stats)
+Grid.CellSize=UDim2.fromOffset(108,38)
+Grid.CellPadding=UDim2.fromOffset(6,6)
+Grid.FillDirectionMaxCells=3
+
+local function statBox(title,val)
+  local f=Instance.new("Frame")
+  f.BackgroundColor3=Color3.fromRGB(24,22,20)
+  f.ZIndex=214
+  mkCorner(f,8)
+  local t1=Instance.new("TextLabel", f)
+  t1.Size=UDim2.new(1,0,0,14)
+  t1.BackgroundTransparency=1
+  t1.Text=title
+  t1.Font=Enum.Font.Gotham
+  t1.TextSize=9
+  t1.TextColor3=Color3.fromRGB(130,120,100)
+  t1.ZIndex=215
+  local t2=Instance.new("TextLabel", f)
+  t2.Size=UDim2.new(1,0,1,0)
+  t2.Position=UDim2.fromOffset(0,6)
+  t2.BackgroundTransparency=1
+  t2.Text=val
+  t2.Name=title
+  t2.Font=Enum.Font.GothamBold
+  t2.TextSize=13
+  t2.TextColor3=Color3.fromRGB(240,230,200)
+  t2.ZIndex=215
+  return f
+end
+
+Stats:AddChild(statBox("Nivel","2,400"))
+Stats:AddChild(statBox("Power","1"))
+Stats:AddChild(statBox("Melee","2,400"))
+Stats:AddChild(statBox("Weapon","2,100"))
+Stats:AddChild(statBox("Cash","23.06M"))
+Stats:AddChild(statBox("Gems","362"))
+
+-- Barra verde
+local BarBG = Instance.new("Frame", Card)
+BarBG.Size=UDim2.new(1,-20,0,28)
+BarBG.Position=UDim2.new(0,10,1,-18)
+BarBG.BackgroundColor3=Color3.fromRGB(40,50,30)
+BarBG.ZIndex=213
+mkCorner(BarBG,14)
+local BarFill = Instance.new("Frame", BarBG)
+BarFill.Size=UDim2.new(0.83,0,1,0)
+BarFill.BackgroundColor3=Color3.fromRGB(90,220,90)
+BarFill.ZIndex=214
+mkCorner(BarFill,14)
+local BarTxt = Instance.new("TextLabel", BarBG)
+BarTxt.Size=UDim2.new(1,0,1,0)
+BarTxt.BackgroundTransparency=1
+BarTxt.Text="❤ 49.7K / 50.6K"
+BarTxt.Font=Enum.Font.GothamBold
+BarTxt.TextSize=12
+BarTxt.TextColor3=Color3.fromRGB(255,255,255)
+BarTxt.ZIndex=215
+
+-- Funciones de selección de jugador
+local players = {}
+local idx = 1
+local function refreshList()
+  players = {}
+  for _,p in ipairs(PLR:GetPlayers()) do
+    if p ~= TLG.LP then table.insert(players,p) end
+  end
+  if #players==0 then
+    NameLbl.Text = TLG.LP.DisplayName
+    HandleLbl.Text = "@"..TLG.LP.Name
+    IdLbl.Text = "ID: "..TLG.LP.UserId
+  end
+end
+local function showPlayer(i)
+  if #players==0 then return end
+  idx = math.clamp(i,1,#players)
+  local p = players[idx]
+  NameLbl.Text = p.DisplayName
+  HandleLbl.Text = "@"..p.Name
+  IdLbl.Text = "ID: "..p.UserId
+  TLG.SelectedTarget = p
+end
+refreshList()
+if #players>0 then showPlayer(1) end
+LeftBtn.MouseButton1Click:Connect(function() showPlayer(idx-1) end)
+RightBtn.MouseButton1Click:Connect(function() showPlayer(idx+1) end)
+PLR.PlayerAdded:Connect(refreshList)
+PLR.PlayerRemoving:Connect(refreshList)
+
+-- ===== RADIAL IZQUIERDO - INFO =====
+local Radial = Instance.new("Frame", SG)
+Radial.Name="RadialINFO"
+Radial.Size=UDim2.fromOffset(360,360)
+Radial.Position=UDim2.fromScale(0.22,0.52)
+Radial.AnchorPoint=Vector2.new(0.5,0.5)
+Radial.BackgroundTransparency=1
+Radial.ZIndex=210
+Radial.Active=true
+Radial.Draggable=true
+
+local Circle = Instance.new("Frame", Radial)
+Circle.Size=UDim2.fromOffset(180,180)
+Circle.Position=UDim2.fromScale(0.5,0.5)
+Circle.AnchorPoint=Vector2.new(0.5,0.5)
+Circle.BackgroundColor3=Color3.fromRGB(20,20,20)
+Circle.BackgroundTransparency=0.3
+Circle.ZIndex=211
+mkCorner(Circle,90)
+mkStroke(Circle, Color3.fromRGB(60,60,60),1).Transparency=0.5
+
+local Center = Instance.new("TextButton", Circle)
+Center.Size=UDim2.fromOffset(90,90)
+Center.Position=UDim2.fromScale(0.5,0.5)
+Center.AnchorPoint=Vector2.new(0.5,0.5)
+Center.BackgroundColor3=Color3.fromRGB(12,12,12)
+Center.Text=""
+Center.ZIndex=212
+mkCorner(Center,45)
+mkStroke(Center, Color3.fromRGB(100,100,100),1)
+
+local Skull = Instance.new("TextLabel", Center)
+Skull.Size=UDim2.new(1,0,1,-16)
+Skull.BackgroundTransparency=1
+Skull.Text="💀"
+Skull.TextSize=38
+Skull.ZIndex=213
+
+local InfoLbl = Instance.new("TextLabel", Circle)
+InfoLbl.Size=UDim2.fromOffset(80,14)
+InfoLbl.Position=UDim2.new(0.5,-40,0.5,52)
+InfoLbl.BackgroundTransparency=1
+InfoLbl.Text="INFO"
+InfoLbl.Font=Enum.Font.GothamBold
+InfoLbl.TextSize=11
+InfoLbl.TextColor3=Color3.fromRGB(160,160,160)
+InfoLbl.ZIndex=213
+
+-- Iconos del radial segun foto 2
+local iconsData = {
+  {e="🍎", a=-60}, {e="📊", a=-25, highlight=true},
+  {e="⚔️", a=5}, {e="🎯", a=40}, {e="🎃", a=75},
+  {e="🏝️", a=110}, {e="📜", a=145}, {e="🔧", a=180},
+  {e="👁️", a=215}, {e="🟣", a=245}, {e="⚡", a=280}, {e="⚙️", a=310},
+}
+
+for _,d in ipairs(iconsData) do
+  local rad = math.rad(d.a)
+  local dist = 130
+  local b = Instance.new("TextButton", Radial)
+  b.Size=UDim2.fromOffset(d.highlight and 48 or 38, d.highlight and 48 or 38)
+  b.AnchorPoint=Vector2.new(0.5,0.5)
+  b.BackgroundColor3 = d.highlight and Color3.fromRGB(80,60,20) or Color3.fromRGB(28,28,28)
+  b.Text=d.e
+  b.TextSize = d.highlight and 20 or 16
+  b.ZIndex=212
+  mkCorner(b, d.highlight and 24 or 19)
+  mkStroke(b, d.highlight and C.Yel or Color3.fromRGB(50,50,50),1)
+  b.Position = UDim2.new(0.5, math.cos(rad)*dist, 0.5, math.sin(rad)*dist)
+end
+
+Center.MouseButton1Click:Connect(function()
+  Main.Visible = not Main.Visible
 end)
+
+-- Actualizar FPS/Ping
+task.spawn(function()
+  while SG.Parent do
+    task.wait(1)
+    pcall(function()
+      local ping = math.floor((TLG.LP:GetNetworkPing() or 0)*1000)
+      FPSLbl.Text = "FPS: "..math.floor(workspace:GetRealPhysicsFPS())
+      PingLbl.Text = "Ping: "..ping.."ms"
+      local t = os.date("%H:%M")
+      TimeLbl.Text = t
+    end)
+  end
+end)
+
+print("[ZTB HUB V3 INFO EDITION] Cargado - Diseño foto 2")
