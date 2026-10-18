@@ -228,7 +228,7 @@ local C = {
   Wh=Color3.fromRGB(255,255,255), Gr=Color3.fromRGB(150,140,110),
   GrD=Color3.fromRGB(70,60,40), Grn=Color3.fromRGB(100,255,140),
   Rd=Color3.fromRGB(255,80,100), Cyan=Color3.fromRGB(0,240,255),
-  Yel=Color3.fromRGB(230,135,65)
+  Yel=Color3.fromRGB(232,170,60)
 }
 TLG.C = C
 
@@ -1281,16 +1281,13 @@ end)
 local function getWindowSize()
   local cam = workspace.CurrentCamera
   local viewport = cam and cam.ViewportSize or Vector2.new(800, 600)
-  if TLG.IsMobile then
-    -- Keep the UI inside narrow Android screens.
-    return UDim2.new(0, math.max(300, math.min(520, viewport.X - 24)), 0,
-      math.max(340, math.min(560, viewport.Y - 70)))
-  end
-  return UDim2.new(0, math.min(900, viewport.X - 40), 0,
-    math.min(580, viewport.Y - 40))
+  -- Panel de cristal a la derecha; la órbita de pestañas queda a la izquierda.
+  local w = math.clamp(math.floor(viewport.X * 0.5), 300, 520)
+  local h = math.clamp(viewport.Y - 40, 280, 460)
+  return UDim2.new(0, w, 0, h)
 end
 local W_S = getWindowSize()
-local W_P = UDim2.new(0.5,0,0.5,0)
+local W_P = UDim2.new(1, -(W_S.X.Offset / 2) - 12, 0.5, 0)
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -1399,7 +1396,7 @@ local function AddPattern(parent, size, color, transp, rotation)
         end
     end
 end
-AddPattern(W, 42, C.Yel, 0.94, 15)
+-- AddPattern(W, 42, C.Yel, 0.94, 15) (desactivado: estilo cristal)
 
 local TB = Instance.new("Frame", W)
 TB.Size = UDim2.new(1,0,0,54)
@@ -1417,7 +1414,7 @@ HF.BackgroundTransparency = 0.05
 HF.BorderSizePixel = 0
 HF.ZIndex = 5
 
-AddPattern(TB, 32, C.Yel, 0.85, 0)
+-- AddPattern(TB, 32, C.Yel, 0.85, 0) (desactivado: estilo cristal)
 
 local DcIco = Instance.new("TextLabel", TB)
 DcIco.Size = UDim2.new(0,26,0,26)
@@ -1726,8 +1723,9 @@ local function Tab(name, icon)
     pp.PaddingRight = UDim.new(0,10)
     pp.PaddingBottom = UDim.new(0,10)
 
-    table.insert(Tabs, {b=b,l=lb,p=pg,u=ul,ico=ico})
-    b.Activated:Connect(function()
+    local entry = {b=b,l=lb,p=pg,u=ul,ico=ico,name=name,icon=icon}
+    table.insert(Tabs, entry)
+    local function sel()
         for _, t in ipairs(Tabs) do
             t.l.TextColor3 = C.Gr
             t.ico.TextTransparency = 0.25
@@ -1740,7 +1738,9 @@ local function Tab(name, icon)
         pg.Visible = true
         b.BackgroundTransparency = 0.18
         TW:Create(ul,TweenInfo.new(0.2,Enum.EasingStyle.Quint),{Size=UDim2.new(0,3,0.62,0)}):Play()
-    end)
+    end
+    entry.sel = sel
+    b.Activated:Connect(sel)
     return pg
 end
 
@@ -3777,6 +3777,9 @@ end
 
 
 -- UI: pestaña CONFIG
+  -- La pestaña nunca se creaba (PCf era nil) y por eso Config no aparecía en el menú.
+  local PCf = Tab("Config", "⚙️")
+  TLG.PCf = PCf
   Sec(PCf, "🎨 COLOR DEL MENÚ", "🎨")
   local grid = Instance.new("Frame", PCf)
   grid.Size = UDim2.new(1, 0, 0, 0)
@@ -4112,6 +4115,9 @@ local FRok, FRerr = pcall(function()
   end
 
   -- UI
+  -- La pestaña nunca se creaba (PFr era nil) y por eso Frutas no aparecía en el menú.
+  local PFr = Tab("Frutas", "🍎")
+  TLG.PFr = PFr
   Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
   local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
   Tog(PFr, "Auto recoger frutas", false, function(v)
@@ -4524,6 +4530,197 @@ task.spawn(function()
   end
 end)
 
+-- ═══════════════════════════════════════════════════════════════
+-- MENÚ ORBITAL ZTB: calavera central + pestañas en órbita (izquierda)
+-- y panel de cristal con el contenido (derecha).
+-- ═══════════════════════════════════════════════════════════════
+local Orbit = {Open = false, Sel = 1, Orbs = {}}
+do
+  local GOLD  = Color3.fromRGB(232, 170, 60)
+  local GOLD2 = Color3.fromRGB(255, 217, 120)
+  local DARK  = Color3.fromRGB(14, 11, 13)
+
+  local cam = workspace.CurrentCamera
+  local vp = cam and cam.ViewportSize or Vector2.new(800, 400)
+  local panelW = W_S.X.Offset
+  local ORB = TLG.IsMobile and 38 or 44
+  local freeW = vp.X - panelW - 24
+  local R = math.clamp(math.min(vp.Y * 0.5 - ORB - 6, freeW / 2 - ORB / 2 - 4), 74, 128)
+  local CORE = math.floor(R * 0.86)
+  local cx = math.max(R + ORB / 2 + 6, freeW / 2 + 6)
+  local BOX = math.floor(R * 2 + ORB + 10)
+
+  -- Estilo cristal del panel derecho
+  W.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+  W.BackgroundTransparency = 0.22
+  Wgrad.Color = ColorSequence.new(Color3.fromRGB(38, 29, 33), Color3.fromRGB(9, 7, 9))
+  Wgrad.Rotation = 135
+  WS.Color = GOLD2
+  WS.Thickness = 1.5
+  TB.BackgroundTransparency = 1
+  HF.BackgroundTransparency = 1
+  local hair = Instance.new("Frame", W)
+  hair.Size = UDim2.new(1, -24, 0, 1)
+  hair.Position = UDim2.new(0, 12, 0, 54)
+  hair.BackgroundColor3 = GOLD2
+  hair.BackgroundTransparency = 0.65
+  hair.BorderSizePixel = 0
+  hair.ZIndex = 6
+  SideBar.Visible = false
+  Cont.Position = UDim2.new(0, 10, 0, 60)
+  Cont.Size = UDim2.new(1, -20, 1, -82)
+  Cont.BackgroundTransparency = 0.55
+
+  -- Contenedor de la órbita
+  local OR = Instance.new("Frame", SG)
+  OR.Name = "ZTB_Orbit"
+  OR.AnchorPoint = Vector2.new(0.5, 0.5)
+  OR.Position = UDim2.new(0, cx, 0.5, 0)
+  OR.Size = UDim2.fromOffset(BOX, BOX)
+  OR.BackgroundTransparency = 1
+  OR.Visible = false
+  OR.ZIndex = 20
+  Orbit.Root = OR
+
+  local function circle(parent, size, bg, bgT, z)
+    local f = Instance.new("Frame", parent)
+    f.AnchorPoint = Vector2.new(0.5, 0.5)
+    f.Position = UDim2.new(0.5, 0, 0.5, 0)
+    f.Size = UDim2.fromOffset(size, size)
+    f.BackgroundColor3 = bg
+    f.BackgroundTransparency = bgT
+    f.BorderSizePixel = 0
+    f.ZIndex = z
+    Instance.new("UICorner", f).CornerRadius = UDim.new(1, 0)
+    return f
+  end
+
+  -- Disco de cristal + anillo dorado
+  local disc = circle(OR, R * 2, DARK, 0.4, 20)
+  local ds = Instance.new("UIStroke", disc)
+  ds.Color = GOLD2; ds.Thickness = 1.5; ds.Transparency = 0.45
+  TLG.PGlow(ds, 0.2, 0.7, 1.6)
+  local dg = Instance.new("UIGradient", disc)
+  dg.Color = ColorSequence.new(Color3.fromRGB(46, 36, 40), Color3.fromRGB(8, 6, 8))
+  dg.Rotation = 120
+  local inner = circle(OR, R * 2 - ORB - 18, DARK, 1, 20)
+  local is = Instance.new("UIStroke", inner)
+  is.Color = GOLD; is.Thickness = 1; is.Transparency = 0.8
+
+  -- Calavera central (cierra el menú)
+  local core = Instance.new("TextButton", OR)
+  core.Name = "ZTB_OrbitCore"
+  core.AnchorPoint = Vector2.new(0.5, 0.5)
+  core.Position = UDim2.new(0.5, 0, 0.5, -8)
+  core.Size = UDim2.fromOffset(CORE, CORE)
+  core.BackgroundColor3 = Color3.fromRGB(18, 13, 16)
+  core.AutoButtonColor = false
+  core.Text = "💀"
+  core.TextSize = math.floor(CORE * 0.58)
+  core.Font = Enum.Font.GothamBold
+  core.TextColor3 = Color3.fromRGB(255, 255, 255)
+  core.BorderSizePixel = 0
+  core.ZIndex = 24
+  Instance.new("UICorner", core).CornerRadius = UDim.new(1, 0)
+  local cs = Instance.new("UIStroke", core)
+  cs.Color = GOLD; cs.Thickness = 2
+  TLG.PGlow(cs, 0.0, 0.5, 1.2)
+
+  local nameL = Instance.new("TextLabel", OR)
+  nameL.AnchorPoint = Vector2.new(0.5, 0)
+  nameL.Position = UDim2.new(0.5, 0, 0.5, math.floor(CORE / 2) - 2)
+  nameL.Size = UDim2.fromOffset(R * 1.5, 18)
+  nameL.BackgroundTransparency = 1
+  nameL.Font = Enum.Font.GothamBold
+  nameL.TextSize = TLG.IsMobile and 10 or 12
+  nameL.TextColor3 = GOLD2
+  nameL.Text = ""
+  nameL.ZIndex = 24
+
+  -- Orbes (una por pestaña)
+  local N = #Tabs
+  local function orbPos(i)
+    local a = math.rad(-90 + (i - 1) * 360 / N)
+    return UDim2.new(0.5, math.floor(math.cos(a) * R + 0.5), 0.5, math.floor(math.sin(a) * R + 0.5))
+  end
+
+  local function style(i, active)
+    local o = Orbit.Orbs[i]
+    if not o then return end
+    TW:Create(o.btn, TweenInfo.new(0.2), {
+      BackgroundColor3 = active and GOLD or Color3.fromRGB(14, 11, 13),
+      Size = UDim2.fromOffset(active and ORB + 6 or ORB, active and ORB + 6 or ORB),
+    }):Play()
+    o.stroke.Transparency = active and 0 or 0.5
+    o.btn.TextTransparency = active and 0 or 0.1
+  end
+
+  function Orbit.Select(i)
+    local t = Tabs[i]
+    if not t then return end
+    for j = 1, #Tabs do style(j, j == i) end
+    Orbit.Sel = i
+    if t.sel then t.sel() end
+    nameL.Text = string.upper(tostring(t.name or ""))
+    pcall(function() SubTitle.Text = "✦ " .. string.upper(tostring(t.name or "")) .. " ✦" end)
+  end
+
+  for i, t in ipairs(Tabs) do
+    local b = Instance.new("TextButton", OR)
+    b.Name = "ZTB_Orb_" .. tostring(t.name)
+    b.AnchorPoint = Vector2.new(0.5, 0.5)
+    b.Position = orbPos(i)
+    b.Size = UDim2.fromOffset(ORB, ORB)
+    b.BackgroundColor3 = Color3.fromRGB(14, 11, 13)
+    b.AutoButtonColor = false
+    b.Text = tostring(t.icon or "•")
+    b.TextSize = math.floor(ORB * 0.5)
+    b.Font = Enum.Font.GothamBold
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.BorderSizePixel = 0
+    b.ZIndex = 26
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    local st = Instance.new("UIStroke", b)
+    st.Color = GOLD2; st.Thickness = 1.3; st.Transparency = 0.5
+    Orbit.Orbs[i] = {btn = b, stroke = st, pos = orbPos(i)}
+    b.Activated:Connect(function() Orbit.Select(i) end)
+  end
+
+  core.Activated:Connect(function()
+    if TLG.ZTB_SetMin then TLG.ZTB_SetMin(true) end
+  end)
+
+  -- Mostrar / ocultar con animación (las orbes salen desde la calavera)
+  function Orbit.Show(on)
+    on = on == true
+    Orbit.Open = on
+    if not on then
+      OR.Visible = false
+      return
+    end
+    OR.Visible = true
+    for i, o in ipairs(Orbit.Orbs) do
+      o.btn.Position = UDim2.new(0.5, 0, 0.5, 0)
+      o.btn.Size = UDim2.fromOffset(4, 4)
+      o.btn.TextTransparency = 1
+      task.delay((i - 1) * 0.03, function()
+        if not Orbit.Open then return end
+        local active = (i == Orbit.Sel)
+        local s = active and ORB + 6 or ORB
+        TW:Create(o.btn, TweenInfo.new(0.38, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+          {Position = o.pos, Size = UDim2.fromOffset(s, s), TextTransparency = active and 0 or 0.1}):Play()
+      end)
+    end
+    core.Size = UDim2.fromOffset(CORE * 0.4, CORE * 0.4)
+    TW:Create(core, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+      {Size = UDim2.fromOffset(CORE, CORE)}):Play()
+  end
+
+  TLG.ZTB_OrbitShow = Orbit.Show
+  TLG.ZTB_OrbitSelect = Orbit.Select
+  Orbit.Select(1)
+end
+
 -- BOTON FLOTANTE ZTB: abre/cierra el menu (sin barra minimizada)
 local min = true
 local setMin
@@ -4602,6 +4799,11 @@ do
     -- Hacerlo en ambos eventos provocaba dos toggles y el menú parecía no abrir.
   end)
 
+  -- Asigna Visible solo si el objeto existe (evita "attempt to index nil with 'Visible'").
+  local function setVis(o, v)
+    if o then pcall(function() o.Visible = v end) end
+  end
+
   setMin = function(st)
     st = st == true
     if st == min then return end
@@ -4609,32 +4811,35 @@ do
     token += 1
     local my = token
     if st then
-      lastWPos = W.Position
-      WM.Visible = false
-      ToggleButton.Visible = true
-      W.Visible = false
-      W.Size = W_S
+      pcall(function() lastWPos = W.Position end)
+      setVis(WM, false)
+      setVis(ToggleButton, true)
+      setVis(W, false)
+      pcall(function() W.Size = W_S end)
+      if TLG.ZTB_OrbitShow then pcall(TLG.ZTB_OrbitShow, false) end
     else
-      ToggleButton.Visible = true
-      W.Size = UDim2.fromOffset(1, 1)
-      W.Position = lastWPos
-      W.Visible = true
+      setVis(ToggleButton, false)
+      pcall(function()
+        W.Size = UDim2.fromOffset(1, 1)
+        W.Position = lastWPos
+      end)
+      setVis(W, true)
       -- Restaurar los elementos del menu usando los nombres reales.
-      -- TabBar no estaba declarado; la barra lateral se llama SideBar.
-      if SideBar and SideBar.Parent then SideBar.Visible = true end
-      if Cont and Cont.Parent then Cont.Visible = true end
-      if BH and BH.Parent then BH.Visible = true end
-      if WM and WM.Parent then WM.Visible = true end
+      -- (TabBar no existe: la barra lateral se llama SideBar.)
+      setVis(Cont, true)
+      setVis(BH, true)
+      setVis(WM, true)
       if STtl and STtl.Parent then STtl.Text = "💀" end
-      tw(W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
+      pcall(tw, W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
+      if TLG.ZTB_OrbitShow then pcall(TLG.ZTB_OrbitShow, true) end
     end
   end
   TLG.ZTB_SetMin = setMin
 
   -- Estado inicial: menú oculto, botón flotante visible.
-  W.Visible = false
-  WM.Visible = false
-  ToggleButton.Visible = true
+  setVis(W, false)
+  setVis(WM, false)
+  setVis(ToggleButton, true)
   min = true
 
   -- Activated funciona mejor en pantalla táctil que depender solo de InputEnded.
