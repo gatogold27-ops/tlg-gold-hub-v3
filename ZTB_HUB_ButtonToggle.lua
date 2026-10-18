@@ -1968,6 +1968,9 @@ Radial.BackgroundTransparency = 0.08
 Radial.BorderSizePixel = 0
 Radial.ZIndex = 100
 Radial.Visible = true
+-- El radial reemplaza la vista inicial; evita mostrar el dashboard antiguo debajo.
+SideBar.Visible = false
+Cont.Visible = false
 local radialStroke = Instance.new("UIStroke", Radial)
 radialStroke.Color = C.Yel; radialStroke.Thickness = 1.5; radialStroke.Transparency = 0.25
 Instance.new("UICorner", Radial).CornerRadius = UDim.new(0,12)
@@ -2013,7 +2016,28 @@ coreButton.TextColor3 = C.Yel
 coreButton.TextSize = TLG.IsMobile and 20 or 27
 coreButton.Font = Enum.Font.GothamBlack
 coreButton.ZIndex = 104
-coreButton.Activated:Connect(function() Radial.Visible = false end)
+coreButton.Activated:Connect(function()
+    -- El centro lleva a Home; nunca deja una pantalla vacía.
+    Radial.Visible = false
+    SideBar.Visible = true
+    Cont.Visible = true
+    local chosen = Tabs[1]
+    if chosen then
+        for _, t in ipairs(Tabs) do
+            t.p.Visible = false
+            t.l.TextColor3 = C.Gr
+            t.ico.TextTransparency = 0.25
+            t.b.BackgroundTransparency = 1
+            t.u.Size = UDim2.new(0,3,0,0)
+        end
+        chosen.p.Visible = true
+        chosen.l.TextColor3 = C.Yel
+        chosen.ico.TextTransparency = 0
+        chosen.b.BackgroundTransparency = 0.18
+        chosen.b.BackgroundColor3 = C.BG3
+        chosen.u.Size = UDim2.new(0,3,0.62,0)
+    end
+end)
 
 local radialItems = {
  {"HOME","⌂",0,{1}},
@@ -2067,6 +2091,8 @@ for _, item in ipairs(radialItems) do
     bs.Color = C.Yel; bs.Thickness = 1; bs.Transparency = 0.28
     b.Activated:Connect(function()
         Radial.Visible = false
+        SideBar.Visible = true
+        Cont.Visible = true
         local first = tabIndexes[1]
         selectExistingTab(first)
         -- Categorias con varias paginas muestran la primera pagina asignada.
@@ -2092,6 +2118,8 @@ local radialReturnStroke = Instance.new("UIStroke", radialReturn)
 radialReturnStroke.Color = C.Yel; radialReturnStroke.Thickness = 1
 radialReturn.Activated:Connect(function()
     for _, t in ipairs(Tabs) do t.p.Visible = false end
+    SideBar.Visible = false
+    Cont.Visible = false
     Radial.Visible = true
 end)
 
