@@ -1584,55 +1584,76 @@ UIS.InputEnded:Connect(function(i)
 end)
 makeDrag(TB)
 
-local TabBar = Instance.new("Frame", W)
-TabBar.Size = UDim2.new(1,0,0,38)
-TabBar.Position = UDim2.new(0,0,0,54)
-TabBar.BackgroundColor3 = C.BG2
-TabBar.BackgroundTransparency = 0.3
-TabBar.BorderSizePixel = 0
-TabBar.ZIndex = 4
+-- PANEL 2: barra lateral + panel de contenido, estilo dashboard oscuro
+local SideBar = Instance.new("Frame", W)
+SideBar.Name = "ZTB_SideBar"
+SideBar.Size = UDim2.new(0, TLG.IsMobile and 112 or 158, 1, -94)
+SideBar.Position = UDim2.new(0, 6, 0, 56)
+SideBar.BackgroundColor3 = C.BG2
+SideBar.BackgroundTransparency = 0.18
+SideBar.BorderSizePixel = 0
+SideBar.ZIndex = 4
+Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
+local SideStroke = Instance.new("UIStroke", SideBar)
+SideStroke.Color = C.Yel; SideStroke.Transparency = 0.78; SideStroke.Thickness = 1
 
-local TScr = Instance.new("ScrollingFrame", TabBar)
-TScr.Size = UDim2.new(1,-10,1,0)
-TScr.Position = UDim2.new(0,5,0,0)
+local SideTitle = Instance.new("TextLabel", SideBar)
+SideTitle.Size = UDim2.new(1,-12,0,27)
+SideTitle.Position = UDim2.new(0,7,0,4)
+SideTitle.BackgroundTransparency = 1
+SideTitle.Font = Enum.Font.GothamBold
+SideTitle.Text = "ZTB  •  MENU"
+SideTitle.TextColor3 = C.Yel
+SideTitle.TextSize = TLG.IsMobile and 9 or 11
+SideTitle.TextXAlignment = Enum.TextXAlignment.Left
+SideTitle.ZIndex = 5
+
+local TScr = Instance.new("ScrollingFrame", SideBar)
+TScr.Name = "ZTB_Navigation"
+TScr.Size = UDim2.new(1,-8,1,-36)
+TScr.Position = UDim2.new(0,4,0,32)
 TScr.BackgroundTransparency = 1
 TScr.BorderSizePixel = 0
-TScr.ScrollBarThickness = 0
-TScr.ScrollBarImageTransparency = 1
+TScr.ScrollBarThickness = TLG.IsMobile and 3 or 4
+TScr.ScrollBarImageColor3 = C.Yel
 TScr.CanvasSize = UDim2.new(0,0,0,0)
 TScr.ZIndex = 5
-TScr.ScrollingDirection = Enum.ScrollingDirection.X
-pcall(function() TScr.AutomaticCanvasSize = Enum.AutomaticSize.X end)
-
+TScr.ScrollingDirection = Enum.ScrollingDirection.Y
+pcall(function() TScr.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
 local TLy = Instance.new("UIListLayout", TScr)
-TLy.FillDirection = Enum.FillDirection.Horizontal
-TLy.VerticalAlignment = Enum.VerticalAlignment.Center
-TLy.HorizontalAlignment = Enum.HorizontalAlignment.Left
-TLy.Padding = UDim.new(0,6)
+TLy.FillDirection = Enum.FillDirection.Vertical
+TLy.VerticalAlignment = Enum.VerticalAlignment.Top
+TLy.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TLy.Padding = UDim.new(0,5)
 
 local Cont = Instance.new("Frame", W)
-Cont.Size = UDim2.new(1,-10,1,-128)
-Cont.Position = UDim2.new(0,5,0,100)
-Cont.BackgroundTransparency = 1
+Cont.Name = "ZTB_ContentPanel"
+Cont.Size = UDim2.new(1, -(TLG.IsMobile and 128 or 174), 1, -108)
+Cont.Position = UDim2.new(0, TLG.IsMobile and 120 or 164, 0, 58)
+Cont.BackgroundColor3 = C.BG2
+Cont.BackgroundTransparency = 0.34
+Cont.BorderSizePixel = 0
 Cont.ZIndex = 3
-
-TLG.TabBar = TabBar
+Instance.new("UICorner", Cont).CornerRadius = UDim.new(0,10)
+local ContStroke = Instance.new("UIStroke", Cont)
+ContStroke.Color = C.Yel; ContStroke.Transparency = 0.82; ContStroke.Thickness = 1
+TLG.TabBar = SideBar
 TLG.Cont = Cont
 
 local BH = Instance.new("Frame", W)
 BH.Name = "ZTB_BottomHandle"
-BH.Size = UDim2.new(1,-10,0,20)
-BH.Position = UDim2.new(0,5,1,-24)
+BH.Size = UDim2.new(1,-10,0,12)
+BH.Position = UDim2.new(0,5,1,-16)
 BH.BackgroundColor3 = C.BG2
 BH.BackgroundTransparency = 0.2
 BH.BorderSizePixel = 0
 BH.ZIndex = 8
-Instance.new("UICorner", BH).CornerRadius = UDim.new(0,8)
+Instance.new("UICorner", BH).CornerRadius = UDim.new(1,0)
 local BHs = Instance.new("UIStroke", BH)
-BHs.Color = C.Yel; BHs.Thickness = 1; BHs.Transparency = 0.6
+BHs.Color = C.Yel; BHs.Thickness = 1; BHs.Transparency = 0.75
 local BHp = Instance.new("Frame", BH)
-BHp.Size = UDim2.new(0,64,0,4)
-BHp.Position = UDim2.new(0.5,-32,0.5,-2)
+BHp.Size = UDim2.new(0,42,0,3)
+BHp.Position = UDim2.new(0.5,-21,0.5,-1)
 BHp.BackgroundColor3 = C.Yel
 BHp.BorderSizePixel = 0
 BHp.ZIndex = 9
@@ -1644,7 +1665,7 @@ local Tabs = {}
 
 local function Tab(name, icon)
     local b = Instance.new("TextButton", TScr)
-    b.Size = UDim2.new(0,88,0,34)
+    b.Size = UDim2.new(1,-4,0,TLG.IsMobile and 36 or 42)
     b.BackgroundColor3 = C.BG3
     b.BackgroundTransparency = 1
     b.Text = ""
@@ -1652,65 +1673,69 @@ local function Tab(name, icon)
     b.AutoButtonColor = false
     b.ZIndex = 6
     Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+
     local ico = Instance.new("TextLabel", b)
-    ico.Size = UDim2.new(1,0,0,14)
-    ico.Position = UDim2.new(0,0,0,3)
+    ico.Size = UDim2.new(0,26,1,0)
+    ico.Position = UDim2.new(0,5,0,0)
     ico.BackgroundTransparency = 1
     ico.Text = icon
-    ico.TextSize = 13
+    ico.TextSize = TLG.IsMobile and 14 or 16
     ico.ZIndex = 7
+
     local lb = Instance.new("TextLabel", b)
-    lb.Size = UDim2.new(1,0,0,12)
-    lb.Position = UDim2.new(0,0,0,18)
+    lb.Size = UDim2.new(1,-34,1,0)
+    lb.Position = UDim2.new(0,32,0,0)
     lb.BackgroundTransparency = 1
     lb.Font = Enum.Font.GothamSemibold
     lb.Text = name
     lb.TextColor3 = C.Gr
-    lb.TextSize = 10
+    lb.TextSize = TLG.IsMobile and 9 or 11
+    lb.TextTruncate = Enum.TextTruncate.AtEnd
+    lb.TextXAlignment = Enum.TextXAlignment.Left
     lb.ZIndex = 7
+
     local ul = Instance.new("Frame", b)
-    ul.Size = UDim2.new(0,0,0,3)
-    ul.Position = UDim2.new(0.5,0,1,-3)
-    ul.AnchorPoint = Vector2.new(0.5,1)
+    ul.Size = UDim2.new(0,3,0,0)
+    ul.Position = UDim2.new(0,0,0.5,0)
+    ul.AnchorPoint = Vector2.new(0,0.5)
     ul.BackgroundColor3 = C.Yel
     ul.BorderSizePixel = 0
     ul.ZIndex = 8
     Instance.new("UICorner", ul).CornerRadius = UDim.new(1,0)
+
     local pg = Instance.new("ScrollingFrame", Cont)
     pg.Size = UDim2.new(1,0,1,0)
+    pg.Position = UDim2.new(0,0,0,0)
     pg.BackgroundTransparency = 1
     pg.BorderSizePixel = 0
-    pg.ScrollBarThickness = TLG.IsMobile and 8 or 5
+    pg.ScrollBarThickness = TLG.IsMobile and 4 or 6
     pg.ScrollBarImageColor3 = C.Yel
     pg.CanvasSize = UDim2.new(0,0,0,0)
     pg.ZIndex = 4
     pcall(function() pg.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
     pg.Visible = false
     local pl = Instance.new("UIListLayout", pg)
-    pl.Padding = UDim.new(0,6)
+    pl.Padding = UDim.new(0,7)
     local pp = Instance.new("UIPadding", pg)
-    pp.PaddingTop = UDim.new(0,8)
-    pp.PaddingLeft = UDim.new(0,8)
-    pp.PaddingRight = UDim.new(0,8)
-    pp.PaddingBottom = UDim.new(0,8)
-    table.insert(Tabs, {b = b, l = lb, p = pg, u = ul, ico = ico})
+    pp.PaddingTop = UDim.new(0,10)
+    pp.PaddingLeft = UDim.new(0,10)
+    pp.PaddingRight = UDim.new(0,10)
+    pp.PaddingBottom = UDim.new(0,10)
+
+    table.insert(Tabs, {b=b,l=lb,p=pg,u=ul,ico=ico})
     b.Activated:Connect(function()
         for _, t in ipairs(Tabs) do
             t.l.TextColor3 = C.Gr
-            t.ico.TextTransparency = 0.5
+            t.ico.TextTransparency = 0.25
             t.p.Visible = false
-            t.b.BackgroundColor3 = C.BG3
             t.b.BackgroundTransparency = 1
-            TW:Create(t.u, TweenInfo.new(0.2), {Size = UDim2.new(0,0,0,3)}):Play()
+            TW:Create(t.u,TweenInfo.new(0.18),{Size=UDim2.new(0,3,0,0)}):Play()
         end
         lb.TextColor3 = C.Yel
         ico.TextTransparency = 0
         pg.Visible = true
-        pg.Position = UDim2.new(0,28,0,0)
-        TW:Create(pg, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0,0,0,0)}):Play()
-        b.BackgroundColor3 = C.BG3
-        b.BackgroundTransparency = 0.5
-        TW:Create(ul, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
+        b.BackgroundTransparency = 0.18
+        TW:Create(ul,TweenInfo.new(0.2,Enum.EasingStyle.Quint),{Size=UDim2.new(0,3,0.62,0)}):Play()
     end)
     return pg
 end
@@ -1934,8 +1959,8 @@ if Tabs[1] then
     Tabs[1].ico.TextTransparency = 0
     Tabs[1].p.Visible = true
     Tabs[1].b.BackgroundColor3 = C.BG3
-    Tabs[1].b.BackgroundTransparency = 0.5
-    TW:Create(Tabs[1].u, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
+    Tabs[1].b.BackgroundTransparency = 0.18
+    TW:Create(Tabs[1].u, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0,3,0.62,0)}):Play()
 end
 
 TLG.PInfo = PInfo
