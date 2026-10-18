@@ -4582,11 +4582,12 @@ task.spawn(function()
   end
 end)
 
--- BOTON FLOTANTE ZTB: abre/cierra el menu (sin barra minimizada)
+-- MINI BARRA ZTB: abrir/cerrar, FPS/PING, arrastrable y oro neon
 local min = true
 local setMin
 do
-  local BTN_SIZE = 40
+  local BTN_SIZE = 188
+  local BTN_HEIGHT = 38
   local EASE = Enum.EasingStyle
   local DIR = Enum.EasingDirection
   local lastWPos = W_P
@@ -4600,24 +4601,60 @@ do
 
   local ToggleButton = Instance.new("TextButton", SG)
   ToggleButton.Name = "ZTB_MenuToggleButton"
-  ToggleButton.Size = UDim2.fromOffset(BTN_SIZE, BTN_SIZE)
-  ToggleButton.Position = UDim2.new(0, 14, 0.5, -BTN_SIZE / 2)
-  ToggleButton.BackgroundColor3 = Color3.fromRGB(15, 12, 14)
+  ToggleButton.Size = UDim2.fromOffset(BTN_SIZE, BTN_HEIGHT)
+  ToggleButton.Position = UDim2.new(0, 14, 0.5, -BTN_HEIGHT / 2)
+  ToggleButton.BackgroundColor3 = Color3.fromRGB(18, 14, 4)
   ToggleButton.BackgroundTransparency = 0.08
   ToggleButton.BorderSizePixel = 0
   ToggleButton.AutoButtonColor = false
-  ToggleButton.Text = "💀"
-  ToggleButton.Font = Enum.Font.GothamBlack
-  ToggleButton.TextSize = 22
-  ToggleButton.TextColor3 = Color3.fromRGB(255, 218, 120)
-  ToggleButton.TextStrokeTransparency = 0.85
+  ToggleButton.Text = "💀  ZTB  •  FPS: --  •  PING: -- ms  ▴"
+  ToggleButton.Font = Enum.Font.GothamBold
+  ToggleButton.TextSize = 10
+  ToggleButton.TextColor3 = Color3.fromRGB(255, 220, 90)
+  ToggleButton.TextStrokeTransparency = 0.72
   ToggleButton.Visible = true
   ToggleButton.ZIndex = 200
-  Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 11)
+  Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 12)
   local ButtonStroke = Instance.new("UIStroke", ToggleButton)
-  ButtonStroke.Color = Color3.fromRGB(255, 190, 55)
-  ButtonStroke.Thickness = 1.2
-  ButtonStroke.Transparency = 0.08
+  ButtonStroke.Color = Color3.fromRGB(255, 205, 35)
+  ButtonStroke.Thickness = 1.8
+  ButtonStroke.Transparency = 0.02
+
+  -- Brillo dorado animado para la mini barra.
+  local BarGlow = Instance.new("UIGradient", ToggleButton)
+  BarGlow.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 180, 0)),
+    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 245, 145)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 190, 20))
+  })
+  BarGlow.Rotation = 0
+  task.spawn(function()
+    while ToggleButton.Parent do
+      local a = TW:Create(ButtonStroke, TweenInfo.new(0.85, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.32, Thickness = 2.5})
+      a:Play(); a.Completed:Wait()
+      if not ToggleButton.Parent then break end
+      local b = TW:Create(ButtonStroke, TweenInfo.new(0.85, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.02, Thickness = 1.8})
+      b:Play(); b.Completed:Wait()
+    end
+  end)
+  -- Actualiza las métricas también cuando el menú principal está oculto.
+  task.spawn(function()
+    local frames, last = 0, os.clock()
+    local conn
+    conn = RS.RenderStepped:Connect(function()
+      frames += 1
+      local now = os.clock()
+      if now - last >= 1 then
+        local fps = math.floor(frames / math.max(now - last, 0.001))
+        local ping = TLG.getPing()
+        if ToggleButton and ToggleButton.Parent then
+          ToggleButton.Text = "💀  ZTB  •  FPS: " .. fps .. "  •  PING: " .. ping .. " ms  ▴"
+        end
+        frames, last = 0, now
+      end
+    end)
+    ToggleButton.Destroying:Connect(function() if conn then conn:Disconnect() end end)
+  end)
 
   local function isPointer(i)
     return i.UserInputType == Enum.UserInputType.MouseButton1
@@ -4644,7 +4681,7 @@ do
     if moved then
       local vp = SG.AbsoluteSize
       local x = math.clamp(startPos.X + delta.X, 0, math.max(0, vp.X - BTN_SIZE))
-      local y = math.clamp(startPos.Y + delta.Y, 0, math.max(0, vp.Y - BTN_SIZE))
+      local y = math.clamp(startPos.Y + delta.Y, 0, math.max(0, vp.Y - BTN_HEIGHT))
       ToggleButton.Position = UDim2.fromOffset(x, y)
     end
   end)
@@ -4670,12 +4707,25 @@ do
       lastWPos = W.Position
       WM.Visible = false
       ToggleButton.Visible = true
+      -- Animación de salida: el panel se encoge y se desvanece antes de ocultarse.
+      local originalSize = W.Size
+      local originalBg = W.BackgroundTransparency
+      local outTween = tw(W, 0.20, EASE.Quad, DIR.In, {
+        Size = UDim2.fromOffset(12, 12),
+        Position = UDim2.new(lastWPos.X.Scale, lastWPos.X.Offset + 18, lastWPos.Y.Scale, lastWPos.Y.Offset + 18),
+        BackgroundTransparency = 1
+      })
+      outTween.Completed:Wait()
+      if my ~= token then return end
       W.Visible = false
       W.Size = W_S
+      W.Position = lastWPos
+      W.BackgroundTransparency = originalBg
     else
       ToggleButton.Visible = true
-      W.Size = UDim2.fromOffset(1, 1)
-      W.Position = lastWPos
+      W.Size = UDim2.fromOffset(12, 12)
+      W.Position = UDim2.new(lastWPos.X.Scale, lastWPos.X.Offset + 18, lastWPos.Y.Scale, lastWPos.Y.Offset + 18)
+      W.BackgroundTransparency = 1
       W.Visible = true
       -- Restaurar los elementos del menu usando los nombres reales.
       -- TabBar no estaba declarado; la barra lateral se llama SideBar.
@@ -4684,7 +4734,9 @@ do
       if BH and BH.Parent then BH.Visible = true end
       if WM and WM.Parent then WM.Visible = true end
       if STtl and STtl.Parent then STtl.Text = "💀" end
-      tw(W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
+      local inTween = tw(W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos, BackgroundTransparency = 0})
+      -- Pulso breve del borde al abrir.
+      tw(ButtonStroke, 0.22, EASE.Quad, DIR.Out, {Thickness = 3, Transparency = 0})
     end
   end
   TLG.ZTB_SetMin = setMin
