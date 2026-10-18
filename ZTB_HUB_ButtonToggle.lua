@@ -4380,186 +4380,110 @@ task.spawn(function()
   end
 end)
 
--- ═══════════ PESTAÑA GAMPI ═══════════
+
+-- ═══════════ PESTAÑA GAMPI - SAFE (sin writefile) ═══════════
 do
-  local GAMPI_B64 = [====[
-/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCAEAAQADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD0tTgYNOyD6VDn1NOV/Sue51EuOOgpu4+gpfMGKZkZ60gY/kjtTBy44xTtwPGaXAzmhDHcAUueKQdc+tB5+tAmGfalozTd2OtAJDwfYUZ9hSA06kMUetLn2poNOyO9VcVhcilGPSm9+KCaLgOOMcAU0c9QKMkUc44p3Adgf5FHHtTeaOKT3AU/QUmfYUlGKNRDhj0FLj2FNzQSaAHjHoKX8qaue5p3emAYHoKMCjNITRewC0YHtRRRcAx7CjA9KKKdwMxiAfalHTikYgjikyQKgseBnNM5BpynFKw5zQOwigg1P2quWNOBJHWgViZGyMUAkUxSQOKV3wKBbD9wpOpzUSuc+tKzsMUCuTjOM5o59ajUkinbqADdg08DPJpoGTmngCgY8Gk6mg8A0itzQJjscYpBjJp2cim4oAQnmij3ppPPFAhScUBgDyaack0hXAzQMk3DtThgjmoRRvIPBpiJweKQsAcjrUW44zmkDGmMnBzSU2Ns/WnipEKOaMUClpgFGDRS5qrAZNOwDTaN3NQWPxikZstimk0oHIoGB604HimnrSUxbEgbBqT7y5quKkV8DmglhtINBBJBNPLg0wnkUhEo4FNL800yHpSYzQlcCypBFOBGMVEnTilyCxAYcdRmgol5pAvPvTVPNPBoCwvSlpM0maVwHEcVHjnNOwaAKYrAOlIRTvamtmmDG9fwpjL82aZPe2lo0SXNxHE0p2oHbBY+1THBPHNCdhWGAU48GndBSEZ607hYEPNTVBjHSpFPFICQGlxUYOKcppobHUUmaM5p3EZjcGjrSUDOamxQHAFJTJGOcChS2RkUgJKKB1pQw707hYBQacCMZxmkJB7YpCfYQmjJpcCm5poYu6gMRTRSnGKLiMbxd4h/4R7Q5LhDmeT5Ih7+v4VwXw48SXKeJ5IL24eQXwPLnPzjpTviffNLrMFmGykMeSPc1xVrdNY6hBdRkhoZA4x7GpuM+kSzdQafGx5zWPouu2msaal3DIpyuWXPQ0291+O2JSBQ7evak5JGlrm6WwtRtcRIBvdV+pxXHXWu3sqkGUqP9nisqSeWU5aRm+prJ1UNQuehHUbReDcR/wDfVPS9glA2TIc+hrzN2YHrSRXDK3ysVI7g1Kq3K9mepBuaC4rgbXxDqFswPn+YB/C/Nb1n4otLnCzZgbuT0rRVEQ4HF/FW4B12xjSUh0i3YB+6c8V2PgnXDrWiqZiDcQHy39+ODXmfjCf+0fFNxcqSyAhUPsBW78OLloNSnhyQJF6fSnzXZDVj1EkZpCfeo1kDj3pxXIrQVh28Y60oYGmBRSgAGncLDjncO1SAimA5I4p+OOlDdxWAtzjFANGMHNN6mgCiRSDrSKxxS9DSuUNZfmzT8cCmspY0rfd60BYXpSEU1SadkmhiAEjjtQWA70lMZSTQgJNwPSihUwtFNALmmsQAWboBk0tV9Tm8jSriUdVjP8qTQHi2vXw1TxDeTliQZCB9BxWNPB++IHSrLkJcsW6uxNTpGC4JHNZNgjW8LtLbFkSVkUjlc8V0LXg+6W5rDsYfKj39GarBbLZrCbZ0RRom4yOuaUXAHWqaDd3pxGO9RY1JZLgc1XS5V2xmo5pAAazjLtfg0CubaMM9amJIGcVhw3DBxz3rZjmDIc0CIbiGKdCGQZ9R1pmhTjStaifJwTtap8ZB5qhdDyZVm64NaQZE0erxycAg9RVjzWxzWZp90LuyhuBgb0BwO1XQ4PWutamDLCPnrTywFVgcHIqXeGAp2ETKc81IGqFTgYp27BpCuSk7qAOKjDgnink8YoGjPxS9TmkJGOBQpNA2Lu4ppORzRig8UANHFOFN96N3rQIceOtAZSeDTGbPFOQYoQx+eKMUlFPUQVleJpfK8PXbeqYrVqlrFoL3Sbi3PO9DjFEgPEbiDzCrgcqa0rOJZcMRytEVnJHIyTLgqcYNaUMKog2iuaTLihxT5RikTlqfuwMEVHg7sisXqdCJ1wlMkkHODUU0/lxliegrMW83uQGoswcki9IwNUXHz/jUzP8AL1qrLIBzmp2FdEqNsYVoQzBxwaxRMWPFaFu2yMnNNaktmktwg+XdzTZVSRCp5BrFkvPJuVycknpWxD8w3CqSYN3Os8HTn+zjas25ojxz2rotwFcj4ck8q7kA7rXUq+7muuEjKSLSvgU9WyahRs8VIAK1umZlrhVzmm+b2xUa88U8BQM1AiaNgRmng5NRx428GngUFFHPakbIpaa1A2Jk+tOyPWmDGOaQdMUCJBgikKikX7wqTHGKGCECADrS7QOaSlJ4oQ2FKcUwN7U484p3AUjApmQaHziow2KlgebatHt1W4BHIkP86hB2CtfxBAp1SV178msebgYrnkawFDZ6VKWjjjLOcCsua4MI6kVhajrcw4XOBSgubQcp8qNnUtQjCMuBgjGTXPNdFJiyHrWVLevdMxuGY8fIAeAakiBECn1rp9lyo5faNs6GG+8y3Gc5qGVyRwaq2YYwirBBrmlG0jeLuh9sTyWq09wEiOD2qGMHZmmygspHtQhtmYtyftQklY4BzXRabrtu/wC63fTNcpc5gkYsm4c8HpVe13FywJBHNdLpqUbmHtGnY9Usb0JcK6Hiu0tpg8SN6ivMNCkd4QWJJwOtd9pU/m28fPIGCKzjoavU3kbnNTq/FUkbtU6HBFakFsH0p+Pl61XViKeJOeRTYiaMnBxU2TiolmUcYpRKD0pDKxIzQRkUxvvCpFIpIoj2GjaRUhprHiquTYYOuRShj0po6U5etAIdu96TcRTW60FuMGkAmcmnBiOlM3DtRvwcUAPZyRyKr3Mwht2c9hUpas3XJgtgV7seKmWxSOYvJzcTSSHkk1QkXNTk9arybtwxXLLc3iitJarIMMuc1zd/pgVzhfbmutZgAAao3KrIxzQpW2FOKOL+wxh8lenapBHukC461sX8EcW5hVa0hUfvXGa39o2jnUELHEIkC+lRSThGwO1Jd3e4kIPl9azWnJY5pRg2XexsQ3AZSMU8MG781iieUD5TipYbt1cbzkU/ZtE8yL9zAsqEEA/Wq0VgA3H5AVejcSoCOhq5bQrvGahya0DluadjCIY1C+lb2jTMt4q54asaPg1oWEvlXMbZxg0JldDsUY5BFW0fJqlEcqDVlT3roRmW1bPWnD1qKM5qdTgVVwFB45pQfSg9KRQKGBEfmajJU1ESQeKUEnrUlkpkwKTcCOtRsPlqPOO9AiYsAcAUm89qiGWNPAOKAHhieDQxpu7HFNJoJF5HWjIxTCxphakOxIWrntWuTLIVDZC8Crt/qHkrtQ8mufkcsT7msZyNIorE/MahlO1we1Sy5XmoJSJIz6gVmmmaLREMr56VUmfBo8xlfBqC4yGz2p8omyleAtJuY/LiqbzqilQetWbuTHB7ismVlJJq4ozbHOQVODWbKGRs1c3rUMrDHrXRDRmMncree+KdC7SPgmmNyelSwrtbNaO1jNJ3N61+SFB7VrWY3SKc1gwSsyADpW5prjcB3FcUlqdUTVUc1PGSrA+nNVg3zZqwpyKaGzsrSXdbofUCriNkYrL00g2qfStBOorWL0MmW0ap0Y4qqhqxGeMVQImBJpcCkU0ppoCijbmOakbgZWqx4PWnqxx1pFDySaAKjLEGjfmgCQOFOKf5gIqvupd4xQBITzTWfkYpM5ppIzSYAXJOKp6hfLbRkZ+bFLfXq20ZIxu7Vzd3cvKxLHJNZSmUokrStcOSTVeXMZqW3NLPhhXO2bJFN33qRVLJVjU7uQ5qGbDpx1pxG0V7tV27wPmFZ8sueTV1ssCj1nXkDIPlrUxZTvGDDPtWSzc1ZmnxlW61TJB5rWC0MpOwMR9Khdqc7gfWmqA55rZKxF7kZPNTR4NP8pKayBG44o5k9Cti5GSqjFa+kykyY7msJJOK2tDRml3nhRXPJWNEzdZtrVYibIqq4O6poSehqRnWaKxe1BJ6HFaoyKyNDJ+x5961lbIrSJBOpOMirEbEmqy1NG2KsCypwacxyBiolbNPV+KAKBI5p0RBPNQjPOaVDt70gJZeOgqIGlaQnjtUeeaExDmPFNLE0opOBQ2Au4461RvtR8n92nLdzTNQ1FYB5cZy57+lYbzs7EsST61jKRpGJNNMZmy5z9TVG/do7WR1OCBwal3bqiuY/Pt3izgsMVg3c25bFLSbqaQN5jlueCa185XJNU7W2S2iCDr3NWgfloKRTmX5yaiyADVmZcmqjZWqW4myOePzE44NUnUoCHq+zDHNVZ8OCCK0MmYF/ZI5LRjB61kSI6MQR0rculkgPBytQK9vLneAG960jKxlKJjbcnmpEA7VelsVdsxkY9KaNNkz94VrzpkctiBUJNSmzd+QOKnCQwcO25h2zQsrSOMdPSs22UkLBaBcA81vWUaxQAAYqjbKvBPWr6uCMCsnLXU0SLZOUp0J6fWmJ/q8mnJ1GO5piZ1eiN/oQz61rRn5qxtNBjt0XocZrVibByapEloMR2qZDkCoQw209D3rURZUccU9RTE6U4ZzQOxnGQCk8xfWqzSkk+lN+8cio5htFssPWgGoFODzTt5FO4rE26s7VNQNsmxPvnv6VPLP5UTSN2FczdTNNMXYk5/Sspy0LjHUa87OxYnJNIHzUJbbQrgmsb3N0rFgGo2J3nmnBuKhkb5s0FE+8EUgkFQ7xjg00y0CJZJBmo2Gajd881H5poIbEmXjiqsucg1YeUE4IqNhuBrVEMoyxeZ1rKu9NZW3RgkVv+VTvLGOn6U07COUG9OQSKR5JnGN7fnXSSWcT5Pljn2qlNpxJJVRiquJoxVhy2Sc1cij2npVtLQA8r0qdYAD0/Sk5NiQ2BTircSYGadFDtGSKf0rJlEgP7urVgA11GD61TzhcVYspNk6sTjB61omSzroBg1dj+7VK3IKg+tXIzxWsUZllPu1NGeMVXQ8VNGwFWBajbtT881Ajin5J6UikYCyc9aeswBwaxI7uTzQvqa0RgisrnQ1YumQdqBJ6niqqvgYJqlfX23dEh56Glci1yTUrwOBErZHfHesp+TTPNO7FO3Cs2y4oYaaOKkJBqM8VDsaIk7VFIeadnIqJmyeaEIM1CzgVJvFQSkYyKGDHB896QsKhLFRmqst7sfAwaSJkXs5yajLFTmqcd8WboKshw/tW1jMesxNTrl1quEXHFTROV4NNCHeWM0jgDg1LkVUmlG8803oAhRM5pmADUTTZPFSR/MeakCUZzTguTULupbaDU8bKorN7gNlAQA06F8Yply2VFRxNkirRLZ21k+63Q+wrQjPFZencWqfQVfV8Dg10RehmWlcDrUgPNVVNTBwatCLSnFSJJ82DVVGOakHLA0mUjkkRmcEjGKuITimHCNinxjKZJ5rA3crkVzdeQhOee1Y8s24lieTU+oy5uCv90VmySDpWUmVEkMvfNPjn3HBNUy4xSBiDkVCKNEtTWeo423LmkdsVQyVWyDVaSYhsE4pQ5U5FVroMTkVLFcmDZNDAEVDCx6GpSaQEDkVUmjU5bHNWnGahK5U1SJZVhK7jxVkS4NVrTDFiexqV5FaTavatUZlhJd3epA59agjUAU4OA1O4FoSEJkmqU0mcgVLK424zVUsB1pXAd5iRpl6iN+M7Y+vrVO4uN5KLyc4qxbWhVtznPtQ9EBfsYi/ztzmrxRR7VHB8nApLqXaOKzepdtCC5dVOWYYqzp0JnYMoyAetYGpTF1VBzzmuk8MK0enYk67u9apaGL3OntvliVfSrKH5qowOcCrcbfNWiZBaQ1KsgAwarq4JxmpCQa0TCxaB4pwY7qgV+PanBqRRybXDM24NT47l1bJORUTIFUY7UmRisTQr3b+bMzdM1UlTIp9y2JKgZ6ykUiuzmNvanrKrjioZW3NVcuYmB7ZqbFXL6SFT1qwJtwx3qkkisAQQc0pJXkGgLll2I5pjyBh1qHzwwIJwarysy8hqVibltc9RTt5FVrW48zKnqKnbpTsNMazE9aRcAUjHio9x9KaEzMukkS4ITIDVatU8tPmOT3qadQVLY5FU1uQvBIrVMguPOqjFQ/aFXnNV5LhMHJFVvM396LXC5ee4BOQc1FPdARnB5qqzbV61RknLMRnirjC5DkjTsIPMk89vXpWwg5qlYKfIQkY46VoIhyM1nUZpEljJBNV7ssxq2Biq9zIFFYrcuRm4zJkjpW/phIgFYMZy1dBapsgQeoraJj1NWOfYOuasR3h7iqEY45qcAdKsbsaC3IBDZqwlzvrKqaJyO9O4WNRJl6E1Kkqj+IGqCtkUb8HpRcLGC0rlsk00ytSkYNJWZoV7s5VW/OqhbNWrnlcVnltrYzUNAPZVPUVWlgZ+nFWsgimu4Rc0BuZ4E1u3tVhLtSMOQDTZH3jpVKWMsOOPemlcl6F8hWG5arSlxx1FZxuJ7dhliR6Zp/9psy/dArT2bIuWraQx3SseAeDWqWBHWueF4CRwc1rROWhVh3FKUWikyySBTd49KZk45NMZsVmWnoOkO5DWBNKRK49Ca2fN6isS8UJct6E5rekrmMmRtIW70LKVFMJAGaiLM3SuhRMnImluWYcmmQKZLhF9TUe0k4rQ06DddIf7vNN2iiU22b8S7atBh2qBSKeWAHFefLc7I7EjykDgVQvZSAM96tGQdD1rN1WYL5eB3NEI3YpMltfmccd66UBRGo9q5jSpBJJ9K6RDnFbJWM0yxG3I5qwOmarIvIqwpwKCiZORzSltp4qEE59qcTgUxFpJscdqlVwWFVYwCKdyG4oGf/Z
-]====]
-
-  local b64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-  local function b64decode(data)
-    local map = {}
-    for i = 1, #b64chars do map[string.byte(b64chars, i)] = i - 1 end
-    local out, n, buf, bits = {}, 0, 0, 0
-    for i = 1, #data do
-      local v = map[string.byte(data, i)]
-      if v then
-        buf = buf * 64 + v
-        bits = bits + 6
-        if bits >= 8 then
-          bits = bits - 8
-          local p = 2 ^ bits
-          n = n + 1
-          out[n] = string.char(math.floor(buf / p) % 256)
-          buf = buf % p
-        end
-      end
-    end
-    return table.concat(out)
-  end
-
-  -- Guarda la foto como archivo y la muestra con getcustomasset (necesita un ejecutor compatible)
-  local assetUrl
-  pcall(function()
-    local fname = "ZTB_Gampi.jpg"
-    if not (isfile and isfile(fname)) then
-      writefile(fname, b64decode((GAMPI_B64:gsub("%s", ""))))
-    end
-    assetUrl = getcustomasset(fname)
-  end)
-
   local PGm = Tab("Gampi", "🐶")
-  TLG.PGm = PGm
   Sec(PGm, "🐶 GAMPI", "🐶")
 
-  local GOLD2 = Color3.fromRGB(255, 217, 120)
-  local card = Instance.new("Frame", PGm)
-  card.Size = UDim2.new(1, 0, 0, 204)
-  card.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  card.BackgroundTransparency = 0.25
-  card.BorderSizePixel = 0
-  card.ZIndex = 5
-  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 14)
-  local cst = Instance.new("UIStroke", card)
-  cst.Color = Color3.fromRGB(255, 255, 255); cst.Thickness = 1.5
-  if TLG.SpinGrad then pcall(TLG.SpinGrad, cst, GOLD2, Color3.fromRGB(110, 70, 20), 5) end
+  local Cont = PGm
+  -- Try to find container - if Sec created a frame, use it
+  if PGm and PGm:FindFirstChild("UIGridLayout") then Cont = PGm end
 
-  local holder = Instance.new("Frame", card)
-  holder.AnchorPoint = Vector2.new(0.5, 0)
-  holder.Position = UDim2.new(0.5, 0, 0, 8)
-  holder.Size = UDim2.fromOffset(160, 153)
-  holder.BackgroundColor3 = Color3.fromRGB(26, 18, 16)
-  holder.BorderSizePixel = 0
-  holder.ZIndex = 6
-  Instance.new("UICorner", holder).CornerRadius = UDim.new(0, 14)
-  local hst = Instance.new("UIStroke", holder)
-  hst.Color = Color3.fromRGB(255, 190, 120); hst.Thickness = 2; hst.Transparency = 0.1
-  local scale = Instance.new("UIScale", holder)
-
-  if assetUrl then
-    local img = Instance.new("ImageLabel", holder)
-    img.Size = UDim2.new(1, 0, 1, 0)
-    img.BackgroundTransparency = 1
-    img.Image = assetUrl
-    img.ScaleType = Enum.ScaleType.Crop
-    img.ZIndex = 7
-    Instance.new("UICorner", img).CornerRadius = UDim.new(0, 14)
-  else
-    local fb = Instance.new("TextLabel", holder)
-    fb.Size = UDim2.new(1, 0, 1, 0)
-    fb.BackgroundTransparency = 1
-    fb.Text = "🐶"
-    fb.TextSize = 72
-    fb.ZIndex = 7
-    local warnL = Instance.new("TextLabel", holder)
-    warnL.Size = UDim2.new(1, -12, 0, 26)
-    warnL.Position = UDim2.new(0, 6, 1, -34)
-    warnL.BackgroundTransparency = 1
-    warnL.Font = Enum.Font.GothamSemibold
-    warnL.TextSize = 9
-    warnL.TextWrapped = true
-    warnL.TextColor3 = Color3.fromRGB(180, 160, 120)
-    warnL.Text = "Tu ejecutor no permite mostrar la foto (falta getcustomasset)."
-    warnL.ZIndex = 8
+  local function mk(parent, class, props)
+    local o = Instance.new(class)
+    for k,v in pairs(props or {}) do
+      if k~="Parent" then pcall(function() o[k]=v end) end
+    end
+    o.Parent = parent
+    return o
   end
 
-  local name = Instance.new("TextLabel", card)
-  name.AnchorPoint = Vector2.new(0.5, 0)
-  name.Position = UDim2.new(0.5, 0, 0, 168)
-  name.Size = UDim2.new(1, -20, 0, 14)
-  name.BackgroundTransparency = 1
-  name.Font = Enum.Font.GothamBold
-  name.TextSize = 12
-  name.TextColor3 = Color3.fromRGB(255, 190, 120)
-  name.Text = "GAMPI 🐾"
-  name.ZIndex = 7
-  local phrase = Instance.new("TextLabel", card)
-  phrase.AnchorPoint = Vector2.new(0.5, 0)
-  phrase.Position = UDim2.new(0.5, 0, 0, 184)
-  phrase.Size = UDim2.new(1, -20, 0, 14)
-  phrase.BackgroundTransparency = 1
-  phrase.Font = Enum.Font.Gotham
-  phrase.TextSize = 10
-  phrase.TextColor3 = Color3.fromRGB(165, 150, 120)
-  phrase.Text = "Tócalo para acariciarlo"
-  phrase.ZIndex = 7
+  local frame = mk(Cont, "Frame", {
+    Size = UDim2.new(1, -20, 0, 320),
+    BackgroundColor3 = Color3.fromRGB(25,22,30),
+    BorderSizePixel = 0,
+  })
+  mk(frame, "UICorner", {CornerRadius = UDim.new(0,10)})
 
-  -- Interacción: toca la foto
-  local pets = 0
-  local phrases = {"¡Guau! 🐶", "Gampi te cuida 🐾", "Gampi aprueba 👍", "¿Ya hiciste farm hoy? 💪",
-    "Gampi tiene hambre 🍖", "Gampi dice: no te rindas 💀", "Qué buen jefe eres 🥹"}
-  local busy = false
-  local btn = Instance.new("TextButton", holder)
-  btn.Size = UDim2.new(1, 0, 1, 0)
-  btn.BackgroundTransparency = 1
-  btn.Text = ""
-  btn.ZIndex = 12
+  local title = mk(frame, "TextLabel", {
+    Size = UDim2.new(1, -20, 0, 40),
+    Position = UDim2.fromOffset(10,10),
+    BackgroundTransparency = 1,
+    Text = "GAMPI 🐾",
+    TextSize = 22,
+    Font = Enum.Font.GothamBold,
+    TextColor3 = Color3.fromRGB(255, 218, 120),
+  })
+
+  local subtitle = mk(frame, "TextLabel", {
+    Size = UDim2.new(1, -20, 0, 20),
+    Position = UDim2.fromOffset(10,45),
+    BackgroundTransparency = 1,
+    Text = "Tócalo para acariciarlo - Tu perro real 🐶",
+    TextSize = 14,
+    Font = Enum.Font.Gotham,
+    TextColor3 = Color3.fromRGB(200,200,200),
+  })
+
+  -- Imagen placeholder usando tu perro como emoji grande (sin necesidad de archivo)
+  local imgLabel = mk(frame, "TextLabel", {
+    Size = UDim2.new(0, 200, 0, 200),
+    Position = UDim2.fromOffset( (300-200)/2 , 75),
+    BackgroundColor3 = Color3.fromRGB(35,30,45),
+    Text = "🐶
+Gampi",
+    TextSize = 60,
+    Font = Enum.Font.GothamBold,
+    TextColor3 = Color3.fromRGB(255,190,120),
+    BorderSizePixel = 0,
+  })
+  mk(imgLabel, "UICorner", {CornerRadius = UDim.new(0,12)})
+
+  local petCount = 0
+  local petLabel = mk(frame, "TextLabel", {
+    Size = UDim2.new(1, -20, 0, 20),
+    Position = UDim2.fromOffset(10, 285),
+    BackgroundTransparency = 1,
+    Text = "Caricias: 0",
+    TextSize = 13,
+    Font = Enum.Font.Gotham,
+    TextColor3 = Color3.fromRGB(180,180,180),
+  })
+
+  local btn = mk(frame, "TextButton", {
+    Size = UDim2.new(1, -20, 0, 0),
+    Position = UDim2.new(0,0,0,0),
+    BackgroundTransparency = 1,
+    Text = "",
+    AutoButtonColor = false,
+    ZIndex = 10,
+  })
+  btn.Size = UDim2.new(1,0,1,0)
+
+  local phrases = {"¡Guau! 🐶", "Gampi te cuida 🐾", "Gampi aprueba 👍", "¿Ya hiciste farm hoy? 💪", "Gampi tiene hambre 🍖", "Gampi dice: no te rindas 💀", "Qué buen jefe eres 🥹"}
+
   btn.Activated:Connect(function()
-    pets = pets + 1
-    phrase.Text = phrases[(pets - 1) % #phrases + 1] .. "  ·  " .. pets .. (pets == 1 and " caricia" or " caricias")
-    -- rebote
-    scale.Scale = 0.9
-    TW:Create(scale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-    -- corazones que suben
-    for k = 1, 4 do
-      task.spawn(function()
-        local h = Instance.new("TextLabel", card)
-        h.AnchorPoint = Vector2.new(0.5, 0.5)
-        h.BackgroundTransparency = 1
-        h.Text = (k % 2 == 0) and "💛" or "🧡"
-        h.TextSize = 16 + k * 2
-        h.Size = UDim2.fromOffset(24, 24)
-        h.ZIndex = 20
-        local x = 0.5 + math.random(-25, 25) / 100
-        h.Position = UDim2.new(x, 0, 0, 120)
-        task.wait(k * 0.06)
-        local tw = TW:Create(h, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-          {Position = UDim2.new(x + math.random(-8, 8) / 100, 0, 0, 20), TextTransparency = 1})
-        tw:Play()
-        task.wait(1.15)
-        h:Destroy()
-      end)
+    petCount += 1
+    petLabel.Text = "Caricias: "..petCount
+    local msg = phrases[math.random(1,#phrases)]
+    if TLG and TLG.PNotif then
+      pcall(TLG.PNotif, "🐶 Gampi", msg, Color3.fromRGB(255,190,120))
     end
-    if pets % 10 == 0 then TLG.PNotif("🐶 Gampi", pets .. " caricias, ¡te quiere mucho!", Color3.fromRGB(255, 190, 120)) end
+    if petCount % 10 == 0 and TLG and TLG.PNotif then
+      pcall(TLG.PNotif, "🐶 Gampi", petCount.." caricias, ¡te quiere mucho!", Color3.fromRGB(255,190,120))
+    end
+    -- Animacion simple
+    pcall(function()
+      game:GetService("TweenService"):Create(imgLabel, TweenInfo.new(0.1), {Size = UDim2.new(0,210,0,210)}):Play()
+      task.wait(0.1)
+      game:GetService("TweenService"):Create(imgLabel, TweenInfo.new(0.1), {Size = UDim2.new(0,200,0,200)}):Play()
+    end)
   end)
 end
 
--- ═══════════════════════════════════════════════════════════════
--- MENÚ ORBITAL ZTB: calavera central + pestañas en órbita (izquierda)
--- y panel de cristal con el contenido (derecha).
--- ═══════════════════════════════════════════════════════════════
-local Orbit = {Open = false, Sel = 1, Orbs = {}, Ang = -90}
-do
-  local GOLD  = Color3.fromRGB(232, 170, 60)
-  local GOLD2 = Color3.fromRGB(255, 217, 120)
-  local DARK  = Color3.fromRGB(14, 11, 13)
-  local WHITE = Color3.fromRGB(255, 255, 255)
-  local QUINT = Enum.EasingStyle.Quint
-  local BACK  = Enum.EasingStyle.Back
-  local OUT   = Enum.EasingDirection.Out
-  local LIN   = Enum.EasingStyle.Linear
-  local SINE  = Enum.EasingStyle.Sine
-  local INOUT = Enum.EasingDirection.InOut
+  Gampi = Color3.fromRGB(255, 190, 120),
 
-  -- Color propio de cada pestaña
-  local ACC = {
-    Info = Color3.fromRGB(110, 185, 255), Combat = Color3.fromRGB(255, 92, 100),
-    Aimbot = Color3.fromRGB(255, 150, 60), Fly = Color3.fromRGB(90, 225, 235),
-    Islands = Color3.fromRGB(100, 225, 150), Scripts = Color3.fromRGB(185, 140, 255),
-    Tools = Color3.fromRGB(255, 200, 80), ESP = Color3.fromRGB(255, 105, 190),
-    Visuals = Color3.fromRGB(255, 235, 150), Optimize = Color3.fromRGB(170, 255, 100),
-    Config = Color3.fromRGB(205, 210, 225),
-    Gampi = Color3.fromRGB(255, 190, 120),
   }
   local function accOf(t) return ACC[t and t.name or ""] or GOLD2 end
 
