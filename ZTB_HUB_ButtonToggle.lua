@@ -245,7 +245,7 @@ local C = {
   Wh=Color3.fromRGB(255,255,255), Gr=Color3.fromRGB(150,140,110),
   GrD=Color3.fromRGB(70,60,40), Grn=Color3.fromRGB(100,255,140),
   Rd=Color3.fromRGB(255,80,100), Cyan=Color3.fromRGB(0,240,255),
-  Yel=Color3.fromRGB(230,135,65)
+  Yel=Color3.fromRGB(232,170,60)
 }
 TLG.C = C
 
@@ -1042,8 +1042,6 @@ function TLG.Panic()
   if TLG.SkyRestore then pcall(TLG.SkyRestore) end
   if TLG.RestoreOptimize then pcall(TLG.RestoreOptimize) end
   if TLG.AutoRejoinToggle then pcall(TLG.AutoRejoinToggle, false) end
-  if TLG.FruitAutoStop then pcall(TLG.FruitAutoStop) end
-  if TLG.FruitESPStop then pcall(TLG.FruitESPStop) end
   if TLG.FastAttackStop then pcall(TLG.FastAttackStop) end
   TLG.PNotif("🚨 PANIC", "Módulos desactivados", C.Rd)
 end
@@ -1298,16 +1296,13 @@ end)
 local function getWindowSize()
   local cam = workspace.CurrentCamera
   local viewport = cam and cam.ViewportSize or Vector2.new(800, 600)
-  if TLG.IsMobile then
-    -- Keep the UI inside narrow Android screens.
-    return UDim2.new(0, math.max(300, math.min(520, viewport.X - 24)), 0,
-      math.max(340, math.min(560, viewport.Y - 70)))
-  end
-  return UDim2.new(0, math.min(900, viewport.X - 40), 0,
-    math.min(580, viewport.Y - 40))
+  -- Panel de cristal a la derecha; la órbita de pestañas queda a la izquierda.
+  local w = math.clamp(math.floor(viewport.X * 0.5), 300, 520)
+  local h = math.clamp(viewport.Y - 40, 280, 460)
+  return UDim2.new(0, w, 0, h)
 end
 local W_S = getWindowSize()
-local W_P = UDim2.new(0.5,0,0.5,0)
+local W_P = UDim2.new(1, -(W_S.X.Offset / 2) - 12, 0.5, 0)
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -1417,7 +1412,7 @@ local function AddPattern(parent, size, color, transp, rotation)
         end
     end
 end
-AddPattern(W, 42, C.Yel, 0.94, 15)
+-- AddPattern(W, 42, C.Yel, 0.94, 15) (desactivado: estilo cristal)
 
 local TB = Instance.new("Frame", W)
 TB.Size = UDim2.new(1,0,0,54)
@@ -1435,7 +1430,7 @@ HF.BackgroundTransparency = 0.05
 HF.BorderSizePixel = 0
 HF.ZIndex = 5
 
-AddPattern(TB, 32, C.Yel, 0.85, 0)
+-- AddPattern(TB, 32, C.Yel, 0.85, 0) (desactivado: estilo cristal)
 
 local DcIco = Instance.new("TextLabel", TB)
 DcIco.Size = UDim2.new(0,26,0,26)
@@ -1459,7 +1454,7 @@ MainTitle.Position = UDim2.new(0.24,0,0,3)
 MainTitle.AnchorPoint = Vector2.new(0,0)
 MainTitle.BackgroundTransparency = 1
 MainTitle.Font = Enum.Font.Garamond
-MainTitle.Text = "ZTB SKULL EDITION"
+MainTitle.Text = "ZTB HUB"
 MainTitle.TextSize = 20
 MainTitle.TextColor3 = C.Yel
 MainTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -1744,8 +1739,9 @@ local function Tab(name, icon)
     pp.PaddingRight = UDim.new(0,10)
     pp.PaddingBottom = UDim.new(0,10)
 
-    table.insert(Tabs, {b=b,l=lb,p=pg,u=ul,ico=ico})
-    b.Activated:Connect(function()
+    local entry = {b=b,l=lb,p=pg,u=ul,ico=ico,name=name,icon=icon}
+    table.insert(Tabs, entry)
+    local function sel()
         for _, t in ipairs(Tabs) do
             t.l.TextColor3 = C.Gr
             t.ico.TextTransparency = 0.25
@@ -1758,7 +1754,9 @@ local function Tab(name, icon)
         pg.Visible = true
         b.BackgroundTransparency = 0.18
         TW:Create(ul,TweenInfo.new(0.2,Enum.EasingStyle.Quint),{Size=UDim2.new(0,3,0.62,0)}):Play()
-    end)
+    end
+    entry.sel = sel
+    b.Activated:Connect(sel)
     return pg
 end
 
@@ -1963,182 +1961,16 @@ TLG.Tog = Tog
 TLG.Sli = Sli
 TLG.Btn = Btn
 
-local PInfo = Tab("Info", "📊")
+local PInfo = Tab("Info", "👤")
 local PCb = Tab("Combat", "⚔️")
 local PAb = Tab("Aimbot", "🎯")
-local PFl = Tab("Fly", "✈")
+local PFl = Tab("Fly", "🚀")
 local PIs = Tab("Islands", "🏝️")
-local PSc = Tab("Scripts", "📜")
-local PTo = Tab("Tools", "🔧")
+local PSc = Tab("Scripts", "💻")
+local PTo = Tab("Tools", "🛠️")
 local PEs = Tab("ESP", "👁️")
-local PVi = Tab("Visuals", "🎨")
+local PVi = Tab("Visuals", "✨")
 local POp = Tab("Optimize", "⚡")
-
--- ZTB SKULL EDITION: RADIAL CORE (360 grados)
--- Usa las paginas ya existentes: no duplica funciones ni callbacks.
-local Radial = Instance.new("Frame", W)
-Radial.Name = "ZTB_RadialCore"
-Radial.Size = UDim2.new(1,0,1,-54)
-Radial.Position = UDim2.new(0,0,0,54)
-Radial.BackgroundColor3 = Color3.fromRGB(7,6,8)
-Radial.BackgroundTransparency = 0.08
-Radial.BorderSizePixel = 0
-Radial.ZIndex = 100
-Radial.Visible = true
--- El radial reemplaza la vista inicial; evita mostrar el dashboard antiguo debajo.
-SideBar.Visible = false
-Cont.Visible = false
-local radialStroke = Instance.new("UIStroke", Radial)
-radialStroke.Color = C.Yel; radialStroke.Thickness = 1.5; radialStroke.Transparency = 0.25
-Instance.new("UICorner", Radial).CornerRadius = UDim.new(0,12)
-
-local radialTitle = Instance.new("TextLabel", Radial)
-radialTitle.Size = UDim2.new(1,-20,0,24)
-radialTitle.Position = UDim2.new(0,10,0,5)
-radialTitle.BackgroundTransparency = 1
-radialTitle.Text = "☠  ZTB SKULL EDITION  •  RADIAL CORE"
-radialTitle.Font = Enum.Font.GothamBlack
-radialTitle.TextSize = TLG.IsMobile and 11 or 14
-radialTitle.TextColor3 = C.Yel
-radialTitle.ZIndex = 102
-
-local radialWheel = Instance.new("Frame", Radial)
-radialWheel.Name = "ZTB_RadialWheel"
-radialWheel.Size = UDim2.new(0, math.min(TLG.IsMobile and 286 or 360, math.max(220, W_S.X.Offset-30)), 0, math.min(TLG.IsMobile and 286 or 360, math.max(220, W_S.X.Offset-30)))
-radialWheel.AnchorPoint = Vector2.new(0.5,0.5)
-radialWheel.Position = UDim2.new(0.5,0,0.53,0)
-radialWheel.BackgroundColor3 = Color3.fromRGB(13,10,11)
-radialWheel.BackgroundTransparency = 0.08
-radialWheel.BorderSizePixel = 0
-radialWheel.ZIndex = 101
-Instance.new("UICorner", radialWheel).CornerRadius = UDim.new(1,0)
-local wheelStroke = Instance.new("UIStroke", radialWheel)
-wheelStroke.Color = C.Yel; wheelStroke.Thickness = 2; wheelStroke.Transparency = 0.12
-local wheelInner = Instance.new("Frame", radialWheel)
-wheelInner.Size = UDim2.new(0.48,0,0.48,0)
-wheelInner.AnchorPoint = Vector2.new(0.5,0.5)
-wheelInner.Position = UDim2.new(0.5,0,0.5,0)
-wheelInner.BackgroundColor3 = Color3.fromRGB(25,15,12)
-wheelInner.BorderSizePixel = 0
-wheelInner.ZIndex = 103
-Instance.new("UICorner", wheelInner).CornerRadius = UDim.new(1,0)
-local innerStroke = Instance.new("UIStroke", wheelInner)
-innerStroke.Color = C.Yel; innerStroke.Thickness = 2
-local coreButton = Instance.new("TextButton", wheelInner)
-coreButton.Name = "ZTB_RadialCenter"
-coreButton.Size = UDim2.new(1,0,1,0)
-coreButton.BackgroundTransparency = 1
-coreButton.Text = "☠\nZTB"
-coreButton.TextColor3 = C.Yel
-coreButton.TextSize = TLG.IsMobile and 20 or 27
-coreButton.Font = Enum.Font.GothamBlack
-coreButton.ZIndex = 104
-coreButton.Activated:Connect(function()
-    -- El centro lleva a Home; nunca deja una pantalla vacía.
-    Radial.Visible = false
-    SideBar.Visible = true
-    Cont.Visible = true
-    local chosen = Tabs[1]
-    if chosen then
-        for _, t in ipairs(Tabs) do
-            t.p.Visible = false
-            t.l.TextColor3 = C.Gr
-            t.ico.TextTransparency = 0.25
-            t.b.BackgroundTransparency = 1
-            t.u.Size = UDim2.new(0,3,0,0)
-        end
-        chosen.p.Visible = true
-        chosen.l.TextColor3 = C.Yel
-        chosen.ico.TextTransparency = 0
-        chosen.b.BackgroundTransparency = 0.18
-        chosen.b.BackgroundColor3 = C.BG3
-        chosen.u.Size = UDim2.new(0,3,0.62,0)
-    end
-end)
-
-local radialItems = {
- {"HOME","⌂",0,{1}},
- {"COMBATE","⚔",45,{2,3}},
- {"VISUALES","◉",90,{8,9}},
- {"UTILIDADES","⚙",135,{4,10}},
- {"EXTRAS","✦",180,{6}},
- {"JUGADOR","♙",225,{1,5}},
- {"MASCOTAS","🐾",270,{7}},
- {"HERRAMIENTAS","⚒",315,{5,7}},
-}
-local function selectExistingTab(index)
-    local chosen = Tabs[index]
-    if not chosen then return end
-    for _, t in ipairs(Tabs) do
-        t.l.TextColor3 = C.Gr
-        t.ico.TextTransparency = 0.25
-        t.p.Visible = false
-        t.b.BackgroundTransparency = 1
-        t.u.Size = UDim2.new(0,3,0,0)
-    end
-    chosen.l.TextColor3 = C.Yel
-    chosen.ico.TextTransparency = 0
-    chosen.p.Visible = true
-    chosen.b.BackgroundTransparency = 0.18
-    chosen.b.BackgroundColor3 = C.BG3
-    chosen.u.Size = UDim2.new(0,3,0.62,0)
-end
-local radialButtons = {}
-local radius = TLG.IsMobile and 0.365 or 0.37
-for _, item in ipairs(radialItems) do
-    local name, glyph, deg, tabIndexes = item[1], item[2], item[3], item[4]
-    local a = math.rad(deg - 90)
-    local b = Instance.new("TextButton", radialWheel)
-    b.Name = "ZTB_Radial_" .. name
-    b.AnchorPoint = Vector2.new(0.5,0.5)
-    b.Position = UDim2.new(0.5 + math.cos(a)*radius,0,0.5 + math.sin(a)*radius,0)
-    b.Size = UDim2.new(0, TLG.IsMobile and 76 or 94, 0, TLG.IsMobile and 48 or 58)
-    b.BackgroundColor3 = Color3.fromRGB(31,22,18)
-    b.BackgroundTransparency = 0.04
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.Text = glyph .. "\n" .. name
-    b.TextColor3 = C.Yel
-    b.TextSize = TLG.IsMobile and 9 or 11
-    b.Font = Enum.Font.GothamBold
-    b.TextWrapped = true
-    b.ZIndex = 105
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
-    local bs = Instance.new("UIStroke", b)
-    bs.Color = C.Yel; bs.Thickness = 1; bs.Transparency = 0.28
-    b.Activated:Connect(function()
-        Radial.Visible = false
-        SideBar.Visible = true
-        Cont.Visible = true
-        local first = tabIndexes[1]
-        selectExistingTab(first)
-        -- Categorias con varias paginas muestran la primera pagina asignada.
-        -- La navegacion lateral original permanece disponible para las demas.
-    end)
-    table.insert(radialButtons,b)
-end
-
--- Boton de calavera en la cabecera para volver al radial desde cualquier categoria.
-local radialReturn = Instance.new("TextButton", TB)
-radialReturn.Name = "ZTB_OpenRadial"
-radialReturn.Size = UDim2.new(0,28,0,28)
-radialReturn.Position = UDim2.new(1,-68,0.5,-14)
-radialReturn.BackgroundColor3 = Color3.fromRGB(35,22,13)
-radialReturn.BorderSizePixel = 0
-radialReturn.Text = "☠"
-radialReturn.TextColor3 = C.Yel
-radialReturn.TextSize = 17
-radialReturn.Font = Enum.Font.GothamBlack
-radialReturn.ZIndex = 20
-Instance.new("UICorner", radialReturn).CornerRadius = UDim.new(0,8)
-local radialReturnStroke = Instance.new("UIStroke", radialReturn)
-radialReturnStroke.Color = C.Yel; radialReturnStroke.Thickness = 1
-radialReturn.Activated:Connect(function()
-    for _, t in ipairs(Tabs) do t.p.Visible = false end
-    SideBar.Visible = false
-    Cont.Visible = false
-    Radial.Visible = true
-end)
 
 
 task.wait(0.1)
@@ -3510,6 +3342,58 @@ end
 
 -- OPTIMIZE
 do
+  local function ramMB()
+    local ok, v = pcall(function() return game:GetService("Stats"):GetTotalMemoryUsageMb() end)
+    if ok and type(v) == "number" then return math.floor(v) end
+    return math.floor(collectgarbage("count") / 1024)
+  end
+  Sec(POp, "📈 MONITOR EN VIVO", "📈")
+  do
+    local mon = Instance.new("Frame", POp)
+    mon.Size = UDim2.new(1, 0, 0, 54)
+    mon.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    mon.BackgroundTransparency = 0.1
+    mon.BorderSizePixel = 0
+    mon.ZIndex = 5
+    Instance.new("UICorner", mon).CornerRadius = UDim.new(0, 10)
+    local ms = Instance.new("UIStroke", mon)
+    ms.Color = C.Yel; ms.Thickness = 1; ms.Transparency = 0.55
+    local function stat(idx, title)
+      local t = Instance.new("TextLabel", mon)
+      t.Size = UDim2.new(1/3, 0, 0, 14)
+      t.Position = UDim2.new((idx - 1) / 3, 0, 0, 7)
+      t.BackgroundTransparency = 1
+      t.Font = Enum.Font.GothamBold
+      t.Text = title
+      t.TextSize = 9
+      t.TextColor3 = C.Gr
+      t.ZIndex = 7
+      local v = Instance.new("TextLabel", mon)
+      v.Size = UDim2.new(1/3, 0, 0, 26)
+      v.Position = UDim2.new((idx - 1) / 3, 0, 0, 21)
+      v.BackgroundTransparency = 1
+      v.Font = Enum.Font.GothamBlack
+      v.Text = "--"
+      v.TextSize = 18
+      v.TextColor3 = C.Wh
+      v.ZIndex = 7
+      return v
+    end
+    local vF, vP, vR = stat(1, "FPS"), stat(2, "PING"), stat(3, "RAM (MB)")
+    task.spawn(function()
+      while mon.Parent do
+        local fps = tonumber(string.match(FpsLabel.Text, "%d+")) or 0
+        local ping = tonumber(string.match(PingLabel.Text, "%d+")) or 0
+        vF.Text = tostring(fps)
+        vF.TextColor3 = fps >= 45 and C.Grn or (fps >= 25 and Color3.fromRGB(255, 210, 80) or C.Rd)
+        vP.Text = tostring(ping)
+        vP.TextColor3 = ping <= 90 and C.Grn or (ping <= 180 and Color3.fromRGB(255, 210, 80) or C.Rd)
+        vR.Text = tostring(ramMB())
+        task.wait(1)
+      end
+    end)
+  end
+
   Sec(POp, "⚡ FPS", "⚡")
   local orig = {}
   local shadowsOriginal = nil
@@ -3692,8 +3576,199 @@ do
   end)
   Lbl(POp, "Quita materiales, sombras, efectos, partículas y baja la calidad. Al apagarlo se restaura todo.", C.Gr)
 
+
+  -- ═══════════ RENDIMIENTO EXTRA ═══════════
+  local perfRestore
+
+  -- 🔋 Modo ahorro: apaga el render 3D y tapa la pantalla (ideal para AFK)
+  Sec(POp, "🔋 MODO AHORRO", "🔋")
+  local Saver = {On = false}
+  local saverGui
+  local function saverStop()
+    if not Saver.On then return end
+    Saver.On = false
+    pcall(function() RS:Set3dRenderingEnabled(true) end)
+    if saverGui then pcall(function() saverGui:Destroy() end); saverGui = nil end
+    TLG.PNotif("🔋 Ahorro", "❌ Desactivado", C.Rd)
+  end
+  local function saverStart()
+    if Saver.On then return end
+    Saver.On = true
+    if TLG.ZTB_SetMin then pcall(TLG.ZTB_SetMin, true) end
+    local b = Instance.new("TextButton", SG)
+    b.Name = "ZTB_Saver"
+    b.Size = UDim2.new(1, 0, 1, 0)
+    b.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.Text = ""
+    b.ZIndex = 900
+    saverGui = b
+    local sk = Instance.new("TextLabel", b)
+    sk.AnchorPoint = Vector2.new(0.5, 0.5)
+    sk.Position = UDim2.new(0.5, 0, 0.42, 0)
+    sk.Size = UDim2.fromOffset(120, 100)
+    sk.BackgroundTransparency = 1
+    sk.Text = "💀"
+    sk.TextSize = 64
+    sk.TextTransparency = 0.35
+    sk.ZIndex = 901
+    TW:Create(sk, TweenInfo.new(1.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+      {TextTransparency = 0.85}):Play()
+    local tl = Instance.new("TextLabel", b)
+    tl.AnchorPoint = Vector2.new(0.5, 0)
+    tl.Position = UDim2.new(0.5, 0, 0.42, 58)
+    tl.Size = UDim2.new(1, 0, 0, 40)
+    tl.BackgroundTransparency = 1
+    tl.Font = Enum.Font.GothamBold
+    tl.TextSize = 12
+    tl.TextColor3 = Color3.fromRGB(150, 130, 90)
+    tl.Text = "MODO AHORRO • toca la pantalla para volver"
+    tl.ZIndex = 901
+    local t0 = os.clock()
+    task.spawn(function()
+      while Saver.On and b.Parent do
+        local s = math.floor(os.clock() - t0)
+        tl.Text = string.format("MODO AHORRO  %d:%02d\ntoca la pantalla para volver", math.floor(s / 60), s % 60)
+        task.wait(1)
+      end
+    end)
+    b.Activated:Connect(saverStop)
+    pcall(function() RS:Set3dRenderingEnabled(false) end)
+    TLG.PNotif("🔋 Ahorro", "✅ Pantalla negra activada", C.Grn)
+  end
+  Btn(POp, "🔋 Activar modo ahorro (pantalla negra)", C.Yel, saverStart)
+  Lbl(POp, "Apaga el 3D para gastar menos batería y calor. Toca la pantalla para volver.", C.Gr)
+
+  local mute = {old = nil}
+  Tog(POp, "🔇 Silenciar el juego", false, function(v)
+    pcall(function()
+      local gs = UserSettings():GetService("UserGameSettings")
+      if v then
+        if mute.old == nil then mute.old = gs.MasterVolume end
+        gs.MasterVolume = 0
+      elseif mute.old ~= nil then
+        gs.MasterVolume = mute.old
+        mute.old = nil
+      end
+    end)
+  end)
+
+  -- 👥 Ocultar a los demás jugadores (solo en tu pantalla)
+  Sec(POp, "👥 JUGADORES", "👥")
+  local HO = {On = false, Saved = setmetatable({}, {__mode = "k"}), Conns = {}}
+  local function hoHide(d)
+    if d:IsA("BasePart") or d:IsA("Decal") then
+      if HO.Saved[d] == nil then HO.Saved[d] = d.Transparency end
+      d.Transparency = 1
+    end
+  end
+  local function hoChar(ch)
+    for _, d in ipairs(ch:GetDescendants()) do pcall(hoHide, d) end
+    table.insert(HO.Conns, ch.DescendantAdded:Connect(function(d)
+      if HO.On then task.defer(function() pcall(hoHide, d) end) end
+    end))
+  end
+  local function hoPlayer(p)
+    if p == TLG.LP then return end
+    if p.Character then pcall(hoChar, p.Character) end
+    table.insert(HO.Conns, p.CharacterAdded:Connect(function(ch)
+      if not HO.On then return end
+      task.wait(0.3)
+      pcall(hoChar, ch)
+    end))
+  end
+  local function hoStop()
+    if not HO.On then return end
+    HO.On = false
+    for _, c in ipairs(HO.Conns) do pcall(function() c:Disconnect() end) end
+    HO.Conns = {}
+    for d, t in pairs(HO.Saved) do
+      if d.Parent then pcall(function() d.Transparency = t end) end
+    end
+    HO.Saved = setmetatable({}, {__mode = "k"})
+  end
+  Tog(POp, "👻 Ocultar otros jugadores", false, function(v)
+    if v then
+      HO.On = true
+      for _, p in ipairs(PLR:GetPlayers()) do hoPlayer(p) end
+      table.insert(HO.Conns, PLR.PlayerAdded:Connect(hoPlayer))
+    else
+      hoStop()
+    end
+  end)
+  Lbl(POp, "Menos personajes que dibujar = más FPS en zonas llenas.", C.Gr)
+
+  -- 🎛 Límite de FPS
+  Sec(POp, "🎛 LÍMITE DE FPS", "🎛")
+  local capL = Lbl(POp, "Límite actual: sin cambios", C.Gr)
+  local function setCap(n, txt)
+    if setfpscap then
+      pcall(setfpscap, n)
+      capL.Text = "Límite actual: " .. txt
+    else
+      capL.Text = "Tu ejecutor no soporta cambiar el límite de FPS"
+    end
+  end
+  Btn(POp, "🔋 30 FPS (ahorra batería)", C.Wh, function() setCap(30, "30 FPS") end)
+  Btn(POp, "⚖️ 60 FPS (equilibrado)", C.Wh, function() setCap(60, "60 FPS") end)
+  Btn(POp, "🚀 Sin límite", C.Wh, function() setCap(0, "sin límite") end)
+
+  -- 🎚 Ajustes avanzados
+  Sec(POp, "🎚 AJUSTES AVANZADOS", "🎚")
+  local Q = {orig = nil, mesh = nil}
+  local qReady = false
+  Sli(POp, "Calidad gráfica (1-10)", 1, 10, 5, function(v)
+    if not qReady then return end
+    pcall(function()
+      local r = settings().Rendering
+      if Q.orig == nil then Q.orig = r.QualityLevel end
+      r.QualityLevel = Enum.QualityLevel["Level" .. string.format("%02d", v)]
+    end)
+  end)
+  qReady = true
+  Tog(POp, "🧩 Mallas en baja calidad", false, function(v)
+    pcall(function()
+      local r = settings().Rendering
+      if v then
+        if Q.mesh == nil then Q.mesh = r.MeshPartDetailLevel end
+        r.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level04
+      elseif Q.mesh ~= nil then
+        r.MeshPartDetailLevel = Q.mesh
+        Q.mesh = nil
+      end
+    end)
+  end)
+
+  -- 🧹 Memoria
+  Sec(POp, "🧹 MEMORIA", "🧹")
+  Btn(POp, "🧹 Limpiar memoria ahora", C.Wh, function()
+    local before = ramMB()
+    collectgarbage("collect")
+    collectgarbage("collect")
+    task.wait(0.2)
+    TLG.PNotif("🧹 Memoria", before .. " MB → " .. ramMB() .. " MB", C.Grn)
+  end)
+
+  perfRestore = function()
+    pcall(saverStop)
+    pcall(hoStop)
+    pcall(function()
+      if mute.old ~= nil then
+        UserSettings():GetService("UserGameSettings").MasterVolume = mute.old
+        mute.old = nil
+      end
+    end)
+    pcall(function()
+      local r = settings().Rendering
+      if Q.orig ~= nil then r.QualityLevel = Q.orig; Q.orig = nil end
+      if Q.mesh ~= nil then r.MeshPartDetailLevel = Q.mesh; Q.mesh = nil end
+    end)
+  end
+
   TLG.RestoreOptimize = function()
     pcall(alStop, true)
+    if perfRestore then pcall(perfRestore) end
     for d, transparency in pairs(orig) do
       if d and d.Parent then pcall(function() d.Transparency = transparency end) end
     end
@@ -3961,6 +4036,9 @@ end
 
 
 -- UI: pestaña CONFIG
+  -- La pestaña nunca se creaba (PCf era nil) y por eso Config no aparecía en el menú.
+  local PCf = Tab("Config", "⚙️")
+  TLG.PCf = PCf
   Sec(PCf, "🎨 COLOR DEL MENÚ", "🎨")
   local grid = Instance.new("Frame", PCf)
   grid.Size = UDim2.new(1, 0, 0, 0)
@@ -4012,394 +4090,6 @@ end)
 if not V9ok then
   warn("[TLG] V9: " .. tostring(V9err))
   pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
-end
-
--- ═══════════ FRUTAS (modo prueba) ═══════════
-local FRok, FRerr = pcall(function()
-  local CFG = TLG.CFG or {}
-  local function save() if TLG.saveSoon then TLG.saveSoon() end end
-  local function myRoot()
-    local ch = TLG.LP.Character
-    return ch and ch:FindFirstChild("HumanoidRootPart")
-  end
-
-  local Fr = {Keys = {}, Items = {}, Range = 5000, AutoOn = false, ESPOn = false,
-    Tried = {}, Origin = nil, Away = false, ReturnBack = true, Count = 0, Log = {}}
-  TLG.Fruit = Fr
-
-  local function parseKeys(s)
-    local keys = {}
-    for w in tostring(s):gmatch("[^,%s]+") do table.insert(keys, w:lower()) end
-    return keys
-  end
-  Fr.Keys = parseKeys(CFG.fruitKeys or "fruit, fruta")
-
-  local function matches(name)
-    local n = name:lower()
-    for _, k in ipairs(Fr.Keys) do
-      if n:find(k, 1, true) then return true end
-    end
-    return false
-  end
-
-  local function isMine(inst)
-    if inst:IsDescendantOf(TLG.LP) then return true end
-    for _, p in ipairs(PLR:GetPlayers()) do
-      local ch = p.Character
-      if ch and inst:IsDescendantOf(ch) then return true end
-    end
-    return false
-  end
-
-  local function track(d)
-    if (d:IsA("Model") or d:IsA("Tool") or d:IsA("BasePart")) and matches(d.Name) then
-      Fr.Items[d] = true
-    end
-  end
-  local function rescan()
-    Fr.Items = {}
-    for _, d in ipairs(workspace:GetDescendants()) do track(d) end
-  end
-  rescan()
-  workspace.DescendantAdded:Connect(track)
-  workspace.DescendantRemoving:Connect(function(d) Fr.Items[d] = nil end)
-
-  local function partOf(inst)
-    if inst:IsA("BasePart") then return inst end
-    if inst:IsA("Tool") then
-      return inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart", true)
-    end
-    if inst:IsA("Model") then
-      return inst.PrimaryPart or inst:FindFirstChildWhichIsA("BasePart", true)
-    end
-    return nil
-  end
-
-  local function list()
-    local out = {}
-    local mr = myRoot()
-    for inst in pairs(Fr.Items) do
-      if inst.Parent and not isMine(inst) then
-        local anc, nested = inst.Parent, false
-        while anc and anc ~= workspace do
-          if Fr.Items[anc] then nested = true; break end
-          anc = anc.Parent
-        end
-        if not nested then
-          local pt = partOf(inst)
-          if pt then
-            table.insert(out, {inst = inst, part = pt,
-              dist = mr and (pt.Position - mr.Position).Magnitude or 0})
-          end
-        end
-      end
-    end
-    table.sort(out, function(a, b) return a.dist < b.dist end)
-    return out
-  end
-
-  local function interact(e)
-    local mr = myRoot(); if not mr then return 0 end
-    local n = 0
-    pcall(function() mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 3, 0)) end)
-    task.wait(0.15)
-    for _, d in ipairs(e.inst:GetDescendants()) do
-      if d:IsA("ProximityPrompt") then
-        pcall(function() d.HoldDuration = 0 end)
-        if fireproximityprompt then pcall(fireproximityprompt, d); n = n + 1 end
-      elseif d:IsA("ClickDetector") and fireclickdetector then
-        pcall(fireclickdetector, d); n = n + 1
-      end
-    end
-    if firetouchinterest then
-      pcall(function()
-        firetouchinterest(mr, e.part, 0)
-        firetouchinterest(mr, e.part, 1)
-      end)
-      n = n + 1
-    end
-    return n
-  end
-
-  function TLG.FruitAutoStart()
-    if Fr.AutoOn then return end
-    Fr.AutoOn = true
-    local mr0 = myRoot()
-    Fr.Origin = mr0 and mr0.CFrame
-    Fr.Away = false
-    task.spawn(function()
-      while Fr.AutoOn do
-        pcall(function()
-          local mr = myRoot(); if not mr then return end
-          local target
-          for _, e in ipairs(list()) do
-            local t = Fr.Tried[e.inst]
-            if e.dist <= Fr.Range and (not t or os.clock() - t > 6) then target = e; break end
-          end
-          if not target then
-            if Fr.ReturnBack and Fr.Origin and Fr.Away then
-              mr.CFrame = Fr.Origin; Fr.Away = false
-            end
-            return
-          end
-          Fr.Away = true
-          Fr.Tried[target.inst] = os.clock()
-          local name = target.inst.Name
-          local n = interact(target)
-          task.wait(0.4)
-          if not target.inst.Parent then
-            Fr.Count = Fr.Count + 1
-            table.insert(Fr.Log, os.date("%H:%M:%S") .. "  " .. name)
-            TLG.PNotif("🍎 Fruta", "Recogida: " .. name, C.Grn)
-          else
-            TLG.PNotif("🍎", name .. " sigue ahí (intentos: " .. n .. ")", C.Yel)
-          end
-        end)
-        task.wait(0.5)
-      end
-    end)
-    TLG.PNotif("🍎 Auto Frutas", "✅ Activado", C.Grn)
-  end
-  function TLG.FruitAutoStop()
-    if not Fr.AutoOn then return end
-    Fr.AutoOn = false
-    local mr = myRoot()
-    if Fr.ReturnBack and Fr.Origin and Fr.Away and mr then mr.CFrame = Fr.Origin end
-    Fr.Away = false
-    TLG.PNotif("🍎 Auto Frutas", "❌ Desactivado", C.Rd)
-  end
-
-  -- ESP de frutas
-  local ESPo, espConn = {}, nil
-  function TLG.FruitESPStart()
-    if Fr.ESPOn then return end
-    Fr.ESPOn = true
-    local last = 0
-    espConn = RS.Heartbeat:Connect(function()
-      if not Fr.ESPOn then return end
-      local now = os.clock()
-      if now - last < 0.5 then return end
-      last = now
-      local keep = {}
-      local l = list()
-      for i = 1, math.min(#l, 20) do
-        local e = l[i]
-        keep[e.inst] = true
-        local o = ESPo[e.inst]
-        if not o or not o.hl.Parent then
-          if o then pcall(function() o.bb:Destroy() end) end
-          local hl = Instance.new("Highlight")
-          hl.Name = "TLG_FR_HL"
-          hl.Adornee = e.inst:IsA("Tool") and e.part or e.inst
-          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-          hl.FillColor = C.Yel; hl.OutlineColor = C.Wh
-          hl.FillTransparency = 0.6; hl.OutlineTransparency = 0
-          hl.Parent = e.part
-          local bb = Instance.new("BillboardGui")
-          bb.Name = "TLG_FR_BB"
-          bb.Adornee = e.part
-          bb.AlwaysOnTop = true
-          bb.Size = UDim2.new(0, 160, 0, 30)
-          bb.StudsOffset = Vector3.new(0, 3, 0)
-          bb.Parent = e.part
-          local lb = Instance.new("TextLabel", bb)
-          lb.Size = UDim2.new(1, 0, 1, 0)
-          lb.BackgroundTransparency = 1
-          lb.Font = Enum.Font.GothamBold
-          lb.TextSize = 11
-          lb.TextColor3 = C.Yel
-          lb.TextStrokeTransparency = 0.3
-          o = {hl = hl, bb = bb, lb = lb}
-          ESPo[e.inst] = o
-        end
-        o.lb.Text = "🍎 " .. e.inst.Name .. "\n" .. math.floor(e.dist) .. " studs"
-      end
-      for inst, o in pairs(ESPo) do
-        if not keep[inst] then
-          pcall(function() o.hl:Destroy() end)
-          pcall(function() o.bb:Destroy() end)
-          ESPo[inst] = nil
-        end
-      end
-    end)
-  end
-  function TLG.FruitESPStop()
-    Fr.ESPOn = false
-    if espConn then pcall(function() espConn:Disconnect() end); espConn = nil end
-    for _, o in pairs(ESPo) do
-      pcall(function() o.hl:Destroy() end)
-      pcall(function() o.bb:Destroy() end)
-    end
-    ESPo = {}
-  end
-
-  -- Reporte para las pruebas
-  local function buildReport()
-    local L = {}
-    local function add(s) table.insert(L, s) end
-    add("== REPORTE ZTB HUB · FRUTAS ==")
-    add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
-    local l = list()
-    add("Candidatos en el mapa: " .. #l)
-    for i = 1, math.min(#l, 25) do
-      local e = l[i]
-      local pr, cd, ti = 0, 0, 0
-      for _, d in ipairs(e.inst:GetDescendants()) do
-        if d:IsA("ProximityPrompt") then pr = pr + 1
-        elseif d:IsA("ClickDetector") then cd = cd + 1
-        elseif d:IsA("TouchTransmitter") then ti = ti + 1 end
-      end
-      add(i .. ". " .. e.inst.Name .. " [" .. e.inst.ClassName .. "] dist=" .. math.floor(e.dist)
-        .. " prompts=" .. pr .. " clicks=" .. cd .. " touch=" .. ti)
-      add("   " .. e.inst:GetFullName())
-    end
-    add("Mochila / personaje:")
-    pcall(function()
-      for _, t in ipairs(TLG.LP.Backpack:GetChildren()) do add("  [Mochila] " .. t.ClassName .. " · " .. t.Name) end
-      local ch = TLG.LP.Character
-      if ch then
-        for _, t in ipairs(ch:GetChildren()) do
-          if t:IsA("Tool") then add("  [En mano] " .. t.Name) end
-        end
-      end
-    end)
-    add("Remotes relacionados (ReplicatedStorage):")
-    local rk = {"fruit","fruta","store","guard","inventory","inventario","eat","collect","pick","drop","bag"}
-    local n = 0
-    pcall(function()
-      for _, d in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
-        if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
-          local low = d.Name:lower()
-          for _, k in ipairs(rk) do
-            if low:find(k, 1, true) then
-              n = n + 1
-              if n <= 60 then add("  " .. d.ClassName .. " · " .. d:GetFullName()) end
-              break
-            end
-          end
-        end
-      end
-    end)
-    add("  (total: " .. n .. ")")
-    add("Datos del jugador con 'fruit/fruta':")
-    pcall(function()
-      for _, d in ipairs(TLG.LP:GetDescendants()) do
-        local low = d.Name:lower()
-        if low:find("fruit", 1, true) or low:find("fruta", 1, true) then
-          local v = ""
-          if d:IsA("ValueBase") then v = " = " .. tostring(d.Value) end
-          add("  " .. d.ClassName .. " · " .. d:GetFullName() .. v)
-        end
-      end
-    end)
-    return table.concat(L, "\n")
-  end
-
-  -- UI
-  Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
-  local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
-  Tog(PFr, "Auto recoger frutas", false, function(v)
-    if v then TLG.FruitAutoStart() else TLG.FruitAutoStop() end
-  end)
-  Tog(PFr, "ESP de frutas", false, function(v)
-    if v then TLG.FruitESPStart() else TLG.FruitESPStop() end
-  end)
-  Tog(PFr, "Volver a mi posición al terminar", true, function(v) Fr.ReturnBack = v end)
-  Sli(PFr, "Rango de búsqueda", 100, 10000, 5000, function(v) Fr.Range = v end)
-
-  Lbl(PFr, "Palabras clave del nombre (separadas por coma):", C.Gr)
-  local row = Instance.new("Frame", PFr)
-  row.Size = UDim2.new(1, 0, 0, 36)
-  row.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  row.BorderSizePixel = 0
-  row.ZIndex = 5
-  Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
-  local rs = Instance.new("UIStroke", row)
-  rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.6
-  local tb = Instance.new("TextBox", row)
-  tb.Size = UDim2.new(1, -20, 1, 0)
-  tb.Position = UDim2.new(0, 10, 0, 0)
-  tb.BackgroundTransparency = 1
-  tb.Font = Enum.Font.Gotham
-  tb.TextSize = 12
-  tb.TextColor3 = C.Wh
-  tb.PlaceholderText = "fruit, fruta"
-  tb.PlaceholderColor3 = C.Gr
-  tb.ClearTextOnFocus = false
-  tb.TextXAlignment = Enum.TextXAlignment.Left
-  tb.Text = table.concat(Fr.Keys, ", ")
-  tb.ZIndex = 7
-  tb.FocusLost:Connect(function()
-    local k = parseKeys(tb.Text)
-    if #k == 0 then return end
-    Fr.Keys = k
-    CFG.fruitKeys = table.concat(k, ", "); save()
-    rescan(); Fr.Tried = {}
-    TLG.PNotif("🍎", "Buscando: " .. table.concat(k, ", "), C.Yel)
-  end)
-
-  local rb = Instance.new("TextBox", PFr)
-  rb.Size = UDim2.new(1, 0, 0, 170)
-  rb.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  rb.BorderSizePixel = 0
-  rb.Font = Enum.Font.Code
-  rb.TextSize = 10
-  rb.TextColor3 = C.Wh
-  rb.MultiLine = true
-  rb.TextWrapped = true
-  rb.TextXAlignment = Enum.TextXAlignment.Left
-  rb.TextYAlignment = Enum.TextYAlignment.Top
-  rb.ClearTextOnFocus = false
-  rb.Text = "El reporte aparece aquí al tocar «Escanear y generar reporte»."
-  rb.ZIndex = 6
-  Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 10)
-  local rbs = Instance.new("UIStroke", rb)
-  rbs.Color = C.Yel; rbs.Thickness = 1; rbs.Transparency = 0.7
-
-  Btn(PFr, "🔍 Escanear y generar reporte", C.Yel, function()
-    rescan()
-    local rep = buildReport()
-    rb.Text = rep
-    if setclipboard then
-      setclipboard(rep)
-      TLG.PNotif("🍎", "Reporte copiado al portapapeles", C.Grn)
-    else
-      TLG.PNotif("🍎", "Reporte listo (copialo del cuadro)", C.Yel)
-    end
-    for line in rep:gmatch("[^\n]+") do print("[TLG] " .. line) end
-  end)
-  Btn(PFr, "📍 TP a la fruta más cercana", C.Wh, function()
-    local mr = myRoot()
-    local e = list()[1]
-    if not mr or not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-    mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 4, 0))
-    TLG.PNotif("🍎", "TP → " .. e.inst.Name, C.Cyan)
-  end)
-  Btn(PFr, "✋ Recoger la más cercana (1 intento)", C.Wh, function()
-    local e = list()[1]
-    if not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-    local n = interact(e)
-    TLG.PNotif("🍎", e.inst.Name .. " · acciones: " .. n, C.Yel)
-  end)
-  Btn(PFr, "📋 Copiar historial de recogidas", C.Wh, function()
-    local txt = table.concat(Fr.Log, "\n")
-    if txt == "" then TLG.PNotif("🍎", "Aún no hay recogidas", C.Yel); return end
-    if setclipboard then setclipboard(txt) end
-    TLG.PNotif("🍎", #Fr.Log .. " recogidas copiadas", C.Grn)
-  end)
-
-  task.spawn(function()
-    while infoL.Parent do
-      pcall(function()
-        infoL.Text = "Frutas en el mapa: " .. #list() .. "  ·  Recogidas: " .. Fr.Count
-      end)
-      task.wait(1)
-    end
-  end)
-end)
-if not FRok then
-  warn("[TLG] Frutas: " .. tostring(FRerr))
-  pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
 end
 
 -- FAB desactivados por defecto para que no estorben la pantalla.
@@ -4708,6 +4398,648 @@ task.spawn(function()
   end
 end)
 
+-- ═══════════ PESTAÑA GAMPI ═══════════
+do
+  local GAMPI_B64 = [==[
+/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC
+0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAFX
+AWgDASIAAhEBAxEB/8QAHAAAAQUBAQEAAAAAAAAAAAAABAABAgMFBgcI/8QAOBAAAQQBAwIFAwIFAwQDAQAAAQACAxEhBBIxBUEGEyJRYXGBkR
+QyByNCUqEIFWIkM3KxROHw8f/EABkBAAMBAQEAAAAAAAAAAAAAAAABAgMEBf/EACERAQEBAQADAQEAAwEBAAAAAAABEQIDEiExQQQTUSJx/9oA
+DAMBAAIRAxEAPwD3yI1Yr8qwEezfwh91k0pMJvlceu7V+Dy0fhSpu2w0KDTam3ggo01ZfX9I/CXmX/TX2TPNJNs8pbS+pE2OAfsh5SHCgAPsie
+xCrfHjHKJTxOJuB/6pWekHsD8BRAIZ8qTQCLPKYzEyRQwPwo7hdGvwovscJ2AEWUvqT2OxH2CcUOQCm9PNJchH05EgRX7Qnsew/CiE9WjaZ7HZ
+o/Cdv/7CjgKbXCk9GJ7gBmvwmBB7AfZIUQkG/hPRh8ewP2UmgEftH4VY5U9wAT0Jhrf7R+FF1NP7R+FHzD2TlwIzyjSprB/pFfRPQ7NH4UbAFp
+w8dkSnIntHs38JUPZqg53slZ7UpKxLH9o/Ci4jHpH4TbiFFzrKZYlg/wBI/Ck3b/aPwoBSKNP4n6f7R+Ewr+0fhJrsKJelCWgD+0fhKqPA/Ci1
+1lTVFTUPYfhKh7D8J/umKNowtrf7R+EsDgD8JE4Tco0z19D9kq+G/hLlII0Fj+0fhIAew/CdIKthFTR/SPwkkUkvYYwSaGAD9U28uxVfRKRwBw
+mB3HAWbWyLg6u6czGwqqrunYASmJE/O9/8pGalRI3ISY2/lCbBLJrKuBwg4xRRYb8pYeJBwtSFDKHedsitBLmoJK9xUqAFBVcKW+kDEqwqnPO4
+NHdTL77KOCbQNWCx3tTBwoMbg2U9V3QJUu2SmBtMcj3VZcRgIgX2KyFJj8KqMFwyrRQ7pn/Ew1M4UKTtKZxsoIwwAkQpBuAVI8IL9QGcJEAdkm
+4clI5BaZK/hJIfAQctIp8Umdwq7oGynprQL7pgDfKgyRo9k/mDskWJUfdID3TMNnKsNVhMkmANNp3uocJg7CZzhWaQdSJoBK1WHk85CkDaWiE5
+ykwqvlymMJpOCnJpKkqQZ0hhJIC+EERST7T7JIJguAVTcONKNn3TtBQ23Ui/NKcfp7qsg3kKY4Sw+f1N4tppVjc0YVrnDYqrsYQdIyWbUmyOIt
+Uq2LjKKmXbiYO52VcJKIFKkH2U2ZItIXnFjpAO3KoMrgTRVz2Whniimz3V7ZL+vdRdLTlGEhtlwtQebf6QjBRTJCQrA9VRigrDVKbTiQcE22yo
+AiwAVe26T0ak1pAwphqgy7U83aDhwcKDT7qR4VRBsUilRDX3hSPCoBVgNhMQ1ZTH6J04FlAqHAVZJvCsf8KrNoLTucSFDbee6ua0EJFoCFKCwj
+KcFTfZGFF1dkkVLdSYSuIonCrkOFBhNUr5g0TuIyFAv9WSohx4T7e54RZg1MSequyIY4UhDVYV0OQlT3V2LT901UpBI4kllMOUrynhWJFMDSSS
+0+FiQdRSUByknhY5xTbhQFpEkLFrFzXA8piRaqDieUndkHuJPcUouEzR3VjaAKSv1UeVNpoKB5StO/UT5Uy4UpMcVUFIXWE8G2jWHczPKg6O8q
+mN23lWiUEJM78uICMVm0gA04TueFAm3goAoZaq5TQUHSENUNxOSlJppMeA4UjIn7gg2jNhExGwqvJyavDqCQkvlQkIDRZAv3KYDaDnKk8XNIcp
+VXCojJBVu72KSlhCYqNkDKleEWkXZOH0cqBNkJbb4KcLEnkdlCrClSQCZYZqcpyRwkRYKcOoO4VbBmyncDlC6/X6TpejdqeoaiOCBvLnupJE+i
+HiwoAYS0+q0+s0zZ9JKyWJwsOYbBVgsp7h+qLWkqTgQApmwE3PKfsXqpJ7K2LACVdkxBHCVp4JDrCRdRVTD6VMlEEWg+6ewqt2KUmOTFWDCSa8
+JtyewjpJYKSPZTnncCgmGeU8jy+tx4UeFJ6chLbjKcHCrlfRCAeynVYkCsFEcpQfaSdMMqbapO3Dk1FSbgJbRlTDMYKC3EHHGEgpObtHKgAhP7
+dMDlPu9kxbQtMhe4nuTFyheU4FhGp1a2SxQCr1mvi6doptVqXhkMTS5zncUE1kBeR/6hPEDtJ0HTdLhfUmqdbwCQdoStOXHlf8Qv4ldZ654iM2
+j1csOigkuFjHUCAvp/wB19viHwnoeoBzS+RgD67OHK+JJmUSeV7v/pn8Q1HrOizvoNPmRA/PKmU+f19BOe8cKcbzuzhVnIGVJmDbiKT2NbyM3W
+me6gs7V9W0ekNSzNB9gVhdS8Y6OIEQNdKR80Fn15OYU5daHWE7XUF5frfHOqcA3TRMi+btZsnjHqrhXngD4Czvnip43sfmUlv+y8Ud4t6of/kf
+4Run8cdTabe9jhfsl/ulP/VXrm6yptcKXC6Px7onsZ+ojka/hx7BdPoOq6PXx7tJqI5PgHIWvPkiOvG0SQTyF4n/AKnJJG9G6UxshbG+UgturX
+sheA7lfNn+o7qr9f4m0uhiJ8vSx5HbcVXXUReM+tP+Ani+TSar/Y9fI50UxuBxP7T7L6GZVYJK+JemTyaLUafUQkiWJwcCD3C+wvDHUx1Houk1
+Dj65IwXfWlHHWpbLimeaVRJ5BwUwLiMrYfsWNce6kSh7dZCXrPdMZgneOE7nCkM0O3ZRDKIzyifBiMJJeb4RIoKhjRmirCD7opYnYCYkKDrKXD
+QU8GLA5JVWTwkpoxipKbmqBFJqsw7BZQ0n7qRTOVCRllAxS2EuHsrY2kcqyNtBOAQUv6Ii3lNZa5SPKRbeUURFr/VStPwVSRWe6dpzkpSizUrP
+Dk6Z7hSiJG0qJN2Ryq09pIBBhT0QlZSspAznWKXzN/HrXjqHjHyWEObpmbcHgr6P6tqmaHpup1MlBscZdn6L496z1H/devazVPsmSRxv4vCjqi
+sLUelhJRXhbreo6F1mDXadztzHCwDyO6u6hC0ws2jNoPS6XdK3HdZ3rDk+vrbwr/EDp3WOkslLxHNtG5p7FVdZ8TP1Efl6Zzo29z3K8S8Ewsi3
+0KFXhdg/WNjFF33WPfkdHM39bEmpc8kySFx+ShZZf7Ss39U12QVF8+7grn6trbnkde40fuoysAbhCt1O0dk0mrtuaU5VUpOMKELy12UJqNZTLx
+yqYNYHOop6etbz2/8A8RGm1k0DxJp5HxuHcOpZTXtv9wRUR3D0m1e/8TY7HpXjTWaVrhqm/qBVAk0QvJ/G0Or6r1vVdQkicQ91rqHlzeapVuk3
+NIIBsdwj3qeuNecmBzaNH6L6Q/hbqjJ4Vha5wO11crxfqOjjafMa2gTRC7v+EnVQySXQvxuNtW/irm65x7PFNgAlENIIwVksfXfKIjkcG0uxA6
+2/CkCECJDeSr4ng4QUq+0/flVueGhJriTnCBaIjF91bXsVQMKQdXdIl5b6VUfZS3CuU1AhMGAICSmRhJAc+yQqbiSVW0UrW/8AbJ7pfi6ZuFCW
+ycKxmVIgd0CRCO9qrkLg7nCtcRWFVLdikFZIk15Kk5/ZQYMJ82EVMLvlMeFJyZpBNINQ++FOJhvKtLQVJooikxmo8FPalIogWmVIp2cpimukBz
+X8T9SNF4P17iQN0Zb+V8jwxhjyXGsr6h/jVMGeFC2/3vDV8x9Xhe1jCzPqWXYv0QWh7QOyJ0cLRWEunwibTNIsupbHStDchL7puQsO/rTiNTpM
+DtLCHXT3cjsjJJC6ieUxx2pMcrn7jq5iyNxpXsDiOaVDGd0ZF+1RGsQLXDkpnY5Tyvo0hZnk907cKh+oH0UD3WY2cxuwiNXZa43lZRJvJU7qa0
+26124WXFbfStWXNN3z3XKt7LX6a/aw/VNO46kkOiJQoBJwhWag7QERFJYTaS6E10RkiLa/Cu8Ba2LpviaB05ppO37lTkPq+ywdeyTS6tmrjyGv
+DvoVtxf+MPLH0qxwdThgIlkmKWB4a13+49H0upPMjbK1A49l3c/jmvwbQqwU8b6ch2OOLVzaKvCG7g5mEmAh24IUOoUFfE40pqKJa7CcPFqsJJ
+4Wr7aBgp4zf0Q4bZFFENpo+VK4k8msJKLcuykjcUyAAmurCcuFcKu/hAtW1TVDdilIXtUUBEfuSdZUjgFRJKBqIdlTqu6gR3CYuI5KErKtVvds
+OKJSDxXKgfU5GGsZI53IFK3ICrioAqZJVQU4GcqRcAoJII6QzhMnARQ8w/jq57ei6Zo/ZvsrwuSLzWADJX0r/FDpf+6+GNQxjC+RjbaBzhfPWi
+0csbrmbtd7Fc3k/Tk+henaaSORsbRgmyuq0sQZWM91DRwsHYcIsggYXP1a6OIk9gOUM7Eiv8zGQVTINzsBZWa3gmIjblIyFtncAEOy28oPqGrE
+Mfqsh2AjFXqQXJq2kkEhDSTA/tKwG61rpSA7No6GQOblF5rP/ZKvlcNpFjKz5BnkK6Z1E5CCnkACj8P2Xk7QMq2DUOjOCsp2oJNWiNK4vOSqlT
+frpdNIXMDkndRDXllcd7QgkDYaGKCxNfqBp3by7Cr1pe2OwZqNzQTaT2iVhBbYPYrJ6Nqv1ela73uvotuAeseyrmZReteg/wANdYf0j9K6wG+p
+vxldwXVwvMvA8nla6VoNAt/OV6DFKSAF2+PrWPY2N5J+FeHHshI3UUTG4O4W/sxWBxsI3TytDfVaEaAQpCxwU7+FgqaVp4VTXOJsE0naMWVawN
+qzQUpPp3HIP1RV4Q8BZfOUQRalf8TaR3STAJJ6qVjWQcJX3KRFC039KX9OxFzzZpRLyOyZxxaZoJHuUyXA2MpEKkOOUi5190YVXchRMYqwmY6z
+tVjRjlKiK2xklTEVcp2u2uUg4k5KNUiGbc2nKm/9qgMlOJsO0WUnDKcYKi45RoxJrebUXEBO6TGFQ99oH4bWNDtJMDm2HH2Xzv1WKtfKKohxB/
+K+iHEGNzT3BC8M8V6I6brOobRILiQsPIrlkQjaLCv8zHCi1lNQ00ha7C5e/wBdPH4KLhfCuijB7BZv6pjcvUdR1eOCJzsH6mk+ZKq9yRp6kMib
+udS5Xr2phkZtaTYKz+peI4qc6aUD4K4zqHX55j5kMVQA0HEGrXR4/Bb9cfk88/GpJqTBq3Pab+q1ul9VEkjWucBYXHM1T52b3CkV06StSE+/Fi
+efJrstVqA4ENdys3UTOrBVQkvglRcQcO4XH6fXTKaCVzpQCcLYhcGnlZmnibusD8osmuCqyAbq9WWQueDwFxuq10up1PrdjstnXOLoXCyuXlcf
+OoUDdWujw87rDyd2O/8AD2tj08cNuGORa7HS6yKUDaRZ7WvCdbqNRpdQI3yAkZ9LrC3vDviKaFzWSuc5pOK7J+T/AB7J7QuPP9x7b0rWfp9a1w
+IHYr0vpWpE2mDt1leI9H1Z1LA48916j4X1ROgb73Snj416+uxjeiYXUsvTSFwtHNfQC6p+MmjG6+VZg8FARyGsoljyPomQqycBTIO0Kpjhyp7y
+ccoBRmpAjGvJfXZURQ2QSr9gHBSPUy49klEEDuknLB6szhMUnkJgbClVVuA2kJmuoKxzbCrLCnCNuzhJLYUnYwmk8R9WUQHCkIDSkHFKzTgk1W
+FFVgkcpycJYa0kkUqnEjuoFzh3Ki5xKZLmyC8lWWHH08oXhPZtIaIeEM/9xUvNdRtV3ZJPKPwUz3ek2aC8t8W1L1R55Xf+IdZ+l0mHUTa8x1M5
+mme9xJPyVzeTppzyyJmFoNLOnYbK2JCSTSCkjBXLfro55c3rpJGA00n7LjOsamZ/mDcQPqvUXwDu21yXW+lNEj2hlC7BAWvj/wDN2s/Jza8v1v
+m+Z/MJI+VBk0xg/Th7jEXbtnOV1er0JZ+5uEPHpY43b2RtDvel6PPn5zHB14roPTxFmkaxwpw5V/TmE6kKx7TuFrW0WkDGB9chYeXyNOfGsbGA
+nLQVY6mNO7CBl1NPBvAXLJrqjR0rf3K19BZ2m1nrFCkUZdxtyPVNv0pWB7CPdc51XQSMLnsy2+3K6YEOApVzxgsNrXjr1Z+TnXnr45DIbBv6La
+0UGYg0ZtaTtBuJs0Fo9J6eBq4hyL9lv5P8idTGPPiyuw8NtcyMhwq13vhzXDTy+VIfS7P0XI6SMRkBvAWlC43jlc8v1058esaR4MVg4PCOhk3E
+BYHQpTJoIj/xC1obDxS6ObsZ9Vqg4RDctCAjf7opjyGrSJ1f35UmuI7qAKnRVYYlsjmtFFSE765Q7HFTuwpsEEMlJI3HCSoBsYSUlaHlwFKP9o
+UJSmY+gk036LAG1QdhQY+1MkE8pgxNBUP5UycqD7LgBlOFUU7eUiK5TAgFFKRa/hVDBUy8FRNWKR/9PE3OBbSgQAMqLxfelU413QlddlOHtHJV
+LXEBNR7pFq9z8hQ3C1XarllbG0ucaAU9XF8uX8eyUIwD/TdLg2nNBdJ4m1I1eoe8nJFfRc1w7C5errblTK6rpDRvJeUVO30kqhgABI5WFdPNO8
+5pZ3UWNkABF1hETybUFqJCRaV1PTF1vTWyMdQAK57XaQQD5+q66aQCJxJ5XK9RcdVLgkAYWvHVc15BaPSee8PcaaCtfUuj00Nk8KjSbYYi0rN1
+8hllNk12W0nsPivWa7cfSSAs52oDuXZT60BjLWWZPUt+PHKy77xps1nlmwLIVg6o/wDtWaySOslOZo/dXfHL/Gf+10Gh14kNPpo+q1g5rmisgr
+i4ZvX6eF1PTHl2mjc5c/l8fqudew6ODctnpGlDXh1cC1n6dwpbnShYJ+KXNjactHTo6A2go/SUUw1SuSnfjv8AwtPv0TWd2LpInAUVwvg2eppG
+Hvldwz9oXV42HQthzaJY9CRG2G1dEaK1TB7eERGRSEjd7ohhCNNdVqtwBd8qQIoBMRn5Rb8H6kwUkmBIGQkkWBXGypejb8oeQnsVFpce6Tarro
+4Kd8mDlV5ScPSUDEmzDupOkFIXAOT/AITOd8oTV3mX3TFxKpYHE4VrWEBMZcSAJF2psO0ZVdEBPu9KNRdSfIK7qO0VZKgXj2USSkcT3Jb7GVRv
+US7NI/DkW7xeLKx/EWtZFpfLunONK3qGuGnidRohcX1LWuneNzi4grn76a8wNrXBweVkmwUZI4uKEnFWua9fWshpBujNeyzXTeXjlGCXNErP6m
+3hzFcunbiuV+/N2g9TIGij2VTZXNko/hQ1oLgS3hF5heweZ+5p9li6poiJqq5WkTY5wsbWTep1qpyztBajWkEgCq7oV2oDjZBUZ3gk/VUCRq35
+5xj11h9RUra7LK1OnLbc38LSLxSEmfjC28dsrHr79ZbgeDYUaNoiVxJyFGNu7surWHrRPTm4N8rsdLQgjrs0LktN6CFuaWd5aAMLi/yPrp8Ux0
+egeCSDnPC6bprKhsLjunP2Gz3XYdNf/IXJjqlHNrciWhBNd6kXG+wrgv1ueGZPL6iM4IXfxyE1XC856EQ3XsK9C05BaK7BacXGPUHxPruiWu9k
+CxFMK2l1AxhoZRUZwgmGxaKidfZM4IarGjNlVsKuFIOQxckmKSoMgybn0rwy0DuDX2r45zfZSqLC8sNBQdIT7p3vaRY5UA8JCpDJTloUQ8DhMZ
+LQFsbm9irgQUDebCmxxpB6vmd2CrB+VEutuVWT7ITmrJHAEKt0oCg/Lgmc20rcGH3AlC9Q1jNMxx3DcOAlrNWzSstxFkYC4nrPUjqXnYS1pPus
+e/Ivjn6t6j1B2oftBxeVnyNNEjhU6f1OyT7rQe22/FLl6ut5GX5lONquR4dYwp6qIhxrlBl4BpQuc6B1B2ykC8JAh7acLV88Qk9QNLPfKYn04L
+TlPUCdQgEVSN4vIQM2ottLS1r/ADI6bn4WBM5zCQQtP4y6O5zdpysDXgtc49kbNqwHHOFma+Tc0kKuP1n1WZI4ElVEN90znZpRcRS6cZWxF/Co
+eVY40h3El2FrzEX6i8gqUNcJ/JeeRSQhewWB91ezBgmNnqC09OdgtZMMmcrSikBYufyRtzY09LPbtpXbdJkDoGj4XnsDqksLuvDnq0oceAua/r
+SfWruAdRRUDxdLPkJLyiNO7AtGG2unS+Xq43dl6RofVEHdi1eX6M/zmf8AkF6f00/9Mz6K5iKNaaRERtUgAj5VsdBbRngmJ4wEVE/1fCDuyiYe
+QqPBd8Ur2OwEP2wnsjKIP6slNGkk+3dkpIVjDkTMOFMubuI+Sqy6nfCC/q0XVhRfYq1fERtVOo5FIFqAfnunL7VN0U4dhCdqZkrm04lVD3fCgX
+koO0W2QE8py4IMXalZWd6olEF4vj7oXW62PTxlznAUsrq3V2wNdHEbfxwua1GrdNu3HlY99teeau6r1B2q1B9RLQMLG1DiThEFZXW3PZ0+VzCQ
+4Dlc3XWtZMaWlkAoFwH3Wg6UBoza806DqJT1G3SOdzdm12+meS1tm0pda8wRqDuaT7LFmxKb5u1sSH0FZE7fWSjFqvMp1IbUw+a6yaKvNApnOB
+V8s+mVZiJDuPdDayOORjg0g2tPWQCWMjvWFlGJ8ZpzSB7rVjY5frOnMA3YpYM2pNFq7vXMZK0hwDlynVOnBzi+MV8LTx2f1j1Kx9/fuq3yAC1G
+WN7HEEVSqcwldfMjmsqBeXHCvhGbKZjAOQrmNHKfVORcCAOLTg204UQwkCkRFC4iq5ysdXrPd+8q6FziMAov/bZS6y2gfdG6fQtjAs2fol15Jh
+88h9DBLNM1oBskfhei9JhZptM2MfdYXSIA2UOq/suiaQCue3a35iyRmbUohlOTcZVcP767JitfQ5mi/wDIL0/QY0zK9l5Z08/zoz/yC9Q0Lv5E
+f0TjPR7JMUiG5CCaaOEWw4C1nQFNwFaxxCDa8k5FIphG0UrISyTKsLlTG0E5U2hNOL2PsUkotCSVXPxhtk3PdSYk2pigTQCZBL430OcJpZbxhU
+biok5tTgO7nlK/SoEpxRCoJ8jKjtoqdiuVAmrJKXVwpNpLG6v1dumaWxeqT/0qetdabp2GOBwMhwaPC5KWZ0j3Pc4kn3K5uu23PIibUmZ5c45K
+HMlmrVP3SXPfrp45xZddygetNfL06VrBbnCgEa4gNVHmguz2SxWMjoHSzE0TTAX7LfjpuBwo9kg6gjBIvfloQGqad2EVvwqJ8kFEg6rMkBBKiH
+BFTMsIV8ZBWnCOjOIIQmpLS2uVOZxB5oIWV9NK11lrG6mx8bg+K67rHfqreWyNz7ldNM4OZmqXP9S0YkO5tg0eEpE36DdoYZ3bwbv2Qet6XtYT
+FRPsqTNqNK8gEtzkFER9ReW+pllbf+p9Z3lkv00gxtSbBKHftW8zWwnLw4fZSk6hp4xYa4lXO7UXjGfptJK4CxQR2xumFuILkFqeqPlP8ljWt7
+2MlURufIbJU2X+iRpMnfI8AnC09LFvIvhZWjZTgStnTGqpY91tOWvpGNjaPdEh9vwbCzGyOBGSjocVax9rqsaUeWWkyg6wotfUJr2TRHHytp+J
+6rV6S0u1MY/5L0TTPIAAPC4vw1pQ7+e/NcBdfo+9qoyvxqwusi1oREYWZCi4HkHK05mlLBjq7KcTiFReVdFwtsLRsTrKvtCw8hFCrUq5IHKSQ/
+ckkbAdJWVWNRXYISScl7h7cKO8EUQs/ZXXP/BrdSHHgKRlaTQ5QDWm7V0bqfn2T9k+tFByewEOXEcJnSOOE7RgncPdYniLqB0sDhG8B78AX2Ru
+q1I02mfK6jt7Lg+p6h2pnMjsWeFj30vjkLNOXSE7uVXvPuouVZe0clc1rr55ki9rj3VzXAoNrwe6vjKFLn/tKELgCiJHekoN7qdlAEslNZSMio
+DhXKiZKQBIldwFVNKbVJlrhVyP7oRav3hwyoOo5QplI4pMJzXATjO3S1LQgpG204RDpw45CqdROFrzE1nvbWFWYwUc+KzwmENHhOEwuo9LbqfU
+B6x3pYGp6bJBIWuY6vel34YFXLG1wotB+qrbA88fA9pqnfhVugc7nC7uXRMde1oWVqemPJJa3CftYnpzTYPhFafTmv2rUZpNpojKLi0wAyle7U
+xmxQOHZaWkiJV8cQvGUbpoD7LLq1cVxRVyEU0UFMt2pNyFH9NeP+yUojSr3ENoJ4j6gt5dR07rw0B+g+66LTcLlPC8rdjmbju5pdbDgBa8TWXQ
+/T8IiPlC6c8hEMOVrIQm0RCbQv0RETgAqKCWYIRbXYQbHjCt8zGElSr7ykqdxISTxX1xzZPUrd4BWONa3fl2ER54e22m1y66vXGtG8EYSc6llM
+nc02iPM3ZtPUWDPOpO5+LQm8NFkrL6r1Uw0yI2e+UW4WJeItcHM/Txu726lzM2SpSzmaQuc45UHZWHXTTnlQeFW5o5IRDm4VJHNrOzW0+INoHh
+XRutVKbDhKGk9yGlNlXufhDSG3JkiHKMhwpUq5rpGFUC9RMhKGkcQ7KTH1m1KZIIPCiXABVOkHc0oGQe4Tk2o6idKtz9vdIPBNWE0q3zIzTE4o
+WpNmaSgXNdeFYwGxacDRBDm20Kt0ZJUtKRVIg44VgKIrGQmdGOKCLx3QMsp3EIAaXTDdwFWYNowr3SVyVU6W1BYZjdrsq/eeAqW25Wmmtsqeoa
+TrITtYSoxuL+yLjZjKy/ooWRpZzwnicLCXUMDCHikoUteU9X46zwvIP11e4XcxOsArznw1If9wYR7Fehac2xpXRxWPTS05wVeDlCQu+VcXi1tK
+ka04wnDqKFicS8K+8qiFsdxavDwAhGSANAKsvGEqqDYpAQkgo5CHpJNNeSyGRpBpbvTH/9ON3KzHNdJTSFoaZpYwD2XNfx22xoWCFJj6CGDsKj
+U6kQtLnEVXuo3GP7Uur68wMa1tbyua1E7pHFzjbvdNq9WZpHPcbJQUkoHdZ9d2tJyvZJnKv34WU6Ws2pxanOcqN0/wAaQk7EKJeDara8EKJcjD
++1IlJpKqc9MJLchS6T9pQ1qc7iI7We6eibNI0tFGUA4UJJbQ2/1YU1OiK58uwqCaHKvlbjlCyH1fCE0HrtSQygCss6p/a1qzMa/CzdQxsfAwr5
+Z9JafUPLs2tSGVxb6llaV7f7UYJKHC2iNaUbhWQrCQQs1uoACvbJY5VQh0TtpBBRbJAR7rIa8kHKtikdfKcDRklDGElZM03qJPdEauWmVayJ5L
+GDano1jpi7gp2F3uaVEBDQS7hKXWxR9wkGrA4VkhDzaoPk2tIwaWRJ1IyAsjNX3R3S4TIbcOVNoacDw0cZRIkPZSbE0f0qLmgcLL+nlCa6SxVo
+aJ2VPWEBxtQ0g8yVrWiyVrzGXTo/DDXHWsdnuvQtO6o2rj/D+nMTmucKNUutjcCaW/DPoYx4r5VrHe6CafUimHK2QLY7IV4efZCsIpXNlAGVUP
+BAN8K9hwAhoyCLHCsDqRVSCI63JKhjiDykkbihE1rrUnG5Gtbm0NqtWzeCO6ZmriDg7eCQuWbjo9mgW01c31yfdOGNP7V0A1LZYw5q5Dqjz+tm
+Pyo6+Dmhnvq7QsjrNg2lK4uaaQUkhYVhW0olzsKsuIIIVDZN3Kn9UcwD9POaAu0UHWFjsl8t4Pyj4tS14qqTlOVa51HPCqc47sFPJR4PKpdgIt
+Fol826Lb3WJrJHNf35WgxwJq0PqmNc4mlJar08pJzyjAbFrPZTSES2TAQWrpD6UFLk8olzgW5KGlI7WUChiCHIPqTdsRd2Rtku4pUdUYZNG6ua
+tXzEdBNAze0O7I2ZrWtBNLI0nUGaaMtePUFIas6zUAN9IrhbyMx7BfGUXG07VRp2U0Xyr3v2NRfw0mEh2US0jbYWX5tv5Vp1G1qidUlmqkJdzh
+CfJwounD3ZVM8gAsFFo0+omDAW2sSWR0kjtotVdQ1b3apwBJC1ujaa4DI8Zd/haeuTaJdN0zRued7wQOwXV6FjYjVCqWdC0AiloRSiwPZYdVpx
+Gi5w22svV6mnUCi55QIueywNVNueTeVJ90B4g1RbC0NcQ4nsUZ/D6eSfqeyUlzQMblja6F2pmskYxS6jwfp2aPUscACQMldPNnrjmv2vSIKZVL
+TgkBorAg1W8i6Wnp5mkDKqVPUajCN4No5ncrJZIPcIjzqAorSdp9WnHnupPbd0g9NLuH/2ry+zzhaex4LgftaBau3WgGSZAVvm0fhLTgsOopKp
+jtwSRpWPMzJ5jQ7OUzeFcYQ1tA4HZVNw4grnlbrGzPjjLWkgcrK1Um6ZxccHlaTyCFh6x9SH6qO7pw7th4NoOdgoqRkVE0npKw1pAD3bXEi7Vk
+Oqs7XE/ZVSHcShJA6O3DNJWK1rOeDxakyTbxf3QOi1AeO26+Cit25ETehseoBwSrHG20CKKzXXiik3U7TTijD0S6Ty3VeFXJO13fKonO8WCgJ3
+ObwURN6ajKcVZVCllaLVgvEZ5taoNi08PmoOJqlWSVOTlVuNNKYpgRuylMd8Tm+4pUGSjxak11pxFczqtDJ+oNXtvK0dBE2FhDQLPJR2pYNjnV
+mlmN1G1xulrOqmtQzbG8XSFm1RPYhUu1QI5ahZ9S3aeE/t/C0Q7VADIyoHWNIr1Ws7zd3fCXJ7o9Ujf1NIXV63+Xi/yhdTNsacrIk1Be42Vt4/
+F7fajrv+NrpMH6mZz5W2wf5XVaZgbGAMCuFheHNz9MMekcFdFEwrPzXLjThZEKKJiad6jCyiLRQFFcldEiqdpLcLG1Mbhbq4C3ZDTVidQmHluH
+c4REds5jbcSuj8Pt9ZPyP/AEufhILja6nocdQl/vS35jD9dBp3gUi2zuaKacLOhuwjYh7rWLgmKeSr3FHQasgeokoAAAYVjGpp/Wi3V0cEozT6
+gk2SsXghEwvI7oP1bbZzyBStbq2/1jjus2F98qwuCCzGm3VM7OSWV5oST1UkcpLrDupoFKBnHJCodV0BSYtvlYNPVa7UB2KKzeqtALHjvyivLr
+JQ3UMwkXfsp6okwAXCgqXgOweFEvokHspNcHBZ4tQ6EVYNITUtO0haDgaUDE080mVc85zopLyCO6P0mvBG1+CO/ujpYGFtEAhZeohaxxLMUmzs
+xrRytkbg4VE0Yc7BWMdTLDe04KlB1VlkSur7Kpzb+F7D3FzO5Q0+osZwrW6mOcWw2FTPG2rLkel/qNBPmIlDmuog2up08nmQMeP6ha5aRguwtL
+peoLWBhs1hVipbGu45TGiFV519kzn+yzv6udHLW3lL0tCpc61EvQqpag2wj3C5TXT7NS5vsuoc4Frlx3WWluueV0+GTr9c/fWUnaojuhpJ3OKp
+NkpiPcLpnEjK90XDNQo8K/8AWBrSKv7rLLg3uqnyqv8AXKi94J1M++wUG3MlDuVAuLijOmxbtYwEYvhaZ6RnL7V2/S42x6WJrG02gtrTjCEgjp
+jfoiWWOF5Xk6267/GJaQHK0yABC7qq0zsgrLG55prP2WBqpQ55HsVryMxhc1M8fqHj2cr45Y99aP0rbXcdKirQsocriumje4NHuu30jizSsb8L
+XmMpREVseb7/AOEZE60CCSLRMTqdjhWsa05CtY7NKqM2FIEBwTlTglrbSLtrlBs3sme68pnKOhlrlFB4cMG1kMc40Bavjc5nAwke60GNDn0khI
+p6fnlJMa5t7RdqBKSSysa39M8+koDVftpJJTg1jajDioQyjgXaSSjBq+8JF+1poJJIwaz5p3ueRaHmstSSTkLqgpItzcrN1ejHLTWEklvx8Y1m
+N1MsRpriB8FXfrJS31OJ+6SS6bzGXtSGtlrn/K1ei6hz9SGuzYKSSjvmYvm7W64WAFPskkuKz61iDn0h5XkHBSSSxVqsSnhYfiAW5rj7JJLo8H
+65+2QHfCrleaSSXdyx6qii7Npi0jukkrvxktgaCbK3OhQNfrA72CSSx8q/H+uwYSCPalcHV9Ukl5vUd3JOfag6ZzcJJKMaWoumJF/C4mfUO/Vy
+H/kUkl1+DmVzeS10Ph2Te7PIK7eA/wApoSSTyajkbCLaiomi0kkY10Qw0nOUkksNJgITvJCSSZLICjALZaSSchSq2xuL8JJJJYp//9k=
+]==]
+
+  local b64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+  local function b64decode(data)
+    local map = {}
+    for i = 1, #b64chars do map[string.byte(b64chars, i)] = i - 1 end
+    local out, n, buf, bits = {}, 0, 0, 0
+    for i = 1, #data do
+      local v = map[string.byte(data, i)]
+      if v then
+        buf = buf * 64 + v
+        bits = bits + 6
+        if bits >= 8 then
+          bits = bits - 8
+          local p = 2 ^ bits
+          n = n + 1
+          out[n] = string.char(math.floor(buf / p) % 256)
+          buf = buf % p
+        end
+      end
+    end
+    return table.concat(out)
+  end
+
+  -- Guarda la foto como archivo y la muestra con getcustomasset (necesita un ejecutor compatible)
+  local assetUrl
+  pcall(function()
+    local fname = "ZTB_Gampi.jpg"
+    if not (isfile and isfile(fname)) then
+      writefile(fname, b64decode((GAMPI_B64:gsub("%s", ""))))
+    end
+    assetUrl = getcustomasset(fname)
+  end)
+
+  local PGm = Tab("Gampi", "🐶")
+  TLG.PGm = PGm
+  Sec(PGm, "🐶 GAMPI", "🐶")
+
+  local GOLD2 = Color3.fromRGB(255, 217, 120)
+  local card = Instance.new("Frame", PGm)
+  card.Size = UDim2.new(1, 0, 0, 204)
+  card.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+  card.BackgroundTransparency = 0.25
+  card.BorderSizePixel = 0
+  card.ZIndex = 5
+  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 14)
+  local cst = Instance.new("UIStroke", card)
+  cst.Color = Color3.fromRGB(255, 255, 255); cst.Thickness = 1.5
+  if TLG.SpinGrad then pcall(TLG.SpinGrad, cst, GOLD2, Color3.fromRGB(110, 70, 20), 5) end
+
+  local holder = Instance.new("Frame", card)
+  holder.AnchorPoint = Vector2.new(0.5, 0)
+  holder.Position = UDim2.new(0.5, 0, 0, 8)
+  holder.Size = UDim2.fromOffset(160, 153)
+  holder.BackgroundColor3 = Color3.fromRGB(26, 18, 16)
+  holder.BorderSizePixel = 0
+  holder.ZIndex = 6
+  Instance.new("UICorner", holder).CornerRadius = UDim.new(0, 14)
+  local hst = Instance.new("UIStroke", holder)
+  hst.Color = Color3.fromRGB(255, 190, 120); hst.Thickness = 2; hst.Transparency = 0.1
+  local scale = Instance.new("UIScale", holder)
+
+  if assetUrl then
+    local img = Instance.new("ImageLabel", holder)
+    img.Size = UDim2.new(1, 0, 1, 0)
+    img.BackgroundTransparency = 1
+    img.Image = assetUrl
+    img.ScaleType = Enum.ScaleType.Crop
+    img.ZIndex = 7
+    Instance.new("UICorner", img).CornerRadius = UDim.new(0, 14)
+  else
+    local fb = Instance.new("TextLabel", holder)
+    fb.Size = UDim2.new(1, 0, 1, 0)
+    fb.BackgroundTransparency = 1
+    fb.Text = "🐶"
+    fb.TextSize = 72
+    fb.ZIndex = 7
+    local warnL = Instance.new("TextLabel", holder)
+    warnL.Size = UDim2.new(1, -12, 0, 26)
+    warnL.Position = UDim2.new(0, 6, 1, -34)
+    warnL.BackgroundTransparency = 1
+    warnL.Font = Enum.Font.GothamSemibold
+    warnL.TextSize = 9
+    warnL.TextWrapped = true
+    warnL.TextColor3 = Color3.fromRGB(180, 160, 120)
+    warnL.Text = "Tu ejecutor no permite mostrar la foto (falta getcustomasset)."
+    warnL.ZIndex = 8
+  end
+
+  local name = Instance.new("TextLabel", card)
+  name.AnchorPoint = Vector2.new(0.5, 0)
+  name.Position = UDim2.new(0.5, 0, 0, 168)
+  name.Size = UDim2.new(1, -20, 0, 14)
+  name.BackgroundTransparency = 1
+  name.Font = Enum.Font.GothamBold
+  name.TextSize = 12
+  name.TextColor3 = Color3.fromRGB(255, 190, 120)
+  name.Text = "GAMPI 🐾"
+  name.ZIndex = 7
+  local phrase = Instance.new("TextLabel", card)
+  phrase.AnchorPoint = Vector2.new(0.5, 0)
+  phrase.Position = UDim2.new(0.5, 0, 0, 184)
+  phrase.Size = UDim2.new(1, -20, 0, 14)
+  phrase.BackgroundTransparency = 1
+  phrase.Font = Enum.Font.Gotham
+  phrase.TextSize = 10
+  phrase.TextColor3 = Color3.fromRGB(165, 150, 120)
+  phrase.Text = "Tócalo para acariciarlo"
+  phrase.ZIndex = 7
+
+  -- Interacción: toca la foto
+  local pets = 0
+  local phrases = {"¡Guau! 🐶", "Gampi te cuida 🐾", "Gampi aprueba 👍", "¿Ya hiciste farm hoy? 💪",
+    "Gampi tiene hambre 🍖", "Gampi dice: no te rindas 💀", "Qué buen jefe eres 🥹"}
+  local busy = false
+  local btn = Instance.new("TextButton", holder)
+  btn.Size = UDim2.new(1, 0, 1, 0)
+  btn.BackgroundTransparency = 1
+  btn.Text = ""
+  btn.ZIndex = 12
+  btn.Activated:Connect(function()
+    pets = pets + 1
+    phrase.Text = phrases[(pets - 1) % #phrases + 1] .. "  ·  " .. pets .. (pets == 1 and " caricia" or " caricias")
+    -- rebote
+    scale.Scale = 0.9
+    TW:Create(scale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
+    -- corazones que suben
+    for k = 1, 4 do
+      task.spawn(function()
+        local h = Instance.new("TextLabel", card)
+        h.AnchorPoint = Vector2.new(0.5, 0.5)
+        h.BackgroundTransparency = 1
+        h.Text = (k % 2 == 0) and "💛" or "🧡"
+        h.TextSize = 16 + k * 2
+        h.Size = UDim2.fromOffset(24, 24)
+        h.ZIndex = 20
+        local x = 0.5 + math.random(-25, 25) / 100
+        h.Position = UDim2.new(x, 0, 0, 120)
+        task.wait(k * 0.06)
+        local tw = TW:Create(h, TweenInfo.new(1.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+          {Position = UDim2.new(x + math.random(-8, 8) / 100, 0, 0, 20), TextTransparency = 1})
+        tw:Play()
+        task.wait(1.15)
+        h:Destroy()
+      end)
+    end
+    if pets % 10 == 0 then TLG.PNotif("🐶 Gampi", pets .. " caricias, ¡te quiere mucho!", Color3.fromRGB(255, 190, 120)) end
+  end)
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- MENÚ ORBITAL ZTB: calavera central + pestañas en órbita (izquierda)
+-- y panel de cristal con el contenido (derecha).
+-- ═══════════════════════════════════════════════════════════════
+local Orbit = {Open = false, Sel = 1, Orbs = {}, Ang = -90}
+do
+  local GOLD  = Color3.fromRGB(232, 170, 60)
+  local GOLD2 = Color3.fromRGB(255, 217, 120)
+  local DARK  = Color3.fromRGB(14, 11, 13)
+  local WHITE = Color3.fromRGB(255, 255, 255)
+  local QUINT = Enum.EasingStyle.Quint
+  local BACK  = Enum.EasingStyle.Back
+  local OUT   = Enum.EasingDirection.Out
+  local LIN   = Enum.EasingStyle.Linear
+  local SINE  = Enum.EasingStyle.Sine
+  local INOUT = Enum.EasingDirection.InOut
+
+  -- Color propio de cada pestaña
+  local ACC = {
+    Info = Color3.fromRGB(110, 185, 255), Combat = Color3.fromRGB(255, 92, 100),
+    Aimbot = Color3.fromRGB(255, 150, 60), Fly = Color3.fromRGB(90, 225, 235),
+    Islands = Color3.fromRGB(100, 225, 150), Scripts = Color3.fromRGB(185, 140, 255),
+    Tools = Color3.fromRGB(255, 200, 80), ESP = Color3.fromRGB(255, 105, 190),
+    Visuals = Color3.fromRGB(255, 235, 150), Optimize = Color3.fromRGB(170, 255, 100),
+    Config = Color3.fromRGB(205, 210, 225),
+    Gampi = Color3.fromRGB(255, 190, 120),
+  }
+  local function accOf(t) return ACC[t and t.name or ""] or GOLD2 end
+
+  local function kp(t, c) return ColorSequenceKeypoint.new(t, c) end
+  -- Degradado giratorio sobre un UIStroke (brillo dorado que recorre el borde)
+  local function spinGrad(stroke, a, b, secs)
+    local g = Instance.new("UIGradient", stroke)
+    g.Color = ColorSequence.new({kp(0, a), kp(0.5, b), kp(1, a)})
+    TW:Create(g, TweenInfo.new(secs, LIN, OUT, -1), {Rotation = 360}):Play()
+    return g
+  end
+  TLG.SpinGrad = spinGrad
+
+  local cam = workspace.CurrentCamera
+  local vp = cam and cam.ViewportSize or Vector2.new(800, 400)
+  local panelW = W_S.X.Offset
+  local ORB = TLG.IsMobile and 38 or 44
+  local freeW = vp.X - panelW - 24
+  local R = math.clamp(math.min(vp.Y * 0.5 - ORB - 6, freeW / 2 - ORB / 2 - 4), 74, 128)
+  local CORE = math.floor(R * 0.86)
+  local cx = math.max(R + ORB / 2 + 6, freeW / 2 + 6)
+  local BOX = math.floor(R * 2 + ORB + 10)
+
+  -- ── Estilo cristal del panel derecho ──
+  W.BackgroundColor3 = WHITE
+  W.BackgroundTransparency = 0.22
+  Wgrad.Color = ColorSequence.new(Color3.fromRGB(38, 29, 33), Color3.fromRGB(9, 7, 9))
+  Wgrad.Rotation = 135
+  WS.Color = WHITE
+  WS.Thickness = 1.6
+  spinGrad(WS, GOLD2, Color3.fromRGB(110, 70, 20), 6)
+  TB.BackgroundTransparency = 1
+  HF.BackgroundTransparency = 1
+  SideBar.Visible = false
+  Cont.Position = UDim2.new(0, 10, 0, 60)
+  Cont.Size = UDim2.new(1, -20, 1, -82)
+  Cont.BackgroundTransparency = 0.55
+
+  -- Reflejo de cristal en la parte alta
+  local sheen = Instance.new("Frame", W)
+  sheen.Name = "ZTB_Sheen"
+  sheen.Size = UDim2.new(1, 0, 0.5, 0)
+  sheen.BackgroundColor3 = WHITE
+  sheen.BorderSizePixel = 0
+  sheen.ZIndex = 2
+  Instance.new("UICorner", sheen).CornerRadius = UDim.new(0, 12)
+  local shg = Instance.new("UIGradient", sheen)
+  shg.Rotation = 90
+  shg.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.88), NumberSequenceKeypoint.new(1, 1)})
+
+  local hair = Instance.new("Frame", W)
+  hair.Size = UDim2.new(1, -24, 0, 1)
+  hair.Position = UDim2.new(0, 12, 0, 54)
+  hair.BackgroundColor3 = GOLD2
+  hair.BackgroundTransparency = 0.55
+  hair.BorderSizePixel = 0
+  hair.ZIndex = 6
+
+  -- Título con destello que lo recorre
+  MainTitle.TextColor3 = WHITE
+  local tg = Instance.new("UIGradient", MainTitle)
+  tg.Color = ColorSequence.new({kp(0, GOLD), kp(0.5, Color3.fromRGB(255, 250, 225)), kp(1, GOLD)})
+  tg.Offset = Vector2.new(-1, 0)
+  TW:Create(tg, TweenInfo.new(2.4, SINE, INOUT, -1, true), {Offset = Vector2.new(1, 0)}):Play()
+
+  -- ── Contenedor de la órbita ──
+  local OR = Instance.new("Frame", SG)
+  OR.Name = "ZTB_Orbit"
+  OR.AnchorPoint = Vector2.new(0.5, 0.5)
+  OR.Position = UDim2.new(0, cx, 0.5, 0)
+  OR.Size = UDim2.fromOffset(BOX, BOX)
+  OR.BackgroundTransparency = 1
+  OR.Visible = false
+  OR.ZIndex = 20
+  Orbit.Root = OR
+
+  local function circle(parent, size, bg, bgT, z)
+    local f = Instance.new("Frame", parent)
+    f.AnchorPoint = Vector2.new(0.5, 0.5)
+    f.Position = UDim2.new(0.5, 0, 0.5, 0)
+    f.Size = UDim2.fromOffset(size, size)
+    f.BackgroundColor3 = bg
+    f.BackgroundTransparency = bgT
+    f.BorderSizePixel = 0
+    f.ZIndex = z
+    Instance.new("UICorner", f).CornerRadius = UDim.new(1, 0)
+    return f
+  end
+
+  -- Disco de cristal con borde dorado giratorio
+  local disc = circle(OR, R * 2, DARK, 0.4, 20)
+  local ds = Instance.new("UIStroke", disc)
+  ds.Color = WHITE; ds.Thickness = 1.6; ds.Transparency = 0.3
+  spinGrad(ds, GOLD2, Color3.fromRGB(90, 58, 18), 8)
+  local dg = Instance.new("UIGradient", disc)
+  dg.Color = ColorSequence.new(Color3.fromRGB(46, 36, 40), Color3.fromRGB(8, 6, 8))
+  dg.Rotation = 120
+  local inner = circle(OR, R * 2 - ORB - 18, DARK, 1, 20)
+  local is = Instance.new("UIStroke", inner)
+  is.Color = GOLD; is.Thickness = 1; is.Transparency = 0.8
+
+  -- Anillo exterior de puntos que gira despacio
+  local spin = Instance.new("Frame", OR)
+  spin.AnchorPoint = Vector2.new(0.5, 0.5)
+  spin.Position = UDim2.new(0.5, 0, 0.5, 0)
+  spin.Size = UDim2.fromOffset(BOX, BOX)
+  spin.BackgroundTransparency = 1
+  spin.ZIndex = 21
+  local rr = BOX / 2 - 3
+  for k = 0, 35 do
+    local a = math.rad(k * 10)
+    local big = (k % 3 == 0)
+    local sz = big and 4 or 2
+    local d = Instance.new("Frame", spin)
+    d.AnchorPoint = Vector2.new(0.5, 0.5)
+    d.Position = UDim2.new(0.5, math.floor(math.cos(a) * rr + 0.5), 0.5, math.floor(math.sin(a) * rr + 0.5))
+    d.Size = UDim2.fromOffset(sz, sz)
+    d.BackgroundColor3 = big and GOLD2 or GOLD
+    d.BackgroundTransparency = big and 0.1 or 0.55
+    d.BorderSizePixel = 0
+    d.ZIndex = 21
+    Instance.new("UICorner", d).CornerRadius = UDim.new(1, 0)
+  end
+  TW:Create(spin, TweenInfo.new(60, LIN, OUT, -1), {Rotation = 360}):Play()
+
+  -- Aura que respira detrás de la calavera
+  local aura = circle(OR, CORE * 1.25, GOLD, 0.82, 22)
+  TW:Create(aura, TweenInfo.new(1.7, SINE, INOUT, -1, true),
+    {Size = UDim2.fromOffset(CORE * 1.6, CORE * 1.6), BackgroundTransparency = 0.96}):Play()
+
+  -- Haz de luz desde la calavera hacia la pestaña activa + halo que se desliza
+  local beamLen = math.max(10, R - CORE / 2 - ORB / 2 - 8)
+  local beam = Instance.new("Frame", OR)
+  beam.AnchorPoint = Vector2.new(0, 0.5)
+  beam.Size = UDim2.fromOffset(beamLen, 3)
+  beam.BackgroundColor3 = GOLD2
+  beam.BackgroundTransparency = 0.1
+  beam.BorderSizePixel = 0
+  beam.ZIndex = 22
+  Instance.new("UICorner", beam).CornerRadius = UDim.new(1, 0)
+  local bg = Instance.new("UIGradient", beam)
+  bg.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.9), NumberSequenceKeypoint.new(1, 0)})
+  local function beamPos(deg)
+    local a = math.rad(deg)
+    local off = CORE / 2 + 2
+    return UDim2.new(0.5, math.cos(a) * off, 0.5, math.sin(a) * off)
+  end
+  beam.Position = beamPos(-90)
+  beam.Rotation = -90
+
+  local halo = circle(OR, ORB + 18, GOLD2, 0.8, 25)
+  local hs = Instance.new("UIStroke", halo)
+  hs.Color = GOLD2; hs.Thickness = 2; hs.Transparency = 0.15
+
+  -- Calavera central (cierra el menú)
+  local core = Instance.new("TextButton", OR)
+  core.Name = "ZTB_OrbitCore"
+  core.AnchorPoint = Vector2.new(0.5, 0.5)
+  core.Position = UDim2.new(0.5, 0, 0.5, -8)
+  core.Size = UDim2.fromOffset(CORE, CORE)
+  core.BackgroundColor3 = Color3.fromRGB(18, 13, 16)
+  core.AutoButtonColor = false
+  core.Text = "💀"
+  core.TextSize = math.floor(CORE * 0.58)
+  core.Font = Enum.Font.GothamBold
+  core.TextColor3 = WHITE
+  core.BorderSizePixel = 0
+  core.ZIndex = 24
+  Instance.new("UICorner", core).CornerRadius = UDim.new(1, 0)
+  local cs = Instance.new("UIStroke", core)
+  cs.Color = WHITE; cs.Thickness = 2
+  spinGrad(cs, GOLD2, Color3.fromRGB(110, 70, 20), 3.5)
+
+  local nameL = Instance.new("TextLabel", OR)
+  nameL.AnchorPoint = Vector2.new(0.5, 0)
+  nameL.Position = UDim2.new(0.5, 0, 0.5, math.floor(CORE / 2) - 2)
+  nameL.Size = UDim2.fromOffset(R * 1.5, 18)
+  nameL.BackgroundTransparency = 1
+  nameL.Font = Enum.Font.GothamBold
+  nameL.TextSize = TLG.IsMobile and 10 or 12
+  nameL.TextColor3 = GOLD2
+  nameL.Text = ""
+  nameL.ZIndex = 24
+
+  -- Chispas doradas que suben dentro del disco
+  for k = 1, 7 do
+    task.spawn(function()
+      local e = circle(OR, 3, GOLD2, 1, 23)
+      task.wait(k * 0.45)
+      while OR.Parent do
+        if not Orbit.Open then
+          task.wait(0.5)
+        else
+          local x = math.random(-math.floor(R * 0.5), math.floor(R * 0.5))
+          local dur = 2.6 + math.random(0, 20) / 10
+          e.Position = UDim2.new(0.5, x, 0.5, math.floor(R * 0.55))
+          e.BackgroundTransparency = 0.1
+          local t = TW:Create(e, TweenInfo.new(dur, SINE, OUT),
+            {Position = UDim2.new(0.5, x + math.random(-12, 12), 0.5, -math.floor(R * 0.5)), BackgroundTransparency = 1})
+          t:Play()
+          task.wait(dur)
+        end
+      end
+    end)
+  end
+
+  -- ── Orbes (una por pestaña) ──
+  local N = #Tabs
+  local function ang(i) return -90 + (i - 1) * 360 / N end
+  local function orbPos(i)
+    local a = math.rad(ang(i))
+    return UDim2.new(0.5, math.floor(math.cos(a) * R + 0.5), 0.5, math.floor(math.sin(a) * R + 0.5))
+  end
+
+  local function style(i, active)
+    local o = Orbit.Orbs[i]
+    if not o then return end
+    local s = active and ORB + 6 or ORB
+    TW:Create(o.btn, TweenInfo.new(0.28, BACK, OUT), {
+      BackgroundColor3 = active and o.acc or Color3.fromRGB(14, 11, 13),
+      Size = UDim2.fromOffset(s, s),
+    }):Play()
+    o.stroke.Color = active and WHITE or o.acc
+    o.stroke.Transparency = active and 0.05 or 0.35
+    o.btn.TextTransparency = active and 0 or 0.08
+  end
+
+  function Orbit.Select(i)
+    local t = Tabs[i]
+    if not t then return end
+    local acc = accOf(t)
+    for j = 1, #Tabs do style(j, j == i) end
+    Orbit.Sel = i
+
+    -- halo y haz de luz hacia la pestaña activa
+    local target = ang(i)
+    local delta = ((target - Orbit.Ang + 180) % 360) - 180
+    Orbit.Ang = Orbit.Ang + delta
+    local ti = TweenInfo.new(0.38, QUINT, OUT)
+    TW:Create(halo, ti, {Position = Orbit.Orbs[i].pos, BackgroundColor3 = acc}):Play()
+    hs.Color = acc
+    TW:Create(beam, ti, {Rotation = Orbit.Ang, Position = beamPos(Orbit.Ang), BackgroundColor3 = acc}):Play()
+
+    -- acentos del panel
+    TW:Create(hair, TweenInfo.new(0.3), {BackgroundColor3 = acc}):Play()
+    TW:Create(ContStroke, TweenInfo.new(0.3), {Color = acc}):Play()
+    ContStroke.Transparency = 0.6
+    local up = string.upper(tostring(t.name or ""))
+    nameL.Text = up
+    nameL.TextColor3 = acc
+    pcall(function() SubTitle.Text = "✦ " .. up .. " ✦"; SubTitle.TextColor3 = acc end)
+    pcall(function()
+      DcIco.Text = tostring(t.icon or "💀")
+      DcS.Color = acc
+      DcIco.Size = UDim2.new(0, 14, 0, 14)
+      DcIco.Position = UDim2.new(0, 16, 0.5, -7)
+      TW:Create(DcIco, TweenInfo.new(0.4, BACK, OUT),
+        {Size = UDim2.new(0, 26, 0, 26), Position = UDim2.new(0, 10, 0.5, -13)}):Play()
+    end)
+
+    -- contenido: aparece deslizándose desde la derecha
+    if t.sel then t.sel() end
+    pcall(function()
+      t.p.Position = UDim2.new(0, 22, 0, 0)
+      TW:Create(t.p, TweenInfo.new(0.34, QUINT, OUT), {Position = UDim2.new(0, 0, 0, 0)}):Play()
+    end)
+  end
+
+  for i, t in ipairs(Tabs) do
+    local acc = accOf(t)
+    local b = Instance.new("TextButton", OR)
+    b.Name = "ZTB_Orb_" .. tostring(t.name)
+    b.AnchorPoint = Vector2.new(0.5, 0.5)
+    b.Position = orbPos(i)
+    b.Size = UDim2.fromOffset(ORB, ORB)
+    b.BackgroundColor3 = Color3.fromRGB(14, 11, 13)
+    b.AutoButtonColor = false
+    b.Text = tostring(t.icon or "•")
+    b.TextSize = math.floor(ORB * 0.5)
+    b.Font = Enum.Font.GothamBold
+    b.TextColor3 = WHITE
+    b.BorderSizePixel = 0
+    b.ZIndex = 26
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    local st = Instance.new("UIStroke", b)
+    st.Color = acc; st.Thickness = 1.6; st.Transparency = 0.35
+    Orbit.Orbs[i] = {btn = b, stroke = st, pos = orbPos(i), acc = acc}
+    b.Activated:Connect(function() Orbit.Select(i) end)
+  end
+  halo.Position = Orbit.Orbs[1] and Orbit.Orbs[1].pos or UDim2.new(0.5, 0, 0.5, 0)
+
+  core.Activated:Connect(function()
+    if TLG.ZTB_SetMin then TLG.ZTB_SetMin(true) end
+  end)
+
+  -- Mostrar / ocultar con animación (las orbes salen disparadas desde la calavera)
+  function Orbit.Show(on)
+    on = on == true
+    Orbit.Open = on
+    if not on then
+      OR.Visible = false
+      return
+    end
+    OR.Visible = true
+    halo.Visible = false
+    for i, o in ipairs(Orbit.Orbs) do
+      o.btn.Position = UDim2.new(0.5, 0, 0.5, 0)
+      o.btn.Size = UDim2.fromOffset(4, 4)
+      o.btn.TextTransparency = 1
+      task.delay((i - 1) * 0.035, function()
+        if not Orbit.Open then return end
+        local active = (i == Orbit.Sel)
+        local s = active and ORB + 6 or ORB
+        TW:Create(o.btn, TweenInfo.new(0.42, BACK, OUT),
+          {Position = o.pos, Size = UDim2.fromOffset(s, s), TextTransparency = active and 0 or 0.08}):Play()
+      end)
+    end
+    task.delay(0.5, function()
+      if not Orbit.Open then return end
+      local o = Orbit.Orbs[Orbit.Sel]
+      if o then halo.Position = o.pos end
+      halo.Visible = true
+    end)
+    core.Size = UDim2.fromOffset(CORE * 0.4, CORE * 0.4)
+    core.Rotation = -200
+    TW:Create(core, TweenInfo.new(0.5, BACK, OUT),
+      {Size = UDim2.fromOffset(CORE, CORE), Rotation = 0}):Play()
+  end
+
+  TLG.ZTB_OrbitShow = Orbit.Show
+  TLG.ZTB_OrbitSelect = Orbit.Select
+  Orbit.Select(1)
+end
+
 -- BOTON FLOTANTE ZTB: abre/cierra el menu (sin barra minimizada)
 local min = true
 local setMin
@@ -4744,6 +5076,11 @@ do
   ButtonStroke.Color = Color3.fromRGB(224, 166, 55)
   ButtonStroke.Thickness = 1.2
   ButtonStroke.Transparency = 0.08
+  if TLG.SpinGrad then
+    ButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+    pcall(TLG.SpinGrad, ButtonStroke, Color3.fromRGB(255, 217, 120), Color3.fromRGB(110, 70, 20), 3)
+  end
+  TLG.PGlow(ButtonStroke, 0.0, 0.45, 1.2)
 
   local function isPointer(i)
     return i.UserInputType == Enum.UserInputType.MouseButton1
@@ -4786,51 +5123,47 @@ do
     -- Hacerlo en ambos eventos provocaba dos toggles y el menú parecía no abrir.
   end)
 
+  -- Asigna Visible solo si el objeto existe (evita "attempt to index nil with 'Visible'").
+  local function setVis(o, v)
+    if o then pcall(function() o.Visible = v end) end
+  end
+
   setMin = function(st)
     st = st == true
     if st == min then return end
     min = st
     token += 1
     local my = token
-    -- Recuperar referencias desde el ScreenGui evita usar variables nil si
-    -- el executor altera el alcance de locales al cargar el script.
-    local root = SG
-    local menu = root and (root:FindFirstChild("ZTB_MainWindow") or W)
-    local mark = root and (root:FindFirstChild("ZTB_Watermark") or WM)
-    local toggle = root and (root:FindFirstChild("ZTB_MenuToggleButton") or ToggleButton)
-    local sidebar = menu and (menu:FindFirstChild("ZTB_SideBar") or SideBar)
-    local content = menu and (menu:FindFirstChild("ZTB_ContentPanel") or Cont)
-    local bottom = menu and (menu:FindFirstChild("ZTB_BottomHandle") or BH)
-    if not menu or not menu.Parent then return end
     if st then
-      lastWPos = menu.Position
-      if mark and mark.Parent then mark.Visible = false end
-      if toggle and toggle.Parent then toggle.Visible = true end
-      menu.Visible = false
-      menu.Size = W_S
+      pcall(function() lastWPos = W.Position end)
+      setVis(WM, false)
+      setVis(ToggleButton, true)
+      setVis(W, false)
+      pcall(function() W.Size = W_S end)
+      if TLG.ZTB_OrbitShow then pcall(TLG.ZTB_OrbitShow, false) end
     else
-      if toggle and toggle.Parent then toggle.Visible = true end
-      menu.Size = UDim2.fromOffset(1, 1)
-      menu.Position = lastWPos
-      menu.Visible = true
-      local radial = menu:FindFirstChild("ZTB_RadialCore")
-      local radialIsOpen = radial and radial:IsA("Frame") and radial.Visible
-      -- Restaurar solo la vista activa: radial O dashboard, nunca ambos.
-      if sidebar and sidebar.Parent then sidebar.Visible = not radialIsOpen end
-      if content and content.Parent then content.Visible = not radialIsOpen end
-      if bottom and bottom.Parent then bottom.Visible = true end
-      if mark and mark.Parent then mark.Visible = true end
-      if radial and radial:IsA("Frame") then radial.Visible = true end
+      setVis(ToggleButton, false)
+      pcall(function()
+        W.Size = UDim2.fromOffset(1, 1)
+        W.Position = lastWPos
+      end)
+      setVis(W, true)
+      -- Restaurar los elementos del menu usando los nombres reales.
+      -- (TabBar no existe: la barra lateral se llama SideBar.)
+      setVis(Cont, true)
+      setVis(BH, true)
+      setVis(WM, true)
       if STtl and STtl.Parent then STtl.Text = "💀" end
-      tw(menu, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
+      pcall(tw, W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos})
+      if TLG.ZTB_OrbitShow then pcall(TLG.ZTB_OrbitShow, true) end
     end
   end
   TLG.ZTB_SetMin = setMin
 
   -- Estado inicial: menú oculto, botón flotante visible.
-  if W and W.Parent then W.Visible = false end
-  if WM and WM.Parent then WM.Visible = false end
-  if ToggleButton and ToggleButton.Parent then ToggleButton.Visible = true end
+  setVis(W, false)
+  setVis(WM, false)
+  setVis(ToggleButton, true)
   min = true
 
   -- Activated funciona mejor en pantalla táctil que depender solo de InputEnded.
