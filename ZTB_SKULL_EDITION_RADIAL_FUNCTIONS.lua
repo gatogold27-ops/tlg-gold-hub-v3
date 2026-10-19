@@ -1298,7 +1298,14 @@ local function getWindowSize()
     math.min(580, viewport.Y - 40))
 end
 local W_S = getWindowSize()
-local W_P = UDim2.new(0.5,0,0.5,0)
+local function getOpenWindowPosition()
+  local cam = workspace.CurrentCamera
+  local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
+  -- Reserva el lado izquierdo para el radial y evita que se monte sobre el panel.
+  if vp.X >= 1050 then return UDim2.new(0.72, 0, 0.5, 0) end
+  return UDim2.new(0.5, 0, 0.5, 0)
+end
+local W_P = getOpenWindowPosition()
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -4587,8 +4594,8 @@ local min = true
 local setMin
 local Radial
 do
-  local BTN_SIZE = 188
-  local BTN_HEIGHT = 38
+  local BTN_SIZE = 210
+  local BTN_HEIGHT = 40
   local EASE = Enum.EasingStyle
   local DIR = Enum.EasingDirection
   local lastWPos = W_P
@@ -4705,7 +4712,7 @@ do
     token += 1
     local my = token
     if st then
-      lastWPos = W.Position
+      if W.Visible then lastWPos = W.Position end
       WM.Visible = false
       ToggleButton.Visible = true
       -- Animación de salida: el panel se encoge y se desvanece antes de ocultarse.
@@ -4747,9 +4754,15 @@ do
   -- RADIAL CENTRAL ZTB: inspirado en la referencia, sin botón de frutas.
   Radial = Instance.new("Frame", SG)
   Radial.Name = "ZTB_Central_Radial"
-  Radial.Size = UDim2.fromOffset(360, 360)
-  Radial.Position = UDim2.new(0, 18, 0.5, -180)
-  if TLG.IsMobile then Radial.Size = UDim2.fromOffset(300, 300); Radial.Position = UDim2.new(0, 4, 0.5, -150) end
+  local radialSize = 270
+  local radialCenter = radialSize / 2
+  local radialRadius = 101
+  local radialButton = 44
+  if TLG.IsMobile then
+    radialSize, radialCenter, radialRadius, radialButton = 230, 115, 84, 40
+  end
+  Radial.Size = UDim2.fromOffset(radialSize, radialSize)
+  Radial.Position = UDim2.new(0, 12, 0.5, -radialCenter)
   Radial.BackgroundTransparency = 1
   Radial.Visible = false
   Radial.ZIndex = 120
@@ -4797,15 +4810,14 @@ do
     {icon="🎨", label="TEMA", keys={"theme","tema","color"}},
     {icon="☠", label="EXTRAS", keys={"extra","misc","more"}},
   }
-  local radius = TLG.IsMobile and 113 or 139
-  local radialCenter = TLG.IsMobile and 150 or 180
+  local radius = radialRadius
   for idx, item in ipairs(radialItems) do
     local angle = math.rad(-90 + (idx - 1) * (360 / #radialItems))
-    local x = radialCenter + math.cos(angle) * radius - 27
-    local y = radialCenter + math.sin(angle) * radius - 27
+    local x = radialCenter + math.cos(angle) * radius - radialButton/2
+    local y = radialCenter + math.sin(angle) * radius - radialButton/2
     local b = Instance.new("TextButton", Radial)
     b.Name = "Radial_" .. item.label
-    b.Size = UDim2.fromOffset(54, 54)
+    b.Size = UDim2.fromOffset(radialButton, radialButton)
     b.Position = UDim2.fromOffset(x, y)
     b.BackgroundColor3 = Color3.fromRGB(12, 10, 8)
     b.BackgroundTransparency = 0.05
@@ -4840,16 +4852,16 @@ do
       if item.label == "INFO" then
         if Cont then Cont.Visible = true end
       end
-      local pulse = TW:Create(b, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(60,60)})
+      local pulse = TW:Create(b, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(radialButton + 6, radialButton + 6)})
       pulse:Play(); pulse.Completed:Connect(function()
-        if b.Parent then TW:Create(b, TweenInfo.new(0.12), {Size = UDim2.fromOffset(54,54)}):Play() end
+        if b.Parent then TW:Create(b, TweenInfo.new(0.12), {Size = UDim2.fromOffset(radialButton,radialButton)}):Play() end
       end)
     end)
   end
 
   local Center = Instance.new("TextButton", Radial)
   Center.Name = "ZTB_Radial_Center"
-  local centerSize = TLG.IsMobile and 94 or 118
+  local centerSize = TLG.IsMobile and 72 or 86
   Center.Size = UDim2.fromOffset(centerSize, centerSize)
   Center.Position = UDim2.new(0.5, -centerSize/2, 0.5, -centerSize/2)
   Center.BackgroundColor3 = Color3.fromRGB(8, 7, 7)
@@ -4857,7 +4869,7 @@ do
   Center.AutoButtonColor = false
   Center.Text = "☠"
   Center.Font = Enum.Font.GothamBlack
-  Center.TextSize = TLG.IsMobile and 54 or 67
+  Center.TextSize = TLG.IsMobile and 43 or 50
   Center.TextColor3 = Color3.fromRGB(255, 242, 190)
   Center.ZIndex = 130
   Instance.new("UICorner", Center).CornerRadius = UDim.new(1, 0)
@@ -4877,6 +4889,7 @@ do
   radialCaption.ZIndex = 130
 
   -- Estado inicial: menú oculto, botón flotante visible.
+  lastWPos = getOpenWindowPosition()
   W.Visible = false
   WM.Visible = false
   ToggleButton.Visible = true
