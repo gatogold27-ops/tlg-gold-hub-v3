@@ -1286,24 +1286,30 @@ PLR.PlayerRemoving:Connect(function(p)
 end)
 
 
+local RADIAL_LEFT = 12
+local function radialWidth()
+  return TLG.IsMobile and 230 or 270
+end
 local function getWindowSize()
   local cam = workspace.CurrentCamera
   local viewport = cam and cam.ViewportSize or Vector2.new(800, 600)
-  if TLG.IsMobile then
-    -- Keep the UI inside narrow Android screens.
-    return UDim2.new(0, math.max(300, math.min(520, viewport.X - 24)), 0,
-      math.max(340, math.min(560, viewport.Y - 70)))
-  end
-  return UDim2.new(0, math.min(900, viewport.X - 40), 0,
-    math.min(580, viewport.Y - 40))
+  local free = viewport.X - (RADIAL_LEFT + radialWidth() + 24)
+  local maxW = TLG.IsMobile and 520 or 640
+  local w = math.clamp(free, 300, maxW)
+  local h = TLG.IsMobile and math.max(300, math.min(560, viewport.Y - 40))
+    or math.max(340, math.min(560, viewport.Y - 40))
+  return UDim2.new(0, w, 0, h)
 end
 local W_S = getWindowSize()
 local function getOpenWindowPosition()
   local cam = workspace.CurrentCamera
   local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
-  -- Reserva el lado izquierdo para el radial y evita que se monte sobre el panel.
-  if vp.X >= 1050 then return UDim2.new(0.72, 0, 0.5, 0) end
-  return UDim2.new(0.5, 0, 0.5, 0)
+  -- La ventana se abre pegada al lado derecho del radial (sin taparlo).
+  local left = RADIAL_LEFT + radialWidth() + 12
+  local w = W_S.X.Offset
+  local x = math.max(left + w / 2, w / 2 + 6)
+  x = math.min(x, vp.X - w / 2 - 6)
+  return UDim2.new(0, x, 0.5, 0)
 end
 local W_P = getOpenWindowPosition()
 
@@ -1612,6 +1618,7 @@ SideBar.BackgroundColor3 = C.BG2
 SideBar.BackgroundTransparency = 0.18
 SideBar.BorderSizePixel = 0
 SideBar.ZIndex = 4
+SideBar.Visible = false -- ya no se usa: el radial es el único menú
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
 local SideStroke = Instance.new("UIStroke", SideBar)
 SideStroke.Color = C.Yel; SideStroke.Transparency = 0.78; SideStroke.Thickness = 1
@@ -1647,8 +1654,8 @@ TLy.Padding = UDim.new(0,5)
 
 local Cont = Instance.new("Frame", W)
 Cont.Name = "ZTB_ContentPanel"
-Cont.Size = UDim2.new(1, -(TLG.IsMobile and 128 or 174), 1, -108)
-Cont.Position = UDim2.new(0, TLG.IsMobile and 120 or 164, 0, 58)
+Cont.Size = UDim2.new(1, -16, 1, -80)
+Cont.Position = UDim2.new(0, 8, 0, 60)
 Cont.BackgroundColor3 = C.BG2
 Cont.BackgroundTransparency = 0.34
 Cont.BorderSizePixel = 0
@@ -1741,8 +1748,7 @@ local function Tab(name, icon)
     pp.PaddingRight = UDim.new(0,10)
     pp.PaddingBottom = UDim.new(0,10)
 
-    table.insert(Tabs, {b=b,l=lb,p=pg,u=ul,ico=ico})
-    b.Activated:Connect(function()
+    local function select()
         for _, t in ipairs(Tabs) do
             t.l.TextColor3 = C.Gr
             t.ico.TextTransparency = 0.25
@@ -1755,7 +1761,11 @@ local function Tab(name, icon)
         pg.Visible = true
         b.BackgroundTransparency = 0.18
         TW:Create(ul,TweenInfo.new(0.2,Enum.EasingStyle.Quint),{Size=UDim2.new(0,3,0.62,0)}):Play()
-    end)
+        pcall(function() SubTitle.Text = string.upper(name) end)
+        if TLG.OnTabChanged then pcall(TLG.OnTabChanged, name) end
+    end
+    table.insert(Tabs, {b=b,l=lb,p=pg,u=ul,ico=ico,name=name,select=select})
+    b.Activated:Connect(select)
     return pg
 end
 
@@ -1970,6 +1980,13 @@ local PTo = Tab("Tools", "🔧")
 local PEs = Tab("ESP", "👁️")
 local PVi = Tab("Visuals", "🎨")
 local POp = Tab("Optimize", "⚡")
+local PCf = Tab("Config", "⚙") -- faltaba: la pestaña Config daba error y no se creaba
+function TLG.SelectTab(name)
+    for _, t in ipairs(Tabs) do
+        if t.name == name then t.select(); return true end
+    end
+    return false
+end
 
 
 task.wait(0.1)
@@ -3895,394 +3912,6 @@ if not V9ok then
   pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
 end
 
--- ═══════════ FRUTAS (modo prueba) ═══════════
-local FRok, FRerr = pcall(function()
-  local CFG = TLG.CFG or {}
-  local function save() if TLG.saveSoon then TLG.saveSoon() end end
-  local function myRoot()
-    local ch = TLG.LP.Character
-    return ch and ch:FindFirstChild("HumanoidRootPart")
-  end
-
-  local Fr = {Keys = {}, Items = {}, Range = 5000, AutoOn = false, ESPOn = false,
-    Tried = {}, Origin = nil, Away = false, ReturnBack = true, Count = 0, Log = {}}
-  TLG.Fruit = Fr
-
-  local function parseKeys(s)
-    local keys = {}
-    for w in tostring(s):gmatch("[^,%s]+") do table.insert(keys, w:lower()) end
-    return keys
-  end
-  Fr.Keys = parseKeys(CFG.fruitKeys or "fruit, fruta")
-
-  local function matches(name)
-    local n = name:lower()
-    for _, k in ipairs(Fr.Keys) do
-      if n:find(k, 1, true) then return true end
-    end
-    return false
-  end
-
-  local function isMine(inst)
-    if inst:IsDescendantOf(TLG.LP) then return true end
-    for _, p in ipairs(PLR:GetPlayers()) do
-      local ch = p.Character
-      if ch and inst:IsDescendantOf(ch) then return true end
-    end
-    return false
-  end
-
-  local function track(d)
-    if (d:IsA("Model") or d:IsA("Tool") or d:IsA("BasePart")) and matches(d.Name) then
-      Fr.Items[d] = true
-    end
-  end
-  local function rescan()
-    Fr.Items = {}
-    for _, d in ipairs(workspace:GetDescendants()) do track(d) end
-  end
-  rescan()
-  workspace.DescendantAdded:Connect(track)
-  workspace.DescendantRemoving:Connect(function(d) Fr.Items[d] = nil end)
-
-  local function partOf(inst)
-    if inst:IsA("BasePart") then return inst end
-    if inst:IsA("Tool") then
-      return inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart", true)
-    end
-    if inst:IsA("Model") then
-      return inst.PrimaryPart or inst:FindFirstChildWhichIsA("BasePart", true)
-    end
-    return nil
-  end
-
-  local function list()
-    local out = {}
-    local mr = myRoot()
-    for inst in pairs(Fr.Items) do
-      if inst.Parent and not isMine(inst) then
-        local anc, nested = inst.Parent, false
-        while anc and anc ~= workspace do
-          if Fr.Items[anc] then nested = true; break end
-          anc = anc.Parent
-        end
-        if not nested then
-          local pt = partOf(inst)
-          if pt then
-            table.insert(out, {inst = inst, part = pt,
-              dist = mr and (pt.Position - mr.Position).Magnitude or 0})
-          end
-        end
-      end
-    end
-    table.sort(out, function(a, b) return a.dist < b.dist end)
-    return out
-  end
-
-  local function interact(e)
-    local mr = myRoot(); if not mr then return 0 end
-    local n = 0
-    pcall(function() mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 3, 0)) end)
-    task.wait(0.15)
-    for _, d in ipairs(e.inst:GetDescendants()) do
-      if d:IsA("ProximityPrompt") then
-        pcall(function() d.HoldDuration = 0 end)
-        if fireproximityprompt then pcall(fireproximityprompt, d); n = n + 1 end
-      elseif d:IsA("ClickDetector") and fireclickdetector then
-        pcall(fireclickdetector, d); n = n + 1
-      end
-    end
-    if firetouchinterest then
-      pcall(function()
-        firetouchinterest(mr, e.part, 0)
-        firetouchinterest(mr, e.part, 1)
-      end)
-      n = n + 1
-    end
-    return n
-  end
-
-  function TLG.FruitAutoStart()
-    if Fr.AutoOn then return end
-    Fr.AutoOn = true
-    local mr0 = myRoot()
-    Fr.Origin = mr0 and mr0.CFrame
-    Fr.Away = false
-    task.spawn(function()
-      while Fr.AutoOn do
-        pcall(function()
-          local mr = myRoot(); if not mr then return end
-          local target
-          for _, e in ipairs(list()) do
-            local t = Fr.Tried[e.inst]
-            if e.dist <= Fr.Range and (not t or os.clock() - t > 6) then target = e; break end
-          end
-          if not target then
-            if Fr.ReturnBack and Fr.Origin and Fr.Away then
-              mr.CFrame = Fr.Origin; Fr.Away = false
-            end
-            return
-          end
-          Fr.Away = true
-          Fr.Tried[target.inst] = os.clock()
-          local name = target.inst.Name
-          local n = interact(target)
-          task.wait(0.4)
-          if not target.inst.Parent then
-            Fr.Count = Fr.Count + 1
-            table.insert(Fr.Log, os.date("%H:%M:%S") .. "  " .. name)
-            TLG.PNotif("🍎 Fruta", "Recogida: " .. name, C.Grn)
-          else
-            TLG.PNotif("🍎", name .. " sigue ahí (intentos: " .. n .. ")", C.Yel)
-          end
-        end)
-        task.wait(0.5)
-      end
-    end)
-    TLG.PNotif("🍎 Auto Frutas", "✅ Activado", C.Grn)
-  end
-  function TLG.FruitAutoStop()
-    if not Fr.AutoOn then return end
-    Fr.AutoOn = false
-    local mr = myRoot()
-    if Fr.ReturnBack and Fr.Origin and Fr.Away and mr then mr.CFrame = Fr.Origin end
-    Fr.Away = false
-    TLG.PNotif("🍎 Auto Frutas", "❌ Desactivado", C.Rd)
-  end
-
-  -- ESP de frutas
-  local ESPo, espConn = {}, nil
-  function TLG.FruitESPStart()
-    if Fr.ESPOn then return end
-    Fr.ESPOn = true
-    local last = 0
-    espConn = RS.Heartbeat:Connect(function()
-      if not Fr.ESPOn then return end
-      local now = os.clock()
-      if now - last < 0.5 then return end
-      last = now
-      local keep = {}
-      local l = list()
-      for i = 1, math.min(#l, 20) do
-        local e = l[i]
-        keep[e.inst] = true
-        local o = ESPo[e.inst]
-        if not o or not o.hl.Parent then
-          if o then pcall(function() o.bb:Destroy() end) end
-          local hl = Instance.new("Highlight")
-          hl.Name = "TLG_FR_HL"
-          hl.Adornee = e.inst:IsA("Tool") and e.part or e.inst
-          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-          hl.FillColor = C.Yel; hl.OutlineColor = C.Wh
-          hl.FillTransparency = 0.6; hl.OutlineTransparency = 0
-          hl.Parent = e.part
-          local bb = Instance.new("BillboardGui")
-          bb.Name = "TLG_FR_BB"
-          bb.Adornee = e.part
-          bb.AlwaysOnTop = true
-          bb.Size = UDim2.new(0, 160, 0, 30)
-          bb.StudsOffset = Vector3.new(0, 3, 0)
-          bb.Parent = e.part
-          local lb = Instance.new("TextLabel", bb)
-          lb.Size = UDim2.new(1, 0, 1, 0)
-          lb.BackgroundTransparency = 1
-          lb.Font = Enum.Font.GothamBold
-          lb.TextSize = 11
-          lb.TextColor3 = C.Yel
-          lb.TextStrokeTransparency = 0.3
-          o = {hl = hl, bb = bb, lb = lb}
-          ESPo[e.inst] = o
-        end
-        o.lb.Text = "🍎 " .. e.inst.Name .. "\n" .. math.floor(e.dist) .. " studs"
-      end
-      for inst, o in pairs(ESPo) do
-        if not keep[inst] then
-          pcall(function() o.hl:Destroy() end)
-          pcall(function() o.bb:Destroy() end)
-          ESPo[inst] = nil
-        end
-      end
-    end)
-  end
-  function TLG.FruitESPStop()
-    Fr.ESPOn = false
-    if espConn then pcall(function() espConn:Disconnect() end); espConn = nil end
-    for _, o in pairs(ESPo) do
-      pcall(function() o.hl:Destroy() end)
-      pcall(function() o.bb:Destroy() end)
-    end
-    ESPo = {}
-  end
-
-  -- Reporte para las pruebas
-  local function buildReport()
-    local L = {}
-    local function add(s) table.insert(L, s) end
-    add("== REPORTE ZTB HUB · FRUTAS ==")
-    add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
-    local l = list()
-    add("Candidatos en el mapa: " .. #l)
-    for i = 1, math.min(#l, 25) do
-      local e = l[i]
-      local pr, cd, ti = 0, 0, 0
-      for _, d in ipairs(e.inst:GetDescendants()) do
-        if d:IsA("ProximityPrompt") then pr = pr + 1
-        elseif d:IsA("ClickDetector") then cd = cd + 1
-        elseif d:IsA("TouchTransmitter") then ti = ti + 1 end
-      end
-      add(i .. ". " .. e.inst.Name .. " [" .. e.inst.ClassName .. "] dist=" .. math.floor(e.dist)
-        .. " prompts=" .. pr .. " clicks=" .. cd .. " touch=" .. ti)
-      add("   " .. e.inst:GetFullName())
-    end
-    add("Mochila / personaje:")
-    pcall(function()
-      for _, t in ipairs(TLG.LP.Backpack:GetChildren()) do add("  [Mochila] " .. t.ClassName .. " · " .. t.Name) end
-      local ch = TLG.LP.Character
-      if ch then
-        for _, t in ipairs(ch:GetChildren()) do
-          if t:IsA("Tool") then add("  [En mano] " .. t.Name) end
-        end
-      end
-    end)
-    add("Remotes relacionados (ReplicatedStorage):")
-    local rk = {"fruit","fruta","store","guard","inventory","inventario","eat","collect","pick","drop","bag"}
-    local n = 0
-    pcall(function()
-      for _, d in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
-        if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
-          local low = d.Name:lower()
-          for _, k in ipairs(rk) do
-            if low:find(k, 1, true) then
-              n = n + 1
-              if n <= 60 then add("  " .. d.ClassName .. " · " .. d:GetFullName()) end
-              break
-            end
-          end
-        end
-      end
-    end)
-    add("  (total: " .. n .. ")")
-    add("Datos del jugador con 'fruit/fruta':")
-    pcall(function()
-      for _, d in ipairs(TLG.LP:GetDescendants()) do
-        local low = d.Name:lower()
-        if low:find("fruit", 1, true) or low:find("fruta", 1, true) then
-          local v = ""
-          if d:IsA("ValueBase") then v = " = " .. tostring(d.Value) end
-          add("  " .. d.ClassName .. " · " .. d:GetFullName() .. v)
-        end
-      end
-    end)
-    return table.concat(L, "\n")
-  end
-
-  -- UI
-  Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
-  local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
-  Tog(PFr, "Auto recoger frutas", false, function(v)
-    if v then TLG.FruitAutoStart() else TLG.FruitAutoStop() end
-  end)
-  Tog(PFr, "ESP de frutas", false, function(v)
-    if v then TLG.FruitESPStart() else TLG.FruitESPStop() end
-  end)
-  Tog(PFr, "Volver a mi posición al terminar", true, function(v) Fr.ReturnBack = v end)
-  Sli(PFr, "Rango de búsqueda", 100, 10000, 5000, function(v) Fr.Range = v end)
-
-  Lbl(PFr, "Palabras clave del nombre (separadas por coma):", C.Gr)
-  local row = Instance.new("Frame", PFr)
-  row.Size = UDim2.new(1, 0, 0, 36)
-  row.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  row.BorderSizePixel = 0
-  row.ZIndex = 5
-  Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
-  local rs = Instance.new("UIStroke", row)
-  rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.6
-  local tb = Instance.new("TextBox", row)
-  tb.Size = UDim2.new(1, -20, 1, 0)
-  tb.Position = UDim2.new(0, 10, 0, 0)
-  tb.BackgroundTransparency = 1
-  tb.Font = Enum.Font.Gotham
-  tb.TextSize = 12
-  tb.TextColor3 = C.Wh
-  tb.PlaceholderText = "fruit, fruta"
-  tb.PlaceholderColor3 = C.Gr
-  tb.ClearTextOnFocus = false
-  tb.TextXAlignment = Enum.TextXAlignment.Left
-  tb.Text = table.concat(Fr.Keys, ", ")
-  tb.ZIndex = 7
-  tb.FocusLost:Connect(function()
-    local k = parseKeys(tb.Text)
-    if #k == 0 then return end
-    Fr.Keys = k
-    CFG.fruitKeys = table.concat(k, ", "); save()
-    rescan(); Fr.Tried = {}
-    TLG.PNotif("🍎", "Buscando: " .. table.concat(k, ", "), C.Yel)
-  end)
-
-  local rb = Instance.new("TextBox", PFr)
-  rb.Size = UDim2.new(1, 0, 0, 170)
-  rb.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  rb.BorderSizePixel = 0
-  rb.Font = Enum.Font.Code
-  rb.TextSize = 10
-  rb.TextColor3 = C.Wh
-  rb.MultiLine = true
-  rb.TextWrapped = true
-  rb.TextXAlignment = Enum.TextXAlignment.Left
-  rb.TextYAlignment = Enum.TextYAlignment.Top
-  rb.ClearTextOnFocus = false
-  rb.Text = "El reporte aparece aquí al tocar «Escanear y generar reporte»."
-  rb.ZIndex = 6
-  Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 10)
-  local rbs = Instance.new("UIStroke", rb)
-  rbs.Color = C.Yel; rbs.Thickness = 1; rbs.Transparency = 0.7
-
-  Btn(PFr, "🔍 Escanear y generar reporte", C.Yel, function()
-    rescan()
-    local rep = buildReport()
-    rb.Text = rep
-    if setclipboard then
-      setclipboard(rep)
-      TLG.PNotif("🍎", "Reporte copiado al portapapeles", C.Grn)
-    else
-      TLG.PNotif("🍎", "Reporte listo (copialo del cuadro)", C.Yel)
-    end
-    for line in rep:gmatch("[^\n]+") do print("[TLG] " .. line) end
-  end)
-  Btn(PFr, "📍 TP a la fruta más cercana", C.Wh, function()
-    local mr = myRoot()
-    local e = list()[1]
-    if not mr or not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-    mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 4, 0))
-    TLG.PNotif("🍎", "TP → " .. e.inst.Name, C.Cyan)
-  end)
-  Btn(PFr, "✋ Recoger la más cercana (1 intento)", C.Wh, function()
-    local e = list()[1]
-    if not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-    local n = interact(e)
-    TLG.PNotif("🍎", e.inst.Name .. " · acciones: " .. n, C.Yel)
-  end)
-  Btn(PFr, "📋 Copiar historial de recogidas", C.Wh, function()
-    local txt = table.concat(Fr.Log, "\n")
-    if txt == "" then TLG.PNotif("🍎", "Aún no hay recogidas", C.Yel); return end
-    if setclipboard then setclipboard(txt) end
-    TLG.PNotif("🍎", #Fr.Log .. " recogidas copiadas", C.Grn)
-  end)
-
-  task.spawn(function()
-    while infoL.Parent do
-      pcall(function()
-        infoL.Text = "Frutas en el mapa: " .. #list() .. "  ·  Recogidas: " .. Fr.Count
-      end)
-      task.wait(1)
-    end
-  end)
-end)
-if not FRok then
-  warn("[TLG] Frutas: " .. tostring(FRerr))
-  pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
-end
-
 -- FAB desactivados por defecto para que no estorben la pantalla.
 local FSG = Instance.new("ScreenGui")
 
@@ -4738,8 +4367,6 @@ do
       W.Visible = true
       Radial.Visible = true
       -- Restaurar los elementos del menu usando los nombres reales.
-      -- TabBar no estaba declarado; la barra lateral se llama SideBar.
-      if SideBar and SideBar.Parent then SideBar.Visible = true end
       if Cont and Cont.Parent then Cont.Visible = true end
       if BH and BH.Parent then BH.Visible = true end
       if WM and WM.Parent then WM.Visible = true end
@@ -4797,26 +4424,40 @@ do
   end)
 
   local radialItems = {
-    {icon="ℹ", label="INFO", keys={"info","stats","estad"}},
-    {icon="⚔", label="COMBATE", keys={"combat","combate","attack","ataque"}},
-    {icon="◎", label="OBJETIVOS", keys={"target","objetivo","aim"}},
-    {icon="⚡", label="OPTIMIZE", keys={"optimize","optim","lag"}},
-    {icon="⚙", label="AJUSTES", keys={"setting","ajuste","config"}},
-    {icon="▤", label="TOOLS", keys={"tool","herramient","util"}},
-    {icon="✈", label="MOVIMIENTO", keys={"move","movimiento","fly","teleport","tp"}},
-    {icon="◉", label="VISUALES", keys={"visual","esp","render"}},
-    {icon="🔧", label="PROTECCIÓN", keys={"protect","protecc","anti"}},
-    {icon="☷", label="OTROS", keys={"other","otros","misc"}},
-    {icon="🎨", label="TEMA", keys={"theme","tema","color"}},
-    {icon="☠", label="EXTRAS", keys={"extra","misc","more"}},
+    {icon="ℹ",  tab="Info"},
+    {icon="⚔",  tab="Combat"},
+    {icon="◎",  tab="Aimbot"},
+    {icon="✈",  tab="Fly"},
+    {icon="🏝", tab="Islands"},
+    {icon="▤",  tab="Scripts"},
+    {icon="🔧", tab="Tools"},
+    {icon="◉",  tab="ESP"},
+    {icon="🎨", tab="Visuals"},
+    {icon="⚡", tab="Optimize"},
+    {icon="⚙",  tab="Config"},
   }
   local radius = radialRadius
+  local radialBtns = {}
+  local GOLD = Color3.fromRGB(255, 205, 35)
+  local function setActive(name)
+    for tabName, o in pairs(radialBtns) do
+      local on = tabName == name
+      TW:Create(o.b, TweenInfo.new(0.18), {
+        BackgroundColor3 = on and GOLD or Color3.fromRGB(12, 10, 8)
+      }):Play()
+      o.b.TextColor3 = on and Color3.fromRGB(15, 12, 5) or Color3.fromRGB(255, 220, 90)
+    end
+    if Radial and Radial:FindFirstChild("ZTB_Caption") then
+      Radial.ZTB_Caption.Text = "ZTB HUB  •  " .. string.upper(name)
+    end
+  end
+  TLG.OnTabChanged = setActive
   for idx, item in ipairs(radialItems) do
     local angle = math.rad(-90 + (idx - 1) * (360 / #radialItems))
     local x = radialCenter + math.cos(angle) * radius - radialButton/2
     local y = radialCenter + math.sin(angle) * radius - radialButton/2
     local b = Instance.new("TextButton", Radial)
-    b.Name = "Radial_" .. item.label
+    b.Name = "Radial_" .. item.tab
     b.Size = UDim2.fromOffset(radialButton, radialButton)
     b.Position = UDim2.fromOffset(x, y)
     b.BackgroundColor3 = Color3.fromRGB(12, 10, 8)
@@ -4833,28 +4474,12 @@ do
     bs.Color = Color3.fromRGB(255, 198, 25)
     bs.Thickness = 2
     bs.Transparency = 0.08
+    radialBtns[item.tab] = {b = b}
     b.Activated:Connect(function()
-      -- Cambia a la pestaña existente más parecida; nunca crea una segunda ventana.
-      local wanted = item.keys
-      local found
-      if TScr then
-        for _, obj in ipairs(TScr:GetDescendants()) do
-          if obj:IsA("TextButton") and obj.Visible then
-            local txt = string.lower(tostring(obj.Text or ""))
-            for _, key in ipairs(wanted) do
-              if txt:find(key, 1, true) then found = obj; break end
-            end
-            if found then break end
-          end
-        end
-      end
-      if found then pcall(function() found:Activate() end) end
-      if item.label == "INFO" then
-        if Cont then Cont.Visible = true end
-      end
-      local pulse = TW:Create(b, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(radialButton + 6, radialButton + 6)})
+      TLG.SelectTab(item.tab)
+      local pulse = TW:Create(b, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(radialButton + 6, radialButton + 6), Position = UDim2.fromOffset(x - 3, y - 3)})
       pulse:Play(); pulse.Completed:Connect(function()
-        if b.Parent then TW:Create(b, TweenInfo.new(0.12), {Size = UDim2.fromOffset(radialButton,radialButton)}):Play() end
+        if b.Parent then TW:Create(b, TweenInfo.new(0.12), {Size = UDim2.fromOffset(radialButton,radialButton), Position = UDim2.fromOffset(x, y)}):Play() end
       end)
     end)
   end
@@ -4879,6 +4504,7 @@ do
   Center.Activated:Connect(function() setMin(true) end)
 
   local radialCaption = Instance.new("TextLabel", Radial)
+  radialCaption.Name = "ZTB_Caption"
   radialCaption.BackgroundTransparency = 1
   radialCaption.Size = UDim2.new(1, 0, 0, 22)
   radialCaption.Position = UDim2.new(0, 0, 1, -1)
@@ -4887,6 +4513,7 @@ do
   radialCaption.TextSize = 11
   radialCaption.TextColor3 = Color3.fromRGB(255, 220, 100)
   radialCaption.ZIndex = 130
+  setActive("Info")
 
   -- Estado inicial: menú oculto, botón flotante visible.
   lastWPos = getOpenWindowPosition()
