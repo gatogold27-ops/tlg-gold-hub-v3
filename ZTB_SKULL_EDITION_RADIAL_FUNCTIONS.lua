@@ -4585,6 +4585,7 @@ end)
 -- MINI BARRA ZTB: abrir/cerrar, FPS/PING, arrastrable y oro neon
 local min = true
 local setMin
+local Radial
 do
   local BTN_SIZE = 188
   local BTN_HEIGHT = 38
@@ -4718,6 +4719,7 @@ do
       outTween.Completed:Wait()
       if my ~= token then return end
       W.Visible = false
+      Radial.Visible = false
       W.Size = W_S
       W.Position = lastWPos
       W.BackgroundTransparency = originalBg
@@ -4727,6 +4729,7 @@ do
       W.Position = UDim2.new(lastWPos.X.Scale, lastWPos.X.Offset + 18, lastWPos.Y.Scale, lastWPos.Y.Offset + 18)
       W.BackgroundTransparency = 1
       W.Visible = true
+      Radial.Visible = true
       -- Restaurar los elementos del menu usando los nombres reales.
       -- TabBar no estaba declarado; la barra lateral se llama SideBar.
       if SideBar and SideBar.Parent then SideBar.Visible = true end
@@ -4740,6 +4743,138 @@ do
     end
   end
   TLG.ZTB_SetMin = setMin
+
+  -- RADIAL CENTRAL ZTB: inspirado en la referencia, sin botón de frutas.
+  Radial = Instance.new("Frame", SG)
+  Radial.Name = "ZTB_Central_Radial"
+  Radial.Size = UDim2.fromOffset(360, 360)
+  Radial.Position = UDim2.new(0, 18, 0.5, -180)
+  if TLG.IsMobile then Radial.Size = UDim2.fromOffset(300, 300); Radial.Position = UDim2.new(0, 4, 0.5, -150) end
+  Radial.BackgroundTransparency = 1
+  Radial.Visible = false
+  Radial.ZIndex = 120
+
+  local ring = Instance.new("Frame", Radial)
+  ring.Name = "GoldNeonRing"
+  ring.Size = UDim2.new(1, -18, 1, -18)
+  ring.Position = UDim2.fromOffset(9, 9)
+  ring.BackgroundColor3 = Color3.fromRGB(10, 9, 7)
+  ring.BackgroundTransparency = 0.34
+  ring.BorderSizePixel = 0
+  ring.ZIndex = 120
+  Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
+  local ringStroke = Instance.new("UIStroke", ring)
+  ringStroke.Color = Color3.fromRGB(255, 205, 35)
+  ringStroke.Thickness = 2.5
+  ringStroke.Transparency = 0.08
+  local ringGradient = Instance.new("UIGradient", ring)
+  ringGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 245, 145)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 170, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 225, 70))
+  })
+  task.spawn(function()
+    while ring.Parent do
+      local a = TW:Create(ringStroke, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.38, Thickness = 4})
+      a:Play(); a.Completed:Wait()
+      if not ring.Parent then break end
+      local b = TW:Create(ringStroke, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.08, Thickness = 2.5})
+      b:Play(); b.Completed:Wait()
+    end
+  end)
+
+  local radialItems = {
+    {icon="ℹ", label="INFO", keys={"info","stats","estad"}},
+    {icon="⚔", label="COMBATE", keys={"combat","combate","attack","ataque"}},
+    {icon="◎", label="OBJETIVOS", keys={"target","objetivo","aim"}},
+    {icon="⚡", label="OPTIMIZE", keys={"optimize","optim","lag"}},
+    {icon="⚙", label="AJUSTES", keys={"setting","ajuste","config"}},
+    {icon="▤", label="TOOLS", keys={"tool","herramient","util"}},
+    {icon="✈", label="MOVIMIENTO", keys={"move","movimiento","fly","teleport","tp"}},
+    {icon="◉", label="VISUALES", keys={"visual","esp","render"}},
+    {icon="🔧", label="PROTECCIÓN", keys={"protect","protecc","anti"}},
+    {icon="☷", label="OTROS", keys={"other","otros","misc"}},
+    {icon="🎨", label="TEMA", keys={"theme","tema","color"}},
+    {icon="☠", label="EXTRAS", keys={"extra","misc","more"}},
+  }
+  local radius = TLG.IsMobile and 113 or 139
+  local radialCenter = TLG.IsMobile and 150 or 180
+  for idx, item in ipairs(radialItems) do
+    local angle = math.rad(-90 + (idx - 1) * (360 / #radialItems))
+    local x = radialCenter + math.cos(angle) * radius - 27
+    local y = radialCenter + math.sin(angle) * radius - 27
+    local b = Instance.new("TextButton", Radial)
+    b.Name = "Radial_" .. item.label
+    b.Size = UDim2.fromOffset(54, 54)
+    b.Position = UDim2.fromOffset(x, y)
+    b.BackgroundColor3 = Color3.fromRGB(12, 10, 8)
+    b.BackgroundTransparency = 0.05
+    b.BorderSizePixel = 0
+    b.AutoButtonColor = false
+    b.Text = item.icon
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 25
+    b.TextColor3 = Color3.fromRGB(255, 220, 90)
+    b.ZIndex = 125
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    local bs = Instance.new("UIStroke", b)
+    bs.Color = Color3.fromRGB(255, 198, 25)
+    bs.Thickness = 2
+    bs.Transparency = 0.08
+    b.Activated:Connect(function()
+      -- Cambia a la pestaña existente más parecida; nunca crea una segunda ventana.
+      local wanted = item.keys
+      local found
+      if TScr then
+        for _, obj in ipairs(TScr:GetDescendants()) do
+          if obj:IsA("TextButton") and obj.Visible then
+            local txt = string.lower(tostring(obj.Text or ""))
+            for _, key in ipairs(wanted) do
+              if txt:find(key, 1, true) then found = obj; break end
+            end
+            if found then break end
+          end
+        end
+      end
+      if found then pcall(function() found:Activate() end) end
+      if item.label == "INFO" then
+        if Cont then Cont.Visible = true end
+      end
+      local pulse = TW:Create(b, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(60,60)})
+      pulse:Play(); pulse.Completed:Connect(function()
+        if b.Parent then TW:Create(b, TweenInfo.new(0.12), {Size = UDim2.fromOffset(54,54)}):Play() end
+      end)
+    end)
+  end
+
+  local Center = Instance.new("TextButton", Radial)
+  Center.Name = "ZTB_Radial_Center"
+  local centerSize = TLG.IsMobile and 94 or 118
+  Center.Size = UDim2.fromOffset(centerSize, centerSize)
+  Center.Position = UDim2.new(0.5, -centerSize/2, 0.5, -centerSize/2)
+  Center.BackgroundColor3 = Color3.fromRGB(8, 7, 7)
+  Center.BorderSizePixel = 0
+  Center.AutoButtonColor = false
+  Center.Text = "☠"
+  Center.Font = Enum.Font.GothamBlack
+  Center.TextSize = TLG.IsMobile and 54 or 67
+  Center.TextColor3 = Color3.fromRGB(255, 242, 190)
+  Center.ZIndex = 130
+  Instance.new("UICorner", Center).CornerRadius = UDim.new(1, 0)
+  local centerStroke = Instance.new("UIStroke", Center)
+  centerStroke.Color = Color3.fromRGB(255, 205, 35)
+  centerStroke.Thickness = 4
+  Center.Activated:Connect(function() setMin(true) end)
+
+  local radialCaption = Instance.new("TextLabel", Radial)
+  radialCaption.BackgroundTransparency = 1
+  radialCaption.Size = UDim2.new(1, 0, 0, 22)
+  radialCaption.Position = UDim2.new(0, 0, 1, -1)
+  radialCaption.Text = "ZTB HUB  •  ORO NEÓN"
+  radialCaption.Font = Enum.Font.GothamBold
+  radialCaption.TextSize = 11
+  radialCaption.TextColor3 = Color3.fromRGB(255, 220, 100)
+  radialCaption.ZIndex = 130
 
   -- Estado inicial: menú oculto, botón flotante visible.
   W.Visible = false
