@@ -2851,7 +2851,7 @@ end
 -- TOOLS TAB
 do
   Sec(PTo, "💀 FABS", "💀")
-  Tog(PTo, "Activar / Desactivar FABS", true, function(v)
+  Tog(PTo, "Activar / Desactivar FABS", false, function(v)
     TLG.FAB_SetVisible(v)
   end)
   Lbl(PTo, "Muestra u oculta los botones rápidos flotantes.", C.Gr)
@@ -4055,11 +4055,10 @@ local RADok, RADerr = pcall(function()
   _G.TLG_RADIAL_GUI = RG
   TLG.RadialGui = RG
 
-  local RAD, ITEM, CEN = 98, 54, 68
+  local RAD, ITEM, CEN = 118, 46, 68
   local cam0 = workspace.CurrentCamera
   local vp0 = cam0 and cam0.ViewportSize or Vector2.new(800, 600)
-  local pos = Vector2.new(vp0.X - RAD - ITEM / 2 - 16, vp0.Y * 0.5)
-  if pos.X < RAD + 10 then pos = Vector2.new(RAD + ITEM / 2 + 10, vp0.Y * 0.5) end
+  local pos = Vector2.new(RAD + ITEM / 2 + 16, vp0.Y * 0.5)
 
   local root = Instance.new("Frame", RG)
   root.Name = "RadialRoot"
@@ -4143,7 +4142,20 @@ local RADok, RADerr = pcall(function()
     {"🪐", "ORBIT", function()
         if OM.On then TLG.OrbitalMapStop() else TLG.OrbitalMapStart() end
       end, function() return OM.On end},
-    {"📋", "PANEL", function()
+    {"💫", "ANTI STUN", function()
+        if TLG.AntiStunState.On then TLG.AntiStunStop() else TLG.AntiStunStart() end
+      end, function() return TLG.AntiStunState.On end},
+    {"🔧", "V.SPEED", function()
+        if TLG.VisualSkillSpeed and TLG.VisualSkillSpeed.On then TLG.VisualSkillSpeedStop()
+        else TLG.VisualSkillSpeedStart() end
+      end, function() return TLG.VisualSkillSpeed and TLG.VisualSkillSpeed.On end},
+    {"🕳️", "ANTI VOID", function()
+        if TLG.AntiVoidState.On then TLG.AntiVoidStop() else TLG.AntiVoidStart() end
+      end, function() return TLG.AntiVoidState.On end},
+    {"🚫", "ANTI ORBIT", function()
+        if TLG.AntiOrbitState.On then TLG.AntiOrbitStop() else TLG.AntiOrbitStart() end
+      end, function() return TLG.AntiOrbitState.On end},
+    {"📋", "AJUSTES", function()
         local v = not W.Visible
         W.Visible = v
         if WM then WM.Visible = v end
@@ -4172,19 +4184,19 @@ local RADok, RADerr = pcall(function()
     st.Color = C.Yel; st.Thickness = 2; st.Transparency = 0.35
 
     local ic = Instance.new("TextLabel", b)
-    ic.Size = UDim2.new(1, 0, 0, 26)
-    ic.Position = UDim2.new(0, 0, 0, 6)
+    ic.Size = UDim2.new(1, 0, 0, 22)
+    ic.Position = UDim2.new(0, 0, 0, 4)
     ic.BackgroundTransparency = 1
-    ic.Text = d[1]; ic.TextSize = 20
+    ic.Text = d[1]; ic.TextSize = 17
     ic.Font = Enum.Font.GothamBold
     ic.TextColor3 = C.Wh
     ic.ZIndex = 6
 
     local nm = Instance.new("TextLabel", b)
-    nm.Size = UDim2.new(1, 0, 0, 12)
-    nm.Position = UDim2.new(0, 0, 1, -17)
+    nm.Size = UDim2.new(1, 0, 0, 10)
+    nm.Position = UDim2.new(0, 0, 1, -14)
     nm.BackgroundTransparency = 1
-    nm.Text = d[2]; nm.TextSize = 8
+    nm.Text = d[2]; nm.TextSize = 7
     nm.Font = Enum.Font.GothamBold
     nm.TextColor3 = C.Wh
     nm.ZIndex = 6
@@ -4268,6 +4280,11 @@ local RADok, RADerr = pcall(function()
   end)
 
   TLG.RadialSetOpen = setOpen
+
+  -- UN SOLO MENÚ: el radial. El panel de ajustes se abre desde "AJUSTES".
+  pcall(function() W.Visible = false end)
+  pcall(function() if WM then WM.Visible = false end end)
+  pcall(function() TLG.FAB_SetVisible(false) end)
 end)
 if not RADok then
   warn("[TLG] Radial: " .. tostring(RADerr))
