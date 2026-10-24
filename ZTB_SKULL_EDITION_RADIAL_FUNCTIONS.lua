@@ -1,12 +1,6 @@
---[[
-    ZTB HUB STYLE - MEME SEA FULL BUILD
-    Recuperación del script anterior para conservar sus pestañas y módulos.
-    IMPORTANTE: este archivo conserva código original; no se ha verificado en Delta.
-    Los errores de APIs no disponibles en un executor pueden seguir ocurriendo.
-]]
--- ZTB HUB STYLE — Meme Sea
--- ZTB HUB STYLE black/gold UI skin over the existing full build.
--- Existing gameplay modules are preserved from the supplied recovery script; runtime not verified in Roblox/Delta.
+-- ZTB HUB — Meme Sea Edition
+-- V9.4.7 | SKYBOX TESTER INTEGRADO (13 sets completos)
+-- Ghost Hitbox + Fly Boost + FABs visibles
 
 local TW = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
@@ -107,7 +101,7 @@ local function ShowTLGKeyGate()
     frame.Parent = gui
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 7)
+    corner.CornerRadius = UDim.new(0, 12)
     corner.Parent = frame
 
     local title = Instance.new("TextLabel")
@@ -190,7 +184,7 @@ if not ShowTLGKeyGate() then
 end
 
 local names = {"TLG_GoldV4","TLG_GoldV5","TLG_GoldV6","TLG_GoldV7",
-  "TLG_GoldV8","ZTB_HUB_Menu","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
+  "TLG_GoldV8","TLG_HideBtn","TLG_Express","TLG_FAB","TLG_FAB_Float",
   "ZTB_Intro","ZTB_Watermark","TLG_FugaFAB"}
 for _, n in ipairs(names) do
   pcall(function() local o = TLG.SP:FindFirstChild(n); if o then o:Destroy() end end)
@@ -198,7 +192,7 @@ for _, n in ipairs(names) do
 end
 
 local SG = Instance.new("ScreenGui")
-SG.Name = "ZTB_HUB_Menu"
+SG.Name = "TLG_GoldV8"
 SG.ResetOnSpawn = false
 SG.IgnoreGuiInset = true
 SG.DisplayOrder = 200
@@ -213,7 +207,6 @@ function TLG.getPing()
 end
 
 local Themes = {
-  ["👑 Oro Neón"] = {A=Color3.fromRGB(255,200,0), A2=Color3.fromRGB(255,248,120)},
   ["👑 Gold"]   = {A=Color3.fromRGB(255,215,0),  A2=Color3.fromRGB(255,235,100)},
   ["💜 Purple"] = {A=Color3.fromRGB(190,90,255), A2=Color3.fromRGB(230,150,255)},
   ["💙 Cyan"]   = {A=Color3.fromRGB(0,240,255),  A2=Color3.fromRGB(120,255,255)},
@@ -224,19 +217,19 @@ local Themes = {
   ["🤍 White"]  = {A=Color3.fromRGB(250,250,255),A2=Color3.fromRGB(255,255,255)}
 }
 TLG.Themes = Themes
-TLG.CurrentTheme = "👑 Oro Neón"
+TLG.CurrentTheme = "👑 Gold"
 TLG.CustomAccent = nil
 TLG.CustomAccent2 = nil
 function TLG.A() return TLG.CustomAccent or Themes[TLG.CurrentTheme].A end
 function TLG.A2() return TLG.CustomAccent2 or Themes[TLG.CurrentTheme].A2 end
 
 local C = {
-  BG=Color3.fromRGB(9,9,12), BG2=Color3.fromRGB(18,18,23),
-  BG3=Color3.fromRGB(27,27,33), BG4=Color3.fromRGB(43,36,23),
-  Wh=Color3.fromRGB(248,246,238), Gr=Color3.fromRGB(160,155,145),
-  GrD=Color3.fromRGB(75,68,52), Grn=Color3.fromRGB(100,230,145),
-  Rd=Color3.fromRGB(255,80,90), Cyan=Color3.fromRGB(255,215,105),
-  Yel=Color3.fromRGB(255,190,55)
+  BG=Color3.fromRGB(12,7,8), BG2=Color3.fromRGB(24,12,13),
+  BG3=Color3.fromRGB(39,20,19), BG4=Color3.fromRGB(52,27,23),
+  Wh=Color3.fromRGB(255,255,255), Gr=Color3.fromRGB(150,140,110),
+  GrD=Color3.fromRGB(70,60,40), Grn=Color3.fromRGB(100,255,140),
+  Rd=Color3.fromRGB(255,80,100), Cyan=Color3.fromRGB(0,240,255),
+  Yel=Color3.fromRGB(230,135,65)
 }
 TLG.C = C
 
@@ -528,7 +521,7 @@ function TLG.AIM_Stop()
 end
 
 -- HITBOX MANUAL
-local HB = {On = false, Sz = 10, Tr = 0.5, Conn = nil, Original = {}} -- tamaño inicial 10, máximo 50
+local HB = {On = false, Sz = 50, Tr = 0.5, Conn = nil, Original = {}}
 local function applyHB(p)
   if p == TLG.LP then return end
   local ch = p.Character; if not ch then return end
@@ -1286,32 +1279,19 @@ PLR.PlayerRemoving:Connect(function(p)
 end)
 
 
-local RADIAL_LEFT = 12
-local function radialWidth()
-  return TLG.IsMobile and 230 or 270
-end
 local function getWindowSize()
   local cam = workspace.CurrentCamera
   local viewport = cam and cam.ViewportSize or Vector2.new(800, 600)
-  local free = viewport.X - (RADIAL_LEFT + radialWidth() + 24)
-  local maxW = TLG.IsMobile and 520 or 640
-  local w = math.clamp(free, 300, maxW)
-  local h = TLG.IsMobile and math.max(300, math.min(560, viewport.Y - 40))
-    or math.max(340, math.min(560, viewport.Y - 40))
-  return UDim2.new(0, w, 0, h)
+  if TLG.IsMobile then
+    -- Keep the UI inside narrow Android screens.
+    return UDim2.new(0, math.max(280, math.min(400, viewport.X - 20)), 0,
+      math.max(250, math.min(420, viewport.Y - 90)))
+  end
+  return UDim2.new(0, math.min(640, viewport.X - 30), 0,
+    math.min(420, viewport.Y - 60))
 end
 local W_S = getWindowSize()
-local function getOpenWindowPosition()
-  local cam = workspace.CurrentCamera
-  local vp = cam and cam.ViewportSize or Vector2.new(1280, 720)
-  -- La ventana se abre pegada al lado derecho del radial (sin taparlo).
-  local left = RADIAL_LEFT + radialWidth() + 12
-  local w = W_S.X.Offset
-  local x = math.max(left + w / 2, w / 2 + 6)
-  x = math.min(x, vp.X - w / 2 - 6)
-  return UDim2.new(0, x, 0.5, 0)
-end
-local W_P = getOpenWindowPosition()
+local W_P = UDim2.new(0.5,0,1,-12)
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -1377,8 +1357,8 @@ end
 
 local W = Instance.new("Frame", SG)
 W.Size = W_S
-W.AnchorPoint = Vector2.new(0.5,0.5)
-W.Position = UDim2.new(0.5,0,1,W_S.Y.Offset)
+W.AnchorPoint = Vector2.new(0.5,1)
+W.Position = UDim2.new(0.5,0,1,W_S.Y.Offset + 20)
 W.BackgroundColor3 = C.BG
 W.BorderSizePixel = 0
 W.ClipsDescendants = true
@@ -1388,11 +1368,11 @@ Instance.new("UICorner", W).CornerRadius = UDim.new(0,12)
 
 local WS = Instance.new("UIStroke", W)
 WS.Thickness = 2
-WS.Color = Color3.fromRGB(255,190,55)
+WS.Color = Color3.fromRGB(205,112,55)
 TLG.PGlow(WS, 0.08, 0.28, 1.5)
 
 local Wgrad = Instance.new("UIGradient", W)
-Wgrad.Color = ColorSequence.new(Color3.fromRGB(9,9,12), Color3.fromRGB(31,25,16))
+Wgrad.Color = ColorSequence.new(Color3.fromRGB(10,6,7), Color3.fromRGB(42,20,18))
 Wgrad.Rotation = 135
 
 TLG.W = W
@@ -1461,8 +1441,8 @@ MainTitle.Size = UDim2.new(0.52,0,0,23)
 MainTitle.Position = UDim2.new(0.24,0,0,3)
 MainTitle.AnchorPoint = Vector2.new(0,0)
 MainTitle.BackgroundTransparency = 1
-MainTitle.Font = Enum.Font.GothamBlack
-MainTitle.Text = "ZTB SKULL EDITION"
+MainTitle.Font = Enum.Font.Garamond
+MainTitle.Text = "ZTB HUB"
 MainTitle.TextSize = 20
 MainTitle.TextColor3 = C.Yel
 MainTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -1472,8 +1452,8 @@ local SubTitle = Instance.new("TextLabel", TB)
 SubTitle.Size = UDim2.new(0.52,0,0,14)
 SubTitle.Position = UDim2.new(0.24,0,0,29)
 SubTitle.BackgroundTransparency = 1
-SubTitle.Font = Enum.Font.GothamBold
-SubTitle.Text = "ZTB HUB STYLE  •  MEME SEA"
+SubTitle.Font = Enum.Font.Garamond
+SubTitle.Text = "✦ MEME SEA  •  ZTB EDITION ✦"
 SubTitle.TextSize = 11
 SubTitle.TextColor3 = C.Gr
 SubTitle.TextXAlignment = Enum.TextXAlignment.Center
@@ -1558,15 +1538,11 @@ CloseBtn.TextColor3 = Color3.fromRGB(255,190,135)
 CloseBtn.ZIndex = 20
 Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0,7)
 local CloseStroke = Instance.new("UIStroke", CloseBtn)
-CloseStroke.Color = Color3.fromRGB(255,190,55)
+CloseStroke.Color = Color3.fromRGB(205,112,55)
 CloseStroke.Transparency = 0.25
 CloseBtn.Activated:Connect(function()
-    if TLG.ZTB_SetMin then
-        TLG.ZTB_SetMin(true)
-    else
-        pcall(function() W.Visible = false end)
-        pcall(function() WM.Visible = false end)
-    end
+    pcall(function() W.Visible = false end)
+    pcall(function() WM.Visible = false end)
 end)
 
 local DragS = {active=false, start=nil, pos=nil}
@@ -1609,77 +1585,55 @@ UIS.InputEnded:Connect(function(i)
 end)
 makeDrag(TB)
 
--- PANEL 2: barra lateral + panel de contenido, estilo dashboard oscuro
-local SideBar = Instance.new("Frame", W)
-SideBar.Name = "ZTB_SideBar"
-SideBar.Size = UDim2.new(0, TLG.IsMobile and 112 or 158, 1, -94)
-SideBar.Position = UDim2.new(0, 6, 0, 56)
-SideBar.BackgroundColor3 = C.BG2
-SideBar.BackgroundTransparency = 0.18
-SideBar.BorderSizePixel = 0
-SideBar.ZIndex = 4
-SideBar.Visible = false -- ya no se usa: el radial es el único menú
-Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
-local SideStroke = Instance.new("UIStroke", SideBar)
-SideStroke.Color = C.Yel; SideStroke.Transparency = 0.78; SideStroke.Thickness = 1
+local TabBar = Instance.new("Frame", W)
+TabBar.Size = UDim2.new(1,0,0,38)
+TabBar.Position = UDim2.new(0,0,0,54)
+TabBar.BackgroundColor3 = C.BG2
+TabBar.BackgroundTransparency = 0.3
+TabBar.BorderSizePixel = 0
+TabBar.ZIndex = 4
 
-local SideTitle = Instance.new("TextLabel", SideBar)
-SideTitle.Size = UDim2.new(1,-12,0,27)
-SideTitle.Position = UDim2.new(0,7,0,4)
-SideTitle.BackgroundTransparency = 1
-SideTitle.Font = Enum.Font.GothamBold
-SideTitle.Text = "☠  SKULL MENU"
-SideTitle.TextColor3 = C.Yel
-SideTitle.TextSize = TLG.IsMobile and 9 or 11
-SideTitle.TextXAlignment = Enum.TextXAlignment.Left
-SideTitle.ZIndex = 5
-
-local TScr = Instance.new("ScrollingFrame", SideBar)
-TScr.Name = "ZTB_Navigation"
-TScr.Size = UDim2.new(1,-8,1,-36)
-TScr.Position = UDim2.new(0,4,0,32)
+local TScr = Instance.new("ScrollingFrame", TabBar)
+TScr.Size = UDim2.new(1,-10,1,0)
+TScr.Position = UDim2.new(0,5,0,0)
 TScr.BackgroundTransparency = 1
 TScr.BorderSizePixel = 0
-TScr.ScrollBarThickness = TLG.IsMobile and 3 or 4
-TScr.ScrollBarImageColor3 = C.Yel
+TScr.ScrollBarThickness = 0
+TScr.ScrollBarImageTransparency = 1
 TScr.CanvasSize = UDim2.new(0,0,0,0)
 TScr.ZIndex = 5
-TScr.ScrollingDirection = Enum.ScrollingDirection.Y
-pcall(function() TScr.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
+TScr.ScrollingDirection = Enum.ScrollingDirection.X
+pcall(function() TScr.AutomaticCanvasSize = Enum.AutomaticSize.X end)
+
 local TLy = Instance.new("UIListLayout", TScr)
-TLy.FillDirection = Enum.FillDirection.Vertical
-TLy.VerticalAlignment = Enum.VerticalAlignment.Top
-TLy.HorizontalAlignment = Enum.HorizontalAlignment.Center
-TLy.Padding = UDim.new(0,5)
+TLy.FillDirection = Enum.FillDirection.Horizontal
+TLy.VerticalAlignment = Enum.VerticalAlignment.Center
+TLy.HorizontalAlignment = Enum.HorizontalAlignment.Left
+TLy.Padding = UDim.new(0,6)
 
 local Cont = Instance.new("Frame", W)
-Cont.Name = "ZTB_ContentPanel"
-Cont.Size = UDim2.new(1, -16, 1, -80)
-Cont.Position = UDim2.new(0, 8, 0, 60)
-Cont.BackgroundColor3 = C.BG2
-Cont.BackgroundTransparency = 0.34
-Cont.BorderSizePixel = 0
+Cont.Size = UDim2.new(1,-10,1,-128)
+Cont.Position = UDim2.new(0,5,0,100)
+Cont.BackgroundTransparency = 1
 Cont.ZIndex = 3
-Instance.new("UICorner", Cont).CornerRadius = UDim.new(0,10)
-local ContStroke = Instance.new("UIStroke", Cont)
-ContStroke.Color = C.Yel; ContStroke.Transparency = 0.82; ContStroke.Thickness = 1
-TLG.TabBar = SideBar
+
+TLG.TabBar = TabBar
 TLG.Cont = Cont
 
 local BH = Instance.new("Frame", W)
 BH.Name = "ZTB_BottomHandle"
-BH.Size = UDim2.new(1,-10,0,12)
-BH.Position = UDim2.new(0,5,1,-16)
+BH.Size = UDim2.new(1,-10,0,20)
+BH.Position = UDim2.new(0,5,1,-24)
 BH.BackgroundColor3 = C.BG2
 BH.BackgroundTransparency = 0.2
 BH.BorderSizePixel = 0
 BH.ZIndex = 8
-Instance.new("UICorner", BH).CornerRadius = UDim.new(1,0)
+Instance.new("UICorner", BH).CornerRadius = UDim.new(0,8)
 local BHs = Instance.new("UIStroke", BH)
-BHs.Color = C.Yel; BHs.Thickness = 1; BHs.Transparency = 0.75
+BHs.Color = C.Yel; BHs.Thickness = 1; BHs.Transparency = 0.6
 local BHp = Instance.new("Frame", BH)
-BHp.Size = UDim2.new(0,42,0,3)
-BHp.Position = UDim2.new(0.5,-21,0.5,-1)
+BHp.Size = UDim2.new(0,64,0,4)
+BHp.Position = UDim2.new(0.5,-32,0.5,-2)
 BHp.BackgroundColor3 = C.Yel
 BHp.BorderSizePixel = 0
 BHp.ZIndex = 9
@@ -1691,7 +1645,7 @@ local Tabs = {}
 
 local function Tab(name, icon)
     local b = Instance.new("TextButton", TScr)
-    b.Size = UDim2.new(1,-4,0,TLG.IsMobile and 36 or 42)
+    b.Size = UDim2.new(0,88,0,34)
     b.BackgroundColor3 = C.BG3
     b.BackgroundTransparency = 1
     b.Text = ""
@@ -1699,73 +1653,66 @@ local function Tab(name, icon)
     b.AutoButtonColor = false
     b.ZIndex = 6
     Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-
     local ico = Instance.new("TextLabel", b)
-    ico.Size = UDim2.new(0,26,1,0)
-    ico.Position = UDim2.new(0,5,0,0)
+    ico.Size = UDim2.new(1,0,0,14)
+    ico.Position = UDim2.new(0,0,0,3)
     ico.BackgroundTransparency = 1
     ico.Text = icon
-    ico.TextSize = TLG.IsMobile and 14 or 16
+    ico.TextSize = 13
     ico.ZIndex = 7
-
     local lb = Instance.new("TextLabel", b)
-    lb.Size = UDim2.new(1,-34,1,0)
-    lb.Position = UDim2.new(0,32,0,0)
+    lb.Size = UDim2.new(1,0,0,12)
+    lb.Position = UDim2.new(0,0,0,18)
     lb.BackgroundTransparency = 1
     lb.Font = Enum.Font.GothamSemibold
     lb.Text = name
     lb.TextColor3 = C.Gr
-    lb.TextSize = TLG.IsMobile and 9 or 11
-    lb.TextTruncate = Enum.TextTruncate.AtEnd
-    lb.TextXAlignment = Enum.TextXAlignment.Left
+    lb.TextSize = 10
     lb.ZIndex = 7
-
     local ul = Instance.new("Frame", b)
-    ul.Size = UDim2.new(0,3,0,0)
-    ul.Position = UDim2.new(0,0,0.5,0)
-    ul.AnchorPoint = Vector2.new(0,0.5)
+    ul.Size = UDim2.new(0,0,0,3)
+    ul.Position = UDim2.new(0.5,0,1,-3)
+    ul.AnchorPoint = Vector2.new(0.5,1)
     ul.BackgroundColor3 = C.Yel
     ul.BorderSizePixel = 0
     ul.ZIndex = 8
     Instance.new("UICorner", ul).CornerRadius = UDim.new(1,0)
-
     local pg = Instance.new("ScrollingFrame", Cont)
     pg.Size = UDim2.new(1,0,1,0)
-    pg.Position = UDim2.new(0,0,0,0)
     pg.BackgroundTransparency = 1
     pg.BorderSizePixel = 0
-    pg.ScrollBarThickness = TLG.IsMobile and 4 or 6
+    pg.ScrollBarThickness = TLG.IsMobile and 8 or 5
     pg.ScrollBarImageColor3 = C.Yel
     pg.CanvasSize = UDim2.new(0,0,0,0)
     pg.ZIndex = 4
     pcall(function() pg.AutomaticCanvasSize = Enum.AutomaticSize.Y end)
     pg.Visible = false
     local pl = Instance.new("UIListLayout", pg)
-    pl.Padding = UDim.new(0,7)
+    pl.Padding = UDim.new(0,6)
     local pp = Instance.new("UIPadding", pg)
-    pp.PaddingTop = UDim.new(0,10)
-    pp.PaddingLeft = UDim.new(0,10)
-    pp.PaddingRight = UDim.new(0,10)
-    pp.PaddingBottom = UDim.new(0,10)
-
-    local function select()
+    pp.PaddingTop = UDim.new(0,8)
+    pp.PaddingLeft = UDim.new(0,8)
+    pp.PaddingRight = UDim.new(0,8)
+    pp.PaddingBottom = UDim.new(0,8)
+    table.insert(Tabs, {b = b, l = lb, p = pg, u = ul, ico = ico})
+    b.Activated:Connect(function()
         for _, t in ipairs(Tabs) do
             t.l.TextColor3 = C.Gr
-            t.ico.TextTransparency = 0.25
+            t.ico.TextTransparency = 0.5
             t.p.Visible = false
+            t.b.BackgroundColor3 = C.BG3
             t.b.BackgroundTransparency = 1
-            TW:Create(t.u,TweenInfo.new(0.18),{Size=UDim2.new(0,3,0,0)}):Play()
+            TW:Create(t.u, TweenInfo.new(0.2), {Size = UDim2.new(0,0,0,3)}):Play()
         end
         lb.TextColor3 = C.Yel
         ico.TextTransparency = 0
         pg.Visible = true
-        b.BackgroundTransparency = 0.18
-        TW:Create(ul,TweenInfo.new(0.2,Enum.EasingStyle.Quint),{Size=UDim2.new(0,3,0.62,0)}):Play()
-        pcall(function() SubTitle.Text = string.upper(name) end)
-        if TLG.OnTabChanged then pcall(TLG.OnTabChanged, name) end
-    end
-    table.insert(Tabs, {b=b,l=lb,p=pg,u=ul,ico=ico,name=name,select=select})
-    b.Activated:Connect(select)
+        pg.Position = UDim2.new(0,28,0,0)
+        TW:Create(pg, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0,0,0,0)}):Play()
+        b.BackgroundColor3 = C.BG3
+        b.BackgroundTransparency = 0.5
+        TW:Create(ul, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
+    end)
     return pg
 end
 
@@ -1980,13 +1927,6 @@ local PTo = Tab("Tools", "🔧")
 local PEs = Tab("ESP", "👁️")
 local PVi = Tab("Visuals", "🎨")
 local POp = Tab("Optimize", "⚡")
-local PCf = Tab("Config", "⚙") -- faltaba: la pestaña Config daba error y no se creaba
-function TLG.SelectTab(name)
-    for _, t in ipairs(Tabs) do
-        if t.name == name then t.select(); return true end
-    end
-    return false
-end
 
 
 task.wait(0.1)
@@ -1995,8 +1935,8 @@ if Tabs[1] then
     Tabs[1].ico.TextTransparency = 0
     Tabs[1].p.Visible = true
     Tabs[1].b.BackgroundColor3 = C.BG3
-    Tabs[1].b.BackgroundTransparency = 0.18
-    TW:Create(Tabs[1].u, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0,3,0.62,0)}):Play()
+    Tabs[1].b.BackgroundTransparency = 0.5
+    TW:Create(Tabs[1].u, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
 end
 
 TLG.PInfo = PInfo
@@ -2109,7 +2049,7 @@ local infoOK, infoERR = pcall(function()
   card.BackgroundTransparency = 0.05
   card.BorderSizePixel = 0
   card.ZIndex = 5
-  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 7)
+  Instance.new("UICorner", card).CornerRadius = UDim.new(0, 12)
   local cs = Instance.new("UIStroke", card)
   cs.Color = C.Yel; cs.Thickness = 1.5; cs.Transparency = 0.45
 
@@ -2864,7 +2804,7 @@ end
 -- TOOLS TAB
 do
   Sec(PTo, "💀 FABS", "💀")
-  Tog(PTo, "Activar / Desactivar FABS", false, function(v)
+  Tog(PTo, "Activar / Desactivar FABS", true, function(v)
     TLG.FAB_SetVisible(v)
   end)
   Lbl(PTo, "Muestra u oculta los botones rápidos flotantes.", C.Gr)
@@ -3322,13 +3262,20 @@ do
 
   Sec(PVi, "🌌 SKYBOX", "🌌")
   local skies = {
-    {name="❌ Ninguno", ids=nil},
-    {name="🏠 Sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
-    {name="🌌 Galaxia", ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
+    {name="❌ Restaurar cielo", ids=nil},
+    {name="🏠 Roblox Sample", ids={"rbxassetid://162001887","rbxassetid://161998893","rbxassetid://162001897","rbxassetid://162001904","rbxassetid://162001919","rbxassetid://162001926"}},
+    {name="🌌 Galaxy", ids={"rbxassetid://159454299","rbxassetid://159454296","rbxassetid://159454293","rbxassetid://159454286","rbxassetid://159454300","rbxassetid://159454288"}},
     {name="🌠 Vaporwave", ids={"rbxassetid://8631780182","rbxassetid://8631784904","rbxassetid://8631769834","rbxassetid://8631777199","rbxassetid://8631735555","rbxassetid://8631782345"}},
     {name="🌅 Sunset", ids={"rbxassetid://323494035","rbxassetid://323494368","rbxassetid://323494130","rbxassetid://323494252","rbxassetid://323494067","rbxassetid://323493360"}},
     {name="🔵 Blue Space", ids={"rbxassetid://135483466","rbxassetid://135483484","rbxassetid://135483461","rbxassetid://135483495","rbxassetid://135483499","rbxassetid://135483475"}},
-    {name="🪐 Blue Planet", ids={"rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524","rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"}}
+    {name="🌃 Red Night", ids={"rbxassetid://401664839","rbxassetid://401664862","rbxassetid://401664960","rbxassetid://401664881","rbxassetid://401664901","rbxassetid://401664936"}},
+    {name="🪐 Blue Planet", ids={"rbxassetid://218955819","rbxassetid://218953419","rbxassetid://218954524","rbxassetid://218958493","rbxassetid://218957134","rbxassetid://218950090"}},
+    {name="🌍 Blue Planet 2", ids={"rbxassetid://16888989874","rbxassetid://16888991855","rbxassetid://16888995219","rbxassetid://16888998994","rbxassetid://16889000916","rbxassetid://16889004122"}},
+    {name="🌆 Twilight", ids={"rbxassetid://264908339","rbxassetid://264907909","rbxassetid://264909420","rbxassetid://264909758","rbxassetid://264908886","rbxassetid://264907379"}},
+    {name="☁️ Vivid Skies", ids={"rbxassetid://271042516","rbxassetid://271077243","rbxassetid://271042556","rbxassetid://271042310","rbxassetid://271042467","rbxassetid://271077958"}},
+    {name="✨ Elysium", ids={"rbxassetid://1898724755","rbxassetid://1898727189","rbxassetid://1898722814","rbxassetid://1898729298","rbxassetid://1898741025","rbxassetid://1898736761"}},
+    {name="💗 Vaporwave 2", ids={"rbxassetid://1417494030","rbxassetid://1417494146","rbxassetid://1417494253","rbxassetid://1417494402","rbxassetid://1417494499","rbxassetid://1417494643"}},
+    {name="🌈 Aurora", ids={"rbxassetid://87940909296156","rbxassetid://103510771527492","rbxassetid://85585087312696","rbxassetid://130745713571518","rbxassetid://84365244722499","rbxassetid://70997945956227"}}
   }
   for _, s in ipairs(skies) do
     Btn(PVi, s.name, C.Yel, function()
@@ -3388,210 +3335,7 @@ do
     end
   end)
 
-  -- 🚀 ANTI-LAG SUPER POTENTE (reversible: al apagarlo restaura todo)
-  Sec(POp, "🚀 ANTI-LAG", "🚀")
-  local AL = {
-    On = false, Conn = nil, Token = 0,
-    Parts = setmetatable({}, {__mode = "k"}),
-    Decals = setmetatable({}, {__mode = "k"}),
-    Fx = setmetatable({}, {__mode = "k"}),
-    Cloth = setmetatable({}, {__mode = "k"}),
-    Post = {}, Light = nil, Terr = nil, Quality = nil,
-  }
-  local function alApply(o)
-    if o:IsA("BasePart") then
-      if not AL.Parts[o] then AL.Parts[o] = {o.Material, o.Reflectance, o.CastShadow} end
-      o.Material = Enum.Material.SmoothPlastic
-      o.Reflectance = 0
-      o.CastShadow = false
-    elseif o:IsA("Decal") or o:IsA("Texture") then
-      if AL.Decals[o] == nil then AL.Decals[o] = o.Transparency end
-      o.Transparency = 1
-    elseif o:IsA("ParticleEmitter") or o:IsA("Trail") or o:IsA("Smoke")
-      or o:IsA("Fire") or o:IsA("Sparkles") then
-      if AL.Fx[o] == nil then AL.Fx[o] = o.Enabled end
-      o.Enabled = false
-    elseif o:IsA("Shirt") or o:IsA("Pants") or o:IsA("ShirtGraphic") then
-      if o.Parent then
-        AL.Cloth[o] = o.Parent
-        o.Parent = nil
-      end
-    end
-  end
-  local function alStart()
-    if AL.On then return end
-    AL.On = true
-    AL.Token = AL.Token + 1
-    local my = AL.Token
-    -- Iluminación
-    pcall(function()
-      AL.Light = {LIGHT.GlobalShadows, LIGHT.FogEnd, LIGHT.Brightness}
-      LIGHT.GlobalShadows = false
-      LIGHT.FogEnd = 9e9
-      LIGHT.Brightness = 1
-    end)
-    AL.Post = {}
-    for _, e in ipairs(LIGHT:GetChildren()) do
-      if e:IsA("PostEffect") or e:IsA("BlurEffect") or e:IsA("SunRaysEffect")
-        or e:IsA("ColorCorrectionEffect") or e:IsA("DepthOfFieldEffect") then
-        pcall(function() AL.Post[e] = e.Enabled; e.Enabled = false end)
-      end
-    end
-    -- Terreno (agua y pasto)
-    local terr = workspace:FindFirstChildOfClass("Terrain")
-    if terr then
-      pcall(function()
-        AL.Terr = {Terrain = terr, WaveSize = terr.WaterWaveSize,
-          WaveSpeed = terr.WaterWaveSpeed, Refl = terr.WaterReflectance,
-          Trans = terr.WaterTransparency}
-        if gethiddenproperty then
-          pcall(function() AL.Terr.Deco = gethiddenproperty(terr, "Decoration") end)
-        end
-        terr.WaterWaveSize = 0
-        terr.WaterWaveSpeed = 0
-        terr.WaterReflectance = 0
-        terr.WaterTransparency = 0
-        if sethiddenproperty then
-          pcall(function() sethiddenproperty(terr, "Decoration", false) end)
-        end
-      end)
-    end
-    -- Calidad gráfica mínima
-    pcall(function()
-      local r = settings().Rendering
-      AL.Quality = r.QualityLevel
-      r.QualityLevel = Enum.QualityLevel.Level01
-    end)
-    -- Mapa actual (por tandas para no congelar el juego)
-    task.spawn(function()
-      local n = 0
-      for _, d in ipairs(workspace:GetDescendants()) do
-        if not AL.On or AL.Token ~= my then return end
-        pcall(alApply, d)
-        n = n + 1
-        if n % 1500 == 0 then task.wait() end
-      end
-    end)
-    -- Objetos nuevos
-    AL.Conn = workspace.DescendantAdded:Connect(function(d)
-      task.defer(function()
-        if AL.On then pcall(alApply, d) end
-      end)
-    end)
-    TLG.PNotif("🚀 Anti-Lag", "✅ Activado", C.Grn)
-  end
-  local function alStop(silent)
-    if not AL.On then return end
-    AL.On = false
-    AL.Token = AL.Token + 1
-    if AL.Conn then pcall(function() AL.Conn:Disconnect() end); AL.Conn = nil end
-    for p, o in pairs(AL.Parts) do
-      if p.Parent then pcall(function()
-        p.Material = o[1]; p.Reflectance = o[2]; p.CastShadow = o[3]
-      end) end
-    end
-    for d, t in pairs(AL.Decals) do
-      if d.Parent then pcall(function() d.Transparency = t end) end
-    end
-    for f, en in pairs(AL.Fx) do
-      if f.Parent then pcall(function() f.Enabled = en end) end
-    end
-    for c, par in pairs(AL.Cloth) do
-      if par and par.Parent then pcall(function() c.Parent = par end) end
-    end
-    AL.Parts = setmetatable({}, {__mode = "k"})
-    AL.Decals = setmetatable({}, {__mode = "k"})
-    AL.Fx = setmetatable({}, {__mode = "k"})
-    AL.Cloth = setmetatable({}, {__mode = "k"})
-    for e, en in pairs(AL.Post) do
-      if e.Parent then pcall(function() e.Enabled = en end) end
-    end
-    AL.Post = {}
-    if AL.Light then
-      pcall(function()
-        -- si "Quitar Sombras" sigue activo, no le devolvemos las sombras
-        if shadowsOriginal == nil then LIGHT.GlobalShadows = AL.Light[1] end
-        LIGHT.FogEnd = AL.Light[2]
-        LIGHT.Brightness = AL.Light[3]
-      end)
-      AL.Light = nil
-    end
-    local t = AL.Terr
-    if t and t.Terrain and t.Terrain.Parent then
-      pcall(function()
-        t.Terrain.WaterWaveSize = t.WaveSize
-        t.Terrain.WaterWaveSpeed = t.WaveSpeed
-        t.Terrain.WaterReflectance = t.Refl
-        t.Terrain.WaterTransparency = t.Trans
-        if sethiddenproperty and t.Deco ~= nil then
-          pcall(function() sethiddenproperty(t.Terrain, "Decoration", t.Deco) end)
-        end
-      end)
-    end
-    AL.Terr = nil
-    if AL.Quality then
-      pcall(function() settings().Rendering.QualityLevel = AL.Quality end)
-      AL.Quality = nil
-    end
-    if not silent then TLG.PNotif("🚀 Anti-Lag", "❌ Desactivado", C.Rd) end
-  end
-  Tog(POp, "🚀 Anti-Lag Super Potente", false, function(v)
-    if v then alStart() else alStop() end
-  end)
-  Lbl(POp, "Quita materiales, sombras, efectos, partículas y baja la calidad. Al apagarlo se restaura todo.", C.Gr)
-
-  -- OPTIMIZACIÓN EXTRA: efectos visuales reversibles, sin borrar objetos.
-  Sec(POp, "✨ EFECTOS Y FPS", "✨")
-  local fxOriginal = setmetatable({}, {__mode = "k"})
-  local fxConn = nil
-  local fxEnabled = false
-  local function setFx(obj, state)
-    if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam")
-      or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
-      if fxOriginal[obj] == nil then fxOriginal[obj] = obj.Enabled end
-      obj.Enabled = state
-    end
-  end
-  local function restoreFx()
-    fxEnabled = false
-    if fxConn then pcall(function() fxConn:Disconnect() end); fxConn = nil end
-    for obj, oldState in pairs(fxOriginal) do
-      if obj and obj.Parent then pcall(function() obj.Enabled = oldState end) end
-    end
-    fxOriginal = setmetatable({}, {__mode = "k"})
-  end
-  Tog(POp, "✨ Reducir partículas y efectos", false, function(v)
-    if v then
-      if fxEnabled then return end
-      fxEnabled = true
-      for _, obj in ipairs(workspace:GetDescendants()) do pcall(setFx, obj, false) end
-      fxConn = workspace.DescendantAdded:Connect(function(obj)
-        if fxEnabled then task.defer(function() pcall(setFx, obj, false) end) end
-      end)
-      TLG.PNotif("✨ Optimizar", "Efectos reducidos", C.Grn)
-    else
-      restoreFx()
-      TLG.PNotif("✨ Optimizar", "Efectos restaurados", C.Yel)
-    end
-  end)
-  Tog(POp, "🌫️ Reducir niebla", false, function(v)
-    if v then
-      if TLG._FogOriginal == nil then TLG._FogOriginal = LIGHT.FogEnd end
-      LIGHT.FogEnd = 1000000
-    elseif TLG._FogOriginal ~= nil then
-      pcall(function() LIGHT.FogEnd = TLG._FogOriginal end)
-      TLG._FogOriginal = nil
-    end
-  end)
-  Lbl(POp, "Los efectos se restauran al apagar cada opción. No elimina objetos del mapa.", C.Gr)
-
   TLG.RestoreOptimize = function()
-    pcall(alStop, true)
-    pcall(restoreFx)
-    if TLG._FogOriginal ~= nil then
-      pcall(function() LIGHT.FogEnd = TLG._FogOriginal end)
-      TLG._FogOriginal = nil
-    end
     for d, transparency in pairs(orig) do
       if d and d.Parent then pcall(function() d.Transparency = transparency end) end
     end
@@ -3912,7 +3656,395 @@ if not V9ok then
   pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
 end
 
--- FAB desactivados por defecto para que no estorben la pantalla.
+-- ═══════════ FRUTAS (modo prueba) ═══════════
+local FRok, FRerr = pcall(function()
+  local CFG = TLG.CFG or {}
+  local function save() if TLG.saveSoon then TLG.saveSoon() end end
+  local function myRoot()
+    local ch = TLG.LP.Character
+    return ch and ch:FindFirstChild("HumanoidRootPart")
+  end
+
+  local Fr = {Keys = {}, Items = {}, Range = 5000, AutoOn = false, ESPOn = false,
+    Tried = {}, Origin = nil, Away = false, ReturnBack = true, Count = 0, Log = {}}
+  TLG.Fruit = Fr
+
+  local function parseKeys(s)
+    local keys = {}
+    for w in tostring(s):gmatch("[^,%s]+") do table.insert(keys, w:lower()) end
+    return keys
+  end
+  Fr.Keys = parseKeys(CFG.fruitKeys or "fruit, fruta")
+
+  local function matches(name)
+    local n = name:lower()
+    for _, k in ipairs(Fr.Keys) do
+      if n:find(k, 1, true) then return true end
+    end
+    return false
+  end
+
+  local function isMine(inst)
+    if inst:IsDescendantOf(TLG.LP) then return true end
+    for _, p in ipairs(PLR:GetPlayers()) do
+      local ch = p.Character
+      if ch and inst:IsDescendantOf(ch) then return true end
+    end
+    return false
+  end
+
+  local function track(d)
+    if (d:IsA("Model") or d:IsA("Tool") or d:IsA("BasePart")) and matches(d.Name) then
+      Fr.Items[d] = true
+    end
+  end
+  local function rescan()
+    Fr.Items = {}
+    for _, d in ipairs(workspace:GetDescendants()) do track(d) end
+  end
+  rescan()
+  workspace.DescendantAdded:Connect(track)
+  workspace.DescendantRemoving:Connect(function(d) Fr.Items[d] = nil end)
+
+  local function partOf(inst)
+    if inst:IsA("BasePart") then return inst end
+    if inst:IsA("Tool") then
+      return inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart", true)
+    end
+    if inst:IsA("Model") then
+      return inst.PrimaryPart or inst:FindFirstChildWhichIsA("BasePart", true)
+    end
+    return nil
+  end
+
+  local function list()
+    local out = {}
+    local mr = myRoot()
+    for inst in pairs(Fr.Items) do
+      if inst.Parent and not isMine(inst) then
+        local anc, nested = inst.Parent, false
+        while anc and anc ~= workspace do
+          if Fr.Items[anc] then nested = true; break end
+          anc = anc.Parent
+        end
+        if not nested then
+          local pt = partOf(inst)
+          if pt then
+            table.insert(out, {inst = inst, part = pt,
+              dist = mr and (pt.Position - mr.Position).Magnitude or 0})
+          end
+        end
+      end
+    end
+    table.sort(out, function(a, b) return a.dist < b.dist end)
+    return out
+  end
+
+  local function interact(e)
+    local mr = myRoot(); if not mr then return 0 end
+    local n = 0
+    pcall(function() mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 3, 0)) end)
+    task.wait(0.15)
+    for _, d in ipairs(e.inst:GetDescendants()) do
+      if d:IsA("ProximityPrompt") then
+        pcall(function() d.HoldDuration = 0 end)
+        if fireproximityprompt then pcall(fireproximityprompt, d); n = n + 1 end
+      elseif d:IsA("ClickDetector") and fireclickdetector then
+        pcall(fireclickdetector, d); n = n + 1
+      end
+    end
+    if firetouchinterest then
+      pcall(function()
+        firetouchinterest(mr, e.part, 0)
+        firetouchinterest(mr, e.part, 1)
+      end)
+      n = n + 1
+    end
+    return n
+  end
+
+  function TLG.FruitAutoStart()
+    if Fr.AutoOn then return end
+    Fr.AutoOn = true
+    local mr0 = myRoot()
+    Fr.Origin = mr0 and mr0.CFrame
+    Fr.Away = false
+    task.spawn(function()
+      while Fr.AutoOn do
+        pcall(function()
+          local mr = myRoot(); if not mr then return end
+          local target
+          for _, e in ipairs(list()) do
+            local t = Fr.Tried[e.inst]
+            if e.dist <= Fr.Range and (not t or os.clock() - t > 6) then target = e; break end
+          end
+          if not target then
+            if Fr.ReturnBack and Fr.Origin and Fr.Away then
+              mr.CFrame = Fr.Origin; Fr.Away = false
+            end
+            return
+          end
+          Fr.Away = true
+          Fr.Tried[target.inst] = os.clock()
+          local name = target.inst.Name
+          local n = interact(target)
+          task.wait(0.4)
+          if not target.inst.Parent then
+            Fr.Count = Fr.Count + 1
+            table.insert(Fr.Log, os.date("%H:%M:%S") .. "  " .. name)
+            TLG.PNotif("🍎 Fruta", "Recogida: " .. name, C.Grn)
+          else
+            TLG.PNotif("🍎", name .. " sigue ahí (intentos: " .. n .. ")", C.Yel)
+          end
+        end)
+        task.wait(0.5)
+      end
+    end)
+    TLG.PNotif("🍎 Auto Frutas", "✅ Activado", C.Grn)
+  end
+  function TLG.FruitAutoStop()
+    if not Fr.AutoOn then return end
+    Fr.AutoOn = false
+    local mr = myRoot()
+    if Fr.ReturnBack and Fr.Origin and Fr.Away and mr then mr.CFrame = Fr.Origin end
+    Fr.Away = false
+    TLG.PNotif("🍎 Auto Frutas", "❌ Desactivado", C.Rd)
+  end
+
+  -- ESP de frutas
+  local ESPo, espConn = {}, nil
+  function TLG.FruitESPStart()
+    if Fr.ESPOn then return end
+    Fr.ESPOn = true
+    local last = 0
+    espConn = RS.Heartbeat:Connect(function()
+      if not Fr.ESPOn then return end
+      local now = os.clock()
+      if now - last < 0.5 then return end
+      last = now
+      local keep = {}
+      local l = list()
+      for i = 1, math.min(#l, 20) do
+        local e = l[i]
+        keep[e.inst] = true
+        local o = ESPo[e.inst]
+        if not o or not o.hl.Parent then
+          if o then pcall(function() o.bb:Destroy() end) end
+          local hl = Instance.new("Highlight")
+          hl.Name = "TLG_FR_HL"
+          hl.Adornee = e.inst:IsA("Tool") and e.part or e.inst
+          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+          hl.FillColor = C.Yel; hl.OutlineColor = C.Wh
+          hl.FillTransparency = 0.6; hl.OutlineTransparency = 0
+          hl.Parent = e.part
+          local bb = Instance.new("BillboardGui")
+          bb.Name = "TLG_FR_BB"
+          bb.Adornee = e.part
+          bb.AlwaysOnTop = true
+          bb.Size = UDim2.new(0, 160, 0, 30)
+          bb.StudsOffset = Vector3.new(0, 3, 0)
+          bb.Parent = e.part
+          local lb = Instance.new("TextLabel", bb)
+          lb.Size = UDim2.new(1, 0, 1, 0)
+          lb.BackgroundTransparency = 1
+          lb.Font = Enum.Font.GothamBold
+          lb.TextSize = 11
+          lb.TextColor3 = C.Yel
+          lb.TextStrokeTransparency = 0.3
+          o = {hl = hl, bb = bb, lb = lb}
+          ESPo[e.inst] = o
+        end
+        o.lb.Text = "🍎 " .. e.inst.Name .. "\n" .. math.floor(e.dist) .. " studs"
+      end
+      for inst, o in pairs(ESPo) do
+        if not keep[inst] then
+          pcall(function() o.hl:Destroy() end)
+          pcall(function() o.bb:Destroy() end)
+          ESPo[inst] = nil
+        end
+      end
+    end)
+  end
+  function TLG.FruitESPStop()
+    Fr.ESPOn = false
+    if espConn then pcall(function() espConn:Disconnect() end); espConn = nil end
+    for _, o in pairs(ESPo) do
+      pcall(function() o.hl:Destroy() end)
+      pcall(function() o.bb:Destroy() end)
+    end
+    ESPo = {}
+  end
+
+  -- Reporte para las pruebas
+  local function buildReport()
+    local L = {}
+    local function add(s) table.insert(L, s) end
+    add("== REPORTE ZTB HUB · FRUTAS ==")
+    add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
+    local l = list()
+    add("Candidatos en el mapa: " .. #l)
+    for i = 1, math.min(#l, 25) do
+      local e = l[i]
+      local pr, cd, ti = 0, 0, 0
+      for _, d in ipairs(e.inst:GetDescendants()) do
+        if d:IsA("ProximityPrompt") then pr = pr + 1
+        elseif d:IsA("ClickDetector") then cd = cd + 1
+        elseif d:IsA("TouchTransmitter") then ti = ti + 1 end
+      end
+      add(i .. ". " .. e.inst.Name .. " [" .. e.inst.ClassName .. "] dist=" .. math.floor(e.dist)
+        .. " prompts=" .. pr .. " clicks=" .. cd .. " touch=" .. ti)
+      add("   " .. e.inst:GetFullName())
+    end
+    add("Mochila / personaje:")
+    pcall(function()
+      for _, t in ipairs(TLG.LP.Backpack:GetChildren()) do add("  [Mochila] " .. t.ClassName .. " · " .. t.Name) end
+      local ch = TLG.LP.Character
+      if ch then
+        for _, t in ipairs(ch:GetChildren()) do
+          if t:IsA("Tool") then add("  [En mano] " .. t.Name) end
+        end
+      end
+    end)
+    add("Remotes relacionados (ReplicatedStorage):")
+    local rk = {"fruit","fruta","store","guard","inventory","inventario","eat","collect","pick","drop","bag"}
+    local n = 0
+    pcall(function()
+      for _, d in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+        if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
+          local low = d.Name:lower()
+          for _, k in ipairs(rk) do
+            if low:find(k, 1, true) then
+              n = n + 1
+              if n <= 60 then add("  " .. d.ClassName .. " · " .. d:GetFullName()) end
+              break
+            end
+          end
+        end
+      end
+    end)
+    add("  (total: " .. n .. ")")
+    add("Datos del jugador con 'fruit/fruta':")
+    pcall(function()
+      for _, d in ipairs(TLG.LP:GetDescendants()) do
+        local low = d.Name:lower()
+        if low:find("fruit", 1, true) or low:find("fruta", 1, true) then
+          local v = ""
+          if d:IsA("ValueBase") then v = " = " .. tostring(d.Value) end
+          add("  " .. d.ClassName .. " · " .. d:GetFullName() .. v)
+        end
+      end
+    end)
+    return table.concat(L, "\n")
+  end
+
+  -- UI
+  Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
+  local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
+  Tog(PFr, "Auto recoger frutas", false, function(v)
+    if v then TLG.FruitAutoStart() else TLG.FruitAutoStop() end
+  end)
+  Tog(PFr, "ESP de frutas", false, function(v)
+    if v then TLG.FruitESPStart() else TLG.FruitESPStop() end
+  end)
+  Tog(PFr, "Volver a mi posición al terminar", true, function(v) Fr.ReturnBack = v end)
+  Sli(PFr, "Rango de búsqueda", 100, 10000, 5000, function(v) Fr.Range = v end)
+
+  Lbl(PFr, "Palabras clave del nombre (separadas por coma):", C.Gr)
+  local row = Instance.new("Frame", PFr)
+  row.Size = UDim2.new(1, 0, 0, 36)
+  row.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+  row.BorderSizePixel = 0
+  row.ZIndex = 5
+  Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
+  local rs = Instance.new("UIStroke", row)
+  rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.6
+  local tb = Instance.new("TextBox", row)
+  tb.Size = UDim2.new(1, -20, 1, 0)
+  tb.Position = UDim2.new(0, 10, 0, 0)
+  tb.BackgroundTransparency = 1
+  tb.Font = Enum.Font.Gotham
+  tb.TextSize = 12
+  tb.TextColor3 = C.Wh
+  tb.PlaceholderText = "fruit, fruta"
+  tb.PlaceholderColor3 = C.Gr
+  tb.ClearTextOnFocus = false
+  tb.TextXAlignment = Enum.TextXAlignment.Left
+  tb.Text = table.concat(Fr.Keys, ", ")
+  tb.ZIndex = 7
+  tb.FocusLost:Connect(function()
+    local k = parseKeys(tb.Text)
+    if #k == 0 then return end
+    Fr.Keys = k
+    CFG.fruitKeys = table.concat(k, ", "); save()
+    rescan(); Fr.Tried = {}
+    TLG.PNotif("🍎", "Buscando: " .. table.concat(k, ", "), C.Yel)
+  end)
+
+  local rb = Instance.new("TextBox", PFr)
+  rb.Size = UDim2.new(1, 0, 0, 170)
+  rb.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+  rb.BorderSizePixel = 0
+  rb.Font = Enum.Font.Code
+  rb.TextSize = 10
+  rb.TextColor3 = C.Wh
+  rb.MultiLine = true
+  rb.TextWrapped = true
+  rb.TextXAlignment = Enum.TextXAlignment.Left
+  rb.TextYAlignment = Enum.TextYAlignment.Top
+  rb.ClearTextOnFocus = false
+  rb.Text = "El reporte aparece aquí al tocar «Escanear y generar reporte»."
+  rb.ZIndex = 6
+  Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 10)
+  local rbs = Instance.new("UIStroke", rb)
+  rbs.Color = C.Yel; rbs.Thickness = 1; rbs.Transparency = 0.7
+
+  Btn(PFr, "🔍 Escanear y generar reporte", C.Yel, function()
+    rescan()
+    local rep = buildReport()
+    rb.Text = rep
+    if setclipboard then
+      setclipboard(rep)
+      TLG.PNotif("🍎", "Reporte copiado al portapapeles", C.Grn)
+    else
+      TLG.PNotif("🍎", "Reporte listo (copialo del cuadro)", C.Yel)
+    end
+    for line in rep:gmatch("[^\n]+") do print("[TLG] " .. line) end
+  end)
+  Btn(PFr, "📍 TP a la fruta más cercana", C.Wh, function()
+    local mr = myRoot()
+    local e = list()[1]
+    if not mr or not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
+    mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 4, 0))
+    TLG.PNotif("🍎", "TP → " .. e.inst.Name, C.Cyan)
+  end)
+  Btn(PFr, "✋ Recoger la más cercana (1 intento)", C.Wh, function()
+    local e = list()[1]
+    if not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
+    local n = interact(e)
+    TLG.PNotif("🍎", e.inst.Name .. " · acciones: " .. n, C.Yel)
+  end)
+  Btn(PFr, "📋 Copiar historial de recogidas", C.Wh, function()
+    local txt = table.concat(Fr.Log, "\n")
+    if txt == "" then TLG.PNotif("🍎", "Aún no hay recogidas", C.Yel); return end
+    if setclipboard then setclipboard(txt) end
+    TLG.PNotif("🍎", #Fr.Log .. " recogidas copiadas", C.Grn)
+  end)
+
+  task.spawn(function()
+    while infoL.Parent do
+      pcall(function()
+        infoL.Text = "Frutas en el mapa: " .. #list() .. "  ·  Recogidas: " .. Fr.Count
+      end)
+      task.wait(1)
+    end
+  end)
+end)
+if not FRok then
+  warn("[TLG] Frutas: " .. tostring(FRerr))
+  pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
+end
+
+-- FAB (visible por defecto)
 local FSG = Instance.new("ScreenGui")
 
 FSG.Name = "TLG_FAB_Float"
@@ -3920,7 +4052,6 @@ _G.TLG_FAB_GUI = FSG
 FSG.ResetOnSpawn = false
 FSG.DisplayOrder = 999
 FSG.IgnoreGuiInset = true
-FSG.Enabled = false
 pcall(function() FSG.Parent = TLG.SP end)
 if not FSG.Parent then pcall(function() FSG.Parent = CG end) end
 
@@ -3933,7 +4064,7 @@ FM.BackgroundColor3 = C.BG
 FM.BackgroundTransparency = 0.2
 FM.BorderSizePixel = 0
 FM.ZIndex = 10
-FM.Visible = false
+FM.Visible = true
 
 -- FAB GROUP 2 - PROTECCION (Anti Stun, Buff Tools, Anti Void, Anti Orbit)
 local FM2 = Instance.new("Frame", FSG)
@@ -3944,8 +4075,8 @@ FM2.BackgroundColor3 = C.BG
 FM2.BackgroundTransparency = 0.2
 FM2.BorderSizePixel = 0
 FM2.ZIndex = 10
-FM2.Visible = false
-TLG.FAB_Toggle_State = false
+FM2.Visible = true
+TLG.FAB_Toggle_State = true
 TLG.FAB_Frame_Ref = FM
 TLG.FAB_SetVisible = function(v)
   TLG.FAB_Toggle_State = v == true
@@ -4199,7 +4330,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "ZTB SKULL EDITION"
+WTx.Text = "ZTB HUB V9.4.6"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -4218,323 +4349,27 @@ task.spawn(function()
   end
 end)
 
--- MINI BARRA ZTB: abrir/cerrar, FPS/PING, arrastrable y oro neon
-local min = true
-local setMin
-local Radial
-do
-  local BTN_SIZE = 210
-  local BTN_HEIGHT = 40
-  local EASE = Enum.EasingStyle
-  local DIR = Enum.EasingDirection
-  local lastWPos = W_P
-  local token = 0
-
-  local function tw(o, t, style, dir, props)
-    local tween = TW:Create(o, TweenInfo.new(t, style, dir), props)
-    tween:Play()
-    return tween
+-- MINIMIZAR
+local min = false
+local function setMin(st)
+  min = st
+  if min then
+    TW:Create(W, TweenInfo.new(0.3, Enum.EasingStyle.Quart),
+      {Size = UDim2.new(W_S.X.Scale, W_S.X.Offset, 0, 42)}):Play()
+    TabBar.Visible = false; Cont.Visible = false; BH.Visible = false
+    STtl.Text = "👑 ▶"
+  else
+    TW:Create(W, TweenInfo.new(0.4, Enum.EasingStyle.Quart),
+      {Size = W_S}):Play()
+    TabBar.Visible = true; Cont.Visible = true; BH.Visible = true
+    STtl.Text = "👑"
   end
-
-  local ToggleButton = Instance.new("TextButton", SG)
-  ToggleButton.Name = "ZTB_MenuToggleButton"
-  ToggleButton.Size = UDim2.fromOffset(BTN_SIZE, BTN_HEIGHT)
-  ToggleButton.Position = UDim2.new(0, 14, 0.5, -BTN_HEIGHT / 2)
-  ToggleButton.BackgroundColor3 = Color3.fromRGB(18, 14, 4)
-  ToggleButton.BackgroundTransparency = 0.08
-  ToggleButton.BorderSizePixel = 0
-  ToggleButton.AutoButtonColor = false
-  ToggleButton.Text = "💀  ZTB  •  FPS: --  •  PING: -- ms  ▴"
-  ToggleButton.Font = Enum.Font.GothamBold
-  ToggleButton.TextSize = 10
-  ToggleButton.TextColor3 = Color3.fromRGB(255, 220, 90)
-  ToggleButton.TextStrokeTransparency = 0.72
-  ToggleButton.Visible = true
-  ToggleButton.ZIndex = 200
-  Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 12)
-  local ButtonStroke = Instance.new("UIStroke", ToggleButton)
-  ButtonStroke.Color = Color3.fromRGB(255, 205, 35)
-  ButtonStroke.Thickness = 1.8
-  ButtonStroke.Transparency = 0.02
-
-  -- Brillo dorado animado para la mini barra.
-  local BarGlow = Instance.new("UIGradient", ToggleButton)
-  BarGlow.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 180, 0)),
-    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 245, 145)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 190, 20))
-  })
-  BarGlow.Rotation = 0
-  task.spawn(function()
-    while ToggleButton.Parent do
-      local a = TW:Create(ButtonStroke, TweenInfo.new(0.85, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.32, Thickness = 2.5})
-      a:Play(); a.Completed:Wait()
-      if not ToggleButton.Parent then break end
-      local b = TW:Create(ButtonStroke, TweenInfo.new(0.85, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.02, Thickness = 1.8})
-      b:Play(); b.Completed:Wait()
-    end
-  end)
-  -- Actualiza las métricas también cuando el menú principal está oculto.
-  task.spawn(function()
-    local frames, last = 0, os.clock()
-    local conn
-    conn = RS.RenderStepped:Connect(function()
-      frames += 1
-      local now = os.clock()
-      if now - last >= 1 then
-        local fps = math.floor(frames / math.max(now - last, 0.001))
-        local ping = TLG.getPing()
-        if ToggleButton and ToggleButton.Parent then
-          ToggleButton.Text = "💀  ZTB  •  FPS: " .. fps .. "  •  PING: " .. ping .. " ms  ▴"
-        end
-        frames, last = 0, now
-      end
-    end)
-    ToggleButton.Destroying:Connect(function() if conn then conn:Disconnect() end end)
-  end)
-
-  local function isPointer(i)
-    return i.UserInputType == Enum.UserInputType.MouseButton1
-      or i.UserInputType == Enum.UserInputType.Touch
-  end
-
-  local dragging, moved, dragInput = false, false, nil
-  local startMouse, startPos = Vector2.zero, Vector2.zero
-  ToggleButton.InputBegan:Connect(function(i)
-    if dragging or not isPointer(i) then return end
-    dragging, moved, dragInput = true, false, i
-    startMouse = Vector2.new(i.Position.X, i.Position.Y)
-    startPos = ToggleButton.AbsolutePosition - SG.AbsolutePosition
-  end)
-
-  UIS.InputChanged:Connect(function(i)
-    if not dragging then return end
-    local same = (i == dragInput) or
-      (dragInput.UserInputType == Enum.UserInputType.MouseButton1
-        and i.UserInputType == Enum.UserInputType.MouseMovement)
-    if not same then return end
-    local delta = Vector2.new(i.Position.X, i.Position.Y) - startMouse
-    if not moved and delta.Magnitude > 8 then moved = true end
-    if moved then
-      local vp = SG.AbsoluteSize
-      local x = math.clamp(startPos.X + delta.X, 0, math.max(0, vp.X - BTN_SIZE))
-      local y = math.clamp(startPos.Y + delta.Y, 0, math.max(0, vp.Y - BTN_HEIGHT))
-      ToggleButton.Position = UDim2.fromOffset(x, y)
-    end
-  end)
-
-  UIS.InputEnded:Connect(function(i)
-    if not dragging then return end
-    local same = (i == dragInput) or
-      (dragInput.UserInputType == Enum.UserInputType.MouseButton1
-        and i.UserInputType == Enum.UserInputType.MouseButton1)
-    if not same then return end
-    dragging = false
-    -- No cambiar el estado aquí: Activated gestiona el toque/clic.
-    -- Hacerlo en ambos eventos provocaba dos toggles y el menú parecía no abrir.
-  end)
-
-  setMin = function(st)
-    st = st == true
-    if st == min then return end
-    min = st
-    token += 1
-    local my = token
-    if st then
-      if W.Visible then lastWPos = W.Position end
-      WM.Visible = false
-      ToggleButton.Visible = true
-      -- Animación de salida: el panel se encoge y se desvanece antes de ocultarse.
-      local originalSize = W.Size
-      local originalBg = W.BackgroundTransparency
-      local outTween = tw(W, 0.20, EASE.Quad, DIR.In, {
-        Size = UDim2.fromOffset(12, 12),
-        Position = UDim2.new(lastWPos.X.Scale, lastWPos.X.Offset + 18, lastWPos.Y.Scale, lastWPos.Y.Offset + 18),
-        BackgroundTransparency = 1
-      })
-      outTween.Completed:Wait()
-      if my ~= token then return end
-      W.Visible = false
-      Radial.Visible = false
-      W.Size = W_S
-      W.Position = lastWPos
-      W.BackgroundTransparency = originalBg
-    else
-      ToggleButton.Visible = true
-      W.Size = UDim2.fromOffset(12, 12)
-      W.Position = UDim2.new(lastWPos.X.Scale, lastWPos.X.Offset + 18, lastWPos.Y.Scale, lastWPos.Y.Offset + 18)
-      W.BackgroundTransparency = 1
-      W.Visible = true
-      Radial.Visible = true
-      -- Restaurar los elementos del menu usando los nombres reales.
-      if Cont and Cont.Parent then Cont.Visible = true end
-      if BH and BH.Parent then BH.Visible = true end
-      if WM and WM.Parent then WM.Visible = true end
-      if STtl and STtl.Parent then STtl.Text = "💀" end
-      local inTween = tw(W, 0.32, EASE.Back, DIR.Out, {Size = W_S, Position = lastWPos, BackgroundTransparency = 0})
-      -- Pulso breve del borde al abrir.
-      tw(ButtonStroke, 0.22, EASE.Quad, DIR.Out, {Thickness = 3, Transparency = 0})
-    end
-  end
-  TLG.ZTB_SetMin = setMin
-
-  -- RADIAL CENTRAL ZTB: inspirado en la referencia, sin botón de frutas.
-  Radial = Instance.new("Frame", SG)
-  Radial.Name = "ZTB_Central_Radial"
-  local radialSize = 270
-  local radialCenter = radialSize / 2
-  local radialRadius = 101
-  local radialButton = 44
-  if TLG.IsMobile then
-    radialSize, radialCenter, radialRadius, radialButton = 230, 115, 84, 40
-  end
-  Radial.Size = UDim2.fromOffset(radialSize, radialSize)
-  Radial.Position = UDim2.new(0, 12, 0.5, -radialCenter)
-  Radial.BackgroundTransparency = 1
-  Radial.Visible = false
-  Radial.ZIndex = 120
-
-  local ring = Instance.new("Frame", Radial)
-  ring.Name = "GoldNeonRing"
-  ring.Size = UDim2.new(1, -18, 1, -18)
-  ring.Position = UDim2.fromOffset(9, 9)
-  ring.BackgroundColor3 = Color3.fromRGB(10, 9, 7)
-  ring.BackgroundTransparency = 0.34
-  ring.BorderSizePixel = 0
-  ring.ZIndex = 120
-  Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
-  local ringStroke = Instance.new("UIStroke", ring)
-  ringStroke.Color = Color3.fromRGB(255, 205, 35)
-  ringStroke.Thickness = 2.5
-  ringStroke.Transparency = 0.08
-  local ringGradient = Instance.new("UIGradient", ring)
-  ringGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 245, 145)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 170, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 225, 70))
-  })
-  task.spawn(function()
-    while ring.Parent do
-      local a = TW:Create(ringStroke, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.38, Thickness = 4})
-      a:Play(); a.Completed:Wait()
-      if not ring.Parent then break end
-      local b = TW:Create(ringStroke, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.08, Thickness = 2.5})
-      b:Play(); b.Completed:Wait()
-    end
-  end)
-
-  local radialItems = {
-    {icon="ℹ",  tab="Info"},
-    {icon="⚔",  tab="Combat"},
-    {icon="◎",  tab="Aimbot"},
-    {icon="✈",  tab="Fly"},
-    {icon="🏝", tab="Islands"},
-    {icon="▤",  tab="Scripts"},
-    {icon="🔧", tab="Tools"},
-    {icon="◉",  tab="ESP"},
-    {icon="🎨", tab="Visuals"},
-    {icon="⚡", tab="Optimize"},
-    {icon="⚙",  tab="Config"},
-  }
-  local radius = radialRadius
-  local radialBtns = {}
-  local GOLD = Color3.fromRGB(255, 205, 35)
-  local function setActive(name)
-    for tabName, o in pairs(radialBtns) do
-      local on = tabName == name
-      TW:Create(o.b, TweenInfo.new(0.18), {
-        BackgroundColor3 = on and GOLD or Color3.fromRGB(12, 10, 8)
-      }):Play()
-      o.b.TextColor3 = on and Color3.fromRGB(15, 12, 5) or Color3.fromRGB(255, 220, 90)
-    end
-    if Radial and Radial:FindFirstChild("ZTB_Caption") then
-      Radial.ZTB_Caption.Text = "ZTB HUB  •  " .. string.upper(name)
-    end
-  end
-  TLG.OnTabChanged = setActive
-  for idx, item in ipairs(radialItems) do
-    local angle = math.rad(-90 + (idx - 1) * (360 / #radialItems))
-    local x = radialCenter + math.cos(angle) * radius - radialButton/2
-    local y = radialCenter + math.sin(angle) * radius - radialButton/2
-    local b = Instance.new("TextButton", Radial)
-    b.Name = "Radial_" .. item.tab
-    b.Size = UDim2.fromOffset(radialButton, radialButton)
-    b.Position = UDim2.fromOffset(x, y)
-    b.BackgroundColor3 = Color3.fromRGB(12, 10, 8)
-    b.BackgroundTransparency = 0.05
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.Text = item.icon
-    b.Font = Enum.Font.GothamBold
-    b.TextSize = 25
-    b.TextColor3 = Color3.fromRGB(255, 220, 90)
-    b.ZIndex = 125
-    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
-    local bs = Instance.new("UIStroke", b)
-    bs.Color = Color3.fromRGB(255, 198, 25)
-    bs.Thickness = 2
-    bs.Transparency = 0.08
-    radialBtns[item.tab] = {b = b}
-    b.Activated:Connect(function()
-      TLG.SelectTab(item.tab)
-      local pulse = TW:Create(b, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(radialButton + 6, radialButton + 6), Position = UDim2.fromOffset(x - 3, y - 3)})
-      pulse:Play(); pulse.Completed:Connect(function()
-        if b.Parent then TW:Create(b, TweenInfo.new(0.12), {Size = UDim2.fromOffset(radialButton,radialButton), Position = UDim2.fromOffset(x, y)}):Play() end
-      end)
-    end)
-  end
-
-  local Center = Instance.new("TextButton", Radial)
-  Center.Name = "ZTB_Radial_Center"
-  local centerSize = TLG.IsMobile and 72 or 86
-  Center.Size = UDim2.fromOffset(centerSize, centerSize)
-  Center.Position = UDim2.new(0.5, -centerSize/2, 0.5, -centerSize/2)
-  Center.BackgroundColor3 = Color3.fromRGB(8, 7, 7)
-  Center.BorderSizePixel = 0
-  Center.AutoButtonColor = false
-  Center.Text = "☠"
-  Center.Font = Enum.Font.GothamBlack
-  Center.TextSize = TLG.IsMobile and 43 or 50
-  Center.TextColor3 = Color3.fromRGB(255, 242, 190)
-  Center.ZIndex = 130
-  Instance.new("UICorner", Center).CornerRadius = UDim.new(1, 0)
-  local centerStroke = Instance.new("UIStroke", Center)
-  centerStroke.Color = Color3.fromRGB(255, 205, 35)
-  centerStroke.Thickness = 4
-  Center.Activated:Connect(function() setMin(true) end)
-
-  local radialCaption = Instance.new("TextLabel", Radial)
-  radialCaption.Name = "ZTB_Caption"
-  radialCaption.BackgroundTransparency = 1
-  radialCaption.Size = UDim2.new(1, 0, 0, 22)
-  radialCaption.Position = UDim2.new(0, 0, 1, -1)
-  radialCaption.Text = "ZTB HUB  •  ORO NEÓN"
-  radialCaption.Font = Enum.Font.GothamBold
-  radialCaption.TextSize = 11
-  radialCaption.TextColor3 = Color3.fromRGB(255, 220, 100)
-  radialCaption.ZIndex = 130
-  setActive("Info")
-
-  -- Estado inicial: menú oculto, botón flotante visible.
-  lastWPos = getOpenWindowPosition()
-  W.Visible = false
-  WM.Visible = false
-  ToggleButton.Visible = true
-  min = true
-
-  -- Activated funciona mejor en pantalla táctil que depender solo de InputEnded.
-  ToggleButton.Activated:Connect(function()
-    if dragging and moved then return end
-    setMin(not min)
-  end)
 end
-
 local CB = Instance.new("TextButton", DcIco)
 CB.Size = UDim2.new(1,0,1,0)
 CB.BackgroundTransparency = 1
 CB.Text = ""; CB.ZIndex = 10
 CB.Activated:Connect(function() setMin(not min) end)
-
 if UIS.KeyboardEnabled then
   UIS.InputBegan:Connect(function(i, gp)
     if gp then return end
@@ -4553,18 +4388,6 @@ task.spawn(function()
     fr.BackgroundTransparency = 1
     fr.BorderSizePixel = 0
     fr.ZIndex = 500
-    local introStroke = Instance.new("UIStroke")
-    introStroke.Color = Color3.fromRGB(255, 200, 0)
-    introStroke.Thickness = 2
-    introStroke.Transparency = 0.12
-    introStroke.Parent = fr
-    local introGlow = Instance.new("UIGradient")
-    introGlow.Color = ColorSequence.new({
-      ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 170, 0)),
-      ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 145)),
-      ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 190, 0))
-    })
-    introGlow.Parent = introStroke
     local t1 = Instance.new("TextLabel", fr)
     t1.Size = UDim2.new(1, 0, 0, 50)
     t1.Position = UDim2.new(0, 0, 0.5, -40)
@@ -4572,7 +4395,7 @@ task.spawn(function()
     t1.Font = Enum.Font.GothamBold
     t1.TextSize = 34
     t1.TextColor3 = C.Yel
-    t1.Text = "💀 ZTB SKULL EDITION"
+    t1.Text = "💀 ZTB HUB"
     t1.TextTransparency = 1
     t1.ZIndex = 501
     local t2 = Instance.new("TextLabel", fr)
@@ -4582,15 +4405,13 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "MEME SEA • DARK GOLD UI"
+    t2.Text = "Meme Sea • V9.4.6"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
     TW:Create(fr, ti, {BackgroundTransparency = 0.4}):Play()
     TW:Create(t1, ti, {TextTransparency = 0}):Play()
     TW:Create(t2, ti, {TextTransparency = 0}):Play()
-    TW:Create(introStroke, TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 2, true),
-      {Transparency = 0.62, Thickness = 4}):Play()
     task.wait(1.1)
     local to = TweenInfo.new(0.5)
     TW:Create(fr, to, {BackgroundTransparency = 1}):Play()
@@ -4606,6 +4427,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("💀 ZTB SKULL EDITION", "ZTB HUB STYLE • Meme Sea listo", C.Yel)
+TLG.PNotif("👑 ZTB HUB V9.4.6", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[ZTB HUB STYLE] 💀 Cargado")
+print("[ZTB HUB V9.4.6] 💀 Cargado")
