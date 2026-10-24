@@ -1738,8 +1738,9 @@ local function Tab(name, icon)
     pp.PaddingLeft = UDim.new(0,8)
     pp.PaddingRight = UDim.new(0,8)
     pp.PaddingBottom = UDim.new(0,8)
-    table.insert(Tabs, {b = b, l = lb, p = pg, u = ul, ico = ico})
-    b.Activated:Connect(function()
+    local rec = {b = b, l = lb, p = pg, u = ul, ico = ico}
+    table.insert(Tabs, rec)
+    local function selectTab()
         for _, t in ipairs(Tabs) do
             t.l.TextColor3 = C.Gr
             t.ico.TextTransparency = 0.5
@@ -1756,7 +1757,9 @@ local function Tab(name, icon)
         b.BackgroundColor3 = C.BG3
         b.BackgroundTransparency = 0.5
         TW:Create(ul, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0.7,0,0,3)}):Play()
-    end)
+    end
+    rec.sel = selectTab
+    b.Activated:Connect(selectTab)
     return pg
 end
 
@@ -4038,7 +4041,9 @@ if UIS.KeyboardEnabled then
 end
 
 -- ═══════════ MENÚ RADIAL CON CENTRO (V9.4.8) ═══════════
--- Toca el 💀 del centro para abrir/cerrar el anillo. Arrastra el centro para moverlo.
+-- Calavera al centro, pestañas en órbita y panel de contenido al lado.
+-- Toca una pestaña para abrir su panel (otra vez para cerrarlo).
+-- Toca la calavera para plegar/desplegar el anillo; arrástrala para moverlo.
 local RADok, RADerr = pcall(function()
   pcall(function() if _G.TLG_RADIAL_GUI then _G.TLG_RADIAL_GUI:Destroy() end end)
   pcall(function()
@@ -4055,10 +4060,28 @@ local RADok, RADerr = pcall(function()
   _G.TLG_RADIAL_GUI = RG
   TLG.RadialGui = RG
 
-  local RAD, ITEM, CEN = 118, 46, 68
+  local RAD, ITEM, CEN = 118, 46, 74
   local cam0 = workspace.CurrentCamera
   local vp0 = cam0 and cam0.ViewportSize or Vector2.new(800, 600)
-  local pos = Vector2.new(RAD + ITEM / 2 + 16, vp0.Y * 0.5)
+  local pos = Vector2.new(RAD + ITEM / 2 + 22, vp0.Y * 0.5)
+
+  -- Panel de contenido a la derecha del radial, sin barra de pestañas
+  -- (las pestañas ahora son los nodos del anillo).
+  do
+    local pw = math.clamp(vp0.X - (pos.X + RAD + ITEM / 2 + 24) - 10, 300, 420)
+    local ph = math.clamp(vp0.Y - 40, 250, 430)
+    W_S = UDim2.new(0, pw, 0, ph)
+    W_P = UDim2.new(1, -10, 0.5, 0)
+    TLG.W_S = W_S; TLG.W_P = W_P
+    W.AnchorPoint = Vector2.new(1, 0.5)
+    W.Size = W_S
+    W.Position = W_P
+    TabBar.Visible = false
+    TabBar.Size = UDim2.new(0, 0, 0, 0)
+    TabBar.ClipsDescendants = true
+    Cont.Position = UDim2.new(0, 5, 0, 60)
+    Cont.Size = UDim2.new(1, -10, 1, -92)
+  end
 
   local root = Instance.new("Frame", RG)
   root.Name = "RadialRoot"
@@ -4067,19 +4090,65 @@ local RADok, RADerr = pcall(function()
   root.Position = UDim2.fromOffset(pos.X, pos.Y)
   root.BackgroundTransparency = 1
 
-  -- anillo guía
+  -- puntos orbitando (decoración)
+  local dots = Instance.new("Frame", root)
+  dots.AnchorPoint = Vector2.new(0.5, 0.5)
+  dots.Size = UDim2.fromOffset(2, 2)
+  dots.Position = UDim2.fromOffset(0, 0)
+  dots.BackgroundTransparency = 1
+  dots.Visible = false
+  local DR = RAD + ITEM / 2 + 12
+  for k = 0, 23 do
+    local a = math.rad(k * 15)
+    local d = Instance.new("Frame", dots)
+    d.AnchorPoint = Vector2.new(0.5, 0.5)
+    d.Size = UDim2.fromOffset(4, 4)
+    d.Position = UDim2.fromOffset(math.cos(a) * DR, math.sin(a) * DR)
+    d.BackgroundColor3 = C.Yel
+    d.BackgroundTransparency = 0.35
+    d.BorderSizePixel = 0
+    Instance.new("UICorner", d).CornerRadius = UDim.new(1, 0)
+  end
+  RS.Heartbeat:Connect(function(dt)
+    if dots.Parent and dots.Visible then
+      dots.Rotation = (dots.Rotation + dt * 8) % 360
+    end
+  end)
+
+  -- anillo exterior (disco translúcido) + anillo interior
   local ring = Instance.new("Frame", root)
   ring.AnchorPoint = Vector2.new(0.5, 0.5)
   ring.Position = UDim2.fromOffset(0, 0)
-  ring.Size = UDim2.fromOffset(RAD * 2, RAD * 2)
-  ring.BackgroundTransparency = 1
+  ring.Size = UDim2.fromOffset((RAD + ITEM / 2 + 4) * 2, (RAD + ITEM / 2 + 4) * 2)
+  ring.BackgroundColor3 = C.BG
+  ring.BackgroundTransparency = 0.45
+  ring.BorderSizePixel = 0
   ring.Visible = false
   ring.ZIndex = 1
   Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
   local ringS = Instance.new("UIStroke", ring)
-  ringS.Color = C.Yel; ringS.Thickness = 2; ringS.Transparency = 0.6
+  ringS.Color = C.Yel; ringS.Thickness = 2; ringS.Transparency = 0.45
 
-  -- CENTRO
+  local inner = Instance.new("Frame", root)
+  inner.AnchorPoint = Vector2.new(0.5, 0.5)
+  inner.Position = UDim2.fromOffset(0, 0)
+  inner.Size = UDim2.fromOffset(RAD * 1.25, RAD * 1.25)
+  inner.BackgroundTransparency = 1
+  inner.Visible = false
+  inner.ZIndex = 1
+  Instance.new("UICorner", inner).CornerRadius = UDim.new(1, 0)
+  local innerS = Instance.new("UIStroke", inner)
+  innerS.Color = C.Yel; innerS.Thickness = 1; innerS.Transparency = 0.8
+
+  -- línea del centro hacia la pestaña activa
+  local line = Instance.new("Frame", root)
+  line.AnchorPoint = Vector2.new(0.5, 0.5)
+  line.BackgroundColor3 = C.Yel
+  line.BorderSizePixel = 0
+  line.Visible = false
+  line.ZIndex = 2
+
+  -- CENTRO (calavera)
   local center = Instance.new("TextButton", root)
   center.Name = "RadialCenter"
   center.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -4087,7 +4156,7 @@ local RADok, RADerr = pcall(function()
   center.Size = UDim2.fromOffset(CEN, CEN)
   center.BackgroundColor3 = C.BG2
   center.Text = "💀"
-  center.TextSize = 32
+  center.TextSize = 38
   center.Font = Enum.Font.GothamBold
   center.TextColor3 = C.Yel
   center.AutoButtonColor = false
@@ -4098,75 +4167,40 @@ local RADok, RADerr = pcall(function()
   cenS.Color = C.Yel; cenS.Thickness = 2.5; cenS.Transparency = 0.1
   TLG.PGlow(cenS, 0.05, 0.6, 1.3)
 
-  local tgt = Instance.new("TextLabel", root)
-  tgt.AnchorPoint = Vector2.new(0.5, 0)
-  tgt.Position = UDim2.fromOffset(0, CEN / 2 + 4)
-  tgt.Size = UDim2.fromOffset(150, 14)
-  tgt.BackgroundTransparency = 1
-  tgt.Font = Enum.Font.GothamBold
-  tgt.TextSize = 10
-  tgt.TextColor3 = C.Wh
-  tgt.TextStrokeTransparency = 0.4
-  tgt.Text = "🎯 Sin objetivo"
-  tgt.ZIndex = 10
+  local nameL = Instance.new("TextLabel", root)
+  nameL.AnchorPoint = Vector2.new(0.5, 0)
+  nameL.Position = UDim2.fromOffset(0, CEN / 2 + 8)
+  nameL.Size = UDim2.fromOffset(120, 14)
+  nameL.BackgroundTransparency = 1
+  nameL.Font = Enum.Font.GothamBold
+  nameL.TextSize = 11
+  nameL.TextColor3 = C.Gr
+  nameL.Text = "ZTB HUB"
+  nameL.ZIndex = 10
+  nameL.Visible = false
 
-  -- acciones
-  local function godOrbToggle()
-    if TLG.GO.On then TLG.GOS(); return end
-    local t = TLG.SelectedTarget
-    if not t or t == TLG.LP or not t.Parent then
-      TLG.PNotif("🌀 God Orb", "Elegí un jugador en Info (‹ ›)", C.Yel); return
+  -- NODOS = pestañas del hub
+  local items = {}
+  local selected = nil
+  local isOpen = false
+  local n = #Tabs
+
+  local function selectTab(i)
+    local t = Tabs[i]
+    if not t then return end
+    if selected == i and W.Visible then
+      W.Visible = false
+      return
     end
-    local ch = t.Character
-    local hu = ch and ch:FindFirstChildOfClass("Humanoid")
-    local r = ch and ch:FindFirstChild("HumanoidRootPart")
-    if not hu or hu.Health <= 0 or not r then
-      TLG.PNotif("🌀 God Orb", "El objetivo no está listo", C.Yel); return
-    end
-    TLG.GOSt(t)
+    selected = i
+    pcall(function() t.sel() end)
+    pcall(function() SubTitle.Text = "✦ " .. string.upper(t.l.Text) .. " ✦" end)
+    W.Visible = true
   end
 
-  local defs = {
-    {"🌀", "GOD ORB", godOrbToggle, function() return TLG.GO.On end},
-    {"✈", "FLY", function()
-        if TLG.Fly.On then TLG.FlyE() else TLG.FlyS() end
-      end, function() return TLG.Fly.On end},
-    {"🎯", "HITBOX", function()
-        if AIM.On then TLG.AIM_Stop()
-        else AIM.MaxTargetRange = 10000; TLG.AIM_Start() end
-      end, function() return AIM.On end},
-    {"👁️", "ESP", function()
-        if TLG.ESP.On then TLG.ESPStop() else TLG.ESPStart() end
-      end, function() return TLG.ESP.On end},
-    {"🚀", "FUGA", function() if TLG.Fuga then TLG.Fuga() end end, nil},
-    {"🪐", "ORBIT", function()
-        if OM.On then TLG.OrbitalMapStop() else TLG.OrbitalMapStart() end
-      end, function() return OM.On end},
-    {"💫", "ANTI STUN", function()
-        if TLG.AntiStunState.On then TLG.AntiStunStop() else TLG.AntiStunStart() end
-      end, function() return TLG.AntiStunState.On end},
-    {"🔧", "V.SPEED", function()
-        if TLG.VisualSkillSpeed and TLG.VisualSkillSpeed.On then TLG.VisualSkillSpeedStop()
-        else TLG.VisualSkillSpeedStart() end
-      end, function() return TLG.VisualSkillSpeed and TLG.VisualSkillSpeed.On end},
-    {"🕳️", "ANTI VOID", function()
-        if TLG.AntiVoidState.On then TLG.AntiVoidStop() else TLG.AntiVoidStart() end
-      end, function() return TLG.AntiVoidState.On end},
-    {"🚫", "ANTI ORBIT", function()
-        if TLG.AntiOrbitState.On then TLG.AntiOrbitStop() else TLG.AntiOrbitStart() end
-      end, function() return TLG.AntiOrbitState.On end},
-    {"📋", "AJUSTES", function()
-        local v = not W.Visible
-        W.Visible = v
-        if WM then WM.Visible = v end
-      end, function() return W.Visible end},
-    {"🚨", "PANIC", function() TLG.Panic() end, nil},
-  }
-
-  local items = {}
-  local isOpen = false
-  for idx, d in ipairs(defs) do
-    local ang = math.rad(-90 + (idx - 1) * (360 / #defs))
+  for idx = 1, n do
+    local t = Tabs[idx]
+    local ang = math.rad(-90 + (idx - 1) * (360 / n))
     local target = Vector2.new(math.cos(ang) * RAD, math.sin(ang) * RAD)
 
     local b = Instance.new("TextButton", root)
@@ -4174,7 +4208,10 @@ local RADok, RADerr = pcall(function()
     b.Position = UDim2.fromOffset(0, 0)
     b.Size = UDim2.fromOffset(ITEM, ITEM)
     b.BackgroundColor3 = C.BG2
-    b.Text = ""
+    b.Text = t.ico.Text
+    b.TextSize = 20
+    b.Font = Enum.Font.GothamBold
+    b.TextColor3 = C.Wh
     b.AutoButtonColor = false
     b.BorderSizePixel = 0
     b.Visible = false
@@ -4183,34 +4220,13 @@ local RADok, RADerr = pcall(function()
     local st = Instance.new("UIStroke", b)
     st.Color = C.Yel; st.Thickness = 2; st.Transparency = 0.35
 
-    local ic = Instance.new("TextLabel", b)
-    ic.Size = UDim2.new(1, 0, 0, 22)
-    ic.Position = UDim2.new(0, 0, 0, 4)
-    ic.BackgroundTransparency = 1
-    ic.Text = d[1]; ic.TextSize = 17
-    ic.Font = Enum.Font.GothamBold
-    ic.TextColor3 = C.Wh
-    ic.ZIndex = 6
-
-    local nm = Instance.new("TextLabel", b)
-    nm.Size = UDim2.new(1, 0, 0, 10)
-    nm.Position = UDim2.new(0, 0, 1, -14)
-    nm.BackgroundTransparency = 1
-    nm.Text = d[2]; nm.TextSize = 7
-    nm.Font = Enum.Font.GothamBold
-    nm.TextColor3 = C.Wh
-    nm.ZIndex = 6
-
-    b.Activated:Connect(function()
-      safeCB(d[3])
-    end)
-
-    items[idx] = {b = b, st = st, ic = ic, nm = nm, target = target, isOn = d[4]}
+    b.Activated:Connect(function() safeCB(selectTab, idx) end)
+    items[idx] = {b = b, st = st, target = target}
   end
 
   local function setOpen(v)
     isOpen = v
-    ring.Visible = v
+    ring.Visible = v; inner.Visible = v; dots.Visible = v; nameL.Visible = v
     for _, it in ipairs(items) do
       if v then
         it.b.Visible = true
@@ -4227,7 +4243,7 @@ local RADok, RADerr = pcall(function()
     end
   end
 
-  -- arrastrar el centro (tap = abrir/cerrar)
+  -- arrastrar el centro (tap = plegar/desplegar)
   local dragging, moved, startIn, startPos, activeType = false, false, nil, nil, nil
   center.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1
@@ -4260,31 +4276,48 @@ local RADok, RADerr = pcall(function()
     end
   end)
 
-  -- estado en vivo (resalta lo activo + muestra el objetivo)
+  -- estado en vivo: resalta la pestaña activa, línea al centro, nombre y icono
   task.spawn(function()
     while RG.Parent do
-      for _, it in ipairs(items) do
-        local on = false
-        if it.isOn then pcall(function() on = it.isOn() == true end) end
-        it.b.BackgroundColor3 = on and C.Yel or C.BG2
-        it.ic.TextColor3 = on and C.BG or C.Wh
-        it.nm.TextColor3 = on and C.BG or C.Wh
-        it.st.Color = on and C.Wh or C.Yel
+      local on = selected ~= nil and W.Visible
+      for i, it in ipairs(items) do
+        local sel = on and i == selected
+        it.b.BackgroundColor3 = sel and C.Yel or C.BG2
+        it.st.Color = sel and C.Wh or C.Yel
+        it.st.Thickness = sel and 3 or 2
       end
-      local t = TLG.SelectedTarget
-      if TLG.GO.On and TLG.GO.T then t = TLG.GO.T end
-      tgt.Text = (t and t.Parent and t ~= TLG.LP)
-        and ("🎯 " .. t.DisplayName) or "🎯 Sin objetivo"
-      task.wait(0.25)
+      if on and isOpen then
+        local T = items[selected].target
+        local a0 = T.Unit * (CEN / 2)
+        local a1 = T.Unit * (T.Magnitude - ITEM / 2)
+        local mid = (a0 + a1) / 2
+        line.Size = UDim2.fromOffset((a1 - a0).Magnitude, 3)
+        line.Position = UDim2.fromOffset(mid.X, mid.Y)
+        line.Rotation = math.deg(math.atan2(T.Y, T.X))
+        line.BackgroundColor3 = C.Yel
+        line.Visible = true
+        nameL.Text = string.upper(Tabs[selected].l.Text)
+        nameL.TextColor3 = C.Yel
+      else
+        line.Visible = false
+        nameL.Text = "ZTB HUB"
+        nameL.TextColor3 = C.Gr
+      end
+      pcall(function()
+        DcIco.Text = on and Tabs[selected].ico.Text or "💀"
+      end)
+      task.wait(0.2)
     end
   end)
 
   TLG.RadialSetOpen = setOpen
+  TLG.RadialSelect = selectTab
 
-  -- UN SOLO MENÚ: el radial. El panel de ajustes se abre desde "AJUSTES".
+  -- UN SOLO MENÚ: el radial. Panel, marca de agua y FABs ocultos al inicio.
   pcall(function() W.Visible = false end)
   pcall(function() if WM then WM.Visible = false end end)
   pcall(function() TLG.FAB_SetVisible(false) end)
+  setOpen(true)
 end)
 if not RADok then
   warn("[TLG] Radial: " .. tostring(RADerr))
