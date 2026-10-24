@@ -473,7 +473,18 @@ local function aimLoop()
       end
     end
   end
-  local t = aimFindTarget()
+  -- FIX V9.4.8: si el God Orb está activo, el objetivo del aimbot es el
+  -- mismo jugador al que orbitas (antes elegía "el más cercano" y podía ser otro).
+  local t
+  local go = TLG.GO
+  if go and go.On and go.T and go.T.Parent and go.T.Character then
+    t = go.T
+    if not go.T.Character:FindFirstChild("TLG_Hitbox") then
+      pcall(aimExpandHead, go.T)
+    end
+  else
+    t = aimFindTarget()
+  end
   AIM.Target = t
   if not t then return end
   -- Do not rotate/move the local character here.
@@ -579,10 +590,20 @@ function TLG.HBStop()
 end
 
 -- GOD ORB
-TLG.GO = {T = nil, C = nil, On = false, Ang = 0}
+-- FIX V9.4.8: antes el God Orb dejaba tu HRP Anchored=true. Un part anclado
+-- NO replica sus cambios de CFrame al servidor, así que el server nunca te veía
+-- orbitando y los golpes/hitbox no conectaban. Ahora el HRP queda sin anclar
+-- (velocidad en 0 + noclip local) y además miras al objetivo (antes miraba
+-- de espaldas por el CFrame.Angles(0, pi, 0)).
+TLG.GO = {T = nil, C = nil, On = false, Ang = 0, Radius = 8, Height = 3,
+  Speed = 5, FaceTarget = true, Collide = {}}
 function TLG.GOS()
   TLG.GO.T = nil; TLG.GO.On = false
   if TLG.GO.C then pcall(function() TLG.GO.C:Disconnect() end); TLG.GO.C = nil end
+  for part, original in pairs(TLG.GO.Collide) do
+    if part and part.Parent then pcall(function() part.CanCollide = original end) end
+  end
+  TLG.GO.Collide = {}
   local ch = TLG.LP.Character
   if ch then
     local h = ch:FindFirstChild("HumanoidRootPart")
@@ -600,20 +621,42 @@ function TLG.GOSt(p)
     local mh = mc:WaitForChild("HumanoidRootPart", 5)
     local mhu = mc:FindFirstChildOfClass("Humanoid")
     if not mh or not mhu then TLG.GOS(); return end
-    mh.Anchored = true; mhu.PlatformStand = true
+    mh.Anchored = false
+    mhu.PlatformStand = true
     TLG.GO.C = RS.PreSimulation:Connect(function(dt)
       if not TLG.GO.On or not TLG.GO.T or not TLG.GO.T.Parent then
         TLG.GOS(); return
       end
+      local cur = TLG.LP.Character
+      local curH = cur and cur:FindFirstChild("HumanoidRootPart")
+      if not cur or not curH then return end
+      mh = curH
       local tc = TLG.GO.T.Character; if not tc then TLG.GOS(); return end
       local th = tc:FindFirstChild("HumanoidRootPart")
       local thu = tc:FindFirstChildOfClass("Humanoid")
       if not th or not thu or thu.Health <= 0 then TLG.GOS(); return end
-      TLG.GO.Ang = TLG.GO.Ang + 5 * dt
+
+      -- noclip local mientras orbitas (sin anclar)
+      for _, part in ipairs(cur:GetDescendants()) do
+        if part:IsA("BasePart") then
+          if TLG.GO.Collide[part] == nil then TLG.GO.Collide[part] = part.CanCollide end
+          part.CanCollide = false
+        end
+      end
+
+      TLG.GO.Ang = TLG.GO.Ang + TLG.GO.Speed * dt
       if TLG.GO.Ang > math.pi * 2 then TLG.GO.Ang = TLG.GO.Ang - math.pi * 2 end
-      local off = Vector3.new(math.cos(TLG.GO.Ang) * 8, 3,
-        math.sin(TLG.GO.Ang) * 8)
-      mh.CFrame = CFrame.new(th.Position + off, th.Position) * CFrame.Angles(0, math.pi, 0)
+      local off = Vector3.new(math.cos(TLG.GO.Ang) * TLG.GO.Radius, TLG.GO.Height,
+        math.sin(TLG.GO.Ang) * TLG.GO.Radius)
+      local pos = th.Position + off
+      local look = th.Position
+      if TLG.GO.FaceTarget then
+        mh.CFrame = CFrame.lookAt(pos, Vector3.new(look.X, pos.Y, look.Z))
+      else
+        mh.CFrame = CFrame.new(pos)
+      end
+      mh.AssemblyLinearVelocity = Vector3.zero
+      mh.AssemblyAngularVelocity = Vector3.zero
     end)
   end)
 end
@@ -1524,6 +1567,7 @@ STtl.ZIndex = 7
 TLG.STtl = STtl
 
 -- Rediseño: botón de cierre visible en la esquina superior derecha.
+local WM -- forward declaration (se crea más abajo)
 local CloseBtn = Instance.new("TextButton", TB)
 CloseBtn.Name = "ZTB_CloseButton"
 CloseBtn.Size = UDim2.new(0,28,0,28)
@@ -1927,6 +1971,9 @@ local PTo = Tab("Tools", "🔧")
 local PEs = Tab("ESP", "👁️")
 local PVi = Tab("Visuals", "🎨")
 local POp = Tab("Optimize", "⚡")
+-- FIX V9.4.8: estas dos pestañas se usaban más abajo (Config / Frutas) pero
+-- nunca se creaban, por eso fallaban con "attempt to index nil".
+local PCf = Tab("Config", "⚙️")
 
 
 task.wait(0.1)
@@ -3642,6 +3689,7 @@ end
   Btn(PCf, "✖ Cerrar hub", C.Rd, function()
     pcall(function() TLG.Panic() end)
     pcall(function() if _G.TLG_FAB_GUI then _G.TLG_FAB_GUI:Destroy() end end)
+    pcall(function() if _G.TLG_RADIAL_GUI then _G.TLG_RADIAL_GUI:Destroy() end end)
     pcall(function() SG:Destroy() end)
   end)
 
@@ -3654,394 +3702,6 @@ end)
 if not V9ok then
   warn("[TLG] V9: " .. tostring(V9err))
   pcall(function() TLG.PNotif("⚠️ V9", tostring(V9err):sub(1, 70), C.Rd) end)
-end
-
--- ═══════════ FRUTAS (modo prueba) ═══════════
-local FRok, FRerr = pcall(function()
-  local CFG = TLG.CFG or {}
-  local function save() if TLG.saveSoon then TLG.saveSoon() end end
-  local function myRoot()
-    local ch = TLG.LP.Character
-    return ch and ch:FindFirstChild("HumanoidRootPart")
-  end
-
-  local Fr = {Keys = {}, Items = {}, Range = 5000, AutoOn = false, ESPOn = false,
-    Tried = {}, Origin = nil, Away = false, ReturnBack = true, Count = 0, Log = {}}
-  TLG.Fruit = Fr
-
-  local function parseKeys(s)
-    local keys = {}
-    for w in tostring(s):gmatch("[^,%s]+") do table.insert(keys, w:lower()) end
-    return keys
-  end
-  Fr.Keys = parseKeys(CFG.fruitKeys or "fruit, fruta")
-
-  local function matches(name)
-    local n = name:lower()
-    for _, k in ipairs(Fr.Keys) do
-      if n:find(k, 1, true) then return true end
-    end
-    return false
-  end
-
-  local function isMine(inst)
-    if inst:IsDescendantOf(TLG.LP) then return true end
-    for _, p in ipairs(PLR:GetPlayers()) do
-      local ch = p.Character
-      if ch and inst:IsDescendantOf(ch) then return true end
-    end
-    return false
-  end
-
-  local function track(d)
-    if (d:IsA("Model") or d:IsA("Tool") or d:IsA("BasePart")) and matches(d.Name) then
-      Fr.Items[d] = true
-    end
-  end
-  local function rescan()
-    Fr.Items = {}
-    for _, d in ipairs(workspace:GetDescendants()) do track(d) end
-  end
-  rescan()
-  workspace.DescendantAdded:Connect(track)
-  workspace.DescendantRemoving:Connect(function(d) Fr.Items[d] = nil end)
-
-  local function partOf(inst)
-    if inst:IsA("BasePart") then return inst end
-    if inst:IsA("Tool") then
-      return inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart", true)
-    end
-    if inst:IsA("Model") then
-      return inst.PrimaryPart or inst:FindFirstChildWhichIsA("BasePart", true)
-    end
-    return nil
-  end
-
-  local function list()
-    local out = {}
-    local mr = myRoot()
-    for inst in pairs(Fr.Items) do
-      if inst.Parent and not isMine(inst) then
-        local anc, nested = inst.Parent, false
-        while anc and anc ~= workspace do
-          if Fr.Items[anc] then nested = true; break end
-          anc = anc.Parent
-        end
-        if not nested then
-          local pt = partOf(inst)
-          if pt then
-            table.insert(out, {inst = inst, part = pt,
-              dist = mr and (pt.Position - mr.Position).Magnitude or 0})
-          end
-        end
-      end
-    end
-    table.sort(out, function(a, b) return a.dist < b.dist end)
-    return out
-  end
-
-  local function interact(e)
-    local mr = myRoot(); if not mr then return 0 end
-    local n = 0
-    pcall(function() mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 3, 0)) end)
-    task.wait(0.15)
-    for _, d in ipairs(e.inst:GetDescendants()) do
-      if d:IsA("ProximityPrompt") then
-        pcall(function() d.HoldDuration = 0 end)
-        if fireproximityprompt then pcall(fireproximityprompt, d); n = n + 1 end
-      elseif d:IsA("ClickDetector") and fireclickdetector then
-        pcall(fireclickdetector, d); n = n + 1
-      end
-    end
-    if firetouchinterest then
-      pcall(function()
-        firetouchinterest(mr, e.part, 0)
-        firetouchinterest(mr, e.part, 1)
-      end)
-      n = n + 1
-    end
-    return n
-  end
-
-  function TLG.FruitAutoStart()
-    if Fr.AutoOn then return end
-    Fr.AutoOn = true
-    local mr0 = myRoot()
-    Fr.Origin = mr0 and mr0.CFrame
-    Fr.Away = false
-    task.spawn(function()
-      while Fr.AutoOn do
-        pcall(function()
-          local mr = myRoot(); if not mr then return end
-          local target
-          for _, e in ipairs(list()) do
-            local t = Fr.Tried[e.inst]
-            if e.dist <= Fr.Range and (not t or os.clock() - t > 6) then target = e; break end
-          end
-          if not target then
-            if Fr.ReturnBack and Fr.Origin and Fr.Away then
-              mr.CFrame = Fr.Origin; Fr.Away = false
-            end
-            return
-          end
-          Fr.Away = true
-          Fr.Tried[target.inst] = os.clock()
-          local name = target.inst.Name
-          local n = interact(target)
-          task.wait(0.4)
-          if not target.inst.Parent then
-            Fr.Count = Fr.Count + 1
-            table.insert(Fr.Log, os.date("%H:%M:%S") .. "  " .. name)
-            TLG.PNotif("🍎 Fruta", "Recogida: " .. name, C.Grn)
-          else
-            TLG.PNotif("🍎", name .. " sigue ahí (intentos: " .. n .. ")", C.Yel)
-          end
-        end)
-        task.wait(0.5)
-      end
-    end)
-    TLG.PNotif("🍎 Auto Frutas", "✅ Activado", C.Grn)
-  end
-  function TLG.FruitAutoStop()
-    if not Fr.AutoOn then return end
-    Fr.AutoOn = false
-    local mr = myRoot()
-    if Fr.ReturnBack and Fr.Origin and Fr.Away and mr then mr.CFrame = Fr.Origin end
-    Fr.Away = false
-    TLG.PNotif("🍎 Auto Frutas", "❌ Desactivado", C.Rd)
-  end
-
-  -- ESP de frutas
-  local ESPo, espConn = {}, nil
-  function TLG.FruitESPStart()
-    if Fr.ESPOn then return end
-    Fr.ESPOn = true
-    local last = 0
-    espConn = RS.Heartbeat:Connect(function()
-      if not Fr.ESPOn then return end
-      local now = os.clock()
-      if now - last < 0.5 then return end
-      last = now
-      local keep = {}
-      local l = list()
-      for i = 1, math.min(#l, 20) do
-        local e = l[i]
-        keep[e.inst] = true
-        local o = ESPo[e.inst]
-        if not o or not o.hl.Parent then
-          if o then pcall(function() o.bb:Destroy() end) end
-          local hl = Instance.new("Highlight")
-          hl.Name = "TLG_FR_HL"
-          hl.Adornee = e.inst:IsA("Tool") and e.part or e.inst
-          hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-          hl.FillColor = C.Yel; hl.OutlineColor = C.Wh
-          hl.FillTransparency = 0.6; hl.OutlineTransparency = 0
-          hl.Parent = e.part
-          local bb = Instance.new("BillboardGui")
-          bb.Name = "TLG_FR_BB"
-          bb.Adornee = e.part
-          bb.AlwaysOnTop = true
-          bb.Size = UDim2.new(0, 160, 0, 30)
-          bb.StudsOffset = Vector3.new(0, 3, 0)
-          bb.Parent = e.part
-          local lb = Instance.new("TextLabel", bb)
-          lb.Size = UDim2.new(1, 0, 1, 0)
-          lb.BackgroundTransparency = 1
-          lb.Font = Enum.Font.GothamBold
-          lb.TextSize = 11
-          lb.TextColor3 = C.Yel
-          lb.TextStrokeTransparency = 0.3
-          o = {hl = hl, bb = bb, lb = lb}
-          ESPo[e.inst] = o
-        end
-        o.lb.Text = "🍎 " .. e.inst.Name .. "\n" .. math.floor(e.dist) .. " studs"
-      end
-      for inst, o in pairs(ESPo) do
-        if not keep[inst] then
-          pcall(function() o.hl:Destroy() end)
-          pcall(function() o.bb:Destroy() end)
-          ESPo[inst] = nil
-        end
-      end
-    end)
-  end
-  function TLG.FruitESPStop()
-    Fr.ESPOn = false
-    if espConn then pcall(function() espConn:Disconnect() end); espConn = nil end
-    for _, o in pairs(ESPo) do
-      pcall(function() o.hl:Destroy() end)
-      pcall(function() o.bb:Destroy() end)
-    end
-    ESPo = {}
-  end
-
-  -- Reporte para las pruebas
-  local function buildReport()
-    local L = {}
-    local function add(s) table.insert(L, s) end
-    add("== REPORTE ZTB HUB · FRUTAS ==")
-    add("Palabras clave: " .. table.concat(Fr.Keys, ", "))
-    local l = list()
-    add("Candidatos en el mapa: " .. #l)
-    for i = 1, math.min(#l, 25) do
-      local e = l[i]
-      local pr, cd, ti = 0, 0, 0
-      for _, d in ipairs(e.inst:GetDescendants()) do
-        if d:IsA("ProximityPrompt") then pr = pr + 1
-        elseif d:IsA("ClickDetector") then cd = cd + 1
-        elseif d:IsA("TouchTransmitter") then ti = ti + 1 end
-      end
-      add(i .. ". " .. e.inst.Name .. " [" .. e.inst.ClassName .. "] dist=" .. math.floor(e.dist)
-        .. " prompts=" .. pr .. " clicks=" .. cd .. " touch=" .. ti)
-      add("   " .. e.inst:GetFullName())
-    end
-    add("Mochila / personaje:")
-    pcall(function()
-      for _, t in ipairs(TLG.LP.Backpack:GetChildren()) do add("  [Mochila] " .. t.ClassName .. " · " .. t.Name) end
-      local ch = TLG.LP.Character
-      if ch then
-        for _, t in ipairs(ch:GetChildren()) do
-          if t:IsA("Tool") then add("  [En mano] " .. t.Name) end
-        end
-      end
-    end)
-    add("Remotes relacionados (ReplicatedStorage):")
-    local rk = {"fruit","fruta","store","guard","inventory","inventario","eat","collect","pick","drop","bag"}
-    local n = 0
-    pcall(function()
-      for _, d in ipairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
-        if d:IsA("RemoteEvent") or d:IsA("RemoteFunction") then
-          local low = d.Name:lower()
-          for _, k in ipairs(rk) do
-            if low:find(k, 1, true) then
-              n = n + 1
-              if n <= 60 then add("  " .. d.ClassName .. " · " .. d:GetFullName()) end
-              break
-            end
-          end
-        end
-      end
-    end)
-    add("  (total: " .. n .. ")")
-    add("Datos del jugador con 'fruit/fruta':")
-    pcall(function()
-      for _, d in ipairs(TLG.LP:GetDescendants()) do
-        local low = d.Name:lower()
-        if low:find("fruit", 1, true) or low:find("fruta", 1, true) then
-          local v = ""
-          if d:IsA("ValueBase") then v = " = " .. tostring(d.Value) end
-          add("  " .. d.ClassName .. " · " .. d:GetFullName() .. v)
-        end
-      end
-    end)
-    return table.concat(L, "\n")
-  end
-
-  -- UI
-  Sec(PFr, "🍎 FRUTAS (modo prueba)", "🍎")
-  local infoL = Lbl(PFr, "Frutas en el mapa: —", C.Yel)
-  Tog(PFr, "Auto recoger frutas", false, function(v)
-    if v then TLG.FruitAutoStart() else TLG.FruitAutoStop() end
-  end)
-  Tog(PFr, "ESP de frutas", false, function(v)
-    if v then TLG.FruitESPStart() else TLG.FruitESPStop() end
-  end)
-  Tog(PFr, "Volver a mi posición al terminar", true, function(v) Fr.ReturnBack = v end)
-  Sli(PFr, "Rango de búsqueda", 100, 10000, 5000, function(v) Fr.Range = v end)
-
-  Lbl(PFr, "Palabras clave del nombre (separadas por coma):", C.Gr)
-  local row = Instance.new("Frame", PFr)
-  row.Size = UDim2.new(1, 0, 0, 36)
-  row.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  row.BorderSizePixel = 0
-  row.ZIndex = 5
-  Instance.new("UICorner", row).CornerRadius = UDim.new(0, 10)
-  local rs = Instance.new("UIStroke", row)
-  rs.Color = C.Yel; rs.Thickness = 1; rs.Transparency = 0.6
-  local tb = Instance.new("TextBox", row)
-  tb.Size = UDim2.new(1, -20, 1, 0)
-  tb.Position = UDim2.new(0, 10, 0, 0)
-  tb.BackgroundTransparency = 1
-  tb.Font = Enum.Font.Gotham
-  tb.TextSize = 12
-  tb.TextColor3 = C.Wh
-  tb.PlaceholderText = "fruit, fruta"
-  tb.PlaceholderColor3 = C.Gr
-  tb.ClearTextOnFocus = false
-  tb.TextXAlignment = Enum.TextXAlignment.Left
-  tb.Text = table.concat(Fr.Keys, ", ")
-  tb.ZIndex = 7
-  tb.FocusLost:Connect(function()
-    local k = parseKeys(tb.Text)
-    if #k == 0 then return end
-    Fr.Keys = k
-    CFG.fruitKeys = table.concat(k, ", "); save()
-    rescan(); Fr.Tried = {}
-    TLG.PNotif("🍎", "Buscando: " .. table.concat(k, ", "), C.Yel)
-  end)
-
-  local rb = Instance.new("TextBox", PFr)
-  rb.Size = UDim2.new(1, 0, 0, 170)
-  rb.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-  rb.BorderSizePixel = 0
-  rb.Font = Enum.Font.Code
-  rb.TextSize = 10
-  rb.TextColor3 = C.Wh
-  rb.MultiLine = true
-  rb.TextWrapped = true
-  rb.TextXAlignment = Enum.TextXAlignment.Left
-  rb.TextYAlignment = Enum.TextYAlignment.Top
-  rb.ClearTextOnFocus = false
-  rb.Text = "El reporte aparece aquí al tocar «Escanear y generar reporte»."
-  rb.ZIndex = 6
-  Instance.new("UICorner", rb).CornerRadius = UDim.new(0, 10)
-  local rbs = Instance.new("UIStroke", rb)
-  rbs.Color = C.Yel; rbs.Thickness = 1; rbs.Transparency = 0.7
-
-  Btn(PFr, "🔍 Escanear y generar reporte", C.Yel, function()
-    rescan()
-    local rep = buildReport()
-    rb.Text = rep
-    if setclipboard then
-      setclipboard(rep)
-      TLG.PNotif("🍎", "Reporte copiado al portapapeles", C.Grn)
-    else
-      TLG.PNotif("🍎", "Reporte listo (copialo del cuadro)", C.Yel)
-    end
-    for line in rep:gmatch("[^\n]+") do print("[TLG] " .. line) end
-  end)
-  Btn(PFr, "📍 TP a la fruta más cercana", C.Wh, function()
-    local mr = myRoot()
-    local e = list()[1]
-    if not mr or not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-    mr.CFrame = CFrame.new(e.part.Position + Vector3.new(0, 4, 0))
-    TLG.PNotif("🍎", "TP → " .. e.inst.Name, C.Cyan)
-  end)
-  Btn(PFr, "✋ Recoger la más cercana (1 intento)", C.Wh, function()
-    local e = list()[1]
-    if not e then TLG.PNotif("🍎", "No hay frutas con esas palabras", C.Rd); return end
-    local n = interact(e)
-    TLG.PNotif("🍎", e.inst.Name .. " · acciones: " .. n, C.Yel)
-  end)
-  Btn(PFr, "📋 Copiar historial de recogidas", C.Wh, function()
-    local txt = table.concat(Fr.Log, "\n")
-    if txt == "" then TLG.PNotif("🍎", "Aún no hay recogidas", C.Yel); return end
-    if setclipboard then setclipboard(txt) end
-    TLG.PNotif("🍎", #Fr.Log .. " recogidas copiadas", C.Grn)
-  end)
-
-  task.spawn(function()
-    while infoL.Parent do
-      pcall(function()
-        infoL.Text = "Frutas en el mapa: " .. #list() .. "  ·  Recogidas: " .. Fr.Count
-      end)
-      task.wait(1)
-    end
-  end)
-end)
-if not FRok then
-  warn("[TLG] Frutas: " .. tostring(FRerr))
-  pcall(function() TLG.PNotif("⚠️ Frutas", tostring(FRerr):sub(1, 70), C.Rd) end)
 end
 
 -- FAB (visible por defecto)
@@ -4306,7 +3966,7 @@ end)
 
 
 -- WATERMARK
-local WM = Instance.new("Frame", SG)
+WM = Instance.new("Frame", SG)
 WM.Name = "ZTB_Watermark"
 WM.Size = UDim2.new(0,180,0,28)
 WM.Position = UDim2.new(0,10,0,10)
@@ -4330,7 +3990,7 @@ WTx.Size = UDim2.new(1,-56,1,0)
 WTx.Position = UDim2.new(0,28,0,0)
 WTx.BackgroundTransparency = 1
 WTx.Font = Enum.Font.GothamBold
-WTx.Text = "ZTB HUB V9.4.6"
+WTx.Text = "ZTB HUB V9.4.8"
 WTx.TextSize = 9; WTx.TextColor3 = C.Wh
 WTx.TextXAlignment = Enum.TextXAlignment.Left
 WTx.ZIndex = 51
@@ -4377,6 +4037,243 @@ if UIS.KeyboardEnabled then
   end)
 end
 
+-- ═══════════ MENÚ RADIAL CON CENTRO (V9.4.8) ═══════════
+-- Toca el 💀 del centro para abrir/cerrar el anillo. Arrastra el centro para moverlo.
+local RADok, RADerr = pcall(function()
+  pcall(function() if _G.TLG_RADIAL_GUI then _G.TLG_RADIAL_GUI:Destroy() end end)
+  pcall(function()
+    local o = TLG.SP:FindFirstChild("ZTB_Radial"); if o then o:Destroy() end
+  end)
+
+  local RG = Instance.new("ScreenGui")
+  RG.Name = "ZTB_Radial"
+  RG.ResetOnSpawn = false
+  RG.IgnoreGuiInset = true
+  RG.DisplayOrder = 1000
+  pcall(function() RG.Parent = TLG.SP end)
+  if not RG.Parent then pcall(function() RG.Parent = CG end) end
+  _G.TLG_RADIAL_GUI = RG
+  TLG.RadialGui = RG
+
+  local RAD, ITEM, CEN = 98, 54, 68
+  local cam0 = workspace.CurrentCamera
+  local vp0 = cam0 and cam0.ViewportSize or Vector2.new(800, 600)
+  local pos = Vector2.new(vp0.X - RAD - ITEM / 2 - 16, vp0.Y * 0.5)
+  if pos.X < RAD + 10 then pos = Vector2.new(RAD + ITEM / 2 + 10, vp0.Y * 0.5) end
+
+  local root = Instance.new("Frame", RG)
+  root.Name = "RadialRoot"
+  root.AnchorPoint = Vector2.new(0.5, 0.5)
+  root.Size = UDim2.fromOffset(0, 0)
+  root.Position = UDim2.fromOffset(pos.X, pos.Y)
+  root.BackgroundTransparency = 1
+
+  -- anillo guía
+  local ring = Instance.new("Frame", root)
+  ring.AnchorPoint = Vector2.new(0.5, 0.5)
+  ring.Position = UDim2.fromOffset(0, 0)
+  ring.Size = UDim2.fromOffset(RAD * 2, RAD * 2)
+  ring.BackgroundTransparency = 1
+  ring.Visible = false
+  ring.ZIndex = 1
+  Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
+  local ringS = Instance.new("UIStroke", ring)
+  ringS.Color = C.Yel; ringS.Thickness = 2; ringS.Transparency = 0.6
+
+  -- CENTRO
+  local center = Instance.new("TextButton", root)
+  center.Name = "RadialCenter"
+  center.AnchorPoint = Vector2.new(0.5, 0.5)
+  center.Position = UDim2.fromOffset(0, 0)
+  center.Size = UDim2.fromOffset(CEN, CEN)
+  center.BackgroundColor3 = C.BG2
+  center.Text = "💀"
+  center.TextSize = 32
+  center.Font = Enum.Font.GothamBold
+  center.TextColor3 = C.Yel
+  center.AutoButtonColor = false
+  center.BorderSizePixel = 0
+  center.ZIndex = 10
+  Instance.new("UICorner", center).CornerRadius = UDim.new(1, 0)
+  local cenS = Instance.new("UIStroke", center)
+  cenS.Color = C.Yel; cenS.Thickness = 2.5; cenS.Transparency = 0.1
+  TLG.PGlow(cenS, 0.05, 0.6, 1.3)
+
+  local tgt = Instance.new("TextLabel", root)
+  tgt.AnchorPoint = Vector2.new(0.5, 0)
+  tgt.Position = UDim2.fromOffset(0, CEN / 2 + 4)
+  tgt.Size = UDim2.fromOffset(150, 14)
+  tgt.BackgroundTransparency = 1
+  tgt.Font = Enum.Font.GothamBold
+  tgt.TextSize = 10
+  tgt.TextColor3 = C.Wh
+  tgt.TextStrokeTransparency = 0.4
+  tgt.Text = "🎯 Sin objetivo"
+  tgt.ZIndex = 10
+
+  -- acciones
+  local function godOrbToggle()
+    if TLG.GO.On then TLG.GOS(); return end
+    local t = TLG.SelectedTarget
+    if not t or t == TLG.LP or not t.Parent then
+      TLG.PNotif("🌀 God Orb", "Elegí un jugador en Info (‹ ›)", C.Yel); return
+    end
+    local ch = t.Character
+    local hu = ch and ch:FindFirstChildOfClass("Humanoid")
+    local r = ch and ch:FindFirstChild("HumanoidRootPart")
+    if not hu or hu.Health <= 0 or not r then
+      TLG.PNotif("🌀 God Orb", "El objetivo no está listo", C.Yel); return
+    end
+    TLG.GOSt(t)
+  end
+
+  local defs = {
+    {"🌀", "GOD ORB", godOrbToggle, function() return TLG.GO.On end},
+    {"✈", "FLY", function()
+        if TLG.Fly.On then TLG.FlyE() else TLG.FlyS() end
+      end, function() return TLG.Fly.On end},
+    {"🎯", "HITBOX", function()
+        if AIM.On then TLG.AIM_Stop()
+        else AIM.MaxTargetRange = 10000; TLG.AIM_Start() end
+      end, function() return AIM.On end},
+    {"👁️", "ESP", function()
+        if TLG.ESP.On then TLG.ESPStop() else TLG.ESPStart() end
+      end, function() return TLG.ESP.On end},
+    {"🚀", "FUGA", function() if TLG.Fuga then TLG.Fuga() end end, nil},
+    {"🪐", "ORBIT", function()
+        if OM.On then TLG.OrbitalMapStop() else TLG.OrbitalMapStart() end
+      end, function() return OM.On end},
+    {"📋", "PANEL", function()
+        local v = not W.Visible
+        W.Visible = v
+        if WM then WM.Visible = v end
+      end, function() return W.Visible end},
+    {"🚨", "PANIC", function() TLG.Panic() end, nil},
+  }
+
+  local items = {}
+  local isOpen = false
+  for idx, d in ipairs(defs) do
+    local ang = math.rad(-90 + (idx - 1) * (360 / #defs))
+    local target = Vector2.new(math.cos(ang) * RAD, math.sin(ang) * RAD)
+
+    local b = Instance.new("TextButton", root)
+    b.AnchorPoint = Vector2.new(0.5, 0.5)
+    b.Position = UDim2.fromOffset(0, 0)
+    b.Size = UDim2.fromOffset(ITEM, ITEM)
+    b.BackgroundColor3 = C.BG2
+    b.Text = ""
+    b.AutoButtonColor = false
+    b.BorderSizePixel = 0
+    b.Visible = false
+    b.ZIndex = 5
+    Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
+    local st = Instance.new("UIStroke", b)
+    st.Color = C.Yel; st.Thickness = 2; st.Transparency = 0.35
+
+    local ic = Instance.new("TextLabel", b)
+    ic.Size = UDim2.new(1, 0, 0, 26)
+    ic.Position = UDim2.new(0, 0, 0, 6)
+    ic.BackgroundTransparency = 1
+    ic.Text = d[1]; ic.TextSize = 20
+    ic.Font = Enum.Font.GothamBold
+    ic.TextColor3 = C.Wh
+    ic.ZIndex = 6
+
+    local nm = Instance.new("TextLabel", b)
+    nm.Size = UDim2.new(1, 0, 0, 12)
+    nm.Position = UDim2.new(0, 0, 1, -17)
+    nm.BackgroundTransparency = 1
+    nm.Text = d[2]; nm.TextSize = 8
+    nm.Font = Enum.Font.GothamBold
+    nm.TextColor3 = C.Wh
+    nm.ZIndex = 6
+
+    b.Activated:Connect(function()
+      safeCB(d[3])
+    end)
+
+    items[idx] = {b = b, st = st, ic = ic, nm = nm, target = target, isOn = d[4]}
+  end
+
+  local function setOpen(v)
+    isOpen = v
+    ring.Visible = v
+    for _, it in ipairs(items) do
+      if v then
+        it.b.Visible = true
+        it.b.Position = UDim2.fromOffset(0, 0)
+        TW:Create(it.b, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+          {Position = UDim2.fromOffset(it.target.X, it.target.Y)}):Play()
+      else
+        TW:Create(it.b, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+          {Position = UDim2.fromOffset(0, 0)}):Play()
+        task.delay(0.22, function()
+          if not isOpen and it.b.Parent then it.b.Visible = false end
+        end)
+      end
+    end
+  end
+
+  -- arrastrar el centro (tap = abrir/cerrar)
+  local dragging, moved, startIn, startPos, activeType = false, false, nil, nil, nil
+  center.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1
+      or i.UserInputType == Enum.UserInputType.Touch then
+      dragging = true; moved = false
+      startIn = i.Position; startPos = pos
+      activeType = i.UserInputType
+    end
+  end)
+  UIS.InputChanged:Connect(function(i)
+    if not dragging then return end
+    if i.UserInputType == Enum.UserInputType.MouseMovement
+      or i.UserInputType == Enum.UserInputType.Touch then
+      local dlt = i.Position - startIn
+      if dlt.Magnitude > 8 then moved = true end
+      if moved then
+        local cam = workspace.CurrentCamera
+        local vp = cam and cam.ViewportSize or Vector2.new(1920, 1080)
+        pos = Vector2.new(
+          math.clamp(startPos.X + dlt.X, 24, vp.X - 24),
+          math.clamp(startPos.Y + dlt.Y, 24, vp.Y - 24))
+        root.Position = UDim2.fromOffset(pos.X, pos.Y)
+      end
+    end
+  end)
+  UIS.InputEnded:Connect(function(i)
+    if dragging and i.UserInputType == activeType then
+      dragging = false
+      if not moved then setOpen(not isOpen) end
+    end
+  end)
+
+  -- estado en vivo (resalta lo activo + muestra el objetivo)
+  task.spawn(function()
+    while RG.Parent do
+      for _, it in ipairs(items) do
+        local on = false
+        if it.isOn then pcall(function() on = it.isOn() == true end) end
+        it.b.BackgroundColor3 = on and C.Yel or C.BG2
+        it.ic.TextColor3 = on and C.BG or C.Wh
+        it.nm.TextColor3 = on and C.BG or C.Wh
+        it.st.Color = on and C.Wh or C.Yel
+      end
+      local t = TLG.SelectedTarget
+      if TLG.GO.On and TLG.GO.T then t = TLG.GO.T end
+      tgt.Text = (t and t.Parent and t ~= TLG.LP)
+        and ("🎯 " .. t.DisplayName) or "🎯 Sin objetivo"
+      task.wait(0.25)
+    end
+  end)
+
+  TLG.RadialSetOpen = setOpen
+end)
+if not RADok then
+  warn("[TLG] Radial: " .. tostring(RADerr))
+  pcall(function() TLG.PNotif("⚠️ Radial", tostring(RADerr):sub(1, 70), C.Rd) end)
+end
+
 if TLG._postBuild then pcall(TLG._postBuild) end
 
 task.spawn(function()
@@ -4405,7 +4302,7 @@ task.spawn(function()
     t2.Font = Enum.Font.Gotham
     t2.TextSize = 14
     t2.TextColor3 = C.Gr
-    t2.Text = "Meme Sea • V9.4.6"
+    t2.Text = "Meme Sea • V9.4.8"
     t2.TextTransparency = 1
     t2.ZIndex = 501
     local ti = TweenInfo.new(0.45)
@@ -4427,6 +4324,6 @@ pcall(function()
     {Size = W_S, Position = W_P}):Play()
 end)
 task.wait(0.9)
-TLG.PNotif("👑 ZTB HUB V9.4.6", "💀 Ghost Hitbox + Fly Boost", C.Yel)
+TLG.PNotif("👑 ZTB HUB V9.4.8", "💀 Ghost Hitbox + Fly Boost", C.Yel)
 
-print("[ZTB HUB V9.4.6] 💀 Cargado")
+print("[ZTB HUB V9.4.8] 💀 Cargado")
