@@ -1,5 +1,5 @@
 -- ZTB HUB — Meme Sea Edition
--- V9.4.7 | SKYBOX TESTER INTEGRADO (13 sets completos)
+-- V9.4.8 | SKYBOX TESTER INTEGRADO (13 sets completos)
 -- Ghost Hitbox + Fly Boost + FABs visibles
 
 local TW = game:GetService("TweenService")
@@ -2254,10 +2254,6 @@ end
 
 -- COMBAT TAB
 do
-  Sec(PCb, "🔵 HITBOX MANUAL", "🔵")
-  Tog(PCb, "Activar Hitbox", false, function(v)
-    if v then TLG.HBStart() else TLG.HBStop() end
-  end)
   local function addArrowAdjust(labelText, initial, minValue, maxValue, step, formatter, callback, parent)
     local value = initial
     local row = Instance.new("Frame", parent or PCb)
@@ -2312,10 +2308,6 @@ do
     return function(v) value = math.clamp(v, minValue, maxValue); refresh() end
   end
   TLG.addArrowAdjust = addArrowAdjust
-  addArrowAdjust("Ajustar transparencia", 40, 0, 100, 5, function(v) return tostring(v) .. "%" end,
-    function(v) HB.Tr = math.clamp(v, 0, 100) / 100 end)
-  Lbl(PCb, "Hitbox estilo Infinite Yield (HumanoidRootPart). El tamaño se ajusta en el tab 🎯 Aimbot (predeterminado 10).", C.Gr)
-  Lbl(PCb, "Para el aimbot, andá al tab 🎯 Aimbot.", C.Yel)
 
   Sec(PCb, "📷 CAMERA FOV", "📷")
 
@@ -2387,52 +2379,57 @@ do
   Lbl(PCb, "Asistente visual: el FOV se mantiene activo después de la cámara del juego.", C.Cyan)
 end
 
--- AIMBOT TAB
+-- AIMBOT TAB (toda la hitbox vive aquí)
 do
-  Sec(PAb, "🎯 HITBOX FANTASMA", "🎯")
+  -- 1) HITBOX (estilo Infinite Yield: HumanoidRootPart de los demás)
+  Sec(PAb, "🔵 HITBOX", "🔵")
 
-  local setSize
-  local AB
-  AB = Btn(PAb, "🎯 ACTIVAR HITBOX 9999", C.Yel, function()
-    if AIM.On then
-      TLG.AIM_Stop(); TLG.HBStop()
-      AB.Text = "🎯 ACTIVAR HITBOX 9999"
-    else
-      AIM.MaxTargetRange = 10000
-      if setSize then setSize(9999) else HB.Sz = 9999 end
-      TLG.HBStart()
-      TLG.AIM_Start()
-      AB.Text = "🛑 DESACTIVAR HITBOX 9999"
-    end
-  end)
-  AB.Size = UDim2.new(1,0,0,54)
-  AB.TextSize = 14
-
-  -- HITBOX 50 (visible, transparencia 0.4, estilo IY)
-  local B50
-  B50 = Btn(PAb, "🔵 ACTIVAR HITBOX 50", C.Yel, function()
-    if HB.On and HB.Sz == 50 then
+  local HBBtn
+  HBBtn = Btn(PAb, "🔵 ACTIVAR HITBOX", C.Yel, function()
+    if HB.On then
       TLG.HBStop()
-      B50.Text = "🔵 ACTIVAR HITBOX 50"
+      HBBtn.Text = "🔵 ACTIVAR HITBOX"
     else
-      if HB.On then TLG.HBStop() end
-      if setSize then setSize(50) else HB.Sz = 50 end
-      HB.Tr = 0.4
       TLG.HBStart()
-      B50.Text = "🛑 DESACTIVAR HITBOX 50"
-      AB.Text = "🎯 ACTIVAR HITBOX 9999"
+      HBBtn.Text = "🛑 DESACTIVAR HITBOX"
     end
   end)
-  B50.Size = UDim2.new(1,0,0,46)
-  B50.TextSize = 13
+  HBBtn.Size = UDim2.new(1,0,0,50)
+  HBBtn.TextSize = 14
 
-  -- flechas para ajustar el tamaño (predeterminado 10, ◀ ▶ de 1 en 1)
-  setSize = TLG.addArrowAdjust("Tamaño hitbox", HB.Sz, 1, 9999, 1,
+  -- tamaño (predeterminado 10) y transparencia
+  local setSize = TLG.addArrowAdjust("Tamaño", HB.Sz, 1, 9999, 1,
     function(v) return tostring(v) end,
     function(v) HB.Sz = math.clamp(v, 1, 9999) end, PAb)
+  TLG.addArrowAdjust("Transparencia", 40, 0, 100, 5,
+    function(v) return tostring(v) .. "%" end,
+    function(v) HB.Tr = math.clamp(v, 0, 100) / 100 end, PAb)
 
-  Lbl(PAb, "Rango de selección: 10,000 studs.", C.Yel)
-  Lbl(PAb, "Este módulo crea una hitbox local; no dirige la cámara.", C.Cyan)
+  -- tamaños rápidos
+  for _, n in ipairs({10, 50, 9999}) do
+    local pb = Btn(PAb, "📏 Tamaño " .. n, C.Yel, function() setSize(n) end)
+    pb.Size = UDim2.new(1,0,0,38)
+    pb.TextSize = 12
+  end
+  Lbl(PAb, "Roblox limita cada eje a 2048, así que 9999 queda en 2048. Si es muy grande se vuelve invisible.", C.Gr)
+
+  -- 2) HITBOX FANTASMA (parte pegada a la cabeza + objetivo del God Orb)
+  Sec(PAb, "👻 HITBOX FANTASMA", "👻")
+  local AB
+  AB = Btn(PAb, "👻 ACTIVAR HITBOX FANTASMA", C.Yel, function()
+    if AIM.On then
+      TLG.AIM_Stop()
+      AB.Text = "👻 ACTIVAR HITBOX FANTASMA"
+    else
+      AIM.MaxTargetRange = 10000
+      TLG.AIM_Start()
+      AB.Text = "🛑 DESACTIVAR HITBOX FANTASMA"
+    end
+  end)
+  AB.Size = UDim2.new(1,0,0,46)
+  AB.TextSize = 13
+  Lbl(PAb, "Rango de selección: 10,000 studs. Con el God Orb activo apunta al jugador que orbitas.", C.Yel)
+  Lbl(PAb, "No dirige la cámara.", C.Cyan)
 end
 
 -- FLY TAB
